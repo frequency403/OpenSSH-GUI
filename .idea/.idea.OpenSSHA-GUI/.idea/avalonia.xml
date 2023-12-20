@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="OpenSSHA-GUI/App.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/MainWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
