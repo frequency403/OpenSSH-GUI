@@ -55,4 +55,10 @@ public class SshKey
             return null;
         }
     }
+
+    public void DeleteKeys()
+    {
+        File.Delete(AbsoluteFilePath);
+        File.Delete(PrivateKey.AbsoluteFilePath);
+    }
 }

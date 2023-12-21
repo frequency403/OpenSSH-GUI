@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
@@ -20,8 +22,6 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private string[] _wordCollection = ["Welcome", "to", "Avalonia"];
-
     public ReactiveCommand<Unit, Unit> OpenCreateKeyWindow => ReactiveCommand.Create(() =>
     {
         var w = new AddKeyWindow
@@ -34,19 +34,29 @@ public class MainWindowViewModel : ViewModelBase
         };
         w.Show();
     });
-    
-    public MainWindowViewModel()
-    {
-        SshKeys = new ObservableCollection<SshKey>(DirectoryCrawler.GetAllKeys());
-    }
 
-    private ObservableCollection<SshKey> _sshKeys;
+    public Interaction<ConfirmDialogViewModel, ConfirmDialogViewModel?> ShowConfirm = new();
+    
+    public ReactiveCommand<SshKey, ConfirmDialogViewModel?> DeleteKey => ReactiveCommand.CreateFromTask<SshKey, ConfirmDialogViewModel?>(async (u) =>
+    {
+
+        var confirm = new ConfirmDialogViewModel("Really delete the SSH key?", "Yes", "No");
+        var result = await ShowConfirm.Handle(confirm);
+        if (!result.Consent) return result;
+        u.DeleteKeys();
+        SshKeys.Remove(u);
+        return result;
+    });
+
+    
+    private ObservableCollection<SshKey> _sshKeys = new (DirectoryCrawler.GetAllKeys());
 
     public ObservableCollection<SshKey> SshKeys
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
     }
+    
     
     public async Task OpenExportWindow(SshKey key)
     {

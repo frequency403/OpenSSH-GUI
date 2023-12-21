@@ -1,0 +1,20 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:OpenSSHA_GUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+        Width="400"
+        Height="200"
+        x:Class="OpenSSHA_GUI.Views.ConfirmDialog"
+        x:DataType="vm:ConfirmDialogViewModel"
+        >
+    <Design.DataContext>
+        <vm:ConfirmDialogViewModel/>
+    </Design.DataContext>
+    <Grid ColumnDefinitions="*, *" RowDefinitions="*, *">
+        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding Question}" HorizontalAlignment="Center"/>
+        <Button Grid.Row="1" Grid.Column="0" Command="{Binding DialogResult}" CommandParameter="true" Content="{Binding OkText}" HorizontalAlignment="Center"/>
+        <Button Grid.Row="1" Grid.Column="1" Command="{Binding DialogResult}" CommandParameter="false" Content="{Binding NotOkText}" HorizontalAlignment="Center"/>
+    </Grid>
+</Window>
