@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenSSHALib.Enums;
+using OpenSSHALib.Extensions;
 using OpenSSHALib.Model;
 using ReactiveUI;
 
@@ -12,53 +14,74 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class AddKeyWindowViewModel : ViewModelBase
 {
+    private static KeyType _keyType = KeyType.RSA;
+
+    private bool _createKey;
+
     public AddKeyWindowViewModel()
     {
         AddKey = ReactiveCommand.Create<string, AddKeyWindowViewModel?>(b =>
         {
-            CreateKey = bool.Parse(b);
+            _createKey = bool.Parse(b);
             return this;
         });
     }
 
     public ReactiveCommand<string, AddKeyWindowViewModel?> AddKey { get; }
 
-    public IEnumerable<KeyType> IEnumerableEnum { get; set; }= Enum.GetValues<KeyType>();
-    
-    private static KeyType _keyType = KeyType.Rsa;
+    public IEnumerable<KeyType> IEnumerableEnum { get; set; } = Enum.GetValues<KeyType>();
+
+    private ObservableCollection<int> _possibleByteValues = new(_keyType.GetBitValues());
+    public ObservableCollection<int> PossibleByteValues
+    {
+        get => _possibleByteValues;
+        set
+        {
+            KeyBitSize = value.Max();
+            this.RaiseAndSetIfChanged(ref _possibleByteValues, value); // TODO Throws ._.
+        }
+    }
 
     public KeyType KeyType
     {
         get => _keyType;
         set
         {
-            BitSize = (int)value;
+            PossibleByteValues = new ObservableCollection<int>(value.GetBitValues());
+            KeyName = $"id_{Enum.GetName(value).ToLower()}";
             this.RaiseAndSetIfChanged(ref _keyType, value);
         }
     }
 
-    public string KeyName { get; set; } = "id_rsa";
-    public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
-    public string? Password { get; set; } = null;
-
-    private int _bitSize = (int)_keyType;
-    public int BitSize
+    private string _keyName = "id_rsa";
+    public string KeyName
     {
-        get => _bitSize;
-        set => this.RaiseAndSetIfChanged(ref _bitSize, value);
+        get => _keyName;
+        set => this.RaiseAndSetIfChanged(ref _keyName, value);
+    }
+    public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
+    public string Password { get; set; } = "";
+
+    private int _keyBitSize = 2048;
+    public int KeyBitSize
+    {
+        get => _keyBitSize;
+        set => _keyBitSize = value;
+        // {
+        //     if (_keyBitSize == value) return;
+        //     this.RaiseAndSetIfChanged(ref _keyBitSize, value);
+        // }
     }
 
-    public bool CreateKey;
-    
     public async ValueTask<SshKey?> RunKeyGen()
     {
-        if(!CreateKey) return null;
+        if (!_createKey) return null;
         var sshUserFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) +
                             $"{Path.DirectorySeparatorChar}.ssh";
         var fullFilePath = $"{sshUserFolder}{Path.DirectorySeparatorChar}{KeyName}";
         var arguments = $"-t {Enum.GetName(KeyType).ToLower()} ";
-        if (BitSize != (int)KeyType) arguments += $"-b {BitSize} ";
-        arguments += $"-N \"{Password??""}\" -C \"{Comment}\" -f \"{fullFilePath}\" ";
+        if (KeyBitSize != (int)KeyType) arguments += $"-b {KeyBitSize} ";
+        arguments += $"-N \"{Password ?? ""}\" -C \"{Comment}\" -f \"{fullFilePath}\" ";
         var proc = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -73,6 +96,6 @@ public class AddKeyWindowViewModel : ViewModelBase
         };
         proc.Start();
         await proc.WaitForExitAsync();
-        return proc.ExitCode == 0 ? new SshKey(fullFilePath+ ".pub") : null;
+        return proc.ExitCode == 0 ? new SshKey(fullFilePath + ".pub") : null;
     }
 }

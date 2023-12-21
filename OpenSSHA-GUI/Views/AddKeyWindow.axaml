@@ -27,8 +27,11 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
-            <Label Content="Bitsize" Target="BitSizeButtonSpinner" />
-            <ButtonSpinner Name="BitSizeButtonSpinner" Content="{Binding BitSize}" />
+            
+            <!-- <Label Content="Bitsize" Target="BitSizeButtonSpinner" /> -->
+            <!-- <ButtonSpinner Name="BitSizeButtonSpinner" Content="{Binding BitSize}" /> -->
+            <Label Content="Bitsize" Target="BitSizeComboBox" />
+            <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding PossibleByteValues}" SelectedItem="{Binding KeyBitSize}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
@@ -40,14 +43,15 @@
             <Label Content="Password?" Target="PasswordTextBox" />
             <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch" VerticalAlignment="Top">
-            <Label Content="Comment (email@example.com)" Target="CommentTextBox"/>
-            <TextBox Name="CommentTextBox" Text="{Binding Comment}"/>
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top">
+            <Label Content="Comment (email@example.com)" Target="CommentTextBox" />
+            <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
         <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 10" Background="ForestGreen" HorizontalAlignment="Center"
                 VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true" Content="Add" />
         <Button Grid.Row="2" Grid.Column="0" Margin="0 0 0 10" Background="DimGray" HorizontalAlignment="Center"
-                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true" Content="Abort" />
+                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="false" Content="Abort" />
 
     </Grid>
 

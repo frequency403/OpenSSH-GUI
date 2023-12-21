@@ -11,5 +11,8 @@ public partial class ExportWindow : Window
         InitializeComponent();
     }
 
-    private async void CopyToClipboard(object? sender, RoutedEventArgs e) => await GetTopLevel(ExportedText).Clipboard.SetTextAsync((DataContext as ExportWindowViewModel).Export);
+    private async void CopyToClipboard(object? sender, RoutedEventArgs e)
+    {
+        await GetTopLevel(ExportedText).Clipboard.SetTextAsync((DataContext as ExportWindowViewModel).Export);
+    }
 }

@@ -1,21 +1,10 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using OpenSSHALib.Enums;
 
 namespace OpenSSHALib.Model;
 
 public class SshKey
 {
-    public string AbsoluteFilePath { get; }
-    private bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
-    public string Filename { get; }
-    public string Comment { get; private set; }
-    public int KeySize { get; private set; }
-    public string KeyType { get; private set; }
-    public string Fingerprint { get; private set; }
-    public SshKey? PrivateKey { get; private set; }
-    
     public SshKey(string absoluteFilePath)
     {
         AbsoluteFilePath = absoluteFilePath;
@@ -37,8 +26,17 @@ public class SshKey
         Fingerprint = outputOfProcess[1];
         Comment = outputOfProcess[2];
         KeyType = outputOfProcess[3].Replace("(", "").Replace(")", "").Trim();
-        if(IsPublicKey) PrivateKey = new SshKey(AbsoluteFilePath.Replace(".pub", ""));
+        if (IsPublicKey) PrivateKey = new SshKey(AbsoluteFilePath.Replace(".pub", ""));
     }
+
+    public string AbsoluteFilePath { get; }
+    private bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
+    public string Filename { get; }
+    public string Comment { get; private set; }
+    public int KeySize { get; private set; }
+    public string KeyType { get; private set; }
+    public string Fingerprint { get; private set; }
+    public SshKey? PrivateKey { get; }
 
     public async Task<string?> ExportKey()
     {

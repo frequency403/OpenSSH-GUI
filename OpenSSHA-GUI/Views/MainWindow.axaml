@@ -25,23 +25,24 @@
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
     <Grid RowDefinitions="*,7*,*" ColumnDefinitions="*,*,*" Name="TheMainGrid">
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Current SSH Keys" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Grid.Row="2" Grid.Column="0" 
-                Command="{Binding OpenCreateKeyWindow}" 
-                HorizontalAlignment="Left" 
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Current SSH Keys"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Button Grid.Row="2" Grid.Column="0"
+                Command="{Binding OpenCreateKeyWindow}"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Background="ForestGreen">
             <StackPanel Orientation="Horizontal">
                 <ToolTip.Tip>Add SSH Key</ToolTip.Tip>
-                <PathIcon Data="{StaticResource AddRegular}"/>
+                <PathIcon Data="{StaticResource AddRegular}" />
             </StackPanel>
         </Button>
-        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
-                  ItemsSource="{Binding SshKeys}" 
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                  ItemsSource="{Binding SshKeys}"
                   IsReadOnly="True"
                   Margin="20"
                   GridLinesVisibility="Horizontal"
@@ -52,16 +53,16 @@
                 <DataTemplate DataType="datamodels:SshKey">
                     <Grid HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="*, *, *">
                         <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Filename on disk: " FontWeight="Bold"/>
-                            <TextBlock Text="{Binding Filename}"/>
+                            <TextBlock Text="Filename on disk: " FontWeight="Bold" />
+                            <TextBlock Text="{Binding Filename}" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Private key filename: " FontWeight="Bold"/>
-                            <TextBlock Text="{Binding PrivateKey.Filename}"/>
+                            <TextBlock Text="Private key filename: " FontWeight="Bold" />
+                            <TextBlock Text="{Binding PrivateKey.Filename}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Absolute path: " FontWeight="Bold"/>
-                            <TextBlock Text="{Binding AbsoluteFilePath}"/>
+                            <TextBlock Text="Absolute path: " FontWeight="Bold" />
+                            <TextBlock Text="{Binding AbsoluteFilePath}" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
@@ -70,71 +71,73 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <PathIcon Data="{StaticResource KeyRegular}"/>
-                            <Label Content="Key-type"/>
+                            <PathIcon Data="{StaticResource KeyRegular}" />
+                            <Label Content="Key-type" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="datamodels:SshKey">
-                            <Label Content="{Binding KeyType}"/>
+                        <Label Content="{Binding KeyType}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <PathIcon Data="{StaticResource FluidRegular}"/>
-                            <Label Content="Key-size in bytes"/>
+                            <PathIcon Data="{StaticResource FluidRegular}" />
+                            <Label Content="Key-size in bytes" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="datamodels:SshKey">
-                            <Label Content="{Binding KeySize}"/>
+                        <Label Content="{Binding KeySize}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <PathIcon Data="{StaticResource FingerprintRegular}"/>
-                            <Label Content="Fingerprint"/>
+                            <PathIcon Data="{StaticResource FingerprintRegular}" />
+                            <Label Content="Fingerprint" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="datamodels:SshKey">
-                            <Label Content="{Binding Fingerprint}"/>
+                        <Label Content="{Binding Fingerprint}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <PathIcon Data="{StaticResource CommentRegular}"/>
-                            <Label Content="Comment"/>
+                            <PathIcon Data="{StaticResource CommentRegular}" />
+                            <Label Content="Comment" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="datamodels:SshKey">
-                        <Label Content="{Binding Comment}"/>
+                        <Label Content="{Binding Comment}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Export/Delete">
                     <DataTemplate DataType="datamodels:SshKey">
                         <StackPanel Orientation="Horizontal">
-                            <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
-                                    CommandParameter="{Binding .}">
+                            <Button
+                                Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
+                                CommandParameter="{Binding .}">
                                 <StackPanel Orientation="Horizontal">
                                     <ToolTip.Tip>Export public key</ToolTip.Tip>
-                                    <PathIcon Data="{StaticResource ExportRegular}"/>
-                                <PathIcon Data="{StaticResource UnlockRegular}"/>
-                            </StackPanel>
+                                    <PathIcon Data="{StaticResource ExportRegular}" />
+                                    <PathIcon Data="{StaticResource UnlockRegular}" />
+                                </StackPanel>
                             </Button>
-                            <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
-                                    CommandParameter="{Binding PrivateKey}">
+                            <Button
+                                Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
+                                CommandParameter="{Binding PrivateKey}">
                                 <StackPanel Orientation="Horizontal">
                                     <ToolTip.Tip>Export private key</ToolTip.Tip>
-                                    <PathIcon Data="{StaticResource ExportRegular}"/>
-                                <PathIcon Data="{StaticResource LockRegular}"/>
+                                    <PathIcon Data="{StaticResource ExportRegular}" />
+                                    <PathIcon Data="{StaticResource LockRegular}" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).DeleteKey}"
                                     CommandParameter="{Binding .}"
                                     Background="DarkRed">
                                 <ToolTip.Tip>Delete key from disk</ToolTip.Tip>
-                                <PathIcon Data="{StaticResource DeleteForeverRegular}"/>
+                                <PathIcon Data="{StaticResource DeleteForeverRegular}" />
                             </Button>
                         </StackPanel>
                     </DataTemplate>
@@ -142,6 +145,6 @@
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
-    
-    
+
+
 </Window>

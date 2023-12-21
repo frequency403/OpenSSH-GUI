@@ -6,7 +6,7 @@ using OpenSSHA_GUI.Views;
 
 namespace OpenSSHA_GUI;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {
@@ -16,12 +16,10 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = new MainWindowViewModel()
             };
-        }
 
         base.OnFrameworkInitializationCompleted();
     }

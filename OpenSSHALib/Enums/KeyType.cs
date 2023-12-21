@@ -2,9 +2,10 @@
 
 public enum KeyType
 {
-    Rsa = 2048,
-    Dsa = 1024,
-    Ecdsa = 256,
-    Eddsa = 448,
+    // ReSharper disable InconsistentNaming
+    RSA = 4096,
+    DSA = 3072,
+    ECDSA = 521,
+    EdDSA = ECDSA,
     Ed25519 = 255
 }
