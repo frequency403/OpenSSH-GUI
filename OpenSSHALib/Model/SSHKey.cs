@@ -1,24 +1,25 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using OpenSSHALib.Enums;
 
 namespace OpenSSHALib.Model;
 
-public class SSHKey
+public class SshKey
 {
-    private readonly string _absoluteFilePath;
-    private bool IsPublicKey => _absoluteFilePath.EndsWith(".pub");
+    public string AbsoluteFilePath { get; }
+    private bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
     public string Filename { get; }
     public string Comment { get; private set; }
     public int KeySize { get; private set; }
     public string KeyType { get; private set; }
     public string Fingerprint { get; private set; }
-    public SSHKey? PrivateKey { get; private set; }
+    public SshKey? PrivateKey { get; private set; }
     
-    public SSHKey(string absoluteFilePath)
+    public SshKey(string absoluteFilePath)
     {
-        _absoluteFilePath = absoluteFilePath;
-        Filename = Path.GetFileName(_absoluteFilePath);
+        AbsoluteFilePath = absoluteFilePath;
+        Filename = Path.GetFileName(AbsoluteFilePath);
         var readerProcess = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -26,7 +27,7 @@ public class SSHKey
                 WindowStyle = ProcessWindowStyle.Hidden,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
-                Arguments = $"-l -f {_absoluteFilePath}",
+                Arguments = $"-l -f {AbsoluteFilePath}",
                 FileName = "ssh-keygen"
             }
         };
@@ -36,14 +37,14 @@ public class SSHKey
         Fingerprint = outputOfProcess[1];
         Comment = outputOfProcess[2];
         KeyType = outputOfProcess[3].Replace("(", "").Replace(")", "").Trim();
-        if(IsPublicKey) PrivateKey = new SSHKey(_absoluteFilePath.Replace(".pub", ""));
+        if(IsPublicKey) PrivateKey = new SshKey(AbsoluteFilePath.Replace(".pub", ""));
     }
 
     public async Task<string?> ExportKey()
     {
         try
         {
-            await using var fileStream = File.OpenRead(_absoluteFilePath);
+            await using var fileStream = File.OpenRead(AbsoluteFilePath);
             using var memoryStream = new MemoryStream();
             await fileStream.CopyToAsync(memoryStream);
             return Encoding.Default.GetString(memoryStream.ToArray());

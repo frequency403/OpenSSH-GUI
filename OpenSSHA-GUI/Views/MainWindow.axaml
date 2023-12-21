@@ -19,23 +19,42 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="*,7*,*" ColumnDefinitions="*,*,*" Name="TheMainGrid">
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Grid.Row="2" Grid.Column="1" Command="{Binding Shuffle}" Content="Shuffle above text!" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Current SSH Keys" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Button Grid.Row="2" Grid.Column="0" Command="{Binding OpenCreateKeyWindow}" Content="Add new SSH Key" HorizontalAlignment="Center" VerticalAlignment="Center" />
         <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
                   ItemsSource="{Binding SshKeys}" 
                   IsReadOnly="True"
                   Margin="20"
                   GridLinesVisibility="Horizontal"
                   BorderThickness="1"
+                  RowDetailsVisibilityMode="VisibleWhenSelected"
                   Name="TheDataGrid">
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate DataType="datamodels:SshKey">
+                    <Grid HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="*, *, *">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Filename on disk: " FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Filename}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Private key filename: " FontWeight="Bold"/>
+                            <TextBlock Text="{Binding PrivateKey.Filename}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Absolute path: " FontWeight="Bold"/>
+                            <TextBlock Text="{Binding AbsoluteFilePath}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Keytype" Binding="{Binding KeyType}"/>
                 <DataGridTextColumn Header="Keysize in Bytes" Binding="{Binding KeySize}"/>
                 <DataGridTextColumn Header="Fingerprint" Binding="{Binding Fingerprint}"/>
-                <DataGridTextColumn Header="Filename" Binding="{Binding Filename}"/>
+                <!-- <DataGridTextColumn Header="Filename" Binding="{Binding Filename}"/> -->
                 <DataGridTextColumn Header="Comment" Binding="{Binding Comment}"/>
                 <DataGridTemplateColumn>
-                    <DataTemplate DataType="datamodels:SSHKey">
+                    <DataTemplate DataType="datamodels:SshKey">
                         <StackPanel Orientation="Horizontal">
                             <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
                                     CommandParameter="{Binding .}"

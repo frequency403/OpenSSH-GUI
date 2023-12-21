@@ -19,8 +19,8 @@ public static class DirectoryCrawler
         return contains;
     }
     
-    public static IEnumerable<SSHKey> GetAllKeys()
+    public static IEnumerable<SshKey> GetAllKeys()
     {
-        return (from fileInSshDirectory in Directory.EnumerateFiles(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + $"{Path.DirectorySeparatorChar}.ssh") where !fileInSshDirectory.FileNameStartsWithAny(_fileNameContainsToSkipWhenSearching) && fileInSshDirectory.EndsWith(".pub") select new SSHKey(fileInSshDirectory)).ToList();
+        return (from fileInSshDirectory in Directory.EnumerateFiles(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + $"{Path.DirectorySeparatorChar}.ssh") where !fileInSshDirectory.FileNameStartsWithAny(_fileNameContainsToSkipWhenSearching) && fileInSshDirectory.EndsWith(".pub") select new SshKey(fileInSshDirectory)).ToList();
     }
 }

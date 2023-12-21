@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform;
@@ -20,39 +21,34 @@ namespace OpenSSHA_GUI.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private string[] _wordCollection = ["Welcome", "to", "Avalonia"];
+
+    public ReactiveCommand<Unit, Unit> OpenCreateKeyWindow => ReactiveCommand.Create(() =>
+    {
+        var w = new AddKeyWindow
+        {
+            DataContext = new AddKeyWindowViewModel(),
+            ShowActivated = true,
+            ShowInTaskbar = true,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner
+        };
+        w.Show();
+    });
     
     public MainWindowViewModel()
     {
-        Greeting = "Welcome to Avalonia!";
-        SshKeys = new ObservableCollection<SSHKey>(DirectoryCrawler.GetAllKeys());
+        SshKeys = new ObservableCollection<SshKey>(DirectoryCrawler.GetAllKeys());
     }
 
-    private ObservableCollection<SSHKey> _sshKeys;
+    private ObservableCollection<SshKey> _sshKeys;
 
-    public ObservableCollection<SSHKey> SshKeys
+    public ObservableCollection<SshKey> SshKeys
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
     }
     
-    private string _greeting;
-    public string Greeting
-    {
-        get => _greeting;
-        set => this.RaiseAndSetIfChanged(ref _greeting, value);
-    }  
-
-    public void Shuffle()
-    {
-        var random = new Random();
-        random.Shuffle(_wordCollection);
-        Greeting = $"{_wordCollection[0]} {_wordCollection[1]} {_wordCollection[2]}";
-        Console.WriteLine($"Greeting is: {Greeting}");
-
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-    }
-
-    public async Task OpenExportWindow(SSHKey key)
+    public async Task OpenExportWindow(SshKey key)
     {
         var export = await key.ExportKey();
         if(export is null) return;
