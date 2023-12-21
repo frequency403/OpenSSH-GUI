@@ -3,22 +3,51 @@
         xmlns:vm="using:OpenSSHA_GUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:datamodels="clr-namespace:OpenSSHALib.Model;assembly=OpenSSHALib"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSHA_GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="OpenSSHA_GUI">
+    <Window.Resources>
 
+    </Window.Resources>
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="*,7*,*" ColumnDefinitions="*,*,*">
+    <Grid RowDefinitions="*,7*,*" ColumnDefinitions="*,*,*" Name="TheMainGrid">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <Button Grid.Row="2" Grid.Column="1" Command="{Binding Shuffle}" Content="Shuffle above text!" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Greeting}" />
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+                  ItemsSource="{Binding SshKeys}" 
+                  IsReadOnly="True"
+                  Margin="20"
+                  GridLinesVisibility="Horizontal"
+                  BorderThickness="1"
+                  Name="TheDataGrid">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Keytype" Binding="{Binding KeyType}"/>
+                <DataGridTextColumn Header="Keysize in Bytes" Binding="{Binding KeySize}"/>
+                <DataGridTextColumn Header="Fingerprint" Binding="{Binding Fingerprint}"/>
+                <DataGridTextColumn Header="Filename" Binding="{Binding Filename}"/>
+                <DataGridTextColumn Header="Comment" Binding="{Binding Comment}"/>
+                <DataGridTemplateColumn>
+                    <DataTemplate DataType="datamodels:SSHKey">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
+                                    CommandParameter="{Binding .}"
+                                    >Export Public Key</Button>
+                            <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
+                                    CommandParameter="{Binding PrivateKey}"
+                            >Export Private Key</Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
     
     

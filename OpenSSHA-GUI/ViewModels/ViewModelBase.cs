@@ -2,6 +2,4 @@
 
 namespace OpenSSHA_GUI.ViewModels;
 
-public class ViewModelBase : ReactiveObject
-{
-}
+public class ViewModelBase : ReactiveObject;

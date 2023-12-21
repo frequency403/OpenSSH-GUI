@@ -1,0 +1,21 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
+        mc:Ignorable="d"
+        Width="500"
+        Height="300"
+        x:Class="OpenSSHA_GUI.Views.ExportWindow"
+        x:DataType="viewModels:ExportWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <viewModels:ExportWindowViewModel/>
+    </Design.DataContext>
+    <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
+        <TextPresenter Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="ExportedText" Text="{Binding Export}" TextWrapping="Wrap"/>
+        <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">Copy to Clipboard</Button>
+    </Grid>
+</Window>
