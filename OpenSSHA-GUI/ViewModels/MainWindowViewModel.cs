@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Layout;
-using Avalonia.Media;
-using Avalonia.Platform;
 using OpenSSHA_GUI.Views;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Model;
@@ -22,22 +12,19 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public ReactiveCommand<Unit, Unit> OpenCreateKeyWindow => ReactiveCommand.Create(() =>
+    public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow => ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
     {
-        var w = new AddKeyWindow
-        {
-            DataContext = new AddKeyWindowViewModel(),
-            ShowActivated = true,
-            ShowInTaskbar = true,
-            CanResize = false,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner
-        };
-        w.Show();
+        var create = new AddKeyWindowViewModel();
+        var result = await ShowCreate.Handle(create);
+        var newKey = await result!.RunKeyGen();
+        SshKeys.Add(newKey);
+        return result;
     });
 
     public Interaction<ConfirmDialogViewModel, ConfirmDialogViewModel?> ShowConfirm = new();
+    public Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
     
-    public ReactiveCommand<SshKey, ConfirmDialogViewModel?> DeleteKey => ReactiveCommand.CreateFromTask<SshKey, ConfirmDialogViewModel?>(async (u) =>
+    public ReactiveCommand<SshKey, ConfirmDialogViewModel?> DeleteKey => ReactiveCommand.CreateFromTask<SshKey, ConfirmDialogViewModel?>(async u =>
     {
 
         var confirm = new ConfirmDialogViewModel("Really delete the SSH key?", "Yes", "No");

@@ -13,6 +13,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         InitializeComponent();
         this.WhenActivated(action => 
             action(ViewModel!.ShowConfirm.RegisterHandler(DoShowDialogAsync)));
+        this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
     }
 
     private async Task DoShowDialogAsync(InteractionContext<ConfirmDialogViewModel, ConfirmDialogViewModel?> interaction)
@@ -23,6 +24,17 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
 
         var result = await dialog.ShowDialog<ConfirmDialogViewModel>(this);
+        interaction.SetOutput(result);
+    }
+
+    private async Task DoShowAddKeyAsync(InteractionContext<AddKeyWindowViewModel, AddKeyWindowViewModel?> interaction)
+    {
+        var dialog = new AddKeyWindow
+        {
+            DataContext = interaction.Input
+        };
+
+        var result = await dialog.ShowDialog<AddKeyWindowViewModel>(this);
         interaction.SetOutput(result);
     }
 }

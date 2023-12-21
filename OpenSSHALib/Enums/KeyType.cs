@@ -2,9 +2,9 @@
 
 public enum KeyType
 {
-    Rsa,
-    Dsa,
-    Ecdsa,
-    Eddsa,
-    Ed25519
+    Rsa = 2048,
+    Dsa = 1024,
+    Ecdsa = 256,
+    Eddsa = 448,
+    Ed25519 = 255
 }

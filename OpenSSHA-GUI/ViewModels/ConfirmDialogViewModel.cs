@@ -1,12 +1,8 @@
-﻿using System;
-using System.Reactive;
-using Avalonia.Controls;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ReactiveUI;
+﻿using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
 
-public class ConfirmDialogViewModel
+public class ConfirmDialogViewModel : ViewModelBase
 {
     public ConfirmDialogViewModel() : this("Allright?", "Yes", "No"){}
 
@@ -25,6 +21,6 @@ public class ConfirmDialogViewModel
     public string OkText { get; }
     public string NotOkText { get; }
     
-    public bool Consent { get; set; } = false;
+    public bool Consent { get; set; }
     public ReactiveCommand<string, ConfirmDialogViewModel> DialogResult { get; } 
 }
