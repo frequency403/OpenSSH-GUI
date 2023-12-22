@@ -1,8 +1,8 @@
 ﻿name: Build and Release
 
 on:
-  workflow_dispatch: 
-    
+  workflow_dispatch:
+  
   push:
     tags:
       - '*'
@@ -36,17 +36,23 @@ jobs:
       - name: Build for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained --output bin/Release/net8.0/linux-x64/publish
 
+      - name: Zip Linux release
+        run: zip -r bin/Release/net8.0/linux-x64/publish/linux-release.zip bin/Release/net8.0/linux-x64/publish/*
+
       - name: Show contents of the directory
-        run: ls -R bin/Release/net8.0/linux-x64/publish      
-      
+        run: ls -R bin/Release/net8.0/linux-x64/publish
+
       - name: Upload Linux release
         uses: actions/upload-artifact@v2
         with:
           name: linux-release
-          path: bin/Release/net8.0/linux-x64/publish/*
+          path: bin/Release/net8.0/linux-x64/publish/linux-release.zip
 
       - name: Build for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained --output bin/Release/net8.0/win-x64/publish
+
+      - name: Zip Windows release
+        run: zip -r bin/Release/net8.0/win-x64/publish/windows-release.zip bin/Release/net8.0/win-x64/publish/*
 
       - name: Show contents of the directory
         run: ls -R bin/Release/net8.0/win-x64/publish
@@ -55,10 +61,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows-release
-          path: bin/Release/net8.0/win-x64/publish/*
+          path: bin/Release/net8.0/win-x64/publish/windows-release.zip
 
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained --output bin/Release/net8.0/osx-x64/publish
+
+      - name: Zip macOS release
+        run: zip -r bin/Release/net8.0/osx-x64/publish/macos-release.zip bin/Release/net8.0/osx-x64/publish/*
 
       - name: Show contents of the directory
         run: ls -R bin/Release/net8.0/osx-x64/publish
@@ -67,7 +76,8 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: macos-release
-          path: bin/Release/net8.0/osx-x64/publish/*
+          path: bin/Release/net8.0/osx-x64/publish/macos-release.zip
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -78,6 +88,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+
       - name: Upload Linux release to Release
         uses: actions/upload-release-asset@v1
         env:
@@ -87,6 +98,7 @@ jobs:
           asset_path: bin/Release/net8.0/linux-x64/publish/linux-release.zip
           asset_name: linux-release.zip
           asset_content_type: application/zip
+
       - name: Upload Windows release to Release
         uses: actions/upload-release-asset@v1
         env:
@@ -96,6 +108,7 @@ jobs:
           asset_path: bin/Release/net8.0/win-x64/publish/windows-release.zip
           asset_name: windows-release.zip
           asset_content_type: application/zip
+
       - name: Upload macOS release to Release
         uses: actions/upload-release-asset@v1
         env:
