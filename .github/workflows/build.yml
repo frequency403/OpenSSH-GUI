@@ -34,7 +34,7 @@ jobs:
         run: dotnet restore
 
       - name: Build for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained
+        run: dotnet publish -c Release -r linux-x64 --self-contained --output bin/Release/net8.0/linux-x64/publish
 
       - name: Upload Linux release
         uses: actions/upload-artifact@v2
@@ -43,7 +43,7 @@ jobs:
           path: bin/Release/net8.0/linux-x64/publish/*
 
       - name: Build for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained
+        run: dotnet publish -c Release -r win-x64 --self-contained --output bin/Release/net8.0/win-x64/publish
 
       - name: Upload Windows release
         uses: actions/upload-artifact@v2
@@ -52,7 +52,7 @@ jobs:
           path: bin/Release/net8.0/win-x64/publish/*
 
       - name: Build for macOS
-        run: dotnet publish -c Release -r osx-x64 --self-contained
+        run: dotnet publish -c Release -r osx-x64 --self-contained --output bin/Release/net8.0/osx-x64/publish
 
       - name: Upload macOS release
         uses: actions/upload-artifact@v2
