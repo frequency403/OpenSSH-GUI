@@ -75,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/Release/net8.0/linux-x64/publish/*
+          asset_path: bin/Release/net8.0/linux-x64/publish/linux-release.zip
           asset_name: linux-release.zip
           asset_content_type: application/zip
       - name: Upload Windows release to Release
@@ -84,7 +84,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/Release/net8.0/win-x64/publish/*
+          asset_path: bin/Release/net8.0/win-x64/publish/windows-release.zip
           asset_name: windows-release.zip
           asset_content_type: application/zip
       - name: Upload macOS release to Release
@@ -93,6 +93,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/Release/net8.0/osx-x64/publish/*
+          asset_path: bin/Release/net8.0/osx-x64/publish/macos-release.zip
           asset_name: macos-release.zip
           asset_content_type: application/zip
