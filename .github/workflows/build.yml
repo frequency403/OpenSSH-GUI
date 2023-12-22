@@ -8,12 +8,22 @@ on:
       - '*'
 
 jobs:
-  build:
+  build_and_release:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.dotnet
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -32,24 +42,11 @@ jobs:
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained
 
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Upload Linux release
+      - name: Upload releases
         uses: actions/upload-artifact@v2
         with:
-          name: linux-release
-          path: bin/Release/net8.0/linux-x64/publish
-
-      - name: Upload Windows release
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows-release
-          path: bin/Release/net8.0/win-x64/publish
-
-      - name: Upload macOS release
-        uses: actions/upload-artifact@v2
-        with:
-          name: macos-release
-          path: bin/Release/net8.0/osx-x64/publish
+          name: releases
+          path: |
+            bin/Release/net5.0/linux-x64/publish
+            bin/Release/net5.0/win-x64/publish
+            bin/Release/net5.0/osx-x64/publish
