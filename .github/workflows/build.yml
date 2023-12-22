@@ -34,7 +34,7 @@ jobs:
         run: dotnet restore
 
       - name: Build for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true -p:EnableReadyToRunCompilation=true -p:IncludeNativeLibrariesForSelfExtract=true
+        run: dotnet publish -c Release -r linux-x64 --self-contained
 
       - name: Zip Linux release
         run: zip -r linux-release.zip bin/Release/net8.0/linux-x64/publish/*
@@ -49,7 +49,7 @@ jobs:
           path: linux-release.zip
 
       - name: Build for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:EnableReadyToRunCompilation=true -p:IncludeNativeLibrariesForSelfExtract=true
+        run: dotnet publish -c Release -r win-x64 --self-contained
 
       - name: Zip Windows release
         run: zip -r windows-release.zip bin/Release/net8.0/win-x64/publish/*
@@ -64,7 +64,7 @@ jobs:
           path: windows-release.zip
 
       - name: Build for macOS
-        run: dotnet publish -c Release -r osx-x64 --self-contained -p:PublishSingleFile=true -p:EnableReadyToRunCompilation=true -p:IncludeNativeLibrariesForSelfExtract=true
+        run: dotnet publish -c Release -r osx-x64 --self-contained
 
       - name: Zip macOS release
         run: zip -r macos-release.zip bin/Release/net8.0/osx-x64/publish/*
