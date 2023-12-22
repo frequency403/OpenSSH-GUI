@@ -36,17 +36,26 @@ jobs:
       - name: Build for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained
 
+      - name: Upload Linux release
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-release
+          path: bin/Release/net8.0/linux-x64/publish
+
       - name: Build for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained
+
+      - name: Upload Windows release
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-release
+          path: bin/Release/net8.0/win-x64/publish
 
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained
 
-      - name: Upload releases
+      - name: Upload macOS release
         uses: actions/upload-artifact@v2
         with:
-          name: releases
-          path: |
-            bin/Release/net8.0/linux-x64/publish
-            bin/Release/net8.0/win-x64/publish
-            bin/Release/net8.0/osx-x64/publish
+          name: macos-release
+          path: bin/Release/net8.0/osx-x64/publish
