@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OpenSSHA_GUI.ViewModels"
+        xmlns:cv="clr-namespace:OpenSSHA_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
         Height="350"
@@ -14,6 +15,9 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <cv:SshKeyTypeConverter x:Key="SshKeyTypeConverter"/>
+    </Window.Resources>
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -29,14 +33,14 @@
                     HorizontalAlignment="Center">
             
             <!-- <Label Content="Bitsize" Target="BitSizeButtonSpinner" /> -->
-            <!-- <ButtonSpinner Name="BitSizeButtonSpinner" Content="{Binding BitSize}" /> -->
+            <!-- <ButtonSpinner Name="BitSizeButtonSpinner" Content="{Binding KeyBitSize}"/> -->
             <Label Content="Bitsize" Target="BitSizeComboBox" />
-            <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding PossibleByteValues}" SelectedItem="{Binding KeyBitSize}" />
+            <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}" SelectedItem="{Binding SelectedKeyType.CurrentBitSize}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
             <Label Content="KeyType" Target="KeyTypesComboBox" />
-            <ComboBox Name="KeyTypesComboBox" ItemsSource="{Binding IEnumerableEnum}" SelectedItem="{Binding KeyType}" />
+            <ComboBox Name="KeyTypesComboBox" ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}" SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                     HorizontalAlignment="Stretch" Margin="20 0 20 10">

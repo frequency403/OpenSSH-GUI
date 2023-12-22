@@ -35,7 +35,8 @@
                 Command="{Binding OpenCreateKeyWindow}"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Background="ForestGreen">
+                Background="ForestGreen"
+                Margin="20 0 0 0">
             <StackPanel Orientation="Horizontal">
                 <ToolTip.Tip>Add SSH Key</ToolTip.Tip>
                 <PathIcon Data="{StaticResource AddRegular}" />
@@ -48,6 +49,8 @@
                   GridLinesVisibility="Horizontal"
                   BorderThickness="1"
                   RowDetailsVisibilityMode="VisibleWhenSelected"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
                   Name="TheDataGrid">
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate DataType="datamodels:SshKey">
@@ -76,7 +79,7 @@
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="datamodels:SshKey">
-                        <Label Content="{Binding KeyType}" />
+                        <Label Content="{Binding KeyType.KeyTypeText}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>
@@ -87,7 +90,7 @@
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="datamodels:SshKey">
-                        <Label Content="{Binding KeySize}" />
+                        <Label Content="{Binding KeyType.CurrentBitSize}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn>

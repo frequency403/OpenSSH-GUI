@@ -22,8 +22,9 @@ public class MainWindowViewModel : ViewModelBase
         {
             var create = new AddKeyWindowViewModel();
             var result = await ShowCreate.Handle(create);
-            var newKey = await result!.RunKeyGen();
-            SshKeys.Add(newKey);
+            if (result == null) return result;
+            var newKey = await result.RunKeyGen();
+            if(newKey!=null) SshKeys.Add(newKey);
             return result;
         });
 

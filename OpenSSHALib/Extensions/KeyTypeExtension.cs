@@ -1,9 +1,16 @@
 ﻿using OpenSSHALib.Enums;
+using OpenSSHALib.Model;
 
 namespace OpenSSHALib.Extensions;
 
 public static class KeyTypeExtension
 {
+    public static IEnumerable<SshKeyType> GetAvailableKeyTypes()
+    {
+        return Enum.GetValues<KeyType>().Select(keyType => new SshKeyType(keyType)).ToList();
+    }
+    
+    
     public static IEnumerable<int> GetBitValues(this KeyType type)
     {
         var listOfInts = new List<int>();

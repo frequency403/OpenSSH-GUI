@@ -25,6 +25,8 @@ public class AddKeyWindowViewModel : ViewModelBase
             _createKey = bool.Parse(b);
             return this;
         });
+        _sshKeyTypes = new ObservableCollection<SshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
+        _selectedKeyType = _sshKeyTypes.First(e => e.BaseType == KeyType.RSA);
     }
 
     public ReactiveCommand<string, AddKeyWindowViewModel?> AddKey { get; }
@@ -37,7 +39,8 @@ public class AddKeyWindowViewModel : ViewModelBase
         get => _possibleByteValues;
         set
         {
-            KeyBitSize = value.Max();
+            //KeyBitSize = 0;
+             KeyBitSize = value.Max();
             this.RaiseAndSetIfChanged(ref _possibleByteValues, value); // TODO Throws ._.
         }
     }
@@ -47,10 +50,38 @@ public class AddKeyWindowViewModel : ViewModelBase
         get => _keyType;
         set
         {
-            PossibleByteValues = new ObservableCollection<int>(value.GetBitValues());
+            // PossibleByteValues = new ObservableCollection<int>(value.GetBitValues());
+            KeyBitSize = value.GetBitValues().Max();
             KeyName = $"id_{Enum.GetName(value).ToLower()}";
             this.RaiseAndSetIfChanged(ref _keyType, value);
         }
+    }
+
+    private SshKeyType _selectedKeyType;
+
+    public SshKeyType SelectedKeyType
+    {
+        get => _selectedKeyType;
+        set 
+        {
+            try
+            {
+                KeyName = $"id_{Enum.GetName(value.BaseType).ToLower()}";
+                this.RaiseAndSetIfChanged(ref _selectedKeyType, value);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }   
+        }
+    }
+
+    private ObservableCollection<SshKeyType> _sshKeyTypes;
+
+    public ObservableCollection<SshKeyType> SshKeyTypes
+    {
+        get => _sshKeyTypes;
+        set => this.RaiseAndSetIfChanged(ref _sshKeyTypes, value);
     }
 
     private string _keyName = "id_rsa";
@@ -66,12 +97,14 @@ public class AddKeyWindowViewModel : ViewModelBase
     public int KeyBitSize
     {
         get => _keyBitSize;
-        set => _keyBitSize = value;
-        // {
-        //     if (_keyBitSize == value) return;
-        //     this.RaiseAndSetIfChanged(ref _keyBitSize, value);
-        // }
+        set //=> _keyBitSize = value;
+        {
+            if (_keyBitSize == value) return;
+            this.RaiseAndSetIfChanged(ref _keyBitSize, value);
+        }
     }
+    
+    // public int KeyBitSize { get; set; }
 
     public async ValueTask<SshKey?> RunKeyGen()
     {
@@ -79,14 +112,12 @@ public class AddKeyWindowViewModel : ViewModelBase
         var sshUserFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) +
                             $"{Path.DirectorySeparatorChar}.ssh";
         var fullFilePath = $"{sshUserFolder}{Path.DirectorySeparatorChar}{KeyName}";
-        var arguments = $"-t {Enum.GetName(KeyType).ToLower()} ";
-        if (KeyBitSize != (int)KeyType) arguments += $"-b {KeyBitSize} ";
-        arguments += $"-N \"{Password ?? ""}\" -C \"{Comment}\" -f \"{fullFilePath}\" ";
+        KeyBitSize = KeyBitSize == 0 ? (int)KeyType : KeyBitSize;
         var proc = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                Arguments = arguments,
+                Arguments = $"-t {Enum.GetName(KeyType).ToLower()} -b {SelectedKeyType.CurrentBitSize} -N \"{Password}\" -C \"{Comment}\" -f \"{fullFilePath}\" ",
                 CreateNoWindow = true,
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,
