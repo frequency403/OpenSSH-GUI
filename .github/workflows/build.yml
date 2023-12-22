@@ -37,7 +37,7 @@ jobs:
         run: dotnet publish -c Release -r linux-x64 --self-contained
 
       - name: Zip Linux release
-        run: zip -r linux-release.zip bin/Release/net8.0/linux-x64/publish/*
+        run: zip -r linux-release.zip . -i bin/Release/net8.0/linux-x64/publish/*
 
       - name: Show contents of the directory
         run: ls -R bin/Release/net8.0/linux-x64/publish
@@ -52,7 +52,7 @@ jobs:
         run: dotnet publish -c Release -r win-x64 --self-contained
 
       - name: Zip Windows release
-        run: zip -r windows-release.zip bin/Release/net8.0/win-x64/publish/*
+        run: zip -r windows-release.zip . -i bin/Release/net8.0/win-x64/publish/*
 
       - name: Show contents of the directory
         run: ls -R bin/Release/net8.0/win-x64/publish
@@ -67,7 +67,7 @@ jobs:
         run: dotnet publish -c Release -r osx-x64 --self-contained
 
       - name: Zip macOS release
-        run: zip -r macos-release.zip bin/Release/net8.0/osx-x64/publish/*
+        run: zip -r macos-release.zip . -i bin/Release/net8.0/osx-x64/publish/*
 
       - name: Show contents of the directory
         run: ls -R bin/Release/net8.0/osx-x64/publish
