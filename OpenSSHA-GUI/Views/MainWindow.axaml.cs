@@ -3,6 +3,7 @@ using Avalonia.ReactiveUI;
 using OpenSSHA_GUI.ViewModels;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
+using OpenSSHALib.Model;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.Views;
@@ -16,8 +17,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             action(ViewModel!.ShowConfirm.RegisterHandler(DoShowDialogAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
 
-        var f = KeyType.EdDSA.GetBitValues();
-        var g = 0;
+        var f = new KnownHostsFile(@"C:\Users\frequ\.ssh\known_hosts");
+        f.ReadContent();
     }
 
     private async Task DoShowDialogAsync(
