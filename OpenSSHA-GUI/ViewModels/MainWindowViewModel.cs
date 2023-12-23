@@ -24,7 +24,7 @@ public class MainWindowViewModel : ViewModelBase
             var editKnownHosts = new EditKnownHostsViewModel();
             var result = await ShowEditKnownHosts.Handle(editKnownHosts);
             
-            // TODO create object for known hosts, that can handle the deletion of keys on its own
+            // TODO throws exception
             
             return null;
         });

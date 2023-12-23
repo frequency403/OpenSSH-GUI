@@ -14,8 +14,7 @@
         CanResize="False"
         ShowInTaskbar="True"
         ShowActivated="True"
-        WindowStartupLocation="CenterOwner"
-        SystemDecorations="BorderOnly">
+        WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <cv:SshKeyTypeConverter x:Key="SshKeyTypeConverter"/>
     </Window.Resources>

@@ -43,6 +43,17 @@
                 <PathIcon Data="{StaticResource AddRegular}" />
             </StackPanel>
         </Button>
+        <Button Grid.Row="2" Grid.Column="1"
+                Command="{Binding OpenEditKnownHostsWindow}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Aquamarine"
+                Margin="20 0 0 0">
+            <StackPanel Orientation="Horizontal">
+                <ToolTip.Tip>Edit "known_hosts" file</ToolTip.Tip>
+                <PathIcon Data="{StaticResource PersonRegular}"/>
+            </StackPanel>
+        </Button>
         <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                   ItemsSource="{Binding SshKeys}"
                   IsReadOnly="True"
