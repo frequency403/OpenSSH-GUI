@@ -23,7 +23,7 @@ public static class DirectoryCrawler
     public static IEnumerable<SshKey> GetAllKeys()
     {
         return (from fileInSshDirectory in Directory.EnumerateFiles(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + $"{Path.DirectorySeparatorChar}.ssh")
+                Settings.UserSshFolderPath)
             where !fileInSshDirectory.FileNameStartsWithAny(_fileNameContainsToSkipWhenSearching) &&
                   fileInSshDirectory.EndsWith(".pub")
             select new SshKey(fileInSshDirectory)).ToList();

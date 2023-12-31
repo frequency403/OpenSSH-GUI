@@ -24,7 +24,7 @@ public class MainWindowViewModel : ViewModelBase
             var editKnownHosts = new EditKnownHostsViewModel();
             var result = await ShowEditKnownHosts.Handle(editKnownHosts);
             
-            // TODO throws exception
+            
             
             return null;
         });

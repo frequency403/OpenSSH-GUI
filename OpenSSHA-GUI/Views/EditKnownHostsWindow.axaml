@@ -2,10 +2,35 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
         x:Class="OpenSSHA_GUI.Views.EditKnownHostsWindow"
+        x:DataType="viewModels:EditKnownHostsViewModel"
         Width="800"
         Height="450"
-        Title="EditKnownHostsWindow">
-    Welcome to Avalonia!
+        Title="Edit known_hosts"
+        Icon="/Assets/avalonia-logo.ico"
+        ShowInTaskbar="True"
+        ShowActivated="True"
+        WindowStartupLocation="CenterOwner">
+        <Grid RowDefinitions="* * *" ColumnDefinitions="* * *">
+                <DataGrid Grid.Row="0" 
+                          Grid.Column="0" 
+                          Grid.ColumnSpan="3" 
+                          Grid.RowSpan="2" 
+                          AutoGenerateColumns="False" 
+                          ItemsSource="{Binding KnownHosts}">
+                        <DataGrid.Columns>
+                                <DataGridTextColumn Header="Host" Binding="{Binding Host}"/>
+                                <DataGridTextColumn Header="Key Type" Binding="{Binding KeyType}"/>
+                                <DataGridTextColumn Header="Keytype-Declaration in file" Binding="{Binding TypeDeclarationInFile}"/>
+                                <DataGridCheckBoxColumn Header="Delete" Binding="{Binding MarkedForDeletion}" IsThreeState="True"/>
+                        </DataGrid.Columns>
+                </DataGrid>
+        </Grid>
+        <Design.DataContext>
+                <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+                <viewModels:EditKnownHostsViewModel />
+        </Design.DataContext>
 </Window>

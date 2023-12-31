@@ -16,9 +16,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(action =>
             action(ViewModel!.ShowConfirm.RegisterHandler(DoShowDialogAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
-
-        var f = new KnownHostsFile(@"C:\Users\frequ\.ssh\known_hosts");
-        f.ReadContent();
+        this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));
     }
 
     private async Task DoShowDialogAsync(
@@ -41,6 +39,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
 
         var result = await dialog.ShowDialog<AddKeyWindowViewModel>(this);
+        interaction.SetOutput(result);
+    }
+
+    private async Task DoShowEditKnownHostsAsync(
+        InteractionContext<EditKnownHostsViewModel, EditKnownHostsViewModel?> interaction)
+    {
+        var dialog = new EditKnownHostsWindow()
+        {
+            DataContext = interaction.Input
+        };
+
+        var result = await dialog.ShowDialog<EditKnownHostsViewModel>(this);
         interaction.SetOutput(result);
     }
 }
