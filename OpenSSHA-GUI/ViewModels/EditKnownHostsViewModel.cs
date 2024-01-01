@@ -9,23 +9,25 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase
 {
-    // TODO!
-
+    
     public EditKnownHostsViewModel()
     {
-        DialogResult = ReactiveCommand.Create<string, EditKnownHostsViewModel>(e =>
-        {
-            return this;
-        });
-
         var hostsFile = new KnownHostsFile(Settings.KnownHostsFilePath);
 
         hostsFile.ReadContent();
         
         KnownHosts = new ObservableCollection<KnownHosts>(hostsFile.KnownHosts.OrderBy(e => e.Host));
+        
+        ProcessData = ReactiveCommand.Create<string, EditKnownHostsViewModel>(e =>
+        {
+            if (!bool.Parse(e)) return this;
+            hostsFile.SyncKnownHosts(KnownHosts);
+            hostsFile.UpdateFile();
+            return this;
+        });
     }
     
-    
     public ObservableCollection<KnownHosts> KnownHosts { get; }
-    public ReactiveCommand<string, EditKnownHostsViewModel> DialogResult { get; }
+    public ReactiveCommand<string, EditKnownHostsViewModel> ProcessData { get; }
+    
 }

@@ -13,6 +13,10 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
+        <Window.Resources>
+                <StreamGeometry x:Key="DismissCircleRegular">M24,4 C35.045695,4 44,12.954305 44,24 C44,35.045695 35.045695,44 24,44 C12.954305,44 4,35.045695 4,24 C4,12.954305 12.954305,4 24,4 Z M24,6.5 C14.3350169,6.5 6.5,14.3350169 6.5,24 C6.5,33.6649831 14.3350169,41.5 24,41.5 C33.6649831,41.5 41.5,33.6649831 41.5,24 C41.5,14.3350169 33.6649831,6.5 24,6.5 Z M17.7823881,16.0249942 L17.8838835,16.1161165 L24,22.233 L30.1161165,16.1161165 C30.5717282,15.6605048 31.2915486,15.6301307 31.7823881,16.0249942 L31.8838835,16.1161165 C32.3394952,16.5717282 32.3698693,17.2915486 31.9750058,17.7823881 L31.8838835,17.8838835 L25.767,24 L31.8838835,30.1161165 C32.3394952,30.5717282 32.3698693,31.2915486 31.9750058,31.7823881 L31.8838835,31.8838835 C31.4282718,32.3394952 30.7084514,32.3698693 30.2176119,31.9750058 L30.1161165,31.8838835 L24,25.767 L17.8838835,31.8838835 C17.4282718,32.3394952 16.7084514,32.3698693 16.2176119,31.9750058 L16.1161165,31.8838835 C15.6605048,31.4282718 15.6301307,30.7084514 16.0249942,30.2176119 L16.1161165,30.1161165 L22.233,24 L16.1161165,17.8838835 C15.6605048,17.4282718 15.6301307,16.7084514 16.0249942,16.2176119 L16.1161165,16.1161165 C16.5717282,15.6605048 17.2915486,15.6301307 17.7823881,16.0249942 Z</StreamGeometry>
+                <StreamGeometry x:Key="TextChangeAcceptRegular">M17.5 12C20.5376 12 23 14.4624 23 17.5C23 20.5376 20.5376 23 17.5 23C14.4624 23 12 20.5376 12 17.5C12 14.4624 14.4624 12 17.5 12ZM20.1465 15.1464L16.0541 19.2388L14.9 17.7C14.7343 17.4791 14.4209 17.4343 14.2 17.6C13.9791 17.7657 13.9343 18.0791 14.1 18.3L15.6 20.3C15.7826 20.5434 16.1384 20.5687 16.3536 20.3535L20.8536 15.8535C21.0488 15.6583 21.0488 15.3417 20.8536 15.1464C20.6583 14.9512 20.3417 14.9512 20.1465 15.1464Z M11.0189 17H2.75L2.64823 17.0068C2.28215 17.0565 2 17.3703 2 17.75C2 18.1642 2.33579 18.5 2.75 18.5H11.0764C11.0261 18.174 11 17.8401 11 17.5C11 17.3318 11.0064 17.165 11.0189 17Z M11.7322 14.5H2.75C2.33579 14.5 2 14.1642 2 13.75C2 13.3703 2.28215 13.0565 2.64823 13.0068L2.75 13H12.8096C12.3832 13.4443 12.0194 13.949 11.7322 14.5Z M21.25 9H2.75L2.64823 9.00685C2.28215 9.05651 2 9.3703 2 9.75C2 10.1642 2.33579 10.5 2.75 10.5H21.25L21.3518 10.4932C21.7178 10.4435 22 10.1297 22 9.75C22 9.33579 21.6642 9 21.25 9Z M21.25 5H2.75L2.64823 5.00685C2.28215 5.05651 2 5.3703 2 5.75C2 6.16421 2.33579 6.5 2.75 6.5H21.25L21.3518 6.49315C21.7178 6.44349 22 6.1297 22 5.75C22 5.33579 21.6642 5 21.25 5Z</StreamGeometry>
+        </Window.Resources>
         <Grid RowDefinitions="* * *" ColumnDefinitions="* * *">
                 <DataGrid Grid.Row="0" 
                           Grid.Column="0" 
@@ -24,9 +28,15 @@
                                 <DataGridTextColumn Header="Host" Binding="{Binding Host}"/>
                                 <DataGridTextColumn Header="Key Type" Binding="{Binding KeyType}"/>
                                 <DataGridTextColumn Header="Keytype-Declaration in file" Binding="{Binding TypeDeclarationInFile}"/>
-                                <DataGridCheckBoxColumn Header="Delete" Binding="{Binding MarkedForDeletion}" IsThreeState="True"/>
+                                <DataGridCheckBoxColumn IsReadOnly="False" Header="Delete" Binding="{Binding MarkedForDeletion}"/>
                         </DataGrid.Columns>
                 </DataGrid>
+                <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Background="Red" Command="{Binding ProcessData}" CommandParameter="false">
+                        <PathIcon Data="{StaticResource DismissCircleRegular}"/>
+                </Button>
+                <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Background="Green" Command="{Binding ProcessData}" CommandParameter="true">
+                        <PathIcon Data="{StaticResource TextChangeAcceptRegular}"/>
+                </Button>
         </Grid>
         <Design.DataContext>
                 <!-- This only sets the DataContext for the previewer in an IDE,

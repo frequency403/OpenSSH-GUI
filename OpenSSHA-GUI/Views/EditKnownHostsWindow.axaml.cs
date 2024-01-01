@@ -10,6 +10,6 @@ public partial class EditKnownHostsWindow : ReactiveWindow<EditKnownHostsViewMod
     public EditKnownHostsWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.DialogResult.Subscribe(Close)));
+        this.WhenActivated(d => d(ViewModel!.ProcessData.Subscribe(Close)));
     }
 }
