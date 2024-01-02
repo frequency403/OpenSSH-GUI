@@ -1,4 +1,4 @@
-﻿using OpenSSHALib.Model;
+﻿using OpenSSHALib.Models;
 
 namespace OpenSSHALib.Lib;
 

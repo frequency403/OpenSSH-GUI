@@ -1,7 +1,7 @@
 ﻿using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 
-namespace OpenSSHALib.Model;
+namespace OpenSSHALib.Models;
 
 public class SshKeyType
 {

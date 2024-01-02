@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Lib;
-using OpenSSHALib.Model;
+using OpenSSHALib.Models;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;

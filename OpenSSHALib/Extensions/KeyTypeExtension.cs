@@ -1,5 +1,5 @@
 ﻿using OpenSSHALib.Enums;
-using OpenSSHALib.Model;
+using OpenSSHALib.Models;
 
 namespace OpenSSHALib.Extensions;
 

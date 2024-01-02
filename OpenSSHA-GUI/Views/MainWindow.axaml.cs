@@ -3,7 +3,6 @@ using Avalonia.ReactiveUI;
 using OpenSSHA_GUI.ViewModels;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
-using OpenSSHALib.Model;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.Views;

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Avalonia.Data.Converters;
 using OpenSSHALib.Enums;
-using OpenSSHALib.Model;
+using OpenSSHALib.Models;
 
 namespace OpenSSHA_GUI.Converters;
 

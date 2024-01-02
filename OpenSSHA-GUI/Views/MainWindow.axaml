@@ -3,7 +3,7 @@
         xmlns:vm="using:OpenSSHA_GUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:datamodels="clr-namespace:OpenSSHALib.Model;assembly=OpenSSHALib"
+        xmlns:models="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSHA_GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -65,7 +65,7 @@
                   VerticalAlignment="Stretch"
                   Name="TheDataGrid">
             <DataGrid.RowDetailsTemplate>
-                <DataTemplate DataType="datamodels:SshKey">
+                <DataTemplate DataType="models:SshKey">
                     <Grid HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="*, *, *">
                         <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="Filename on disk: " FontWeight="Bold" />
@@ -90,7 +90,7 @@
                             <Label Content="Key-type" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="datamodels:SshKey">
+                    <DataTemplate DataType="models:SshKey">
                         <Label Content="{Binding KeyType.KeyTypeText}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
@@ -101,7 +101,7 @@
                             <Label Content="Key-size in bytes" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="datamodels:SshKey">
+                    <DataTemplate DataType="models:SshKey">
                         <Label Content="{Binding KeyType.CurrentBitSize}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
@@ -112,7 +112,7 @@
                             <Label Content="Fingerprint" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="datamodels:SshKey">
+                    <DataTemplate DataType="models:SshKey">
                         <Label Content="{Binding Fingerprint}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
@@ -123,12 +123,12 @@
                             <Label Content="Comment" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="datamodels:SshKey">
+                    <DataTemplate DataType="models:SshKey">
                         <Label Content="{Binding Comment}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Export/Delete">
-                    <DataTemplate DataType="datamodels:SshKey">
+                    <DataTemplate DataType="models:SshKey">
                         <StackPanel Orientation="Horizontal">
                             <Button
                                 Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
