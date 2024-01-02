@@ -2,7 +2,7 @@
 using System.Text;
 using OpenSSHALib.Enums;
 
-namespace OpenSSHALib.Model;
+namespace OpenSSHALib.Models;
 
 public class SshKey
 {

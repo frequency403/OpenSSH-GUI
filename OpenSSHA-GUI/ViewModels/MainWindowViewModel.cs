@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using OpenSSHA_GUI.Views;
 using OpenSSHALib.Lib;
-using OpenSSHALib.Model;
+using OpenSSHALib.Models;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
@@ -16,7 +16,15 @@ public class MainWindowViewModel : ViewModelBase
 
     public Interaction<ConfirmDialogViewModel, ConfirmDialogViewModel?> ShowConfirm = new();
     public Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
+    public Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
 
+    public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
+        ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
+        {
+            var editKnownHosts = new EditKnownHostsViewModel();
+            return await ShowEditKnownHosts.Handle(editKnownHosts);
+        });
+    
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
         {

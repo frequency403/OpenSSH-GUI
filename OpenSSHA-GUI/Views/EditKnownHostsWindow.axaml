@@ -1,0 +1,131 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
+        xmlns:dataModels="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
+        mc:Ignorable="d"
+        x:Class="OpenSSHA_GUI.Views.EditKnownHostsWindow"
+        x:DataType="viewModels:EditKnownHostsViewModel"
+        Width="800"
+        Height="600"
+        Title="Edit known_hosts"
+        Icon="/Assets/avalonia-logo.ico"
+        ShowInTaskbar="True"
+        ShowActivated="True"
+        WindowStartupLocation="CenterOwner">
+        <Window.Resources>
+                <StreamGeometry x:Key="CircleRegular">M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 16.6944 7.30558 20.5 12 20.5C16.6944 20.5 20.5 16.6944 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z</StreamGeometry>
+                <StreamGeometry x:Key="ArrowRepeatAllRegular">M19.75,7.39676942 C19.9325768,7.39676942 20.0999162,7.46224512 20.2299788,7.57107688 L20.3028524,7.63964652 C21.3570816,8.79922931 22,10.3419681 22,12.0354139 C22,15.5599801 19.2150038,18.431713 15.7331341,18.5549053 L15.5,18.5590232 L8.564,18.5590232 L10.4633677,20.4650195 L10.530489,20.5421024 C10.7542269,20.8371413 10.7318531,21.2600716 10.4633677,21.5295322 C10.1971011,21.7967659 9.78043743,21.8210599 9.48682593,21.6024141 L9.4027075,21.5295322 L6.22072699,18.3359941 L6.15360562,18.2589112 C5.95224154,17.9933762 5.95022789,17.6242492 6.1475647,17.3566423 L6.22072699,17.2714814 L9.4027075,14.0779433 L9.47951144,14.0105782 C9.74408547,13.8084827 10.1118766,13.8064617 10.378515,14.0045153 L10.4633677,14.0779433 L10.530489,14.1550262 C10.7318531,14.4205612 10.7338668,14.7896882 10.53653,15.0572951 L10.4633677,15.142456 L8.558,17.0535749 L15.5,17.0535749 C18.2614237,17.0535749 20.5,14.8068677 20.5,12.0354139 C20.5,10.724552 19.9991929,9.53108474 19.1791288,8.63722164 C19.0677172,8.50699633 19,8.33618177 19,8.14949357 C19,7.7337755 19.3357864,7.39676942 19.75,7.39676942 Z M14.5333772,2.40310264 L14.6101811,2.4704678 L17.7921616,5.66400589 C18.0606471,5.93346653 18.0830209,6.35639677 17.859283,6.65143568 L17.7921616,6.72851859 L14.6101811,9.92205668 C14.3172879,10.2160137 13.8424141,10.2160137 13.5495209,9.92205668 C13.2810355,9.65259603 13.2586617,9.22966579 13.4823996,8.93462689 L13.5495209,8.85754398 L15.381,7.01725293 L8.5,7.01725293 C5.73857625,7.01725293 3.5,9.26396013 3.5,12.0354139 C3.5,13.2494182 3.92953352,14.3627352 4.64439355,15.230634 L4.84372808,15.4613408 C4.94170374,15.5885416 5,15.7480922 5,15.9213081 C5,16.3370261 4.66421356,16.6740322 4.25,16.6740322 C4.06462665,16.6740322 3.89496098,16.6065353 3.76407095,16.4946933 L3.69169995,16.4251818 C2.64070402,15.2662798 2,13.7259408 2,12.0354139 C2,8.51084769 4.78499621,5.63911482 8.26686587,5.51592254 L8.5,5.51180464 L15.521,5.51180464 L13.5495209,3.5349805 C13.2810355,3.26551985 13.2586617,2.84258961 13.4823996,2.5475507 L13.5495209,2.4704678 C13.8180064,2.20100716 14.239406,2.1785521 14.5333772,2.40310264 Z</StreamGeometry>
+                <StreamGeometry x:Key="DismissCircleRegular">M24,4 C35.045695,4 44,12.954305 44,24 C44,35.045695 35.045695,44 24,44 C12.954305,44 4,35.045695 4,24 C4,12.954305 12.954305,4 24,4 Z M24,6.5 C14.3350169,6.5 6.5,14.3350169 6.5,24 C6.5,33.6649831 14.3350169,41.5 24,41.5 C33.6649831,41.5 41.5,33.6649831 41.5,24 C41.5,14.3350169 33.6649831,6.5 24,6.5 Z M17.7823881,16.0249942 L17.8838835,16.1161165 L24,22.233 L30.1161165,16.1161165 C30.5717282,15.6605048 31.2915486,15.6301307 31.7823881,16.0249942 L31.8838835,16.1161165 C32.3394952,16.5717282 32.3698693,17.2915486 31.9750058,17.7823881 L31.8838835,17.8838835 L25.767,24 L31.8838835,30.1161165 C32.3394952,30.5717282 32.3698693,31.2915486 31.9750058,31.7823881 L31.8838835,31.8838835 C31.4282718,32.3394952 30.7084514,32.3698693 30.2176119,31.9750058 L30.1161165,31.8838835 L24,25.767 L17.8838835,31.8838835 C17.4282718,32.3394952 16.7084514,32.3698693 16.2176119,31.9750058 L16.1161165,31.8838835 C15.6605048,31.4282718 15.6301307,30.7084514 16.0249942,30.2176119 L16.1161165,30.1161165 L22.233,24 L16.1161165,17.8838835 C15.6605048,17.4282718 15.6301307,16.7084514 16.0249942,16.2176119 L16.1161165,16.1161165 C16.5717282,15.6605048 17.2915486,15.6301307 17.7823881,16.0249942 Z</StreamGeometry>
+                <StreamGeometry x:Key="TextChangeAcceptRegular">M17.5 12C20.5376 12 23 14.4624 23 17.5C23 20.5376 20.5376 23 17.5 23C14.4624 23 12 20.5376 12 17.5C12 14.4624 14.4624 12 17.5 12ZM20.1465 15.1464L16.0541 19.2388L14.9 17.7C14.7343 17.4791 14.4209 17.4343 14.2 17.6C13.9791 17.7657 13.9343 18.0791 14.1 18.3L15.6 20.3C15.7826 20.5434 16.1384 20.5687 16.3536 20.3535L20.8536 15.8535C21.0488 15.6583 21.0488 15.3417 20.8536 15.1464C20.6583 14.9512 20.3417 14.9512 20.1465 15.1464Z M11.0189 17H2.75L2.64823 17.0068C2.28215 17.0565 2 17.3703 2 17.75C2 18.1642 2.33579 18.5 2.75 18.5H11.0764C11.0261 18.174 11 17.8401 11 17.5C11 17.3318 11.0064 17.165 11.0189 17Z M11.7322 14.5H2.75C2.33579 14.5 2 14.1642 2 13.75C2 13.3703 2.28215 13.0565 2.64823 13.0068L2.75 13H12.8096C12.3832 13.4443 12.0194 13.949 11.7322 14.5Z M21.25 9H2.75L2.64823 9.00685C2.28215 9.05651 2 9.3703 2 9.75C2 10.1642 2.33579 10.5 2.75 10.5H21.25L21.3518 10.4932C21.7178 10.4435 22 10.1297 22 9.75C22 9.33579 21.6642 9 21.25 9Z M21.25 5H2.75L2.64823 5.00685C2.28215 5.05651 2 5.3703 2 5.75C2 6.16421 2.33579 6.5 2.75 6.5H21.25L21.3518 6.49315C21.7178 6.44349 22 6.1297 22 5.75C22 5.33579 21.6642 5 21.25 5Z</StreamGeometry>
+        </Window.Resources>
+        <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *" Name="MainGrid">
+                <ScrollViewer Grid.Row="0" 
+                        Grid.Column="0" 
+                        Grid.ColumnSpan="3" 
+                        Grid.RowSpan="2">
+                        <ItemsControl ItemsSource="{Binding KnownHosts}" >
+                                <ItemsControl.Styles>
+                                        <Style Selector="Expander:expanded Button.whole-host">
+                                                <Setter Property="IsVisible" Value="False"/>
+                                        </Style>
+                                        <Style Selector="ToggleButton PathIcon.stay">
+                                                <Setter Property="IsVisible" Value="True"/>
+                                        </Style>
+                                        <Style Selector="ToggleButton PathIcon.delete">
+                                                <Setter Property="IsVisible" Value="False"/>
+                                        </Style>
+                                        <Style Selector="ToggleButton:checked PathIcon.stay">
+                                                <Setter Property="IsVisible" Value="False"/>
+                                        </Style>
+                                        <Style Selector="ToggleButton:checked PathIcon.delete">
+                                                <Setter Property="IsVisible" Value="True"/>
+                                        </Style>
+                                </ItemsControl.Styles>
+                                <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="dataModels:KnownHost">
+                                        <Expander HorizontalAlignment="Stretch">
+                                                <Expander.Header>
+                                                                <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
+                                                                        <Label Grid.Column="0" Content="{Binding Host}" HorizontalAlignment="Center" FontWeight="Bold"/>
+                                                                        <ToggleButton Grid.Column="1" IsChecked="False" Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
+                                                                                <!-- TODO: Change button background in toggled state to "Red" -->
+                                                                                <ToolTip.Tip>
+                                                                                        <Label Content="Delete"/>
+                                                                                </ToolTip.Tip>
+                                                                                <Panel>
+                                                                                        <PathIcon Data="{StaticResource CircleRegular}" Classes="stay"/>
+                                                                                        <PathIcon Data="{StaticResource DismissCircleRegular}" Classes="delete"/>
+                                                                                </Panel>
+                                                                        </ToggleButton>
+                                                                </Grid>
+                                                </Expander.Header>
+                                                        <DataGrid ItemsSource="{Binding Keys}" HorizontalAlignment="Stretch">
+                                                                <DataGrid.Styles>
+                                                                        <Style Selector="DataGridTextColumn">
+                                                                                <Setter Property="IsVisible" Value="{Binding !DeleteWholeHost}"/>
+                                                                        </Style>
+                                                                </DataGrid.Styles>
+                                                                <DataGrid.Columns>
+                                                                        <DataGridTextColumn Header="KeyType" Binding="{Binding KeyType}" Width="*"/>
+                                                                        <DataGridTextColumn Header="KeySize" Binding="{Binding KeySize}" Width="*"/>
+                                                                        <DataGridTemplateColumn Header="Fingerprint" Width="*">
+                                                                                <DataTemplate DataType="dataModels:KnownHostKey">
+                                                                                        <TextBlock Text="{Binding Fingerprint}">
+                                                                                                <ToolTip.Tip>
+                                                                                                        <Label Content="{Binding Fingerprint}"/>
+                                                                                                </ToolTip.Tip>
+                                                                                        </TextBlock>
+                                                                                </DataTemplate>
+                                                                        </DataGridTemplateColumn>
+                                                                        <DataGridTemplateColumn Width="*" Header="Options">
+                                                                                <DataTemplate DataType="dataModels:KnownHostKey">
+                                                                                        <ToggleButton Grid.Column="1" IsChecked="{Binding MarkedForDeletion}" HorizontalAlignment="Center">
+                                                                                                <!-- TODO: Change button background in toggled state to "Red" -->
+                                                                                                <ToolTip.Tip>
+                                                                                                        <Label Content="Delete"/>
+                                                                                                </ToolTip.Tip>
+                                                                                                <Panel>
+                                                                                                        <PathIcon Data="{StaticResource CircleRegular}" Classes="stay"/>
+                                                                                                        <PathIcon Data="{StaticResource DismissCircleRegular}" Classes="delete"/>
+                                                                                                </Panel>
+                                                                                        </ToggleButton>
+                                                                                </DataTemplate>
+                                                                        </DataGridTemplateColumn>
+                                                                </DataGrid.Columns>
+                                                        </DataGrid>
+                                        </Expander>
+                                </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                </ScrollViewer>
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" BorderBrush="Black" BorderThickness="1" CornerRadius="10">
+                        <Grid RowDefinitions="*" ColumnDefinitions="* * *">
+                                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Background="Red" Command="{Binding ProcessData}" CommandParameter="false">
+                                        <ToolTip.Tip>
+                                                <Label Content="Dismiss and close"/>
+                                        </ToolTip.Tip>
+                                        <PathIcon Data="{StaticResource DismissCircleRegular}"/>
+                                </Button>
+                                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Background="Khaki" Command="{Binding ResetChangesAndReload}">
+                                        <ToolTip.Tip>
+                                                <Label Content="Revert changes and reload file"/>
+                                        </ToolTip.Tip>
+                                        <PathIcon Data="{StaticResource ArrowRepeatAllRegular}" />
+                                </Button>
+                                <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Background="Green" Command="{Binding ProcessData}" CommandParameter="true">
+                                        <ToolTip.Tip>
+                                                <Label Content="Accept changes and write them to file"/>
+                                        </ToolTip.Tip>
+                                        <PathIcon Data="{StaticResource TextChangeAcceptRegular}"/>
+                                </Button>
+                        </Grid>
+                </Border>
+        </Grid>
+        <Design.DataContext>
+                <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+                <viewModels:EditKnownHostsViewModel />
+        </Design.DataContext>
+</Window>

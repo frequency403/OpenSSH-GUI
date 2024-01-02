@@ -7,7 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
-using OpenSSHALib.Model;
+using OpenSSHALib.Lib;
+using OpenSSHALib.Models;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
@@ -109,8 +110,7 @@ public class AddKeyWindowViewModel : ViewModelBase
     public async ValueTask<SshKey?> RunKeyGen()
     {
         if (!_createKey) return null;
-        var sshUserFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) +
-                            $"{Path.DirectorySeparatorChar}.ssh";
+        var sshUserFolder = Settings.UserSshFolderPath;
         var fullFilePath = $"{sshUserFolder}{Path.DirectorySeparatorChar}{KeyName}";
         KeyBitSize = KeyBitSize == 0 ? (int)KeyType : KeyBitSize;
         var proc = new Process
