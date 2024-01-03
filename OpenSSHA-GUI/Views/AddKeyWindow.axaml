@@ -4,6 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OpenSSHA_GUI.ViewModels"
         xmlns:cv="clr-namespace:OpenSSHA_GUI.Converters"
+        xmlns:materialIcons="clr-namespace:Material;assembly=Material.Icons.Avalonia"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
         Height="350"
@@ -53,9 +55,19 @@
             <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
         <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 10" Background="ForestGreen" HorizontalAlignment="Center"
-                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true" Content="Add" />
+                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true">
+            <ToolTip.Tip>
+                <Label Content="Abort"/>
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="KeyAdd"/>
+        </Button>
         <Button Grid.Row="2" Grid.Column="0" Margin="0 0 0 10" Background="DimGray" HorizontalAlignment="Center"
-                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="false" Content="Abort" />
+                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="false">
+            <ToolTip.Tip>
+                <Label Content="Add Key"/>
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="Cancel"/>
+        </Button>
 
     </Grid>
 
