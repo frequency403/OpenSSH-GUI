@@ -1,6 +1,6 @@
-﻿using Avalonia.ReactiveUI;
+﻿using System;
+using Avalonia.ReactiveUI;
 using OpenSSHA_GUI.ViewModels;
-using System;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.Views;

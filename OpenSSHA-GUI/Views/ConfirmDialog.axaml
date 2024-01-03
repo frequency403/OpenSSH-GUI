@@ -15,17 +15,19 @@
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, *">
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding Question}"
                HorizontalAlignment="Center" />
-        <Button Grid.Row="1" Grid.Column="1" Command="{Binding DialogResult}" CommandParameter="true" HorizontalAlignment="Center" Background="Green">
+        <Button Grid.Row="1" Grid.Column="1" Command="{Binding DialogResult}" CommandParameter="true"
+                HorizontalAlignment="Center" Background="Green">
             <ToolTip.Tip>
-                <Label Content="{Binding OkText}"/>
+                <Label Content="{Binding OkText}" />
             </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="Check"/>
+            <avalonia:MaterialIcon Kind="Check" />
         </Button>
-        <Button Grid.Row="1" Grid.Column="0" Command="{Binding DialogResult}" CommandParameter="false" HorizontalAlignment="Center" Background="Red">
+        <Button Grid.Row="1" Grid.Column="0" Command="{Binding DialogResult}" CommandParameter="false"
+                HorizontalAlignment="Center" Background="Red">
             <ToolTip.Tip>
-                <Label Content="{Binding NotOkText}"/>
+                <Label Content="{Binding NotOkText}" />
             </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="CancelOutline"/>
+            <avalonia:MaterialIcon Kind="CancelOutline" />
         </Button>
     </Grid>
 </Window>

@@ -7,23 +7,26 @@ public class KnownHostsFile : ReactiveObject
 {
     internal const string LineEnding = "\r\n";
     private readonly string _filePath;
-    
-    public List<KnownHost> KnownHosts { get; private set; }
-    
-    
+
+
     public KnownHostsFile(string pathToKnownHosts)
     {
         _filePath = pathToKnownHosts;
         ReadContent();
     }
-    
-    
-    private void SetKnownHosts(string fileContent) => KnownHosts = fileContent
-        .Split(LineEnding)
-        .Where(e => !string.IsNullOrEmpty(e))
-        .GroupBy(e => e.Split(' ')[0])
-        .Select(e => new KnownHost(e)).ToList();
-    
+
+    public List<KnownHost> KnownHosts { get; private set; }
+
+
+    private void SetKnownHosts(string fileContent)
+    {
+        KnownHosts = fileContent
+            .Split(LineEnding)
+            .Where(e => !string.IsNullOrEmpty(e))
+            .GroupBy(e => e.Split(' ')[0])
+            .Select(e => new KnownHost(e)).ToList();
+    }
+
     public async Task ReadContentAsync(FileStream? stream = null)
     {
         if (stream is null)
@@ -37,9 +40,8 @@ public class KnownHostsFile : ReactiveObject
             using var streamReader = new StreamReader(stream);
             SetKnownHosts(await streamReader.ReadToEndAsync());
         }
-        
     }
-    
+
     public void ReadContent(FileStream? stream = null)
     {
         if (stream is null)
@@ -55,8 +57,11 @@ public class KnownHostsFile : ReactiveObject
         }
     }
 
-    public void SyncKnownHosts(IEnumerable<KnownHost> newKnownHosts) => KnownHosts = newKnownHosts.ToList();
-    
+    public void SyncKnownHosts(IEnumerable<KnownHost> newKnownHosts)
+    {
+        KnownHosts = newKnownHosts.ToList();
+    }
+
     public async Task UpdateFile()
     {
         await using var fileStream = File.OpenWrite(_filePath);
@@ -68,7 +73,7 @@ public class KnownHostsFile : ReactiveObject
         var newContentBytes = Encoding.Default.GetBytes(newContent);
         fileStream.SetLength(newContentBytes.Length);
         await fileStream.WriteAsync(newContentBytes);
-        await fileStream.FlushAsync(); 
+        await fileStream.FlushAsync();
         SetKnownHosts(newContent);
     }
 }

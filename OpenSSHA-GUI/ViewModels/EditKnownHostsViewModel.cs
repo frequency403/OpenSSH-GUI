@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using Avalonia.ReactiveUI;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
@@ -11,7 +9,8 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase
 {
-    
+    private ObservableCollection<KnownHost> _knownHosts = [];
+
     public EditKnownHostsViewModel()
     {
         KnownHostsFile = new KnownHostsFile(Settings.KnownHostsFilePath);
@@ -38,20 +37,19 @@ public class EditKnownHostsViewModel : ViewModelBase
             await KnownHostsFile.ReadContentAsync();
             KnownHosts = new ObservableCollection<KnownHost>(KnownHostsFile.KnownHosts);
             return e;
-        } );
+        });
     }
+
     private KnownHostsFile KnownHostsFile { get; }
 
-    private ObservableCollection<KnownHost> _knownHosts = [];
     public ObservableCollection<KnownHost> KnownHosts
     {
         get => _knownHosts;
         private set => this.RaiseAndSetIfChanged(ref _knownHosts, value);
     }
-    
+
     public ReactiveCommand<string, EditKnownHostsViewModel> ProcessData { get; }
-    public ReactiveCommand<Unit, Unit> ResetChangesAndReload { get; } 
-    public ReactiveCommand<KnownHost, Unit> DeleteHost { get; } 
+    public ReactiveCommand<Unit, Unit> ResetChangesAndReload { get; }
+    public ReactiveCommand<KnownHost, Unit> DeleteHost { get; }
     public ReactiveCommand<KnownHostKey, Unit> DeleteKey { get; }
-    
 }

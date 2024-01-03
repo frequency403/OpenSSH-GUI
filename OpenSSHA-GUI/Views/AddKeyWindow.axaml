@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OpenSSHA_GUI.ViewModels"
         xmlns:cv="clr-namespace:OpenSSHA_GUI.Converters"
-        xmlns:materialIcons="clr-namespace:Material;assembly=Material.Icons.Avalonia"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
@@ -18,7 +17,7 @@
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
-        <cv:SshKeyTypeConverter x:Key="SshKeyTypeConverter"/>
+        <cv:SshKeyTypeConverter x:Key="SshKeyTypeConverter" />
     </Window.Resources>
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -33,16 +32,16 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
-            
-            <!-- <Label Content="Bitsize" Target="BitSizeButtonSpinner" /> -->
-            <!-- <ButtonSpinner Name="BitSizeButtonSpinner" Content="{Binding KeyBitSize}"/> -->
             <Label Content="Bitsize" Target="BitSizeComboBox" />
-            <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}" SelectedItem="{Binding SelectedKeyType.CurrentBitSize}" />
+            <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
+                      SelectedItem="{Binding SelectedKeyType.CurrentBitSize}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
             <Label Content="KeyType" Target="KeyTypesComboBox" />
-            <ComboBox Name="KeyTypesComboBox" ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}" SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
+            <ComboBox Name="KeyTypesComboBox"
+                      ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}"
+                      SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                     HorizontalAlignment="Stretch" Margin="20 0 20 10">
@@ -57,16 +56,16 @@
         <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 10" Background="ForestGreen" HorizontalAlignment="Center"
                 VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true">
             <ToolTip.Tip>
-                <Label Content="Abort"/>
+                <Label Content="Add Key" />
             </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="KeyAdd"/>
+            <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
         <Button Grid.Row="2" Grid.Column="0" Margin="0 0 0 10" Background="DimGray" HorizontalAlignment="Center"
                 VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="false">
             <ToolTip.Tip>
-                <Label Content="Add Key"/>
+                <Label Content="Abort" />
             </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="Cancel"/>
+            <avalonia:MaterialIcon Kind="Cancel" />
         </Button>
 
     </Grid>

@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using Avalonia.ReactiveUI;
 using OpenSSHA_GUI.ViewModels;
-using OpenSSHALib.Enums;
-using OpenSSHALib.Extensions;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.Views;
@@ -44,7 +42,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private async Task DoShowEditKnownHostsAsync(
         InteractionContext<EditKnownHostsViewModel, EditKnownHostsViewModel?> interaction)
     {
-        var dialog = new EditKnownHostsWindow()
+        var dialog = new EditKnownHostsWindow
         {
             DataContext = interaction.Input
         };

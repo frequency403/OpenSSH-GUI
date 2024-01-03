@@ -29,7 +29,7 @@
                 Margin="20 0 0 0">
             <StackPanel Orientation="Horizontal">
                 <ToolTip.Tip>Add SSH Key</ToolTip.Tip>
-                <materialIcons:MaterialIcon Kind="KeyAdd"/>
+                <materialIcons:MaterialIcon Kind="KeyAdd" />
             </StackPanel>
         </Button>
         <Button Grid.Row="2" Grid.Column="1"
@@ -40,7 +40,7 @@
                 Margin="20 0 0 0">
             <StackPanel Orientation="Horizontal">
                 <ToolTip.Tip>Edit "known_hosts" file</ToolTip.Tip>
-                <materialIcons:MaterialIcon Kind="ServerNetwork"/>
+                <materialIcons:MaterialIcon Kind="ServerNetwork" />
             </StackPanel>
         </Button>
         <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
@@ -75,7 +75,7 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <materialIcons:MaterialIcon Kind="KeyVariant"/>
+                            <materialIcons:MaterialIcon Kind="KeyVariant" />
                             <Label Content="Key-type" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
@@ -86,7 +86,7 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <materialIcons:MaterialIcon Kind="Counter"/>
+                            <materialIcons:MaterialIcon Kind="Counter" />
                             <Label Content="Key-size in bytes" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
@@ -97,7 +97,7 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <materialIcons:MaterialIcon Kind="Fingerprint"/>
+                            <materialIcons:MaterialIcon Kind="Fingerprint" />
                             <Label Content="Fingerprint" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
@@ -108,7 +108,7 @@
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
-                            <materialIcons:MaterialIcon Kind="Comment"/>
+                            <materialIcons:MaterialIcon Kind="Comment" />
                             <Label Content="Comment" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
@@ -124,8 +124,8 @@
                                 CommandParameter="{Binding .}">
                                 <ToolTip.Tip>Export public key</ToolTip.Tip>
                                 <StackPanel Orientation="Horizontal">
-                                    <materialIcons:MaterialIcon Kind="Publish"/>
-                                    <materialIcons:MaterialIcon Kind="KeyOutline"/>
+                                    <materialIcons:MaterialIcon Kind="Publish" />
+                                    <materialIcons:MaterialIcon Kind="KeyOutline" />
                                 </StackPanel>
                             </Button>
                             <Button
@@ -133,15 +133,15 @@
                                 CommandParameter="{Binding PrivateKey}">
                                 <ToolTip.Tip>Export private key</ToolTip.Tip>
                                 <StackPanel Orientation="Horizontal">
-                                    <materialIcons:MaterialIcon Kind="Publish"/>
-                                    <materialIcons:MaterialIcon Kind="ShieldKeyOutline"/>
+                                    <materialIcons:MaterialIcon Kind="Publish" />
+                                    <materialIcons:MaterialIcon Kind="ShieldKeyOutline" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).DeleteKey}"
                                     CommandParameter="{Binding .}"
                                     Background="DarkRed">
                                 <ToolTip.Tip>Delete key from disk</ToolTip.Tip>
-                                <materialIcons:MaterialIcon Kind="DeleteOutline"/>
+                                <materialIcons:MaterialIcon Kind="DeleteOutline" />
                             </Button>
                         </StackPanel>
                     </DataTemplate>

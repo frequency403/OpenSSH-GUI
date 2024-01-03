@@ -9,13 +9,13 @@ public static class KeyTypeExtension
     {
         return Enum.GetValues<KeyType>().Select(keyType => new SshKeyType(keyType)).ToList();
     }
-    
-    
+
+
     public static IEnumerable<int> GetBitValues(this KeyType type)
     {
         var listOfInts = new List<int>();
         for (var i = type.MinimalValue(); i <= (int)type; i *= 2) listOfInts.Add(i);
-        if(!listOfInts.Contains((int)type)) listOfInts.Add((int)type);
+        if (!listOfInts.Contains((int)type)) listOfInts.Add((int)type);
         return listOfInts;
     }
 
@@ -23,7 +23,7 @@ public static class KeyTypeExtension
     {
         return type switch
         {
-            KeyType.RSA or KeyType.DSA => 1024, 
+            KeyType.RSA or KeyType.DSA => 1024,
             KeyType.ECDSA => 192,
             KeyType.EdDSA or KeyType.Ed25519 => 128,
             _ => 0

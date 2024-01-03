@@ -15,112 +15,119 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
-        <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *" Name="MainGrid">
-                <ScrollViewer Grid.Row="0" 
-                        Grid.Column="0" 
-                        Grid.ColumnSpan="3" 
-                        Grid.RowSpan="2">
-                        <ItemsControl ItemsSource="{Binding KnownHosts}" >
-                                <ItemsControl.Styles>
-                                        <Style Selector="Expander:expanded Button.whole-host">
-                                                <Setter Property="IsVisible" Value="False"/>
-                                        </Style>
-                                        <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
-                                                <Setter Property="IsVisible" Value="True"/>
-                                        </Style>
-                                        <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
-                                                <Setter Property="IsVisible" Value="False"/>
-                                        </Style>
-                                        <Style Selector="ToggleButton:checked avalonia|MaterialIcon.stay">
-                                                <Setter Property="IsVisible" Value="False"/>
-                                        </Style>
-                                        <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
-                                                <Setter Property="IsVisible" Value="True"/>
-                                        </Style>
-                                </ItemsControl.Styles>
-                                <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="dataModels:KnownHost">
-                                        <Expander HorizontalAlignment="Stretch">
-                                                <Expander.Header>
-                                                                <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
-                                                                        <Label Grid.Column="0" Content="{Binding Host}" HorizontalAlignment="Center" FontWeight="Bold"/>
-                                                                        <ToggleButton Grid.Column="1" IsChecked="False" Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
-                                                                                <!-- TODO: Change button background in toggled state to "Red" -->
-                                                                                <ToolTip.Tip>
-                                                                                        <Label Content="Delete"/>
-                                                                                </ToolTip.Tip>
-                                                                                <Panel>
-                                                                                        <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay"/>
-                                                                                        <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete"/>
-                                                                                </Panel>
-                                                                        </ToggleButton>
-                                                                </Grid>
-                                                </Expander.Header>
-                                                        <DataGrid ItemsSource="{Binding Keys}" HorizontalAlignment="Stretch">
-                                                                <DataGrid.Styles>
-                                                                        <Style Selector="DataGridTextColumn">
-                                                                                <Setter Property="IsVisible" Value="{Binding !DeleteWholeHost}"/>
-                                                                        </Style>
-                                                                </DataGrid.Styles>
-                                                                <DataGrid.Columns>
-                                                                        <DataGridTextColumn Header="KeyType" Binding="{Binding KeyType}" Width="*"/>
-                                                                        <DataGridTextColumn Header="KeySize" Binding="{Binding KeySize}" Width="*"/>
-                                                                        <DataGridTemplateColumn Header="Fingerprint" Width="*">
-                                                                                <DataTemplate DataType="dataModels:KnownHostKey">
-                                                                                        <TextBlock Text="{Binding Fingerprint}">
-                                                                                                <ToolTip.Tip>
-                                                                                                        <Label Content="{Binding Fingerprint}"/>
-                                                                                                </ToolTip.Tip>
-                                                                                        </TextBlock>
-                                                                                </DataTemplate>
-                                                                        </DataGridTemplateColumn>
-                                                                        <DataGridTemplateColumn Width="*" Header="Options">
-                                                                                <DataTemplate DataType="dataModels:KnownHostKey">
-                                                                                        <ToggleButton Grid.Column="1" IsChecked="{Binding MarkedForDeletion}" HorizontalAlignment="Center">
-                                                                                                <!-- TODO: Change button background in toggled state to "Red" -->
-                                                                                                <ToolTip.Tip>
-                                                                                                        <Label Content="Delete"/>
-                                                                                                </ToolTip.Tip>
-                                                                                                <Panel>
-                                                                                                        <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay"/>
-                                                                                                        <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete"/>
-                                                                                                </Panel>
-                                                                                        </ToggleButton>
-                                                                                </DataTemplate>
-                                                                        </DataGridTemplateColumn>
-                                                                </DataGrid.Columns>
-                                                        </DataGrid>
-                                        </Expander>
-                                </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                </ScrollViewer>
-                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" BorderBrush="Black" BorderThickness="1" CornerRadius="10">
-                        <Grid RowDefinitions="*" ColumnDefinitions="* * *">
-                                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Background="Red" Command="{Binding ProcessData}" CommandParameter="false">
+    <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *" Name="MainGrid">
+        <ScrollViewer Grid.Row="0"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="3"
+                      Grid.RowSpan="2">
+            <ItemsControl ItemsSource="{Binding KnownHosts}">
+                <ItemsControl.Styles>
+                    <Style Selector="Expander:expanded Button.whole-host">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
+                        <Setter Property="IsVisible" Value="True" />
+                    </Style>
+                    <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="ToggleButton:checked avalonia|MaterialIcon.stay">
+                        <Setter Property="IsVisible" Value="False" />
+                    </Style>
+                    <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
+                        <Setter Property="IsVisible" Value="True" />
+                    </Style>
+                </ItemsControl.Styles>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="dataModels:KnownHost">
+                        <Expander HorizontalAlignment="Stretch">
+                            <Expander.Header>
+                                <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
+                                    <Label Grid.Column="0" Content="{Binding Host}" HorizontalAlignment="Center"
+                                           FontWeight="Bold" />
+                                    <ToggleButton Grid.Column="1" IsChecked="False"
+                                                  Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
+                                        <!-- TODO: Change button background in toggled state to "Red" -->
                                         <ToolTip.Tip>
-                                                <Label Content="Dismiss and close"/>
+                                            <Label Content="Delete" />
                                         </ToolTip.Tip>
-                                        <avalonia:MaterialIcon Kind="CloseCircleOutline"/>
-                                </Button>
-                                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Background="Khaki" Command="{Binding ResetChangesAndReload}">
-                                        <ToolTip.Tip>
-                                                <Label Content="Revert changes and reload file"/>
-                                        </ToolTip.Tip>
-                                        <avalonia:MaterialIcon Kind="Reload"/>
-                                </Button>
-                                <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Background="Green" Command="{Binding ProcessData}" CommandParameter="true">
-                                        <ToolTip.Tip>
-                                                <Label Content="Accept changes and write them to file"/>
-                                        </ToolTip.Tip>
-                                        <avalonia:MaterialIcon Kind="Check"/>
-                                </Button>
-                        </Grid>
-                </Border>
-        </Grid>
-        <Design.DataContext>
-                <!-- This only sets the DataContext for the previewer in an IDE,
+                                        <Panel>
+                                            <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
+                                            <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
+                                        </Panel>
+                                    </ToggleButton>
+                                </Grid>
+                            </Expander.Header>
+                            <DataGrid ItemsSource="{Binding Keys}" HorizontalAlignment="Stretch">
+                                <DataGrid.Styles>
+                                    <Style Selector="DataGridTextColumn">
+                                        <Setter Property="IsVisible" Value="{Binding !DeleteWholeHost}" />
+                                    </Style>
+                                </DataGrid.Styles>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="KeyType" Binding="{Binding KeyType}" Width="*" />
+                                    <DataGridTextColumn Header="KeySize" Binding="{Binding KeySize}" Width="*" />
+                                    <DataGridTemplateColumn Header="Fingerprint" Width="*">
+                                        <DataTemplate DataType="dataModels:KnownHostKey">
+                                            <TextBlock Text="{Binding Fingerprint}">
+                                                <ToolTip.Tip>
+                                                    <Label Content="{Binding Fingerprint}" />
+                                                </ToolTip.Tip>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="*" Header="Options">
+                                        <DataTemplate DataType="dataModels:KnownHostKey">
+                                            <ToggleButton Grid.Column="1" IsChecked="{Binding MarkedForDeletion}"
+                                                          HorizontalAlignment="Center">
+                                                <!-- TODO: Change button background in toggled state to "Red" -->
+                                                <ToolTip.Tip>
+                                                    <Label Content="Delete" />
+                                                </ToolTip.Tip>
+                                                <Panel>
+                                                    <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
+                                                    <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
+                                                </Panel>
+                                            </ToggleButton>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" BorderBrush="Black"
+                BorderThickness="1" CornerRadius="10">
+            <Grid RowDefinitions="*" ColumnDefinitions="* * *">
+                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Background="Red"
+                        Command="{Binding ProcessData}" CommandParameter="false">
+                    <ToolTip.Tip>
+                        <Label Content="Dismiss and close" />
+                    </ToolTip.Tip>
+                    <avalonia:MaterialIcon Kind="CloseCircleOutline" />
+                </Button>
+                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Background="Khaki"
+                        Command="{Binding ResetChangesAndReload}">
+                    <ToolTip.Tip>
+                        <Label Content="Revert changes and reload file" />
+                    </ToolTip.Tip>
+                    <avalonia:MaterialIcon Kind="Reload" />
+                </Button>
+                <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Background="Green"
+                        Command="{Binding ProcessData}" CommandParameter="true">
+                    <ToolTip.Tip>
+                        <Label Content="Accept changes and write them to file" />
+                    </ToolTip.Tip>
+                    <avalonia:MaterialIcon Kind="Check" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-                <viewModels:EditKnownHostsViewModel />
-        </Design.DataContext>
+        <viewModels:EditKnownHostsViewModel />
+    </Design.DataContext>
 </Window>

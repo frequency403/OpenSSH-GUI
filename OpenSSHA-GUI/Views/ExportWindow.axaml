@@ -16,15 +16,17 @@
         <vm:ExportWindowViewModel />
     </Design.DataContext>
     <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
-        <TextPresenter Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="ExportedText"
-                       Text="{Binding Export}" TextWrapping="Wrap" />
+        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3">
+            <TextPresenter Name="ExportedText"
+                           Text="{Binding Export}" TextWrapping="Wrap" />
+        </ScrollViewer>
         <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">
             <ToolTip.Tip>
-                <Label Content="Copy to Clipboard"/>
+                <Label Content="Copy to Clipboard" />
             </ToolTip.Tip>
             <StackPanel Orientation="Horizontal">
-                <avalonia:MaterialIcon Kind="ContentCopy"/>
-                <avalonia:MaterialIcon Kind="Clipboard"/>
+                <avalonia:MaterialIcon Kind="ContentCopy" />
+                <avalonia:MaterialIcon Kind="Clipboard" />
             </StackPanel>
         </Button>
     </Grid>

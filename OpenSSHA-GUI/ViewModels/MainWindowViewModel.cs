@@ -24,7 +24,7 @@ public class MainWindowViewModel : ViewModelBase
             var editKnownHosts = new EditKnownHostsViewModel();
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
-    
+
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
         {
@@ -32,7 +32,7 @@ public class MainWindowViewModel : ViewModelBase
             var result = await ShowCreate.Handle(create);
             if (result == null) return result;
             var newKey = await result.RunKeyGen();
-            if(newKey!=null) SshKeys.Add(newKey);
+            if (newKey != null) SshKeys.Add(newKey);
             return result;
         });
 
