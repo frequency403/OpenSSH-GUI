@@ -3,6 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OpenSSHA_GUI.ViewModels"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:openSshaGui="clr-namespace:OpenSSHA_GUI"
         mc:Ignorable="d"
         Width="500"
         Height="300"
@@ -15,8 +17,18 @@
         <vm:ExportWindowViewModel />
     </Design.DataContext>
     <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
-        <TextPresenter Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="ExportedText"
-                       Text="{Binding Export}" TextWrapping="Wrap" />
-        <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">Copy to Clipboard</Button>
+        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3">
+            <TextPresenter Name="ExportedText"
+                           Text="{Binding Export}" TextWrapping="Wrap" />
+        </ScrollViewer>
+        <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">
+            <ToolTip.Tip>
+                <Label Content="{x:Static openSshaGui:StringsAndTexts.ExportWindowCopyToClipboardToolTipText}" />
+            </ToolTip.Tip>
+            <StackPanel Orientation="Horizontal">
+                <avalonia:MaterialIcon Kind="ContentCopy" />
+                <avalonia:MaterialIcon Kind="Clipboard" />
+            </StackPanel>
+        </Button>
     </Grid>
 </Window>

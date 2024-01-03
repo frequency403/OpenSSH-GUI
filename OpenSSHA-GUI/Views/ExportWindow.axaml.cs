@@ -13,6 +13,6 @@ public partial class ExportWindow : Window
 
     private async void CopyToClipboard(object? sender, RoutedEventArgs e)
     {
-        await GetTopLevel(ExportedText).Clipboard.SetTextAsync((DataContext as ExportWindowViewModel).Export);
+        await GetTopLevel(ExportedText)!.Clipboard!.SetTextAsync((DataContext as ExportWindowViewModel)!.Export);
     }
 }

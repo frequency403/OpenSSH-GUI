@@ -2,5 +2,5 @@
 
 public class ExportWindowViewModel : ViewModelBase
 {
-    public string Export { get; set; }
+    public string Export { get; set; } = "";
 }
