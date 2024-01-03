@@ -15,7 +15,7 @@ public class KnownHostsFile : ReactiveObject
         ReadContent();
     }
 
-    public List<KnownHost> KnownHosts { get; private set; }
+    public List<KnownHost> KnownHosts { get; private set; } = [];
 
 
     private void SetKnownHosts(string fileContent)

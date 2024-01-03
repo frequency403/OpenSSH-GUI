@@ -32,6 +32,15 @@
         <ProjectReference Include="..\OpenSSHALib\OpenSSHALib.csproj"/>
     </ItemGroup>
 
+
+    <ItemGroup>
+      <Compile Update="StringsAndTexts.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>StringsAndTexts.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
     <PropertyGroup> <!-- OSX Settings -->
         <CFBundleName>OpenSSH GUI</CFBundleName> <!-- Also defines .app file name -->
         <CFBundleDisplayName>OpenSSH GUI</CFBundleDisplayName>

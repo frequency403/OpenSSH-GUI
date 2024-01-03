@@ -8,7 +8,7 @@ public class SshKeyType
     public SshKeyType(KeyType baseType, int? currentBitSize = null)
     {
         BaseType = baseType;
-        KeyTypeText = Enum.GetName(BaseType);
+        KeyTypeText = Enum.GetName(BaseType)!;
         var possibleBitSizes = BaseType.GetBitValues().ToList();
         PossibleBitSizes = possibleBitSizes;
         MaxBitSize = possibleBitSizes.Max();

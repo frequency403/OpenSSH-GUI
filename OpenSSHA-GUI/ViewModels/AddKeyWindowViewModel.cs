@@ -14,8 +14,6 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class AddKeyWindowViewModel : ViewModelBase
 {
-    private static KeyType _keyType = KeyType.RSA;
-
     private bool _createKey;
 
     private string _keyName = "id_rsa";
@@ -44,7 +42,7 @@ public class AddKeyWindowViewModel : ViewModelBase
         {
             try
             {
-                KeyName = $"id_{Enum.GetName(value.BaseType).ToLower()}";
+                KeyName = $"id_{Enum.GetName(value.BaseType)!.ToLower()}";
                 this.RaiseAndSetIfChanged(ref _selectedKeyType, value);
             }
             catch (Exception e)
@@ -78,7 +76,7 @@ public class AddKeyWindowViewModel : ViewModelBase
             StartInfo = new ProcessStartInfo
             {
                 Arguments =
-                    $"-t {Enum.GetName(SelectedKeyType.BaseType).ToLower()} -b {SelectedKeyType.CurrentBitSize} -N \"{Password}\" -C \"{Comment}\" -f \"{fullFilePath}\" ",
+                    $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -b {SelectedKeyType.CurrentBitSize} -N \"{Password}\" -C \"{Comment}\" -f \"{fullFilePath}\" ",
                 CreateNoWindow = true,
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,

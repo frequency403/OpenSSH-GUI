@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OpenSSHA_GUI.ViewModels"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:openSshaGui="clr-namespace:OpenSSHA_GUI"
         mc:Ignorable="d"
         Width="500"
         Height="300"
@@ -22,7 +23,7 @@
         </ScrollViewer>
         <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">
             <ToolTip.Tip>
-                <Label Content="Copy to Clipboard" />
+                <Label Content="{x:Static openSshaGui:StringsAndTexts.ExportWindowCopyToClipboardToolTipText}" />
             </ToolTip.Tip>
             <StackPanel Orientation="Horizontal">
                 <avalonia:MaterialIcon Kind="ContentCopy" />

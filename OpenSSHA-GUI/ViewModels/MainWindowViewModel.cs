@@ -14,9 +14,9 @@ public class MainWindowViewModel : ViewModelBase
 {
     private ObservableCollection<SshKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
 
-    public Interaction<ConfirmDialogViewModel, ConfirmDialogViewModel?> ShowConfirm = new();
-    public Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
-    public Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
+    public readonly Interaction<ConfirmDialogViewModel, ConfirmDialogViewModel?> ShowConfirm = new();
+    public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
+    public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
 
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
@@ -39,9 +39,10 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<SshKey, ConfirmDialogViewModel?> DeleteKey =>
         ReactiveCommand.CreateFromTask<SshKey, ConfirmDialogViewModel?>(async u =>
         {
-            var confirm = new ConfirmDialogViewModel("Really delete the SSH key?", "Yes", "No");
+            var confirm = new ConfirmDialogViewModel(StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, 
+                StringsAndTexts.MainWindowViewModelDeleteKeyOkText, StringsAndTexts.MainWindowViewModelDeleteKeyNoText);
             var result = await ShowConfirm.Handle(confirm);
-            if (!result.Consent) return result;
+            if (result is { Consent: false }) return result;
             u.DeleteKeys();
             SshKeys.Remove(u);
             return result;
@@ -64,7 +65,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 Export = export
             },
-            Title = $"Export {key.Fingerprint}",
+            Title = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.KeyTypeString, key.Fingerprint),
             ShowActivated = true,
             ShowInTaskbar = true,
             CanResize = false,
