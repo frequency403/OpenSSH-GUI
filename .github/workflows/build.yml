@@ -3,9 +3,11 @@
 on:
   workflow_dispatch:
   
-#  push:
-#    tags:
-#      - '*'
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
 
 jobs:
   build_and_release:
@@ -40,7 +42,7 @@ jobs:
         run: ls -R bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
 
       - name: Zip Linux release
-        run: zip -r linux-release.zip . -i bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI/*
+        run: zip -r linux-release.zip bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI/*
 
       - name: Upload Linux release
         uses: actions/upload-artifact@v2
@@ -55,7 +57,7 @@ jobs:
         run: ls -R bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI
 
       - name: Zip Windows release
-        run: zip -r windows-release.zip . -i bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI/*
+        run: zip -r windows-release.zip bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI/*
 
       - name: Upload Windows release
         uses: actions/upload-artifact@v2
@@ -70,7 +72,7 @@ jobs:
         run: ls -R bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
 
       - name: Zip macOS release
-        run: zip -r macos-release.zip . -i bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI/*
+        run: zip -r macos-release.zip bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI/*
 
       - name: Upload macOS release
         uses: actions/upload-artifact@v2
