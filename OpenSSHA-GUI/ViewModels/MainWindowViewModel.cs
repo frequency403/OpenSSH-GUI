@@ -3,6 +3,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using OpenSSHA_GUI.Views;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
@@ -12,9 +14,8 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private ObservableCollection<SshKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
+    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
 
-    public readonly Interaction<ConfirmDialogViewModel, ConfirmDialogViewModel?> ShowConfirm = new();
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
 
@@ -36,19 +37,18 @@ public class MainWindowViewModel : ViewModelBase
             return result;
         });
 
-    public ReactiveCommand<SshKey, ConfirmDialogViewModel?> DeleteKey =>
-        ReactiveCommand.CreateFromTask<SshKey, ConfirmDialogViewModel?>(async u =>
+    public ReactiveCommand<SshPublicKey, SshPublicKey?> DeleteKey =>
+        ReactiveCommand.CreateFromTask<SshPublicKey, SshPublicKey?>(async u =>
         {
-            var confirm = new ConfirmDialogViewModel(StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, 
-                StringsAndTexts.MainWindowViewModelDeleteKeyOkText, StringsAndTexts.MainWindowViewModelDeleteKeyNoText);
-            var result = await ShowConfirm.Handle(confirm);
-            if (result is { Consent: false }) return result;
-            u.DeleteKeys();
+            var box = MessageBoxManager.GetMessageBoxStandard(string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename, u.PrivateKey.Filename), StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
+            var res = await box.ShowAsync();
+            if (res != ButtonResult.Yes) return null;
+            u.DeleteKey();
             SshKeys.Remove(u);
-            return result;
+            return u;
         });
 
-    public ObservableCollection<SshKey> SshKeys
+    public ObservableCollection<SshPublicKey> SshKeys
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);

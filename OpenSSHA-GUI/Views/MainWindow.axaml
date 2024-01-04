@@ -57,7 +57,7 @@
                   VerticalAlignment="Stretch"
                   Name="TheDataGrid">
             <DataGrid.RowDetailsTemplate>
-                <DataTemplate DataType="models:SshKey">
+                <DataTemplate DataType="models:SshPublicKey">
                     <Grid HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="*, *, *">
                         <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}" FontWeight="Bold" />
@@ -82,7 +82,7 @@
                             <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="models:SshKey">
+                    <DataTemplate DataType="models:SshPublicKey">
                         <Label Content="{Binding KeyType.KeyTypeText}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
@@ -93,7 +93,7 @@
                             <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingKeySizeText}" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="models:SshKey">
+                    <DataTemplate DataType="models:SshPublicKey">
                         <Label Content="{Binding KeyType.CurrentBitSize}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
@@ -104,7 +104,7 @@
                             <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="models:SshKey">
+                    <DataTemplate DataType="models:SshPublicKey">
                         <Label Content="{Binding Fingerprint}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
@@ -115,12 +115,12 @@
                             <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingCommentText}" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
-                    <DataTemplate DataType="models:SshKey">
+                    <DataTemplate DataType="models:SshPublicKey">
                         <Label Content="{Binding Comment}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}">
-                    <DataTemplate DataType="models:SshKey">
+                    <DataTemplate DataType="models:SshPublicKey">
                         <StackPanel Orientation="Horizontal">
                             <Button
                                 Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"

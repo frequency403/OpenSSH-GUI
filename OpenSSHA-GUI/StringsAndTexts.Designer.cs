@@ -393,29 +393,20 @@ namespace OpenSSHA_GUI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No.
-        /// </summary>
-        public static string MainWindowViewModelDeleteKeyNoText {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelDeleteKeyNoText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Yes.
-        /// </summary>
-        public static string MainWindowViewModelDeleteKeyOkText {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelDeleteKeyOkText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Really delete the SSH key?.
         /// </summary>
         public static string MainWindowViewModelDeleteKeyQuestionText {
             get {
                 return ResourceManager.GetString("MainWindowViewModelDeleteKeyQuestionText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete {0} &amp; {1}?.
+        /// </summary>
+        public static string MainWindowViewModelDeleteKeyTitleText {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelDeleteKeyTitleText", resourceCulture);
             }
         }
         

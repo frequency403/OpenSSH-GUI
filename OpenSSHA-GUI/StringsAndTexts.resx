@@ -21,12 +21,6 @@
     <data name="MainWindowViewModelDeleteKeyQuestionText" xml:space="preserve">
         <value>Really delete the SSH key?</value>
     </data>
-    <data name="MainWindowViewModelDeleteKeyOkText" xml:space="preserve">
-        <value>Yes</value>
-    </data>
-    <data name="MainWindowViewModelDeleteKeyNoText" xml:space="preserve">
-        <value>No</value>
-    </data>
     <data name="MainWindowViewModelDynamicExportWindowTitle" xml:space="preserve">
         <value>Export {0} key: {1}</value>
     </data>
@@ -140,5 +134,8 @@
     </data>
     <data name="MainWindowFoundKeyPairsCountLabelPart2" xml:space="preserve">
         <value>keypairs in SSH directory</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyTitleText" xml:space="preserve">
+        <value>Delete {0} &amp; {1}?</value>
     </data>
 </root>

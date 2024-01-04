@@ -25,6 +25,7 @@
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.6"/>
         <PackageReference Include="Material.Icons" Version="2.1.5"/>
         <PackageReference Include="Material.Icons.Avalonia" Version="2.1.0"/>
+        <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
     </ItemGroup>
 
 
@@ -39,6 +40,14 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>StringsAndTexts.resx</DependentUpon>
       </Compile>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <EmbeddedResource Update="StringsAndTexts.resx">
+        <Generator>PublicResXFileCodeGenerator</Generator>
+        <CustomToolNamespace>OpenSSHA_GUI</CustomToolNamespace>
+      </EmbeddedResource>
     </ItemGroup>
 
     <PropertyGroup> <!-- OSX Settings -->

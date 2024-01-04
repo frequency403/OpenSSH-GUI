@@ -67,7 +67,7 @@ public class AddKeyWindowViewModel : ViewModelBase
     public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
     public string Password { get; set; } = "";
 
-    public async ValueTask<SshKey?> RunKeyGen()
+    public async ValueTask<SshPublicKey?> RunKeyGen()
     {
         if (!_createKey) return null;
         var fullFilePath = $"{Settings.UserSshFolderPath}{Path.DirectorySeparatorChar}{KeyName}";
@@ -86,6 +86,8 @@ public class AddKeyWindowViewModel : ViewModelBase
         };
         proc.Start();
         await proc.WaitForExitAsync();
-        return proc.ExitCode == 0 ? new SshKey(fullFilePath + ".pub") : null;
+        var newKey = new SshPublicKey(fullFilePath + ".pub");
+        newKey.GetPrivateKey();
+        return proc.ExitCode == 0 ? newKey : null;
     }
 }
