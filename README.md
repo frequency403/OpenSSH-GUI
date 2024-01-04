@@ -34,7 +34,7 @@ who participated in this project.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE)
+This project is licensed under the [GNU General Public License v3](LICENSE)
 - see the [LICENSE](LICENSE) file for
 details
 
