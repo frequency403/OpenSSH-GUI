@@ -28,30 +28,35 @@
     <Grid ColumnDefinitions="* *" RowDefinitions="* * *">
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" Margin="20">
-            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}" Target="KeyFileNameTextBox" />
+            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
+                   Target="KeyFileNameTextBox" />
             <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
-            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}" Target="BitSizeComboBox" />
+            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
+                   Target="BitSizeComboBox" />
             <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
                       SelectedItem="{Binding SelectedKeyType.CurrentBitSize}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
-            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}" Target="KeyTypesComboBox" />
+            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}"
+                   Target="KeyTypesComboBox" />
             <ComboBox Name="KeyTypesComboBox"
                       ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}"
                       SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                     HorizontalAlignment="Stretch" Margin="20 0 20 10">
-            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}" Target="PasswordTextBox" />
+            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
+                   Target="PasswordTextBox" />
             <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
-            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}" Target="CommentTextBox" />
+            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
+                   Target="CommentTextBox" />
             <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
         <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 10" Background="ForestGreen" HorizontalAlignment="Center"

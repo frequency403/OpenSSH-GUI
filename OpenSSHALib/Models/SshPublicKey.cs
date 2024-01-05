@@ -3,6 +3,7 @@
 public class SshPublicKey(string absoluteFilePath) : SshKey(absoluteFilePath)
 {
     public SshPrivateKey PrivateKey { get; protected set; }
+
     public void GetPrivateKey()
     {
         if (IsPublicKey) PrivateKey = new SshPrivateKey(AbsoluteFilePath.Replace(".pub", ""));

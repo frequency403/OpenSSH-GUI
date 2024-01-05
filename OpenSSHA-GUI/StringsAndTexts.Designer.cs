@@ -240,6 +240,15 @@ namespace OpenSSHA_GUI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy to clipboard.
         /// </summary>
         public static string ExportWindowCopyToClipboardToolTipText {
@@ -416,6 +425,15 @@ namespace OpenSSHA_GUI {
         public static string MainWindowViewModelDynamicExportWindowTitle {
             get {
                 return ResourceManager.GetString("MainWindowViewModelDynamicExportWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not open or read keyfile!.
+        /// </summary>
+        public static string MainWindowViewModelExportKeyErrorMessage {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelExportKeyErrorMessage", resourceCulture);
             }
         }
     }

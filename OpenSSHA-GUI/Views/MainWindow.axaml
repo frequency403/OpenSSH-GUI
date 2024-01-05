@@ -28,7 +28,7 @@
                 Margin="20 0 0 0">
             <StackPanel Orientation="Horizontal">
                 <ToolTip.Tip>
-                    <Label Content="{x:Static main:StringsAndTexts.MainWindowAddKeyToolTip}"/>
+                    <Label Content="{x:Static main:StringsAndTexts.MainWindowAddKeyToolTip}" />
                 </ToolTip.Tip>
                 <materialIcons:MaterialIcon Kind="KeyAdd" />
             </StackPanel>
@@ -41,7 +41,7 @@
                 Margin="20 0 0 0">
             <StackPanel Orientation="Horizontal">
                 <ToolTip.Tip>
-                    <Label Content="{x:Static main:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}"/>
+                    <Label Content="{x:Static main:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
                 </ToolTip.Tip>
                 <materialIcons:MaterialIcon Kind="ServerNetwork" />
             </StackPanel>
@@ -60,15 +60,20 @@
                 <DataTemplate DataType="models:SshPublicKey">
                     <Grid HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="*, *, *">
                         <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}" FontWeight="Bold" />
+                            <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
+                                   FontWeight="Bold" />
                             <Label Content="{Binding Filename}" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsPrivateKeyFilenameText}" FontWeight="Bold" />
+                            <Label
+                                Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsPrivateKeyFilenameText}"
+                                FontWeight="Bold" />
                             <Label Content="{Binding PrivateKey.Filename}" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}" FontWeight="Bold" />
+                            <Label
+                                Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
+                                FontWeight="Bold" />
                             <Label Content="{Binding AbsoluteFilePath}" />
                         </StackPanel>
                     </Grid>
@@ -101,7 +106,8 @@
                     <DataGridTemplateColumn.Header>
                         <StackPanel Orientation="Horizontal">
                             <materialIcons:MaterialIcon Kind="Fingerprint" />
-                            <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
+                            <Label
+                                Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
                         </StackPanel>
                     </DataGridTemplateColumn.Header>
                     <DataTemplate DataType="models:SshPublicKey">
@@ -119,14 +125,16 @@
                         <Label Content="{Binding Comment}" />
                     </DataTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}">
+                <DataGridTemplateColumn
+                    Header="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}">
                     <DataTemplate DataType="models:SshPublicKey">
                         <StackPanel Orientation="Horizontal">
                             <Button
-                                Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
+                                Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
                                 CommandParameter="{Binding .}">
                                 <ToolTip.Tip>
-                                    <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}"/>
+                                    <Label
+                                        Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
                                 </ToolTip.Tip>
                                 <StackPanel Orientation="Horizontal">
                                     <materialIcons:MaterialIcon Kind="Publish" />
@@ -134,10 +142,11 @@
                                 </StackPanel>
                             </Button>
                             <Button
-                                Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportWindow}"
+                                Command="{Binding #TheMainGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
                                 CommandParameter="{Binding PrivateKey}">
                                 <ToolTip.Tip>
-                                    <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}"/>
+                                    <Label
+                                        Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
                                 </ToolTip.Tip>
                                 <StackPanel Orientation="Horizontal">
                                     <materialIcons:MaterialIcon Kind="Publish" />
@@ -148,7 +157,8 @@
                                     CommandParameter="{Binding .}"
                                     Background="DarkRed">
                                 <ToolTip.Tip>
-                                    <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}"/>
+                                    <Label
+                                        Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
                                 </ToolTip.Tip>
                                 <materialIcons:MaterialIcon Kind="DeleteOutline" />
                             </Button>
@@ -157,12 +167,13 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <StackPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Orientation="Horizontal">
-            <Label Content="{x:Static main:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}"/>
-            <Label Content="{Binding SshKeys.Count}" FontWeight="Bold"/>
-            <Label Content="{x:Static main:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}"/>
+        <StackPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Orientation="Horizontal">
+            <Label Content="{x:Static main:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
+            <Label Content="{Binding SshKeys.Count}" FontWeight="Bold" />
+            <Label Content="{x:Static main:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
         </StackPanel>
-        
+
     </Grid>
 
 

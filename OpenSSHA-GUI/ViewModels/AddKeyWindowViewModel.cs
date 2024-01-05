@@ -70,18 +70,18 @@ public class AddKeyWindowViewModel : ViewModelBase
     public async ValueTask<SshPublicKey?> RunKeyGen()
     {
         if (!_createKey) return null;
-        var fullFilePath = $"{Settings.UserSshFolderPath}{Path.DirectorySeparatorChar}{KeyName}";
+        var fullFilePath = $"{SettingsFileHandler.Settings.UserSshFolderPath}{Path.DirectorySeparatorChar}{KeyName}";
         var proc = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 Arguments =
-                    $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -b {SelectedKeyType.CurrentBitSize} -N \"{Password}\" -C \"{Comment}\" -f \"{fullFilePath}\" ",
+                    $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -b {SelectedKeyType.CurrentBitSize} -N \"{Password}\" -C \"{Comment}\" -f \"{fullFilePath}\"",
                 CreateNoWindow = true,
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                WorkingDirectory = Settings.UserSshFolderPath
+                WorkingDirectory = SettingsFileHandler.Settings.UserSshFolderPath
             }
         };
         proc.Start();

@@ -25,9 +25,9 @@ public abstract class SshKey
         var outputOfProcess = readerProcess.StandardOutput.ReadToEnd().Split(' ');
         Fingerprint = outputOfProcess[1];
         Comment = outputOfProcess[2];
-    
+
         var keyTypeText = outputOfProcess[3].Replace("(", "").Replace(")", "").Trim();
-    
+
         if (Enum.TryParse<KeyType>(keyTypeText, true, out var parsedEnum))
         {
             if (int.TryParse(outputOfProcess[0], out var parsed)) KeyType = new SshKeyType(parsedEnum, parsed);
@@ -36,8 +36,6 @@ public abstract class SshKey
         {
             throw new ArgumentException($"{keyTypeText} is not a valid enum member of {typeof(KeyType)}");
         }
-    
-        
     }
 
     public string AbsoluteFilePath { get; protected set; }
@@ -67,5 +65,5 @@ public abstract class SshKey
     public virtual void DeleteKey()
     {
         File.Delete(AbsoluteFilePath);
-    }    
+    }
 }

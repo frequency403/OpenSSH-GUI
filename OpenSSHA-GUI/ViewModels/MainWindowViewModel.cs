@@ -1,11 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Avalonia.Controls;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSHA_GUI.Views;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
@@ -14,16 +11,38 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
-
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
+    public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
+    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
 
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
             var editKnownHosts = new EditKnownHostsViewModel();
             return await ShowEditKnownHosts.Handle(editKnownHosts);
+        });
+
+    public ReactiveCommand<SshKey, ExportWindowViewModel?> OpenExportKeyWindow =>
+        ReactiveCommand.CreateFromTask<SshKey, ExportWindowViewModel?>(async key =>
+        {
+            var keyExport = await key.ExportKey();
+            if (keyExport is null)
+            {
+                var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
+                    StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
+                    ButtonEnum.Ok, Icon.Error);
+                await alert.ShowAsync();
+                return null;
+            }
+
+            var exportViewModel = new ExportWindowViewModel
+            {
+                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
+                    key.KeyTypeString, key.Fingerprint),
+                Export = keyExport
+            };
+            return await ShowExportWindow.Handle(exportViewModel);
         });
 
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
@@ -40,7 +59,9 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<SshPublicKey, SshPublicKey?> DeleteKey =>
         ReactiveCommand.CreateFromTask<SshPublicKey, SshPublicKey?>(async u =>
         {
-            var box = MessageBoxManager.GetMessageBoxStandard(string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename, u.PrivateKey.Filename), StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
+            var box = MessageBoxManager.GetMessageBoxStandard(
+                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename, u.PrivateKey.Filename),
+                StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
             var res = await box.ShowAsync();
             if (res != ButtonResult.Yes) return null;
             u.DeleteKey();
@@ -52,25 +73,5 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
-    }
-
-
-    public async Task OpenExportWindow(SshKey key)
-    {
-        var export = await key.ExportKey();
-        if (export is null) return;
-        var win = new ExportWindow
-        {
-            DataContext = new ExportWindowViewModel
-            {
-                Export = export
-            },
-            Title = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.KeyTypeString, key.Fingerprint),
-            ShowActivated = true,
-            ShowInTaskbar = true,
-            CanResize = false,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner
-        };
-        win.Show();
     }
 }
