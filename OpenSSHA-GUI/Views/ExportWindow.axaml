@@ -10,6 +10,7 @@
         Height="300"
         x:Class="OpenSSHA_GUI.Views.ExportWindow"
         x:DataType="vm:ExportWindowViewModel"
+        Title="{Binding WindowTitle}"
         Icon="/Assets/avalonia-logo.ico">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

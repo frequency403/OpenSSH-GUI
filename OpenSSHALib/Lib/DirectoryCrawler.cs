@@ -4,10 +4,7 @@ namespace OpenSSHALib.Lib;
 
 public static class DirectoryCrawler
 {
-    private static readonly IEnumerable<string> _fileNameContainsToSkipWhenSearching =
-        ["authorized", "config", "known"];
-
-    private static bool FileNameStartsWithAny(this string fullFilePath, IEnumerable<string> collection)
+    private static bool FileNameStartsWithAny(this string fullFilePath, params string[] collection)
     {
         var contains = false;
 
@@ -20,12 +17,19 @@ public static class DirectoryCrawler
         return contains;
     }
 
-    public static IEnumerable<SshKey> GetAllKeys()
+    public static IEnumerable<SshPublicKey> GetAllKeys()
     {
-        return (from fileInSshDirectory in Directory.EnumerateFiles(
-                Settings.UserSshFolderPath)
-            where !fileInSshDirectory.FileNameStartsWithAny(_fileNameContainsToSkipWhenSearching) &&
-                  fileInSshDirectory.EndsWith(".pub")
-            select new SshKey(fileInSshDirectory)).ToList();
+        var list = new List<SshPublicKey>();
+        foreach (var filepath in Directory.EnumerateFiles(
+                     SettingsFileHandler.Settings.UserSshFolderPath).Where(e =>
+                     !e.FileNameStartsWithAny(SettingsFileHandler.Settings.FileNamesToSkipWhenSearchingForKeys) &&
+                     e.EndsWith(".pub")))
+        {
+            var key = new SshPublicKey(filepath);
+            key.GetPrivateKey();
+            list.Add(key);
+        }
+
+        return list;
     }
 }

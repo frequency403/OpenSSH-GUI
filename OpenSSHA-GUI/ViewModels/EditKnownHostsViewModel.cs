@@ -13,7 +13,7 @@ public class EditKnownHostsViewModel : ViewModelBase
 
     public EditKnownHostsViewModel()
     {
-        KnownHostsFile = new KnownHostsFile(Settings.KnownHostsFilePath);
+        KnownHostsFile = new KnownHostsFile(SettingsFileHandler.Settings.KnownHostsFilePath);
         KnownHosts = new ObservableCollection<KnownHost>(KnownHostsFile.KnownHosts.OrderBy(e => e.Host));
         ProcessData = ReactiveCommand.CreateFromTask<string, EditKnownHostsViewModel>(async e =>
         {

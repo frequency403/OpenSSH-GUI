@@ -10,22 +10,19 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     public MainWindow()
     {
         InitializeComponent();
-        this.WhenActivated(action =>
-            action(ViewModel!.ShowConfirm.RegisterHandler(DoShowDialogAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));
+        this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(DoShowExportWindowAsync)));
     }
 
-    private async Task DoShowDialogAsync(
-        InteractionContext<ConfirmDialogViewModel, ConfirmDialogViewModel?> interaction)
+    private async Task DoShowExportWindowAsync(
+        InteractionContext<ExportWindowViewModel, ExportWindowViewModel?> interaction)
     {
-        var dialog = new ConfirmDialog
+        var dialog = new ExportWindow
         {
             DataContext = interaction.Input
         };
-
-        var result = await dialog.ShowDialog<ConfirmDialogViewModel>(this);
-        interaction.SetOutput(result);
+        interaction.SetOutput(await dialog.ShowDialog<ExportWindowViewModel>(this));
     }
 
     private async Task DoShowAddKeyAsync(InteractionContext<AddKeyWindowViewModel, AddKeyWindowViewModel?> interaction)
@@ -34,9 +31,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         {
             DataContext = interaction.Input
         };
-
-        var result = await dialog.ShowDialog<AddKeyWindowViewModel>(this);
-        interaction.SetOutput(result);
+        interaction.SetOutput(await dialog.ShowDialog<AddKeyWindowViewModel>(this));
     }
 
     private async Task DoShowEditKnownHostsAsync(
@@ -46,8 +41,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         {
             DataContext = interaction.Input
         };
-
-        var result = await dialog.ShowDialog<EditKnownHostsViewModel>(this);
-        interaction.SetOutput(result);
+        interaction.SetOutput(await dialog.ShowDialog<EditKnownHostsViewModel>(this));
     }
 }

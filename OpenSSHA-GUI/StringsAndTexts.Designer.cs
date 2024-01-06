@@ -240,6 +240,15 @@ namespace OpenSSHA_GUI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy to clipboard.
         /// </summary>
         public static string ExportWindowCopyToClipboardToolTipText {
@@ -393,24 +402,6 @@ namespace OpenSSHA_GUI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No.
-        /// </summary>
-        public static string MainWindowViewModelDeleteKeyNoText {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelDeleteKeyNoText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Yes.
-        /// </summary>
-        public static string MainWindowViewModelDeleteKeyOkText {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelDeleteKeyOkText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Really delete the SSH key?.
         /// </summary>
         public static string MainWindowViewModelDeleteKeyQuestionText {
@@ -420,11 +411,29 @@ namespace OpenSSHA_GUI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete {0} &amp; {1}?.
+        /// </summary>
+        public static string MainWindowViewModelDeleteKeyTitleText {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelDeleteKeyTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export {0} key: {1}.
         /// </summary>
         public static string MainWindowViewModelDynamicExportWindowTitle {
             get {
                 return ResourceManager.GetString("MainWindowViewModelDynamicExportWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not open or read keyfile!.
+        /// </summary>
+        public static string MainWindowViewModelExportKeyErrorMessage {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelExportKeyErrorMessage", resourceCulture);
             }
         }
     }

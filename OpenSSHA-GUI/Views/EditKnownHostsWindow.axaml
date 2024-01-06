@@ -50,7 +50,8 @@
                                                   Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
                                         <!-- TODO: Change button background in toggled state to "Red" -->
                                         <ToolTip.Tip>
-                                            <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
+                                            <Label
+                                                Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
                                         </ToolTip.Tip>
                                         <Panel>
                                             <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
@@ -66,9 +67,15 @@
                                     </Style>
                                 </DataGrid.Styles>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderKeyTypeText}" Binding="{Binding KeyType}" Width="*" />
-                                    <DataGridTextColumn Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderKeySizeText}" Binding="{Binding KeySize}" Width="*" />
-                                    <DataGridTemplateColumn Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderFingerprintText}" Width="*">
+                                    <DataGridTextColumn
+                                        Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderKeyTypeText}"
+                                        Binding="{Binding KeyType}" Width="*" />
+                                    <DataGridTextColumn
+                                        Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderKeySizeText}"
+                                        Binding="{Binding KeySize}" Width="*" />
+                                    <DataGridTemplateColumn
+                                        Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderFingerprintText}"
+                                        Width="*">
                                         <DataTemplate DataType="dataModels:KnownHostKey">
                                             <TextBlock Text="{Binding Fingerprint}">
                                                 <ToolTip.Tip>
@@ -77,13 +84,15 @@
                                             </TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Width="*" Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderOptionsText}">
+                                    <DataGridTemplateColumn Width="*"
+                                                            Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderOptionsText}">
                                         <DataTemplate DataType="dataModels:KnownHostKey">
                                             <ToggleButton Grid.Column="1" IsChecked="{Binding MarkedForDeletion}"
                                                           HorizontalAlignment="Center">
                                                 <!-- TODO: Change button background in toggled state to "Red" -->
                                                 <ToolTip.Tip>
-                                                    <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
+                                                    <Label
+                                                        Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
                                                 </ToolTip.Tip>
                                                 <Panel>
                                                     <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />

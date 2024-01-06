@@ -4,9 +4,9 @@ using OpenSSHALib.Enums;
 
 namespace OpenSSHALib.Models;
 
-public class SshKey
+public abstract class SshKey
 {
-    public SshKey(string absoluteFilePath)
+    protected SshKey(string absoluteFilePath)
     {
         AbsoluteFilePath = absoluteFilePath;
         Filename = Path.GetFileName(AbsoluteFilePath);
@@ -36,18 +36,15 @@ public class SshKey
         {
             throw new ArgumentException($"{keyTypeText} is not a valid enum member of {typeof(KeyType)}");
         }
-
-        if (IsPublicKey) PrivateKey = new SshKey(AbsoluteFilePath.Replace(".pub", ""));
     }
 
-    public string AbsoluteFilePath { get; }
-    private bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
+    public string AbsoluteFilePath { get; protected set; }
+    protected bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
     public string KeyTypeString => IsPublicKey ? "public" : "private";
-    public string Filename { get; }
-    public string Comment { get; private set; }
-    public SshKeyType KeyType { get; private set; } = new(Enums.KeyType.RSA);
-    public string Fingerprint { get; private set; }
-    public SshKey? PrivateKey { get; }
+    public string Filename { get; protected set; }
+    public string Comment { get; protected set; }
+    public SshKeyType KeyType { get; } = new(Enums.KeyType.RSA);
+    public string Fingerprint { get; protected set; }
 
     public async Task<string?> ExportKey()
     {
@@ -65,9 +62,8 @@ public class SshKey
         }
     }
 
-    public void DeleteKeys()
+    public virtual void DeleteKey()
     {
         File.Delete(AbsoluteFilePath);
-        if(PrivateKey is not null) File.Delete(PrivateKey.AbsoluteFilePath);
     }
 }
