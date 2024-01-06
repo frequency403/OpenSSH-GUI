@@ -23,6 +23,13 @@ The three bottom buttons:
 - Middle: Reload file and revert all changes
 - Right: Accept changes and write them to disk
 
+## Plans for the future
+
+- [ ] Add functionality for putting a key onto a Server
+- [ ] Beautify UI
+- [ ] Add functionality for editing authorized_keys
+- many more not yet known!
+
 ## Authors
 
   - **Oliver Schantz** - *Idea and primary development* -

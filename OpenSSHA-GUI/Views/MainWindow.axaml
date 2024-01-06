@@ -62,19 +62,19 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
                                    FontWeight="Bold" />
-                            <Label Content="{Binding Filename}" />
+                            <TextPresenter Text="{Binding Filename}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Label
                                 Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsPrivateKeyFilenameText}"
                                 FontWeight="Bold" />
-                            <Label Content="{Binding PrivateKey.Filename}" />
+                            <TextPresenter Text="{Binding PrivateKey.Filename}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Label
                                 Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
                                 FontWeight="Bold" />
-                            <Label Content="{Binding AbsoluteFilePath}" />
+                            <TextPresenter Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

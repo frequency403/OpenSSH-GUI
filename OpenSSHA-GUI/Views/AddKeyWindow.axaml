@@ -30,7 +30,7 @@
                     VerticalAlignment="Top" Margin="20">
             <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
                    Target="KeyFileNameTextBox" />
-            <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
+            <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">

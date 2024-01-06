@@ -4,15 +4,20 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
+using ReactiveUI.Validation.Abstractions;
+using ReactiveUI.Validation.Contexts;
+using ReactiveUI.Validation.Extensions;
 
 namespace OpenSSHA_GUI.ViewModels;
 
-public class AddKeyWindowViewModel : ViewModelBase
+public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 {
     private bool _createKey;
 
@@ -24,8 +29,22 @@ public class AddKeyWindowViewModel : ViewModelBase
 
     public AddKeyWindowViewModel()
     {
-        AddKey = ReactiveCommand.Create<string, AddKeyWindowViewModel?>(b =>
+
+        this.ValidationRule(
+            e => e.KeyName,
+            name => File.Exists(SettingsFileHandler.Settings.UserSshFolderPath + Path.DirectorySeparatorChar + name),
+            "Filename does already exist!"
+        ); // TODO: Validation does not yet work correctly, need further fixing.
+        
+        AddKey = ReactiveCommand.CreateFromTask<string, AddKeyWindowViewModel?>(async b =>
         {
+            if (File.Exists(SettingsFileHandler.Settings.UserSshFolderPath + Path.DirectorySeparatorChar + KeyName))
+            {
+                var box = MessageBoxManager.GetMessageBoxStandard("Keyfile does already exists",
+                    "The filename you requested exists already. Aborting.", ButtonEnum.Ok, Icon.Error);
+                await box.ShowAsync();
+                return null;
+            } // TODO: Remove, when Validation works.
             _createKey = bool.Parse(b);
             return this;
         });
@@ -57,7 +76,8 @@ public class AddKeyWindowViewModel : ViewModelBase
         get => _sshKeyTypes;
         set => this.RaiseAndSetIfChanged(ref _sshKeyTypes, value);
     }
-
+    
+    
     public string KeyName
     {
         get => _keyName;
@@ -90,4 +110,6 @@ public class AddKeyWindowViewModel : ViewModelBase
         newKey.GetPrivateKey();
         return proc.ExitCode == 0 ? newKey : null;
     }
+
+    public ValidationContext ValidationContext { get; } = new ();
 }
