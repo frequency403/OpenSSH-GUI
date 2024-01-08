@@ -36,7 +36,7 @@ jobs:
         run: dotnet restore
 
       - name: Build for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true 
+        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
       - name: Show contents of the directory
         run: tree .
@@ -51,7 +51,7 @@ jobs:
           path: linux-release.zip
 
       - name: Build for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true 
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
       - name: Show contents of the directory
         run: tree .
@@ -66,7 +66,7 @@ jobs:
           path: windows-release.zip
 
       - name: Build for macOS
-        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true -o bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI 
+        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
       - name: Show contents of the directory
         run: tree .
