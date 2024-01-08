@@ -38,7 +38,7 @@ jobs:
       - name: Upload Linux release
         uses: actions/upload-artifact@v2
         with:
-          name: Linux-Binary
+          name: OpenSSHA-GUI.bin
           path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
 
       - name: Build for Windows
@@ -47,7 +47,7 @@ jobs:
       - name: Upload Windows release
         uses: actions/upload-artifact@v2
         with:
-          name: Windows-Executable
+          name: OpenSSHA-GUI.exe
           path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
           
       - name: Build for macOS
@@ -56,7 +56,7 @@ jobs:
       - name: Upload macOS release
         uses: actions/upload-artifact@v2
         with:
-          name: MacOS-Binary
+          name: OpenSSHA-GUI.bin
           path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
 
       - name: Create Release
@@ -76,8 +76,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
-          asset_name: OpenSSH-GUI.bin
+          asset_path: OpenSSHA-GUI.bin
+          asset_name: OpenSSH-GUI-linux-x64.bin
           asset_content_type: application/x-openssh-gui
 
       - name: Upload Windows release to Release
@@ -86,8 +86,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI.exe
-          asset_name: OpenSSH-GUI.exe
+          asset_path: OpenSSHA-GUI.exe
+          asset_name: OpenSSH-GUI-win-x64.exe
           asset_content_type: application/x-openssh-gui
 
       - name: Upload macOS release to Release
@@ -96,6 +96,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
-          asset_name: OpenSSH-GUI.bin
+          asset_path: OpenSSHA-GUI.bin
+          asset_name: OpenSSH-GUI-osx-x64.bin
           asset_content_type: application/x-openssh-gui
