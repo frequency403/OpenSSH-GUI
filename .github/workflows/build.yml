@@ -36,7 +36,7 @@ jobs:
         run: dotnet restore
 
       - name: Build for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
+        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
       - name: Show contents of the directory
         run: tree .
@@ -48,7 +48,7 @@ jobs:
           path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
 
       - name: Build for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
       - name: Show contents of the directory
         run: tree .
@@ -57,10 +57,10 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Windows-Executable
-          path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI.exe
+          path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
 
       - name: Build for macOS
-        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
+        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
       - name: Show contents of the directory
         run: tree .
@@ -69,7 +69,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: MacOS-Binary
-          path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
+          path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
 
       - name: Create Release
         id: create_release
