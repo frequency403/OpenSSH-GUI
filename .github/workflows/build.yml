@@ -35,29 +35,11 @@ jobs:
       - name: Build for Linux
         run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
-      - name: Upload Linux release
-        uses: actions/upload-artifact@v2
-        with:
-          name: OpenSSHA-GUI.bin
-          path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
-
       - name: Build for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
-
-      - name: Upload Windows release
-        uses: actions/upload-artifact@v2
-        with:
-          name: OpenSSHA-GUI.exe
-          path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
-          
+        
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
-        
-      - name: Upload macOS release
-        uses: actions/upload-artifact@v2
-        with:
-          name: OpenSSHA-GUI.bin
-          path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
 
       - name: Create Release
         id: create_release

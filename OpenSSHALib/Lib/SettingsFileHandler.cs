@@ -23,6 +23,8 @@ public static class SettingsFileHandler
 
     public static SettingsFile Settings { get; private set; }
 
+    public static bool IsFileInitialized { get; private set; } = false;
+    
     public static bool InitSettingsFile()
     {
         try
@@ -49,11 +51,12 @@ public static class SettingsFileHandler
             var fileContent = JsonSerializer.Deserialize<SettingsFile>(streamReader.ReadToEnd(), JsonSerializerOptions);
             if (fileContent is null) return false;
             Settings = fileContent;
-            return true;
+            IsFileInitialized = true;
+            return IsFileInitialized;
         }
         catch (Exception e)
         {
-            return false;
+            return IsFileInitialized;
         }
     }
 }
