@@ -41,14 +41,11 @@ jobs:
       - name: Show contents of the directory
         run: tree .
 
-      - name: Zip Linux release
-        run: zip -r linux-release.zip bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI/*
-
       - name: Upload Linux release
         uses: actions/upload-artifact@v2
         with:
-          name: linux-release
-          path: linux-release.zip
+          name: Linux-Binary
+          path: bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
 
       - name: Build for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
@@ -56,14 +53,11 @@ jobs:
       - name: Show contents of the directory
         run: tree .
 
-      - name: Zip Windows release
-        run: zip -r windows-release.zip bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI/*
-
       - name: Upload Windows release
         uses: actions/upload-artifact@v2
         with:
-          name: windows-release
-          path: windows-release.zip
+          name: Windows-Executable
+          path: bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI.exe
 
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
@@ -71,14 +65,11 @@ jobs:
       - name: Show contents of the directory
         run: tree .
 
-      - name: Zip macOS release
-        run: zip -r macos-release.zip bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI/*
-
       - name: Upload macOS release
         uses: actions/upload-artifact@v2
         with:
-          name: macos-release
-          path: macos-release.zip
+          name: MacOS-Binary
+          path: bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
 
       - name: Create Release
         id: create_release
