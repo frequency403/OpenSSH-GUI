@@ -9,7 +9,7 @@ namespace OpenSSHALib.Lib;
 
 public static class ServerCommunicator
 {
-    public static bool TestConnection(string ipAddressOrHostname, [NotNullWhen(false)]out string? message)
+    public static bool TestConnection(string ipAddressOrHostname, string user, string userPassword, [NotNullWhen(false)]out string? message)
     {
         message = null;
         if (!NetworkInterface.GetIsNetworkAvailable())
@@ -18,8 +18,19 @@ public static class ServerCommunicator
             return false;
         }
 
-        using var ping = new Ping();
-        return ping.Send(ipAddressOrHostname).Status == IPStatus.Success;
+        try
+        {
+            using var sshClient = new SshClient(ipAddressOrHostname, user, userPassword);
+            sshClient.Connect();
+            var result = sshClient.IsConnected;
+            sshClient.Disconnect();
+            return result;
+        }
+        catch (Exception e)
+        {
+            message = e.Message;
+            return false;
+        }
     }
 
     public static bool TryOpenSshConnection(string ipAddressOrHostname, string user, string userPassword,[NotNullWhen(true)] out SshClient? connection, [NotNullWhen(false)] out string? message)

@@ -3,12 +3,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
+        xmlns:models="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:converters="clr-namespace:OpenSSHA_GUI.Converters"
         x:DataType="viewModels:UploadToServerViewModel"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
         x:Class="OpenSSHA_GUI.Views.UploadToServerWindow"
-        Width="400"
+        Width="500"
         Height="600"
         Title="Upload key to Server">
+    <Window.Resources>
+        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
+    </Window.Resources>
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -17,12 +23,37 @@
     <Grid ColumnDefinitions="* * *" RowDefinitions="* * * * *">
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Content="Upload a Key to a Server" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 20"/>
         <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" ItemsSource="{Binding Keys}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="models:SshPublicKey">
+                    <Grid RowDefinitions="*" ColumnDefinitions="* * * *">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <avalonia:MaterialIcon Kind="FileKey"/>
+                            <TextBlock Text="{Binding Filename}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <avalonia:MaterialIcon Kind="Key"/>
+                            <Label Content="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal">
+                            <avalonia:MaterialIcon Kind="CommentText"/>
+                            <Label Content="{Binding Comment}"/>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
         </ListBox>
         <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 20" Height="25"/>
         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding User}" Watermark="Username" Margin="5 20" Height="25"/>
         <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*" Margin="5 20" Height="25"/>
-        <Button Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" >Test connection</Button>
-        <Button Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" IsEnabled="False">Status: Unknown</Button>
+        <Button Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Command="{Binding TestConnection}" >
+            <Label Content="Test connection"/>
+        </Button>
+        <Canvas Grid.Row="4" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" Background="{Binding StatusButtonBackground}">
+            <ToolTip.Tip>
+                <Label Content="{Binding StatusButtonToolTip}"/>
+            </ToolTip.Tip>
+            <Label Content="{Binding StatusButtonText}" />
+        </Canvas>
         <Button Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5" Background="LimeGreen">Upload</Button>
     </Grid>
 </Window>
