@@ -19,33 +19,48 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="*,7*,*" ColumnDefinitions="*,*,*" Name="TheMainGrid">
-        <Button Grid.Row="2" Grid.Column="0"
-                Command="{Binding OpenCreateKeyWindow}"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Background="ForestGreen"
-                Margin="20 0 0 0">
-            <StackPanel Orientation="Horizontal">
-                <ToolTip.Tip>
-                    <Label Content="{x:Static main:StringsAndTexts.MainWindowAddKeyToolTip}" />
-                </ToolTip.Tip>
-                <materialIcons:MaterialIcon Kind="KeyAdd" />
-            </StackPanel>
-        </Button>
-        <Button Grid.Row="2" Grid.Column="1"
-                Command="{Binding OpenEditKnownHostsWindow}"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Background="Aquamarine"
-                Margin="20 0 0 0">
-            <StackPanel Orientation="Horizontal">
-                <ToolTip.Tip>
-                    <Label Content="{x:Static main:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
-                </ToolTip.Tip>
-                <materialIcons:MaterialIcon Kind="ServerNetwork" />
-            </StackPanel>
-        </Button>
+    <Grid RowDefinitions="*,7*,*" ColumnDefinitions="*,*,*" Name="TheMainGrid" Margin="20 0">
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <Button 
+                    Command="{Binding OpenCreateKeyWindow}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Background="ForestGreen"
+                    Margin="0 0 0 0">
+                <StackPanel Orientation="Horizontal">
+                    <ToolTip.Tip>
+                        <Label Content="{x:Static main:StringsAndTexts.MainWindowAddKeyToolTip}" />
+                    </ToolTip.Tip>
+                    <materialIcons:MaterialIcon Kind="KeyAdd" />
+                </StackPanel>
+            </Button>
+            <Button
+                    Command="{Binding OpenEditKnownHostsWindow}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Background="CornflowerBlue"
+                    Margin="0 0 0 0">
+                <StackPanel Orientation="Horizontal">
+                    <ToolTip.Tip>
+                        <Label Content="{x:Static main:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
+                    </ToolTip.Tip>
+                    <materialIcons:MaterialIcon Kind="ServerNetwork" />
+                </StackPanel>
+            </Button>
+            <Button 
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Top" 
+                    Background="Goldenrod" 
+                    Margin="0 0 0 0"
+                    Command="{Binding OpenUploadToServerWindow}">
+                <StackPanel Orientation="Horizontal">
+                    <ToolTip.Tip>
+                        <Label Content="Upload keys to Server"/>
+                    </ToolTip.Tip>
+                    <materialIcons:MaterialIcon Kind="UploadNetwork"/>
+                </StackPanel>
+            </Button>
+        </Grid>
         <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2"
                   ItemsSource="{Binding SshKeys}"
                   IsReadOnly="True"

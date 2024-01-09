@@ -9,6 +9,7 @@
         <entry key="OpenSSHA-GUI/Views/EditKnownHostsWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/ExportWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/MainWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/UploadToServerWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
       </map>
     </option>
   </component>

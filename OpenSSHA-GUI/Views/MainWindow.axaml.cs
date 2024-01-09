@@ -13,8 +13,20 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(DoShowExportWindowAsync)));
+        this.WhenActivated(action =>
+            action(ViewModel!.ShowUploadToServer.RegisterHandler(DoShowUploadToServerWindowAsync)));
     }
 
+    private async Task DoShowUploadToServerWindowAsync(
+        InteractionContext<UploadToServerViewModel, UploadToServerViewModel?> interaction)
+    {
+        var dialog = new UploadToServerWindow
+        {
+            DataContext = interaction.Input
+        };
+        interaction.SetOutput(await dialog.ShowDialog<UploadToServerViewModel>(this));
+    }
+    
     private async Task DoShowExportWindowAsync(
         InteractionContext<ExportWindowViewModel, ExportWindowViewModel?> interaction)
     {

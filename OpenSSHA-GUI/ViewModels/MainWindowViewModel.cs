@@ -14,6 +14,7 @@ public class MainWindowViewModel : ViewModelBase
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
+    public readonly Interaction<UploadToServerViewModel, UploadToServerViewModel?> ShowUploadToServer = new();
     private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
 
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
@@ -45,6 +46,14 @@ public class MainWindowViewModel : ViewModelBase
             return await ShowExportWindow.Handle(exportViewModel);
         });
 
+
+    public ReactiveCommand<Unit, UploadToServerViewModel?> OpenUploadToServerWindow => ReactiveCommand.CreateFromTask<Unit, UploadToServerViewModel?>(async e =>
+    {
+        var uploadViewModel = new UploadToServerViewModel(_sshKeys);
+        var result = await ShowUploadToServer.Handle(uploadViewModel);
+        return result;
+    });
+    
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
         {
