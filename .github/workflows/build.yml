@@ -37,28 +37,9 @@ jobs:
 
       - name: Build for Windows
         run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
-
+        
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
-
-
-      - name: Upload Linux release
-        uses: actions/upload-artifact@v2
-        with:
-          name: Linux-Binary
-          path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
-
-      - name: Upload Windows release
-        uses: actions/upload-artifact@v2
-        with:
-          name: Windows-Executable
-          path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
-
-      - name: Upload macOS release
-        uses: actions/upload-artifact@v2
-        with:
-          name: MacOS-Binary
-          path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
 
       - name: Create Release
         id: create_release
@@ -77,8 +58,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Linux-Binary
-          asset_name: OpenSSH-GUI.bin
+          asset_path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
+          asset_name: OpenSSH-GUI-linux-x64.bin
           asset_content_type: application/x-openssh-gui
 
       - name: Upload Windows release to Release
@@ -87,8 +68,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Windows-Executable
-          asset_name: OpenSSH-GUI.exe
+          asset_path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
+          asset_name: OpenSSH-GUI-win-x64.exe
           asset_content_type: application/x-openssh-gui
 
       - name: Upload macOS release to Release
@@ -97,6 +78,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: MacOS-Binary
-          asset_name: OpenSSH-GUI.bin
+          asset_path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
+          asset_name: OpenSSH-GUI-osx-x64.bin
           asset_content_type: application/x-openssh-gui
