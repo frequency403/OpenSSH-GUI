@@ -28,6 +28,7 @@
                     </Style>
                     <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
                         <Setter Property="IsVisible" Value="True" />
+                        <Setter Property="Foreground" Value="Green"/>
                     </Style>
                     <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
                         <Setter Property="IsVisible" Value="False" />
@@ -37,6 +38,7 @@
                     </Style>
                     <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
                         <Setter Property="IsVisible" Value="True" />
+                        <Setter Property="Foreground" Value="Red"/>
                     </Style>
                 </ItemsControl.Styles>
                 <ItemsControl.ItemTemplate>
@@ -48,7 +50,6 @@
                                            FontWeight="Bold" />
                                     <ToggleButton Grid.Column="1" IsChecked="False"
                                                   Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
-                                        <!-- TODO: Change button background in toggled state to "Red" -->
                                         <ToolTip.Tip>
                                             <Label
                                                 Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
@@ -89,7 +90,6 @@
                                         <DataTemplate DataType="dataModels:KnownHostKey">
                                             <ToggleButton Grid.Column="1" IsChecked="{Binding MarkedForDeletion}"
                                                           HorizontalAlignment="Center">
-                                                <!-- TODO: Change button background in toggled state to "Red" -->
                                                 <ToolTip.Tip>
                                                     <Label
                                                         Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />

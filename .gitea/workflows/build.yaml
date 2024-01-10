@@ -41,43 +41,24 @@ jobs:
       - name: Build for macOS
         run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
 
+      - name: SortFiles
+        run: cp OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI OpenSSH-GUI-linux-x64.bin && cp OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe OpenSSH-GUI-win-x64.exe && cp OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI OpenSSH-GUI-osx-x64.bin
+
+      - name: setup go
+        uses: https://github.com/actions/setup-go@v4
+        with:
+          go-version: '>=1.20.1'
+
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        uses: https://gitea.com/actions/release-action@main
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ gitea.ref }}
+          release_name: Release ${{ gitea.ref }}
           draft: false
           prerelease: false
-
-      - name: Upload Linux release to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
-          asset_name: OpenSSH-GUI-linux-x64.bin
-          asset_content_type: application/x-openssh-gui
-
-      - name: Upload Windows release to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
-          asset_name: OpenSSH-GUI-win-x64.exe
-          asset_content_type: application/x-openssh-gui
-
-      - name: Upload macOS release to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
-          asset_name: OpenSSH-GUI-osx-x64.bin
-          asset_content_type: application/x-openssh-gui
+          api_key: ${{ secrets.TOKEN }}
+          files: |-
+            OpenSSH-GUI-linux-x64.bin
+            OpenSSH-GUI-win-x64.exe
+            OpenSSH-GUI-osx-x64.bin

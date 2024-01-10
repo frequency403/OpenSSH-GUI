@@ -65,21 +65,23 @@ public static class ServerCommunicator
         message = createAuthorizedKeysFile.Error + "\n" + createAuthorizedKeysFile.Result;
         return false;
     }
+
+    private static bool KeyAlreadyExists(this SshClient client, string export)
+    {
+        var command = client.RunCommand("cat $HOME/.ssh/authorized_keys");
+        if (command.ExitStatus != 0) throw new ApplicationException("Cat command was not executed successfully");
+        return command.Result.Trim().Split(KnownHostsFile.LineEnding).Contains(export.Trim());
+    }
     
     public static async Task<string> PutKeyToServer(this SshClient clientConnection, SshPublicKey publicKey)
     {
-        try
-        {
             if (!clientConnection.CreateAuthorizedKeysIfNotExist(out var errorMessage)) throw new ApplicationException(errorMessage);
             var export = await publicKey.ExportKey();
             if (export is null) return "Key could not be exported!";
-            var command = clientConnection.RunCommand($"echo \"{export}\r\n\" >> $HOME/.ssh/authorized_keys");
+            if (clientConnection.KeyAlreadyExists(export))
+                throw new ApplicationException("Key does already exist on host!");
+            var command = clientConnection.RunCommand($"echo \"{export}\" >> $HOME/.ssh/authorized_keys");
             if (command.ExitStatus != 0) throw new Exception(command.Error + "\n" + command.Result);
             return "Key successfully uploaded";
-        }
-        catch (Exception e)
-        {
-            return e.Message;
-        }
     }
 }
