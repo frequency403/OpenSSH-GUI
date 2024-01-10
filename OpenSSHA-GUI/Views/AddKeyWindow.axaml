@@ -11,7 +11,7 @@
         Height="350"
         x:Class="OpenSSHA_GUI.Views.AddKeyWindow"
         x:DataType="vm:AddKeyWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/appicon.ico"
         Title="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowTitle}"
         CanResize="False"
         ShowInTaskbar="True"

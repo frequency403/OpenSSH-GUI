@@ -11,40 +11,46 @@
         x:DataType="vm:MainWindowViewModel"
         Width="1150"
         Height="450"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/appicon.ico"
         Title="{x:Static main:StringsAndTexts.MainWindowTitle}">
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
-    <Grid RowDefinitions="* 7* *" ColumnDefinitions="* * *" Margin="20" HorizontalAlignment="Stretch">
+    <Design.DataContext><vm:MainWindowViewModel/></Design.DataContext>
+    <Grid RowDefinitions="* 7* *" ColumnDefinitions="* * *" Margin="20 5" HorizontalAlignment="Stretch">
         
         <!-- Key List -->
         
         <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" ColumnDefinitions="* 3* * *" RowDefinitions="* 10*">
             
             <!-- Heading  -->
-            
-            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                <materialIcons:MaterialIcon Kind="KeyVariant" />
-                <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
-            </StackPanel>
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <materialIcons:MaterialIcon Kind="Fingerprint" />
-                <Label
-                    Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
-            </StackPanel>
-            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                <materialIcons:MaterialIcon Kind="Comment" />
-                <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingCommentText}" />
-            </StackPanel>
-            <Label Grid.Row="0" Grid.Column="3" Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}" HorizontalAlignment="Center"/>
-            
+            <Border Grid.Row="0" Grid.Column="0" BorderBrush="DimGray" BorderThickness="0 0 0 1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0 5">
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="KeyVariant" VerticalAlignment="Top"/>
+                    <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Row="0" Grid.Column="1" BorderBrush="DimGray" BorderThickness="1 0 0 1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0 5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="Fingerprint" VerticalAlignment="Top"/>
+                    <Label
+                        Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Row="0" Grid.Column="2" BorderBrush="DimGray" BorderThickness="1 0 0 1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0 5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="Comment" VerticalAlignment="Top"/>
+                    <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingCommentText}" />
+                </StackPanel>
+            </Border>
+                <Border Grid.Row="0" Grid.Column="3" BorderBrush="DimGray" BorderThickness="1 0 0 1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="0 5">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <materialIcons:MaterialIcon Kind="FileExportOutline"/>
+                        <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}"/>
+                    </StackPanel>
+                    
+                </Border>
             <!-- Items  -->
             
             <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-                <Border BorderThickness="1" CornerRadius="5" Padding="1" BorderBrush="DodgerBlue">
+                <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="1" BorderBrush="DimGray">
                     <ItemsControl ItemsSource="{Binding SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
@@ -53,25 +59,21 @@
                         <DataTemplate DataType="models:SshPublicKey">
                             <Grid ColumnDefinitions="* 3* * *">
                                 <ToolTip.Tip>
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Label Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
-                                                   FontWeight="Bold" />
-                                            <TextPresenter Text="{Binding Filename}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Label
-                                                Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsPrivateKeyFilenameText}"
-                                                FontWeight="Bold" />
-                                            <TextPresenter Text="{Binding PrivateKey.Filename}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Label
-                                                Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
-                                                FontWeight="Bold" />
-                                            <TextPresenter Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
+                                    <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
+                                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
+                                               FontWeight="Bold" />
+                                        <TextPresenter Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Filename}" VerticalAlignment="Center"/>
+                                        
+                                        <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"
+                                               Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsPrivateKeyFilenameText}"
+                                               FontWeight="Bold" />
+                                        <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PrivateKey.Filename}" VerticalAlignment="Center"/>
+                                        
+                                        <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
+                                               Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
+                                               FontWeight="Bold" />
+                                        <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center"/>
+                                    </Grid>
                                 </ToolTip.Tip>
                                     <TextBlock Grid.Column="0" Text="{Binding Filename}" Margin="5" HorizontalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5" HorizontalAlignment="Center"/>

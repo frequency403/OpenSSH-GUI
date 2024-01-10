@@ -11,6 +11,7 @@
         x:Class="OpenSSHA_GUI.Views.UploadToServerWindow"
         Width="500"
         Height="600"
+        Icon="/Assets/appicon.ico"
         Title="Upload key to Server">
     <Window.Resources>
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
@@ -20,10 +21,10 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <viewModels:UploadToServerViewModel />
     </Design.DataContext>
-    <Grid ColumnDefinitions="* * *" RowDefinitions="* * * * *">
+    <Grid ColumnDefinitions="* * *" RowDefinitions="* 2* 2* * *">
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Content="Upload a Key to a Server"
-               VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 20" />
-        <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" 
+               VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0 5" />
+        <ListBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="4" Margin="0 40" 
                  ItemsSource="{Binding Keys}" 
                  SelectionMode="Single, AlwaysSelected" 
                  SelectedItem="{Binding SelectedPublicKey}">
@@ -49,12 +50,12 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 20" Height="25"
-                 IsEnabled="{Binding !UploadButtonEnabled}" />
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding User}" Watermark="Username" Margin="5 20" Height="25"
-                 IsEnabled="{Binding !UploadButtonEnabled}" />
+        <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10" Height="25"
+                 IsEnabled="{Binding !UploadButtonEnabled}" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding User}" Watermark="Username" Margin="5 10" Height="25"
+                 IsEnabled="{Binding !UploadButtonEnabled}" VerticalAlignment="Bottom"/>
         <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*"
-                 Margin="5 20" Height="25" IsEnabled="{Binding !UploadButtonEnabled}" />
+                 Margin="5 10" Height="25" IsEnabled="{Binding !UploadButtonEnabled}" VerticalAlignment="Bottom"/>
         <Button Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5"
                 Command="{Binding TestConnection}" IsEnabled="{Binding !UploadButtonEnabled}">
             <ToolTip.Tip>
@@ -79,7 +80,7 @@
                 <avalonia:MaterialIcon Kind="Replay"/>
             </Button>
         </TextBlock>
-        <Button Grid.Row="4" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5"
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
                 Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}" Command="{Binding UploadAction}">
             <ToolTip.Tip>
                 <Label Content="Upload key"/>
