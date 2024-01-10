@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using MsBox.Avalonia;
@@ -15,8 +16,8 @@ public class MainWindowViewModel : ViewModelBase
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
     public readonly Interaction<UploadToServerViewModel, UploadToServerViewModel?> ShowUploadToServer = new();
-    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
-
+    public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys = new();
+    
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
@@ -53,6 +54,14 @@ public class MainWindowViewModel : ViewModelBase
         var result = await ShowUploadToServer.Handle(uploadViewModel);
         return result;
     });
+
+    public ReactiveCommand<Unit, EditAuthorizedKeysViewModel?> OpenEditAuthorizedKeysWindow =>
+        ReactiveCommand.CreateFromTask<Unit, EditAuthorizedKeysViewModel?>(
+            async e =>
+            {
+                var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel();
+                return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
+            });
     
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
@@ -78,6 +87,7 @@ public class MainWindowViewModel : ViewModelBase
             return u;
         });
 
+    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
     public ObservableCollection<SshPublicKey> SshKeys
     {
         get => _sshKeys;

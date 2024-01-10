@@ -36,8 +36,9 @@
                     HorizontalAlignment="Center">
             <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
                    Target="BitSizeComboBox" />
+            <Label Content="is default!" IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}"/>
             <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
-                      SelectedItem="{Binding SelectedKeyType.CurrentBitSize}" />
+                      SelectedItem="{Binding SelectedKeyType.CurrentBitSize}" IsVisible="{Binding !SelectedKeyType.HasDefaultBitSize}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
@@ -45,7 +46,7 @@
                    Target="KeyTypesComboBox" />
             <ComboBox Name="KeyTypesComboBox"
                       ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}"
-                      SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
+                      SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                     HorizontalAlignment="Stretch" Margin="20 0 20 10">

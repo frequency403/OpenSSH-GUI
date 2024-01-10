@@ -5,23 +5,19 @@ namespace OpenSSHALib.Models;
 
 public class SshKeyType
 {
-    public SshKeyType(KeyType baseType, int? currentBitSize = null)
+    public SshKeyType(KeyType baseType)
     {
         BaseType = baseType;
         KeyTypeText = Enum.GetName(BaseType)!;
         var possibleBitSizes = BaseType.GetBitValues().ToList();
         PossibleBitSizes = possibleBitSizes;
-        MaxBitSize = possibleBitSizes.Max();
-        MinBitSize = possibleBitSizes.Min();
-        DefaultBitSize = (int)BaseType;
-        CurrentBitSize = currentBitSize ?? DefaultBitSize;
+        HasDefaultBitSize = !PossibleBitSizes.Any();
+        CurrentBitSize = HasDefaultBitSize ? 0 : PossibleBitSizes.Max();
     }
 
     public KeyType BaseType { get; }
     public string KeyTypeText { get; private set; }
-    public int MaxBitSize { get; private set; }
-    public int MinBitSize { get; private set; }
-    public int DefaultBitSize { get; }
+    public bool HasDefaultBitSize { get; }
     public int CurrentBitSize { get; set; }
-    public IEnumerable<int> PossibleBitSizes { get; private set; }
+    public IEnumerable<int> PossibleBitSizes { get; }
 }

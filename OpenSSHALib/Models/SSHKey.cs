@@ -30,7 +30,7 @@ public abstract class SshKey
 
         if (Enum.TryParse<KeyType>(keyTypeText, true, out var parsedEnum))
         {
-            if (int.TryParse(outputOfProcess[0], out var parsed)) KeyType = new SshKeyType(parsedEnum, parsed);
+            if (int.TryParse(outputOfProcess[0], out var parsed)) KeyType = new SshKeyType(parsedEnum);
         }
         else
         {

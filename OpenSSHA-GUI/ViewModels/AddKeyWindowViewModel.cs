@@ -49,7 +49,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
             return this;
         });
         _sshKeyTypes = new ObservableCollection<SshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
-        _selectedKeyType = _sshKeyTypes.First(e => e.BaseType == KeyType.RSA);
+        _selectedKeyType = _sshKeyTypes.First();
     }
 
     public ReactiveCommand<string, AddKeyWindowViewModel?> AddKey { get; }
@@ -96,7 +96,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
             StartInfo = new ProcessStartInfo
             {
                 Arguments =
-                    $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -b {SelectedKeyType.CurrentBitSize} -N \"{Password}\" -C \"{Comment}\" -f \"{fullFilePath}\"",
+                    $"-q -t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -C \"{Comment}\" -f \"{fullFilePath}\" ",
                 CreateNoWindow = true,
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,
@@ -104,6 +104,8 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                 WorkingDirectory = SettingsFileHandler.Settings.UserSshFolderPath
             }
         };
+        if (!SelectedKeyType.HasDefaultBitSize) proc.StartInfo.Arguments += $"-b {SelectedKeyType.CurrentBitSize} ";
+        if (Password is not "") proc.StartInfo.Arguments += $"-N \"{Password}\"";
         proc.Start();
         await proc.WaitForExitAsync();
         var newKey = new SshPublicKey(fullFilePath + ".pub");

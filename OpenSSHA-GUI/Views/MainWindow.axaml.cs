@@ -15,8 +15,20 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(DoShowExportWindowAsync)));
         this.WhenActivated(action =>
             action(ViewModel!.ShowUploadToServer.RegisterHandler(DoShowUploadToServerWindowAsync)));
+        this.WhenActivated(action =>
+            action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(DoShowEditAuthorizedKeysWindowAsync)));
     }
 
+    private async Task DoShowEditAuthorizedKeysWindowAsync(
+        InteractionContext<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> interaction)
+    {
+        var dialog = new EditAuthorizedKeysWindow
+        {
+            DataContext = interaction.Input
+        };
+        interaction.SetOutput(await dialog.ShowDialog<EditAuthorizedKeysViewModel>(this));
+    }
+    
     private async Task DoShowUploadToServerWindowAsync(
         InteractionContext<UploadToServerViewModel, UploadToServerViewModel?> interaction)
     {
