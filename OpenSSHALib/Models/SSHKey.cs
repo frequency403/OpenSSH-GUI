@@ -46,13 +46,29 @@ public abstract class SshKey
     public SshKeyType KeyType { get; } = new(Enums.KeyType.RSA);
     public string Fingerprint { get; protected set; }
 
-    public async Task<string?> ExportKey()
+    public async Task<string?> ExportKeyAsync()
     {
         try
         {
             await using var fileStream = File.OpenRead(AbsoluteFilePath);
             using var memoryStream = new MemoryStream();
             await fileStream.CopyToAsync(memoryStream);
+            return Encoding.Default.GetString(memoryStream.ToArray());
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+            return null;
+        }
+    }
+    
+    public string? ExportKey()
+    {
+        try
+        {
+            using var fileStream = File.OpenRead(AbsoluteFilePath);
+            using var memoryStream = new MemoryStream();
+            fileStream.CopyTo(memoryStream);
             return Encoding.Default.GetString(memoryStream.ToArray());
         }
         catch (Exception e)

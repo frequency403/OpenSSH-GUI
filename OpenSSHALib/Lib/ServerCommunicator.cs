@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using OpenSSHALib.Enums;
 using OpenSSHALib.Models;
 using Renci.SshNet;
 
@@ -9,6 +11,8 @@ namespace OpenSSHALib.Lib;
 
 public static class ServerCommunicator
 {
+    public const string SshPathWithVariable = "$HOME/.ssh";
+    
     public static bool TestConnection(string ipAddressOrHostname, string user, string userPassword, [NotNullWhen(false)]out string? message)
     {
         message = null;
@@ -58,9 +62,9 @@ public static class ServerCommunicator
     private static bool CreateAuthorizedKeysIfNotExist(this SshClient clientConnection, [NotNullWhen(false)] out string? message)
     {
         message = null;
-        var listDirectory = clientConnection.RunCommand("ls $HOME/.ssh");
+        var listDirectory = clientConnection.RunCommand($"ls {SshPathWithVariable}");
         if (listDirectory.Result.Split("\n", StringSplitOptions.RemoveEmptyEntries).Contains("authorized_keys")) return true;
-        var createAuthorizedKeysFile = clientConnection.RunCommand("touch $HOME/.ssh/authorized_keys && chmod 700 $HOME/.ssh/authorized_keys");
+        var createAuthorizedKeysFile = clientConnection.RunCommand($"touch {SshPathWithVariable}/authorized_keys && chmod 700 {SshPathWithVariable}/authorized_keys");
         if (createAuthorizedKeysFile.ExitStatus == 0) return true;
         message = createAuthorizedKeysFile.Error + "\n" + createAuthorizedKeysFile.Result;
         return false;
@@ -76,11 +80,11 @@ public static class ServerCommunicator
     public static async Task<string> PutKeyToServer(this SshClient clientConnection, SshPublicKey publicKey)
     {
             if (!clientConnection.CreateAuthorizedKeysIfNotExist(out var errorMessage)) throw new ApplicationException(errorMessage);
-            var export = await publicKey.ExportKey();
+            var export = await publicKey.ExportKeyAsync();
             if (export is null) return "Key could not be exported!";
             if (clientConnection.KeyAlreadyExists(export))
                 throw new ApplicationException("Key does already exist on host!");
-            var command = clientConnection.RunCommand($"echo \"{export}\" >> $HOME/.ssh/authorized_keys");
+            var command = clientConnection.RunCommand($"echo \"{export}\" >> {SshPathWithVariable}/authorized_keys");
             if (command.ExitStatus != 0) throw new Exception(command.Error + "\n" + command.Result);
             return "Key successfully uploaded";
     }

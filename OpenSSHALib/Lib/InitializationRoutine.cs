@@ -1,9 +1,12 @@
-﻿namespace OpenSSHALib.Lib;
+﻿using OpenSSHALib.Enums;
+using OpenSSHALib.Extensions;
+
+namespace OpenSSHALib.Lib;
 
 public static class InitializationRoutine
 {
-    public static bool IsProgramStartReady => Directory.Exists(SettingsFileHandler.Settings.UserSshFolderPath) &&
-                                              File.Exists(SettingsFileHandler.Settings.KnownHostsFilePath);
+    public static bool IsProgramStartReady => Directory.Exists(SshConfigFilesExtension.GetBaseSshPath()) &&
+                                              File.Exists(SshConfigFiles.Known_Hosts.GetPathOfFile());
     
     public static bool MakeProgramStartReady()
     {
@@ -12,11 +15,11 @@ public static class InitializationRoutine
             if (IsProgramStartReady) return IsProgramStartReady;
             if (SettingsFileHandler.IsFileInitialized)
             {
-                if (!Directory.Exists(SettingsFileHandler.Settings.UserSshFolderPath))
-                    Directory.CreateDirectory(SettingsFileHandler.Settings.UserSshFolderPath);
-                if (!File.Exists(SettingsFileHandler.Settings.KnownHostsFilePath))
+                if (!Directory.Exists(SshConfigFilesExtension.GetBaseSshPath()))
+                    Directory.CreateDirectory(SshConfigFilesExtension.GetBaseSshPath());
+                if (!File.Exists(SshConfigFiles.Known_Hosts.GetPathOfFile()))
                 {
-                    using var file = File.Create(SettingsFileHandler.Settings.KnownHostsFilePath);
+                    using var file = File.Create(SshConfigFiles.Known_Hosts.GetPathOfFile());
                 }
             }
 

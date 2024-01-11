@@ -73,15 +73,19 @@
                 <Label Content="{Binding StatusButtonToolTip}" />
             </ToolTip.Tip>
             <TextBlock Text="{Binding StatusButtonText}" VerticalAlignment="Center"/>
-            <Button HorizontalAlignment="Right" Background="DarkSlateGray" Command="{Binding ResetCommand}" IsVisible="{Binding UploadButtonEnabled}">
+            <Button HorizontalAlignment="Right" Background="DarkSlateGray" 
+                    Command="{Binding ResetCommand}" 
+                    IsVisible="{Binding UploadButtonEnabled}">
                 <ToolTip.Tip>
                     <Label Content="Reset values"/>
                 </ToolTip.Tip>
                 <avalonia:MaterialIcon Kind="Replay"/>
             </Button>
         </TextBlock>
-        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
-                Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}" Command="{Binding UploadAction}">
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" 
+                HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
+                Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}" 
+                Command="{Binding UploadAction}">
             <ToolTip.Tip>
                 <Label Content="Upload key"/>
             </ToolTip.Tip>

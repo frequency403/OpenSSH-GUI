@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using OpenSSHALib.Enums;
+using OpenSSHALib.Extensions;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
@@ -13,7 +15,7 @@ public class EditKnownHostsViewModel : ViewModelBase
 
     public EditKnownHostsViewModel()
     {
-        KnownHostsFile = new KnownHostsFile(SettingsFileHandler.Settings.KnownHostsFilePath);
+        KnownHostsFile = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
         KnownHosts = new ObservableCollection<KnownHost>(KnownHostsFile.KnownHosts.OrderBy(e => e.Host));
         ProcessData = ReactiveCommand.CreateFromTask<string, EditKnownHostsViewModel>(async e =>
         {

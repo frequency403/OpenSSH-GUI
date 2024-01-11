@@ -32,13 +32,13 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 
         this.ValidationRule(
             e => e.KeyName,
-            name => File.Exists(SettingsFileHandler.Settings.UserSshFolderPath + Path.DirectorySeparatorChar + name),
+            name => File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + name),
             "Filename does already exist!"
         ); // TODO: Validation does not yet work correctly, need further fixing.
         
         AddKey = ReactiveCommand.CreateFromTask<string, AddKeyWindowViewModel?>(async b =>
         {
-            if (File.Exists(SettingsFileHandler.Settings.UserSshFolderPath + Path.DirectorySeparatorChar + KeyName))
+            if (File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName))
             {
                 var box = MessageBoxManager.GetMessageBoxStandard("Keyfile does already exists",
                     "The filename you requested exists already. Aborting.", ButtonEnum.Ok, Icon.Error);
@@ -90,7 +90,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
     public async ValueTask<SshPublicKey?> RunKeyGen()
     {
         if (!_createKey) return null;
-        var fullFilePath = $"{SettingsFileHandler.Settings.UserSshFolderPath}{Path.DirectorySeparatorChar}{KeyName}";
+        var fullFilePath = $"{SshConfigFilesExtension.GetBaseSshPath()}{Path.DirectorySeparatorChar}{KeyName}";
         var proc = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -101,7 +101,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                WorkingDirectory = SettingsFileHandler.Settings.UserSshFolderPath
+                WorkingDirectory = SshConfigFilesExtension.GetBaseSshPath()
             }
         };
         if (!SelectedKeyType.HasDefaultBitSize) proc.StartInfo.Arguments += $"-b {SelectedKeyType.CurrentBitSize} ";

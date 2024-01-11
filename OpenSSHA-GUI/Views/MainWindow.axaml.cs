@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using OpenSSHA_GUI.ViewModels;
 using ReactiveUI;
@@ -7,6 +8,8 @@ namespace OpenSSHA_GUI.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
+    private const WindowStartupLocation DefaultWindowStartupLocation = WindowStartupLocation.CenterScreen;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -24,7 +27,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         var dialog = new EditAuthorizedKeysWindow
         {
-            DataContext = interaction.Input
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
         };
         interaction.SetOutput(await dialog.ShowDialog<EditAuthorizedKeysViewModel>(this));
     }
@@ -34,7 +38,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         var dialog = new UploadToServerWindow
         {
-            DataContext = interaction.Input
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
         };
         interaction.SetOutput(await dialog.ShowDialog<UploadToServerViewModel>(this));
     }
@@ -44,7 +49,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         var dialog = new ExportWindow
         {
-            DataContext = interaction.Input
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
         };
         interaction.SetOutput(await dialog.ShowDialog<ExportWindowViewModel>(this));
     }
@@ -53,7 +59,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         var dialog = new AddKeyWindow
         {
-            DataContext = interaction.Input
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
         };
         interaction.SetOutput(await dialog.ShowDialog<AddKeyWindowViewModel>(this));
     }
@@ -63,7 +70,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         var dialog = new EditKnownHostsWindow
         {
-            DataContext = interaction.Input
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
         };
         interaction.SetOutput(await dialog.ShowDialog<EditKnownHostsViewModel>(this));
     }

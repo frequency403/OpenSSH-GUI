@@ -1,8 +1,12 @@
+using System;
+using System.Reactive;
+using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using OpenSSHA_GUI.ViewModels;
 using OpenSSHA_GUI.Views;
+using ReactiveUI;
 
 namespace OpenSSHA_GUI;
 
@@ -21,5 +25,10 @@ public class App : Application
                 DataContext = new MainWindowViewModel()
             };
         base.OnFrameworkInitializationCompleted();
+    }
+    
+    private void CloseProgram(object? sender, EventArgs e)
+    {
+        Environment.Exit(0);
     }
 }

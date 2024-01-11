@@ -28,7 +28,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<SshKey, ExportWindowViewModel?> OpenExportKeyWindow =>
         ReactiveCommand.CreateFromTask<SshKey, ExportWindowViewModel?>(async key =>
         {
-            var keyExport = await key.ExportKey();
+            var keyExport = await key.ExportKeyAsync();
             if (keyExport is null)
             {
                 var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
@@ -59,8 +59,19 @@ public class MainWindowViewModel : ViewModelBase
         ReactiveCommand.CreateFromTask<Unit, EditAuthorizedKeysViewModel?>(
             async e =>
             {
-                var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel();
-                return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
+                try
+                {
+                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel();
+                    return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
+                }
+                catch (Exception exception)
+                {
+                    var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, exception.Message,
+                        ButtonEnum.Ok, Icon.Error);
+                    await messageBox.ShowAsync();
+                    return null;
+                }
+                
             });
     
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
@@ -87,6 +98,13 @@ public class MainWindowViewModel : ViewModelBase
             return u;
         });
 
+    private ServerConnection _serverConnection = new ("123", "123", "123");
+    public ServerConnection ServerConnection
+    {
+        get => _serverConnection;
+        set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
+    }
+    
     private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
     public ObservableCollection<SshPublicKey> SshKeys
     {
