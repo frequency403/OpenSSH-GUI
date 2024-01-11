@@ -9,7 +9,15 @@ namespace OpenSSHALib.Lib;
 
 public class ServerConnection(string hostname, string user, string password) : ReactiveObject, IDisposable
 {
-    private SshClient ClientConnection { get; }  = new (hostname, user, password);
+    public string Hostname { get; } = hostname;
+    public string Username { get; } = user;
+    public string Password { get; } = password;
+    private SshClient _sshClient = new (hostname, user, password);
+    private SshClient ClientConnection
+    {
+        get => _sshClient;
+        set => this.RaiseAndSetIfChanged(ref _sshClient, value);
+    }  
 
     private bool _isConnected = false;
     public bool IsConnected
@@ -53,6 +61,21 @@ public class ServerConnection(string hostname, string user, string password) : R
         }
     }
 
+    public bool ReopenConnection()
+    {
+        if (IsConnected) return false;
+        ClientConnection = new SshClient(Hostname, Username, Password);
+        try
+        {
+            ClientConnection.Connect();
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        return IsConnected;
+    }
+    
     public bool CloseConnection([NotNullWhen(false)] out Exception? ex)
     {
         ex = null;
@@ -69,29 +92,35 @@ public class ServerConnection(string hostname, string user, string password) : R
         }
     }
     
-    // public KnownHostsFile GetKnownHostsFromServer()
-    // {
-    //     return new KnownHostsFile(ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOS)}").Result, true);
-    // }
-    //
-    // public bool WriteKnownHostsToServer(KnownHostsFile knownHostsFile)
-    // {
-    //     var command = ClientConnection.RunCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOS)}\" > {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOS)}");
-    //     return command.ExitStatus == 0;
-    // }
+    public KnownHostsFile GetKnownHostsFromServer()
+    {
+        return !IsConnected ? new KnownHostsFile("", true) : new KnownHostsFile(ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOs)}").Result, true);
+    }
+    
+    public bool WriteKnownHostsToServer(KnownHostsFile knownHostsFile)
+    {
+        if (!IsConnected) return false;
+        var command = ClientConnection.RunCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOs)}");
+        return command.ExitStatus == 0;
+    }
 
     public AuthorizedKeysFile GetAuthorizedKeysFromServer()
     {
+        if (!IsConnected) return new AuthorizedKeysFile("", true);
         return new AuthorizedKeysFile(
             ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(ServerOs)}")
                 .Result, true);
     }
 
-    public bool WriteAuthorizedKeysChangesToServer(AuthorizedKeysFile authorizedKeysFile) => ClientConnection
+    public bool WriteAuthorizedKeysChangesToServer(AuthorizedKeysFile authorizedKeysFile)
+    {
+        if (!IsConnected) return false;
+        return ClientConnection
             .RunCommand(
                 $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {SshConfigFiles.Authorized_Keys.GetPathOfFile(ServerOs)}")
-            .ExitStatus == 0; 
-    
+            .ExitStatus == 0;
+    }
+
 
     /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
     void IDisposable.Dispose()

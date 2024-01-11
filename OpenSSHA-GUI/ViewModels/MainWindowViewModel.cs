@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSHALib.Lib;
@@ -54,7 +55,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
-            var editKnownHosts = new EditKnownHostsViewModel();
+            var editKnownHosts = new EditKnownHostsViewModel(ServerConnection);
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
 
@@ -94,7 +95,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 try
                 {
-                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel();
+                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel(ServerConnection);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
                 catch (Exception exception)
@@ -113,8 +114,23 @@ public class MainWindowViewModel : ViewModelBase
             var create = new AddKeyWindowViewModel();
             var result = await ShowCreate.Handle(create);
             if (result == null) return result;
-            var newKey = await result.RunKeyGen();
-            if (newKey != null) SshKeys.Add(newKey);
+            Exception? exception = null;
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    var newKey = await result.RunKeyGen();
+                    if (newKey != null) SshKeys.Add(newKey);
+                }
+                catch (Exception e1)
+                {
+                    exception = e1;
+                }
+            });
+            if (exception is null) return result;
+            var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, exception.Message,
+                ButtonEnum.Ok, Icon.Error);
+            await msgBox.ShowAsync();
             return result;
         });
 

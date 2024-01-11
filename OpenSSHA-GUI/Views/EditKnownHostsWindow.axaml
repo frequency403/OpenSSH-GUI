@@ -16,99 +16,110 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
-    <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *" Name="MainGrid">
-        <ScrollViewer Grid.Row="0"
-                      Grid.Column="0"
-                      Grid.ColumnSpan="3"
-                      Grid.RowSpan="2">
-            <ItemsControl ItemsSource="{Binding KnownHosts}">
-                <ItemsControl.Styles>
-                    <Style Selector="Expander:expanded Button.whole-host">
-                        <Setter Property="IsVisible" Value="False" />
-                    </Style>
-                    <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
-                        <Setter Property="IsVisible" Value="True" />
-                        <Setter Property="Foreground" Value="Green"/>
-                    </Style>
-                    <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
-                        <Setter Property="IsVisible" Value="False" />
-                    </Style>
-                    <Style Selector="ToggleButton:checked avalonia|MaterialIcon.stay">
-                        <Setter Property="IsVisible" Value="False" />
-                    </Style>
-                    <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
-                        <Setter Property="IsVisible" Value="True" />
-                        <Setter Property="Foreground" Value="Red"/>
-                    </Style>
-                </ItemsControl.Styles>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="dataModels:KnownHost">
-                        <Expander HorizontalAlignment="Stretch">
-                            <Expander.Header>
-                                <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
-                                    <Label Grid.Column="0" Content="{Binding Host}" HorizontalAlignment="Center"
-                                           FontWeight="Bold" />
-                                    <ToggleButton Grid.Column="1" IsChecked="False"
-                                                  Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
-                                        <ToolTip.Tip>
-                                            <Label
-                                                Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
-                                        </ToolTip.Tip>
-                                        <Panel>
-                                            <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
-                                            <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
-                                        </Panel>
-                                    </ToggleButton>
-                                </Grid>
-                            </Expander.Header>
-                            <DataGrid ItemsSource="{Binding Keys}" HorizontalAlignment="Stretch">
-                                <DataGrid.Styles>
-                                    <Style Selector="DataGridTextColumn">
-                                        <Setter Property="IsVisible" Value="{Binding !DeleteWholeHost}" />
-                                    </Style>
-                                </DataGrid.Styles>
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn
-                                        Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderKeyTypeText}"
-                                        Binding="{Binding KeyType}" Width="*" />
-                                    <DataGridTextColumn
-                                        Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderKeySizeText}"
-                                        Binding="{Binding KeySize}" Width="*" />
-                                    <DataGridTemplateColumn
-                                        Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderFingerprintText}"
-                                        Width="*">
-                                        <DataTemplate DataType="dataModels:KnownHostKey">
-                                            <TextBlock Text="{Binding Fingerprint}">
-                                                <ToolTip.Tip>
-                                                    <Label Content="{Binding Fingerprint}" />
-                                                </ToolTip.Tip>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Width="*"
-                                                            Header="{x:Static main:StringsAndTexts.EditKnownHostsWindowDataGridColumnHeaderOptionsText}">
-                                        <DataTemplate DataType="dataModels:KnownHostKey">
-                                            <ToggleButton Grid.Column="1" IsChecked="{Binding MarkedForDeletion}"
-                                                          HorizontalAlignment="Center">
-                                                <ToolTip.Tip>
-                                                    <Label
-                                                        Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
-                                                </ToolTip.Tip>
-                                                <Panel>
-                                                    <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
-                                                    <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
-                                                </Panel>
-                                            </ToggleButton>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Expander>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" BorderBrush="Black"
+    <Window.Styles>
+        <Style Selector="Expander:expanded ToggleButton.whole-host">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Foreground" Value="Green" />
+        </Style>
+        <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="ToggleButton:checked avalonia|MaterialIcon.stay">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Foreground" Value="Red" />
+        </Style>
+    </Window.Styles>
+    <Window.DataTemplates>
+        <DataTemplate DataType="dataModels:KnownHost">
+            <Expander HorizontalAlignment="Stretch" Margin="5">
+                <Expander.Header>
+                    <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
+                        <TextBlock Grid.Column="0" Text="{Binding Host}" HorizontalAlignment="Center"
+                               FontWeight="Bold" />
+                        <ToggleButton Grid.Column="1" IsChecked="False" Classes="whole-host"
+                                      Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
+                            <ToolTip.Tip>
+                                <Label
+                                    Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
+                            </ToolTip.Tip>
+                            <Panel>
+                                <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
+                                <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
+                            </Panel>
+                        </ToggleButton>
+                    </Grid>
+                </Expander.Header>
+                <Grid RowDefinitions="* *" ColumnDefinitions="* * *">
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="0 5">
+                        <Grid  ColumnDefinitions="* * *">
+                            <TextBlock Grid.Column="0" Text="KeyType" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Fingerprint" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="Mark for deletion" HorizontalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}" HorizontalAlignment="Stretch">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="dataModels:KnownHostKey">
+                                <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Padding="5">
+                                    <Grid ColumnDefinitions="* * *">
+                                        <TextBlock Grid.Column="0" Text="{Binding KeyType }" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" HorizontalAlignment="Center">
+                                            <ToolTip.Tip>
+                                                <Label Content="{Binding Fingerprint}" />
+                                            </ToolTip.Tip>
+                                        </TextBlock>
+                                        <ToggleButton Grid.Column="2" IsChecked="{Binding MarkedForDeletion}" HorizontalAlignment="Center" VerticalAlignment="Top">
+                                            <ToolTip.Tip>
+                                                <Label
+                                                    Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
+                                            </ToolTip.Tip>
+                                            <Panel>
+                                                <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
+                                                <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
+                                            </Panel>
+                                        </ToggleButton>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+                
+                
+            </Expander>
+        </DataTemplate>
+    </Window.DataTemplates>
+    <Grid RowDefinitions="10* *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <TabControl Grid.Row="0" VerticalAlignment="Stretch" TabStripPlacement="Left">
+            <TabItem Header="Local" Padding="5">
+                <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
+                    <ScrollViewer Grid.Row="0"
+                                  Grid.Column="0"
+                                  Grid.ColumnSpan="3"
+                                  Grid.RowSpan="2">
+                        <ItemsControl ItemsSource="{Binding KnownHostsLocal}" />
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnection.IsConnected}">
+                <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
+                    <ScrollViewer Grid.Row="0"
+                                  Grid.Column="0"
+                                  Grid.ColumnSpan="3"
+                                  Grid.RowSpan="2">
+                        <ItemsControl ItemsSource="{Binding KnownHostsRemote}" />
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Border Grid.Row="1" HorizontalAlignment="Stretch" BorderBrush="Black"
                 BorderThickness="1" CornerRadius="10">
             <Grid RowDefinitions="*" ColumnDefinitions="* * *">
                 <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Background="Red"

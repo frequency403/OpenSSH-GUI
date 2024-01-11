@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DynamicData;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSHALib.Enums;
@@ -95,8 +96,14 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         {
             StartInfo = new ProcessStartInfo
             {
-                Arguments =
-                    $"-q -t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -C \"{Comment}\" -f \"{fullFilePath}\" ",
+                // ArgumentList =
+                // {
+                //     $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()}",
+                //     $"-C \"{Comment}\"",
+                //     $"-f \"{fullFilePath}\"",
+                //     $"-N \"{Password}\""
+                // },
+                Arguments = $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -C \"{Comment}\" -f \"{fullFilePath}\" -N \"{Password}\" ",
                 CreateNoWindow = true,
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,
@@ -105,7 +112,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
             }
         };
         if (!SelectedKeyType.HasDefaultBitSize) proc.StartInfo.Arguments += $"-b {SelectedKeyType.CurrentBitSize} ";
-        if (Password is not "") proc.StartInfo.Arguments += $"-N \"{Password}\"";
+        proc.StartInfo.Arguments += "-q";
         proc.Start();
         await proc.WaitForExitAsync();
         var newKey = new SshPublicKey(fullFilePath + ".pub");

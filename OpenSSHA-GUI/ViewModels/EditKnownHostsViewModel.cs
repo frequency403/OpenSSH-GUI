@@ -11,17 +11,21 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase
 {
-    private ObservableCollection<KnownHost> _knownHosts = [];
-
-    public EditKnownHostsViewModel()
+    public EditKnownHostsViewModel() : this(new ServerConnection("123", "123", "123")) {}
+    public EditKnownHostsViewModel(ServerConnection serverConnection)
     {
-        KnownHostsFile = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
-        KnownHosts = new ObservableCollection<KnownHost>(KnownHostsFile.KnownHosts.OrderBy(e => e.Host));
+        ServerConnection = serverConnection;
+        KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
+        KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
+        KnownHostsLocal = new ObservableCollection<KnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
+        KnownHostsRemote = new ObservableCollection<KnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
         ProcessData = ReactiveCommand.CreateFromTask<string, EditKnownHostsViewModel>(async e =>
         {
             if (!bool.Parse(e)) return this;
-            KnownHostsFile.SyncKnownHosts(KnownHosts);
-            await KnownHostsFile.UpdateFile();
+            KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
+            if(ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
+            await KnownHostsFileLocal.UpdateFile();
+            if(ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
             return this;
         });
         DeleteHost = ReactiveCommand.Create<KnownHost, Unit>(e =>
@@ -36,18 +40,29 @@ public class EditKnownHostsViewModel : ViewModelBase
         });
         ResetChangesAndReload = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
         {
-            await KnownHostsFile.ReadContentAsync();
-            KnownHosts = new ObservableCollection<KnownHost>(KnownHostsFile.KnownHosts);
+            await KnownHostsFileLocal.ReadContentAsync();
+            KnownHostsLocal = new ObservableCollection<KnownHost>(KnownHostsFileLocal.KnownHosts);
             return e;
         });
     }
 
-    private KnownHostsFile KnownHostsFile { get; }
-
-    public ObservableCollection<KnownHost> KnownHosts
+    public ServerConnection ServerConnection { get; }
+    
+    private KnownHostsFile KnownHostsFileLocal { get; }
+    private KnownHostsFile KnownHostsFileRemote { get; }
+    
+    private ObservableCollection<KnownHost> _knownHostsRemote = [];
+    public ObservableCollection<KnownHost> KnownHostsRemote
     {
-        get => _knownHosts;
-        private set => this.RaiseAndSetIfChanged(ref _knownHosts, value);
+        get => _knownHostsRemote;
+        private set => this.RaiseAndSetIfChanged(ref _knownHostsRemote, value);
+    }
+    
+    private ObservableCollection<KnownHost> _knownHostsLocal = [];
+    public ObservableCollection<KnownHost> KnownHostsLocal
+    {
+        get => _knownHostsLocal;
+        private set => this.RaiseAndSetIfChanged(ref _knownHostsLocal, value);
     }
 
     public ReactiveCommand<string, EditKnownHostsViewModel> ProcessData { get; }

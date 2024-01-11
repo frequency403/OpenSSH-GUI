@@ -9,6 +9,7 @@ public abstract class SshKey
     protected SshKey(string absoluteFilePath)
     {
         AbsoluteFilePath = absoluteFilePath;
+        if (!File.Exists(AbsoluteFilePath)) throw new FileNotFoundException($"No such file: {AbsoluteFilePath}");
         Filename = Path.GetFileName(AbsoluteFilePath);
         var readerProcess = new Process
         {

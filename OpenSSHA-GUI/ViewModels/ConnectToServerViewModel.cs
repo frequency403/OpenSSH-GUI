@@ -23,7 +23,7 @@ public class ConnectToServerViewModel : ViewModelBase
     {
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
         {
-            var task = Task.Run(async () =>
+            var task = Task.Run(() =>
             {
                 try
                 {
@@ -39,15 +39,15 @@ public class ConnectToServerViewModel : ViewModelBase
                     StatusButtonText = "Status: failed!";
                     StatusButtonToolTip = exception.Message;
                     StatusButtonBackground = Brushes.Red;
-                    var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, exception.Message,
-                        ButtonEnum.Ok, Icon.Error);
-                    await messageBox.ShowAsync();
                 }
             });
             TryingToConnect = true;
             await task;
             TryingToConnect = false;
-
+            if (ServerConnection.IsConnected) return e;
+            var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
+                ButtonEnum.Ok, Icon.Error);
+            await messageBox.ShowAsync();
             return e;
         });
         ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
@@ -58,6 +58,7 @@ public class ConnectToServerViewModel : ViewModelBase
             StatusButtonText = "Status: unknown";
             StatusButtonToolTip = "Status not yet tested!";
             StatusButtonBackground = Brushes.Gray;
+            ServerConnection = new ServerConnection("123", "123", "123");
             return e;
         });
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e => this);
@@ -65,9 +66,25 @@ public class ConnectToServerViewModel : ViewModelBase
 
     private bool ValidData => Hostname != "" && Username != "" && Password != "";
 
-    public string Hostname { get; set; } = "";
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
+    private string _hostName = "";
+    public string Hostname
+    {
+        get => _hostName;
+        set => this.RaiseAndSetIfChanged(ref _hostName, value);
+    }
+    private string _userName = "";
+    public string Username
+    {
+        get => _userName;
+        set => this.RaiseAndSetIfChanged(ref _userName, value);
+        
+    }
+    private string _password = "";
+    public string Password
+    {
+        get => _password;
+        set => this.RaiseAndSetIfChanged(ref _password, value);
+    }
 
     private bool _tryingToConnect = false;
 

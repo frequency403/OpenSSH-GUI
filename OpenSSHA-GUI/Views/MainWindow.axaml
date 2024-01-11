@@ -50,13 +50,14 @@
             <!-- Items  -->
             
             <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-                <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="1" BorderBrush="DimGray">
+                
                     <ItemsControl ItemsSource="{Binding SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
                               Name="TheItemsGrid">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="models:SshPublicKey">
+                            <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="5" BorderBrush="DimGray" Margin="0 0 0 5">
                             <Grid ColumnDefinitions="* 3* * *">
                                 <ToolTip.Tip>
                                     <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
@@ -114,10 +115,11 @@
                                     </Button>
                                 </StackPanel>
                             </Grid>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                </Border>
+                
             </ScrollViewer>
         </Grid>
         

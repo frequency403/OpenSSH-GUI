@@ -50,7 +50,7 @@
         </Button>
         
         <TextBlock Grid.Row="2" Grid.Column="2"  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" IsVisible="{Binding TryingToConnect}" Classes="Working" >
-                <avalonia:MaterialIcon Classes="Working" Kind="Sync"/>
+                <avalonia:MaterialIcon Classes="Working" Kind="Autorenew"/>
         </TextBlock>
        
         
