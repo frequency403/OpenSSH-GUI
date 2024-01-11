@@ -24,9 +24,14 @@ public class AuthorizedKeysFile : ReactiveObject
 
     private void LoadFileContents(string fileContents)
     {
+        var split = fileContents.TrimEnd().Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+        var sorted = split.Where(e => e != "");
+        
+        
+        
         AuthorizedKeys =
-            new ObservableCollection<AuthorizedKey>(fileContents.Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
-                .Select(e => new AuthorizedKey(e.Trim())));
+            new ObservableCollection<AuthorizedKey>(fileContents.TrimEnd().Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
+                .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
     }
     
     private void ReadAndLoadFileContents(string pathToFile)

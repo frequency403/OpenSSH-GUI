@@ -198,15 +198,15 @@
         
         <!-- Server Status -->
         
-        <StackPanel Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="Transparent">
+        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="Transparent" Margin="10 0">
             <StackPanel.ContextMenu>
                 <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
-                        <MenuItem Header="Connect" IsEnabled="{Binding !ServerConnection.IsConnected}">
+                        <MenuItem Header="Connect" IsEnabled="{Binding !ServerConnection.IsConnected}" Command="{Binding OpenConnectToServerWindow}">
                             <MenuItem.Icon>
                                 <materialIcons:MaterialIconExt Kind="LanConnect"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="Disconnect" IsEnabled="{Binding ServerConnection.IsConnected}">
+                        <MenuItem Header="Disconnect" IsEnabled="{Binding ServerConnection.IsConnected}" Command="{Binding DisconnectServer}">
                             <MenuItem.Icon>
                                 <materialIcons:MaterialIconExt Kind="LanDisconnect"/>
                             </MenuItem.Icon>
@@ -214,7 +214,7 @@
                 </ContextMenu>
             </StackPanel.ContextMenu>
             <StackPanel Orientation="Horizontal" IsVisible="{Binding ServerConnection.IsConnected}">
-                <TextBlock Text="Connected via SSH to" Foreground="Green"/>
+                <TextBlock Text="Connected via SSH to: " Foreground="Green"/>
                 <TextBlock Text="{Binding ServerConnection.ConnectionString}" Foreground="Green"/>
             </StackPanel>
             <StackPanel IsVisible="{Binding !ServerConnection.IsConnected}">

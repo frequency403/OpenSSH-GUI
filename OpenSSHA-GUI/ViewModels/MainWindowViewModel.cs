@@ -17,6 +17,39 @@ public class MainWindowViewModel : ViewModelBase
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
     public readonly Interaction<UploadToServerViewModel, UploadToServerViewModel?> ShowUploadToServer = new();
     public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys = new();
+    public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
+    
+    
+    public ReactiveCommand<Unit, Unit> DisconnectServer => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
+    {
+        var messageBoxText = "Disconnected successfully!";
+        var messageBoxIcon = Icon.Success;
+        if (ServerConnection.IsConnected)
+        {
+            if (!ServerConnection.CloseConnection(out var exception))
+            {
+                messageBoxText = exception.Message;
+                messageBoxIcon = Icon.Error;
+            }
+        }
+        else
+        {
+            messageBoxText = "Nothing to disconnect from!";
+            messageBoxIcon = Icon.Error;
+        }
+        var msgBox = MessageBoxManager.GetMessageBoxStandard("Disconnect from Server", messageBoxText,
+            ButtonEnum.Ok, messageBoxIcon);
+        await msgBox.ShowAsync();
+        return e;
+    });
+    
+    public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow => ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
+    {
+        var connectToServer = new ConnectToServerViewModel();
+        var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
+        if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
+        return windowResult;
+    });
     
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
@@ -50,7 +83,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, UploadToServerViewModel?> OpenUploadToServerWindow => ReactiveCommand.CreateFromTask<Unit, UploadToServerViewModel?>(async e =>
     {
-        var uploadViewModel = new UploadToServerViewModel(_sshKeys);
+        var uploadViewModel = new UploadToServerViewModel(_sshKeys, ServerConnection);
         var result = await ShowUploadToServer.Handle(uploadViewModel);
         return result;
     });

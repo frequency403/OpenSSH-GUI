@@ -20,8 +20,21 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             action(ViewModel!.ShowUploadToServer.RegisterHandler(DoShowUploadToServerWindowAsync)));
         this.WhenActivated(action =>
             action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(DoShowEditAuthorizedKeysWindowAsync)));
+        this.WhenActivated(action =>
+            action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(DoShowConnectToServerWindowAsync)));
     }
 
+    private async Task DoShowConnectToServerWindowAsync(
+        InteractionContext<ConnectToServerViewModel, ConnectToServerViewModel?> interaction)
+    {
+        var dialog = new ConnectToServerWindow
+        {
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
+        };
+        interaction.SetOutput(await dialog.ShowDialog<ConnectToServerViewModel>(this));
+    }
+    
     private async Task DoShowEditAuthorizedKeysWindowAsync(
         InteractionContext<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> interaction)
     {

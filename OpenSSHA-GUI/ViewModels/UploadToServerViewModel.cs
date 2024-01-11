@@ -18,76 +18,52 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class UploadToServerViewModel : ViewModelBase, IValidatableViewModel
 {
-    public UploadToServerViewModel() : this([]){}
-    public UploadToServerViewModel(ObservableCollection<SshPublicKey> keys)
+    public UploadToServerViewModel() : this([], new ServerConnection("123", "123", "123")){}
+    public UploadToServerViewModel(ObservableCollection<SshPublicKey> keys, ServerConnection serverConnection)
     {
+        ServerConnection = serverConnection;
         Keys = keys;
         SelectedPublicKey = Keys.First();
         UploadAction = ReactiveCommand.CreateFromTask<Unit, UploadToServerViewModel>(
             async e =>
             {
-                string messageBoxText;
+                var messageBoxText = "Upload successful!";
                 var messageBoxIcon = Icon.Success;
-                if(Hostname is "" || User is "" || Password is "") messageBoxIcon = Icon.Error;
-                if (ServerCommunicator.TryOpenSshConnection(Hostname, User, Password, out var client, out var errorMessage))
+
+                var authorizedKeys = ServerConnection.GetAuthorizedKeysFromServer();
+                if (!await authorizedKeys.AddAuthorizedKeyAsync(SelectedPublicKey))
                 {
-                    try
-                    {
-                        messageBoxText = await client.PutKeyToServer(SelectedPublicKey);
-                    }
-                    catch (Exception exception)
-                    {
-                        messageBoxText = exception.Message;
-                        messageBoxIcon = Icon.Error;
-                    }
-                }
-                else
-                {
-                    messageBoxText = errorMessage;
                     messageBoxIcon = Icon.Error;
+                    messageBoxText = "Error adding the key to the collection!";
                 }
+                else if(!ServerConnection.WriteAuthorizedKeysChangesToServer(authorizedKeys))
+                {
+                    messageBoxIcon = Icon.Error;
+                    messageBoxText = "Error saving the key on the server!";
+                }
+                
+                // if (ServerCommunicator.TryOpenSshConnection(Hostname, User, Password, out var client, out var errorMessage))
+                // {
+                //     try
+                //     {
+                //         messageBoxText = await client.PutKeyToServer(SelectedPublicKey);
+                //     }
+                //     catch (Exception exception)
+                //     {
+                //         messageBoxText = exception.Message;
+                //         messageBoxIcon = Icon.Error;
+                //     }
+                // }
+                // else
+                // {
+                //     messageBoxText = errorMessage;
+                //     messageBoxIcon = Icon.Error;
+                // }
 
                 var messageBox = MessageBoxManager.GetMessageBoxStandard($"Upload result of key {SelectedPublicKey.Filename}", messageBoxText, ButtonEnum.Ok, messageBoxIcon);
                 await messageBox.ShowAsync();
                 return this;
             });
-        TestConnection  = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
-        {
-            var toolTipMessage = "Missing host, user or password!";
-            if(Hostname is "" || User is "" || Password is "") goto Failed;
-            if (ServerCommunicator.TestConnection(Hostname, User, Password, out var message))
-            {
-                StatusButtonBackground = Brushes.LimeGreen;
-                StatusButtonText = "Status: success";
-                StatusButtonToolTip = $"Connection successfully established for ssh://{User}@{Hostname}";
-                ConnectionSuccessful = true;
-                EvaluateEnabledState();
-                return e;
-            }
-            toolTipMessage = message;
-            Failed:
-            StatusButtonBackground = Brushes.IndianRed;
-            StatusButtonText = "Status: failed";
-            StatusButtonToolTip = toolTipMessage;
-            Hostname = "";
-            User = "";
-            Password = "";
-            EvaluateEnabledState();
-            return e;
-        });
-        ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
-        {
-            Hostname = "";
-            User = "";
-            Password = "";
-            ConnectionSuccessful = false;
-            SelectedPublicKey = Keys.First();
-            StatusButtonText = "Status: unknown";
-            StatusButtonToolTip = "Status not yet tested!";
-            StatusButtonBackground = Brushes.Gray;
-            EvaluateEnabledState();
-            return e;
-        });
     }
 
     public string Hostname { get; set; } = "";
@@ -131,6 +107,7 @@ public class UploadToServerViewModel : ViewModelBase, IValidatableViewModel
         set => this.RaiseAndSetIfChanged(ref _statusButtonBackground, value);
     }
     
+    public ServerConnection ServerConnection { get; }
     public SshPublicKey SelectedPublicKey { get; set; }
     public ObservableCollection<SshPublicKey> Keys { get; }
     public ValidationContext ValidationContext { get; } = new();

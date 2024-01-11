@@ -2,8 +2,81 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
+        Width="600"
+        Height="150"
+        CanResize="False"
         x:Class="OpenSSHA_GUI.Views.ConnectToServerWindow"
+        x:DataType="viewModels:ConnectToServerViewModel"
         Title="ConnectToServerWindow">
-    Welcome to Avalonia!
+    <Window.Styles>
+        <Style Selector="TextBlock.Working">
+            <Setter Property="Text"></Setter>
+            <Style.Animations>
+                <Animation IterationCount="INFINITE" Duration="0:0:1">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="RotateTransform.Angle" Value="180.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </Window.Styles>
+    <Design.DataContext><viewModels:ConnectToServerViewModel/></Design.DataContext>
+    <Grid RowDefinitions="* * * *" ColumnDefinitions="* * *" Margin="5">
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold" Text="Connect to Server" HorizontalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10" Height="25"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10" Height="25"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*"
+                 Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+        <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5"
+                Command="{Binding TestConnection}" IsEnabled="{Binding !ServerConnection.IsConnected}">
+            <ToolTip.Tip>
+                <Label Content="Test connection" />
+            </ToolTip.Tip>
+            <StackPanel Orientation="Horizontal">
+                <avalonia:MaterialIcon Kind="LanConnect"/>
+                <avalonia:MaterialIcon Kind="Help"/>
+            </StackPanel>
+        </Button>
+        
+        <TextBlock Grid.Row="2" Grid.Column="2"  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" IsVisible="{Binding TryingToConnect}" Classes="Working" >
+                <avalonia:MaterialIcon Classes="Working" Kind="Sync"/>
+        </TextBlock>
+       
+        
+        <TextBlock Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" Padding="5"
+                   Background="{Binding StatusButtonBackground}" IsVisible="{Binding !TryingToConnect}">
+            <ToolTip.Tip>
+                <Label Content="{Binding StatusButtonToolTip}" />
+            </ToolTip.Tip>
+            <TextBlock Text="{Binding StatusButtonText}" VerticalAlignment="Center"/>
+            <Button HorizontalAlignment="Right" Background="DarkSlateGray" 
+                    Command="{Binding ResetCommand}" 
+                    IsVisible="{Binding ServerConnection.IsConnected}">
+                <ToolTip.Tip>
+                    <Label Content="Reset values"/>
+                </ToolTip.Tip>
+                <avalonia:MaterialIcon Kind="Replay"/>
+            </Button>
+        </TextBlock>
+        <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
+                HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
+                Background="LimeGreen" IsEnabled="{Binding ServerConnection.IsConnected}" 
+                Command="{Binding SubmitConnection}">
+            <ToolTip.Tip>
+                <Label Content="Accept connection"/>
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="Check"/>
+        </Button>
+    </Grid>
 </Window>

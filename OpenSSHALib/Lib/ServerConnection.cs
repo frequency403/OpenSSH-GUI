@@ -10,12 +10,17 @@ namespace OpenSSHALib.Lib;
 public class ServerConnection(string hostname, string user, string password) : ReactiveObject, IDisposable
 {
     private SshClient ClientConnection { get; }  = new (hostname, user, password);
-    public bool IsConnected => ClientConnection.IsConnected;
+
+    private bool _isConnected = false;
+    public bool IsConnected
+    {
+        get => _isConnected;
+        set => this.RaiseAndSetIfChanged(ref _isConnected, value);
+    }
+    
     public string ConnectionString => IsConnected ? $"{user}@{hostname}" : "";
-    private PlatformID ServerOs { get; set; }
-
+    private PlatformID ServerOs { get; set; } = PlatformID.Other;
     private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
-
     private PlatformID GetServerOs()
     {
         var linuxCommand = ClientConnection.RunCommand("uname -s");
@@ -29,15 +34,17 @@ public class ServerConnection(string hostname, string user, string password) : R
         return PlatformID.Other;
     }
     
-    public bool TestAndOpenConnection([NotNullWhen(true)] out Exception? exception)
+    public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
     {
         exception = null;
         try
         {
             ClientConnection.Connect();
-            if(ClientConnection.IsConnected) ServerOs = GetServerOs();
-            if (ServerOs == PlatformID.Other) throw new NotSupportedException("No other OS than Windows oder Linux is supported!");
-            return ClientConnection.IsConnected;
+            IsConnected = ClientConnection.IsConnected;
+            if(IsConnected) ServerOs = GetServerOs();
+            if (ServerOs != PlatformID.Other) return IsConnected;
+            exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");
+            return false;
         }
         catch (Exception e)
         {
@@ -46,6 +53,22 @@ public class ServerConnection(string hostname, string user, string password) : R
         }
     }
 
+    public bool CloseConnection([NotNullWhen(false)] out Exception? ex)
+    {
+        ex = null;
+        try
+        {
+            ClientConnection.Disconnect();
+            IsConnected = false;
+            return true;
+        }
+        catch (Exception e)
+        {
+            ex = e;
+            return false;
+        }
+    }
+    
     // public KnownHostsFile GetKnownHostsFromServer()
     // {
     //     return new KnownHostsFile(ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOS)}").Result, true);
@@ -60,7 +83,7 @@ public class ServerConnection(string hostname, string user, string password) : R
     public AuthorizedKeysFile GetAuthorizedKeysFromServer()
     {
         return new AuthorizedKeysFile(
-            ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOs)}")
+            ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(ServerOs)}")
                 .Result, true);
     }
 
