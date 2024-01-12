@@ -1,4 +1,5 @@
-﻿using OpenSSHALib.Models;
+﻿using OpenSSHALib.Extensions;
+using OpenSSHALib.Models;
 
 namespace OpenSSHALib.Lib;
 
@@ -21,7 +22,7 @@ public static class DirectoryCrawler
     {
         var list = new List<SshPublicKey>();
         foreach (var filepath in Directory.EnumerateFiles(
-                     SettingsFileHandler.Settings.UserSshFolderPath).Where(e =>
+                     SshConfigFilesExtension.GetBaseSshPath()).Where(e =>
                      !e.FileNameStartsWithAny(SettingsFileHandler.Settings.FileNamesToSkipWhenSearchingForKeys) &&
                      e.EndsWith(".pub")))
         {

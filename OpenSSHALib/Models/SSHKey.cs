@@ -9,6 +9,7 @@ public abstract class SshKey
     protected SshKey(string absoluteFilePath)
     {
         AbsoluteFilePath = absoluteFilePath;
+        if (!File.Exists(AbsoluteFilePath)) throw new FileNotFoundException($"No such file: {AbsoluteFilePath}");
         Filename = Path.GetFileName(AbsoluteFilePath);
         var readerProcess = new Process
         {
@@ -30,7 +31,7 @@ public abstract class SshKey
 
         if (Enum.TryParse<KeyType>(keyTypeText, true, out var parsedEnum))
         {
-            if (int.TryParse(outputOfProcess[0], out var parsed)) KeyType = new SshKeyType(parsedEnum, parsed);
+            if (int.TryParse(outputOfProcess[0], out var parsed)) KeyType = new SshKeyType(parsedEnum);
         }
         else
         {
@@ -46,13 +47,29 @@ public abstract class SshKey
     public SshKeyType KeyType { get; } = new(Enums.KeyType.RSA);
     public string Fingerprint { get; protected set; }
 
-    public async Task<string?> ExportKey()
+    public async Task<string?> ExportKeyAsync()
     {
         try
         {
             await using var fileStream = File.OpenRead(AbsoluteFilePath);
             using var memoryStream = new MemoryStream();
             await fileStream.CopyToAsync(memoryStream);
+            return Encoding.Default.GetString(memoryStream.ToArray());
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+            return null;
+        }
+    }
+    
+    public string? ExportKey()
+    {
+        try
+        {
+            using var fileStream = File.OpenRead(AbsoluteFilePath);
+            using var memoryStream = new MemoryStream();
+            fileStream.CopyTo(memoryStream);
             return Encoding.Default.GetString(memoryStream.ToArray());
         }
         catch (Exception e)

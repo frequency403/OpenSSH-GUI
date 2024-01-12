@@ -16,7 +16,7 @@ public class KnownHostKey : ReactiveObject
             TypeDeclarationInFile.StartsWith("ssh-")
                 ? TypeDeclarationInFile.Replace("ssh-", "")
                 : TypeDeclarationInFile.Split('-')[0], true);
-        Fingerprint = splitted[1];
+        Fingerprint = splitted[1].Replace("\n", "").Replace("\r", "");
     }
 
     public KeyType KeyType { get; }

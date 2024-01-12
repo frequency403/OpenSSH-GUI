@@ -6,9 +6,14 @@
         <entry key="OpenSSHA-GUI/App.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/AddKeyWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/ConfirmDialog.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/ConnectToServer.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/ConnectToServerWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/EditAuthorizedKeysView.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/EditAuthorizedKeysWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/EditKnownHostsWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/ExportWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/MainWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/UploadToServerWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
       </map>
     </option>
   </component>
