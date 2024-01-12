@@ -4,13 +4,28 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
+        xmlns:models="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
+        xmlns:converters="clr-namespace:OpenSSHA_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="600"
-        Height="150"
+        Height="200"
         CanResize="False"
+        Icon="/Assets/appicon.ico"
         x:Class="OpenSSHA_GUI.Views.ConnectToServerWindow"
         x:DataType="viewModels:ConnectToServerViewModel"
         Title="ConnectToServerWindow">
+    <Window.Resources>
+        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter"/>
+    </Window.Resources>
+    <Window.DataTemplates>
+        <DataTemplate DataType="models:SshPublicKey">
+            <Grid ColumnDefinitions="* * *">
+                <TextBlock Grid.Column="0" Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" Margin="5"/>
+                <Separator Grid.Column="1"/>
+                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"/>
+            </Grid>
+        </DataTemplate>
+    </Window.DataTemplates>
     <Window.Styles>
         <Style Selector="TextBlock.Working">
             <Setter Property="Text"></Setter>
@@ -32,12 +47,28 @@
     <Design.DataContext><viewModels:ConnectToServerViewModel/></Design.DataContext>
     <Grid RowDefinitions="* * * *" ColumnDefinitions="* * *" Margin="5">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold" Text="Connect to Server" HorizontalAlignment="Center"/>
-        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10" Height="25"
-                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10" Height="25"
-                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+        <CheckBox Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
+            <Label Content="Use public key"/>
+        </CheckBox>
+        <AutoCompleteBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10" Height="25"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" 
+                 ItemsSource="{Binding  ProgramSettings.LastUsedServers.Keys}"
+                 FilterMode="Contains"
+                 />
+        <AutoCompleteBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10" Height="25"
+                         IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" 
+                         ItemsSource="{Binding ProgramSettings.LastUsedServers.Values}"
+                         FilterMode="Contains"
+                         />
         <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*"
-                 Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+                 Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}" IsVisible="{Binding !AuthWithPublicKey}" VerticalAlignment="Bottom"/>
+        <ComboBox Grid.Row="1" Grid.Column="2" Margin="5 10" Height="25" 
+                  IsEnabled="{Binding !ServerConnection.IsConnected}" 
+                  IsVisible="{Binding AuthWithPublicKey}"
+                  ItemsSource="{Binding PublicKeys}"
+                  SelectedItem="{Binding SelectedPublicKey}"
+                  VerticalAlignment="Bottom"></ComboBox>
+        
         <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5"
                 Command="{Binding TestConnection}" IsEnabled="{Binding !ServerConnection.IsConnected}">
             <ToolTip.Tip>
@@ -71,7 +102,7 @@
         </TextBlock>
         <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" 
                 HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
-                Background="LimeGreen" IsEnabled="{Binding ServerConnection.IsConnected}" 
+                Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}" 
                 Command="{Binding SubmitConnection}">
             <ToolTip.Tip>
                 <Label Content="Accept connection"/>

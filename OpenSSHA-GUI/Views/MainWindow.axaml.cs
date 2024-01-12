@@ -17,8 +17,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(DoShowExportWindowAsync)));
         this.WhenActivated(action =>
-            action(ViewModel!.ShowUploadToServer.RegisterHandler(DoShowUploadToServerWindowAsync)));
-        this.WhenActivated(action =>
             action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(DoShowEditAuthorizedKeysWindowAsync)));
         this.WhenActivated(action =>
             action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(DoShowConnectToServerWindowAsync)));
@@ -44,17 +42,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             WindowStartupLocation = DefaultWindowStartupLocation
         };
         interaction.SetOutput(await dialog.ShowDialog<EditAuthorizedKeysViewModel>(this));
-    }
-    
-    private async Task DoShowUploadToServerWindowAsync(
-        InteractionContext<UploadToServerViewModel, UploadToServerViewModel?> interaction)
-    {
-        var dialog = new UploadToServerWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<UploadToServerViewModel>(this));
     }
     
     private async Task DoShowExportWindowAsync(

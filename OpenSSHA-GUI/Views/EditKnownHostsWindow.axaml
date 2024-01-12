@@ -11,6 +11,7 @@
         x:DataType="viewModels:EditKnownHostsViewModel"
         Width="800"
         Height="600"
+        Icon="/Assets/appicon.ico"
         Title="{x:Static main:StringsAndTexts.EditKnownHostsWindowTitle}"
         >
     <Window.Styles>
@@ -87,8 +88,6 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </Grid>
-                
-                
             </Expander>
         </DataTemplate>
     </Window.DataTemplates>
@@ -115,37 +114,21 @@
                 </Grid>
             </TabItem>
         </TabControl>
-
-        <Border Grid.Row="1" HorizontalAlignment="Stretch" BorderBrush="Black"
-                BorderThickness="1" CornerRadius="10">
-            <Grid RowDefinitions="*" ColumnDefinitions="* * *">
-                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Background="Red"
+            <Grid Grid.Row="1" HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="* *">
+                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Background="Red" Margin="5 0"
                         Command="{Binding ProcessData}" CommandParameter="false">
                     <ToolTip.Tip>
                         <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}" />
                     </ToolTip.Tip>
-                    <avalonia:MaterialIcon Kind="CloseCircleOutline" />
+                    <avalonia:MaterialIcon Kind="Cancel" />
                 </Button>
-                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Background="Khaki"
-                        Command="{Binding ResetChangesAndReload}">
-                    <ToolTip.Tip>
-                        <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowReloadButtonToolTipText}" />
-                    </ToolTip.Tip>
-                    <avalonia:MaterialIcon Kind="Reload" />
-                </Button>
-                <Button Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Background="Green"
+                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="Green" Margin="5 0"
                         Command="{Binding ProcessData}" CommandParameter="true">
                     <ToolTip.Tip>
                         <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}" />
                     </ToolTip.Tip>
-                    <avalonia:MaterialIcon Kind="Check" />
+                    <avalonia:MaterialIcon Kind="FloppyDisk" />
                 </Button>
             </Grid>
-        </Border>
     </Grid>
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <viewModels:EditKnownHostsViewModel />
-    </Design.DataContext>
 </Window>

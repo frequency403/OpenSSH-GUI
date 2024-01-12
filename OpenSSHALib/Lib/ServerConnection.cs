@@ -7,18 +7,42 @@ using Renci.SshNet;
 
 namespace OpenSSHALib.Lib;
 
-public class ServerConnection(string hostname, string user, string password) : ReactiveObject, IDisposable
+public class ServerConnection : ReactiveObject, IDisposable
 {
-    public string Hostname { get; } = hostname;
-    public string Username { get; } = user;
-    public string Password { get; } = password;
-    private SshClient _sshClient = new (hostname, user, password);
+
+    public ServerConnection(string hostname, string user, string password)
+    {
+        Hostname = hostname;
+        Username = user;
+        Password = password;
+        _sshClient = new SshClient(Hostname, Username, Password)
+        {
+            KeepAliveInterval = TimeSpan.FromSeconds(10)
+        };
+    }
+
+    public ServerConnection(string hostname, string user, SshPublicKey key)
+    {
+        Hostname = hostname;
+        Username = user;
+        AuthKey = key;
+        _sshClient = new SshClient(Hostname, Username, new PrivateKeyFile(AuthKey.PrivateKey.AbsoluteFilePath))
+        {
+            KeepAliveInterval = TimeSpan.FromSeconds(10)
+        };
+    }
+    
+    public string Hostname { get; }
+    public string Username { get; } 
+    public string Password { get; } 
+    public SshPublicKey? AuthKey { get; set; }
+    private SshClient _sshClient;
     private SshClient ClientConnection
     {
         get => _sshClient;
         set => this.RaiseAndSetIfChanged(ref _sshClient, value);
-    }  
-
+    }
+    
     private bool _isConnected = false;
     public bool IsConnected
     {
@@ -26,7 +50,7 @@ public class ServerConnection(string hostname, string user, string password) : R
         set => this.RaiseAndSetIfChanged(ref _isConnected, value);
     }
     
-    public string ConnectionString => IsConnected ? $"{user}@{hostname}" : "";
+    public string ConnectionString => IsConnected ? $"{Username}@{Hostname}" : "";
     private PlatformID ServerOs { get; set; } = PlatformID.Other;
     private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
     private PlatformID GetServerOs()

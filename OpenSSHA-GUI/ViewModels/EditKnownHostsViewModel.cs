@@ -11,8 +11,7 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase
 {
-    public EditKnownHostsViewModel() : this(new ServerConnection("123", "123", "123")) {}
-    public EditKnownHostsViewModel(ServerConnection serverConnection)
+    public EditKnownHostsViewModel(ref ServerConnection serverConnection)
     {
         ServerConnection = serverConnection;
         KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());

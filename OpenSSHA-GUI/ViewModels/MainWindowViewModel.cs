@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Material.Icons;
+using Material.Icons.Avalonia;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSHALib.Lib;
@@ -16,10 +20,82 @@ public class MainWindowViewModel : ViewModelBase
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
-    public readonly Interaction<UploadToServerViewModel, UploadToServerViewModel?> ShowUploadToServer = new();
     public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys = new();
     public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
+
+    public MainWindowViewModel()
+    {
+        EvaluateAppropriateIcon();
+    }
+
+    private MaterialIcon _itemsCount = new()
+    {
+        Kind = MaterialIconKind.NumericZero,
+        Width = 20,
+        Height = 20
+    };
+
+    public MaterialIcon ItemsCount
+    {
+        get => _itemsCount;
+        set => this.RaiseAndSetIfChanged(ref _itemsCount, value);
+    }
+
+    private void EvaluateAppropriateIcon()
+    {
+        ItemsCount = new MaterialIcon
+        {
+            Kind = SshKeys.Count switch
+            {
+                1 => MaterialIconKind.NumericOne,
+                2 => MaterialIconKind.NumericTwo,
+                3 => MaterialIconKind.NumericThree,
+                4 => MaterialIconKind.NumericFour,
+                5 => MaterialIconKind.NumericFive,
+                6 => MaterialIconKind.NumericSix,
+                7 => MaterialIconKind.NumericSeven,
+                8 => MaterialIconKind.NumericEight,
+                9 => MaterialIconKind.NumericNine,
+                10 => MaterialIconKind.Numeric10,
+                _ => MaterialIconKind.Infinity
+            },
+            Width = 20,
+            Height = 20
+        };
+    }
     
+    public ReactiveCommand<Unit, Unit> NotImplementedMessage => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
+    {
+        var msgBox = MessageBoxManager.GetMessageBoxStandard("Not Implemented jet",
+            "This function is not implemented jet, but planned!", ButtonEnum.Ok, Icon.Info);
+        await msgBox.ShowAsync();
+        return e;
+    });
+    
+    public ReactiveCommand<string, Unit?> OpenBrowser => ReactiveCommand.Create<string, Unit?>(e =>
+    {
+        var url = int.Parse(e) switch
+        {
+            1 => "https://github.com/frequency403/OpenSSH-GUI/issues",
+            2 => "https://github.com/frequency403/OpenSSH-GUI#authors",
+            _ => "https://github.com/frequency403/OpenSSH-GUI"
+        };
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            url = url.Replace("&", "^&");
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Process.Start("xdg-open", url);
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Process.Start("open", url);
+        }
+        return null;
+    });
     
     public ReactiveCommand<Unit, Unit> DisconnectServer => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
@@ -46,7 +122,7 @@ public class MainWindowViewModel : ViewModelBase
     
     public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow => ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
     {
-        var connectToServer = new ConnectToServerViewModel();
+        var connectToServer = new ConnectToServerViewModel(ref _sshKeys);
         var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
         if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
         return windowResult;
@@ -55,7 +131,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
-            var editKnownHosts = new EditKnownHostsViewModel(ServerConnection);
+            var editKnownHosts = new EditKnownHostsViewModel(ref _serverConnection);
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
 
@@ -81,21 +157,13 @@ public class MainWindowViewModel : ViewModelBase
             return await ShowExportWindow.Handle(exportViewModel);
         });
 
-
-    public ReactiveCommand<Unit, UploadToServerViewModel?> OpenUploadToServerWindow => ReactiveCommand.CreateFromTask<Unit, UploadToServerViewModel?>(async e =>
-    {
-        var uploadViewModel = new UploadToServerViewModel(_sshKeys, ServerConnection);
-        var result = await ShowUploadToServer.Handle(uploadViewModel);
-        return result;
-    });
-
     public ReactiveCommand<Unit, EditAuthorizedKeysViewModel?> OpenEditAuthorizedKeysWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditAuthorizedKeysViewModel?>(
             async e =>
             {
                 try
                 {
-                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel(ServerConnection);
+                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel(ref _serverConnection, ref _sshKeys);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
                 catch (Exception exception)
@@ -131,6 +199,7 @@ public class MainWindowViewModel : ViewModelBase
             var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, exception.Message,
                 ButtonEnum.Ok, Icon.Error);
             await msgBox.ShowAsync();
+            EvaluateAppropriateIcon();
             return result;
         });
 
@@ -144,6 +213,7 @@ public class MainWindowViewModel : ViewModelBase
             if (res != ButtonResult.Yes) return null;
             u.DeleteKey();
             SshKeys.Remove(u);
+            EvaluateAppropriateIcon();
             return u;
         });
 

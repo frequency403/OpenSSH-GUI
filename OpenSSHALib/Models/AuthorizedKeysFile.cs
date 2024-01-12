@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
 using DynamicData;
 using ReactiveUI;
 
@@ -6,29 +7,32 @@ namespace OpenSSHALib.Models;
 
 public class AuthorizedKeysFile : ReactiveObject
 {
-    public ObservableCollection<AuthorizedKey> AuthorizedKeys { get; set; }= [];
+    private ObservableCollection<AuthorizedKey> _authorizedKeys = [];
+    public ObservableCollection<AuthorizedKey> AuthorizedKeys
+    {
+        get => _authorizedKeys;
+        set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
+    }
+    
     private bool IsFileFromServer { get; }
+    private readonly string _fileContentsOrPath;
     
     public AuthorizedKeysFile(string fileContentsOrPath, bool fromServer = false)
     {
         IsFileFromServer = fromServer;
+        _fileContentsOrPath = fileContentsOrPath;
         if (IsFileFromServer)
         {
-            LoadFileContents(fileContentsOrPath);
+            LoadFileContents(_fileContentsOrPath);
         }
         else
         {
-            ReadAndLoadFileContents(fileContentsOrPath);
+            ReadAndLoadFileContents(_fileContentsOrPath);
         }
     }
 
     private void LoadFileContents(string fileContents)
     {
-        var split = fileContents.TrimEnd().Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
-        var sorted = split.Where(e => e != "");
-        
-        
-        
         AuthorizedKeys =
             new ObservableCollection<AuthorizedKey>(fileContents.TrimEnd().Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
                 .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
@@ -51,6 +55,23 @@ public class AuthorizedKeysFile : ReactiveObject
         return true;
     }
 
+    public bool ApplyChanges(IEnumerable<AuthorizedKey> keys)
+    {
+        var countBefore = AuthorizedKeys.Count;
+        AuthorizedKeys = new ObservableCollection<AuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
+        return countBefore != AuthorizedKeys.Count;
+    }
+    
+    public AuthorizedKeysFile PersistChangesInFile()
+    {
+        if (IsFileFromServer) return this;
+        using var fileStream = File.Open(_fileContentsOrPath, FileMode.Truncate);
+        fileStream.Write(Encoding.Default.GetBytes(ExportFileContent()));
+        fileStream.Close();
+        ReadAndLoadFileContents(_fileContentsOrPath);
+        return this;
+    }
+
     public async Task<bool> AddAuthorizedKeyAsync(SshPublicKey key)
     {
         if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
@@ -71,6 +92,6 @@ public class AuthorizedKeysFile : ReactiveObject
 
     public string ExportFileContent(bool local = true, PlatformID? platform = null) =>
      local ? 
-            AuthorizedKeys.Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}\r\n") : 
-            AuthorizedKeys.Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
+            AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}\r\n") : 
+            AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
 }
