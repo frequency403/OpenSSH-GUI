@@ -30,19 +30,27 @@ public class ConnectToServerViewModel : ViewModelBase
                     if (!ValidData) throw new ArgumentException("Missing hostname/ip, username or password!");
                     ServerConnection = new ServerConnection(Hostname, Username, Password);
                     if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
-                    StatusButtonText = "Status: success";
-                    StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
-                    StatusButtonBackground = Brushes.Green;
+                    
+                    return true;
                 }
                 catch (Exception exception)
                 {
-                    StatusButtonText = "Status: failed!";
                     StatusButtonToolTip = exception.Message;
-                    StatusButtonBackground = Brushes.Red;
+                    return false;
                 }
             });
             TryingToConnect = true;
-            await task;
+            if (await task)
+            {
+                StatusButtonText = "Status: success";
+                StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
+                StatusButtonBackground = Brushes.Green;
+            }
+            else
+            {
+                StatusButtonText = "Status: failed!";
+                StatusButtonBackground = Brushes.Red;
+            }
             TryingToConnect = false;
             if (ServerConnection.IsConnected) return e;
             var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,

@@ -79,10 +79,10 @@
                                     <TextBlock Grid.Column="0" Text="{Binding Filename}" Margin="5" HorizontalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5" HorizontalAlignment="Center"/>
                                     <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" HorizontalAlignment="Center"/>
-                                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button
-                                        Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
-                                        CommandParameter="{Binding .}">
+                                    <Grid Grid.Column="3" ColumnDefinitions="* * *" HorizontalAlignment="Center">
+                                        <Button Grid.Column="0" HorizontalAlignment="Center"
+                                                Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
+                                                CommandParameter="{Binding .}">
                                         <ToolTip.Tip>
                                             <Label
                                                 Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
@@ -92,7 +92,7 @@
                                             <materialIcons:MaterialIcon Kind="KeyOutline" />
                                         </StackPanel>
                                     </Button>
-                                    <Button
+                                    <Button Grid.Column="1" HorizontalAlignment="Center"
                                         Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
                                         CommandParameter="{Binding PrivateKey}">
                                         <ToolTip.Tip>
@@ -104,16 +104,17 @@
                                             <materialIcons:MaterialIcon Kind="ShieldKeyOutline" />
                                         </StackPanel>
                                     </Button>
-                                    <Button Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).DeleteKey}"
-                                            CommandParameter="{Binding .}"
-                                            Background="DarkRed">
+                                    <Button Grid.Column="2" HorizontalAlignment="Center" Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).DeleteKey}"
+                                                           CommandParameter="{Binding .}"
+                                                           Background="DarkRed">
                                         <ToolTip.Tip>
                                             <Label
                                                 Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
                                         </ToolTip.Tip>
                                         <materialIcons:MaterialIcon Kind="DeleteOutline" />
                                     </Button>
-                                </StackPanel>
+                                    </Grid>
+                                
                             </Grid>
                             </Border>
                         </DataTemplate>
@@ -200,7 +201,10 @@
         
         <!-- Server Status -->
         
-        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="Transparent" Margin="10 0">
+        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="Transparent" Margin="10 5">
+            <ToolTip.Tip>
+                <Label Content="Right click to open connection menu"/>
+            </ToolTip.Tip>
             <StackPanel.ContextMenu>
                 <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                         <MenuItem Header="Connect" IsEnabled="{Binding !ServerConnection.IsConnected}" Command="{Binding OpenConnectToServerWindow}">
@@ -216,11 +220,10 @@
                 </ContextMenu>
             </StackPanel.ContextMenu>
             <StackPanel Orientation="Horizontal" IsVisible="{Binding ServerConnection.IsConnected}">
-                <TextBlock Text="Connected via SSH to: " Foreground="Green"/>
-                <TextBlock Text="{Binding ServerConnection.ConnectionString}" Foreground="Green"/>
+                <materialIcons:MaterialIcon Kind="Signal" Foreground="Green"/>
             </StackPanel>
-            <StackPanel IsVisible="{Binding !ServerConnection.IsConnected}">
-                <TextBlock Text="No server connected!" Foreground="Red"/>
+            <StackPanel Orientation="Horizontal" IsVisible="{Binding !ServerConnection.IsConnected}">
+                <materialIcons:MaterialIcon Kind="SignalOff" Foreground="Red"/>
             </StackPanel>
         </StackPanel>
         

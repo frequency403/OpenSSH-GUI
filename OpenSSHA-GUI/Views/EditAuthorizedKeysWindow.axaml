@@ -11,7 +11,12 @@
         x:Class="OpenSSHA_GUI.Views.EditAuthorizedKeysWindow"
         x:DataType="viewModels:EditAuthorizedKeysViewModel"
         Title="EditAuthorizedKeysWindow"
-        Icon="/Assets/appicon.ico">
+        Width="800"
+        Height="600"
+        Icon="/Assets/appicon.ico"
+        ShowInTaskbar="True"
+        ShowActivated="True"
+        WindowStartupLocation="CenterOwner">
     <Design.DataContext><viewModels:EditAuthorizedKeysViewModel AuthorizedKeysFileRemote="{Binding AuthorizedKeysFileRemote}"
                                                                 AuthorizedKeysFileLocal="{Binding AuthorizedKeysFileLocal}"/></Design.DataContext>
     <Window.Resources>
