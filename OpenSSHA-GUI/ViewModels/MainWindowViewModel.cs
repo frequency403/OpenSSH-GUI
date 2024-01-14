@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -33,12 +34,25 @@ public class MainWindowViewModel : ViewModelBase
         Height = 20
     };
 
-    private ServerConnection _serverConnection = new("123", "123", "123");
+    private static void Initialization()
+    {
+        if (!SettingsFileHandler.IsFileInitialized)
+            if (!SettingsFileHandler.InitSettingsFile())
+                return;
+        if (!InitializationRoutine.IsProgramStartReady)
+            if (!InitializationRoutine.MakeProgramStartReady())
+                return;
+    }
+    
+    private ServerConnection _serverConnection;
 
-    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
+    private ObservableCollection<SshPublicKey> _sshKeys;
 
     public MainWindowViewModel()
     {
+        RxApp.MainThreadScheduler.Schedule(Initialization);
+        _sshKeys = new ObservableCollection<SshPublicKey>(DirectoryCrawler.GetAllKeys());
+        _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }
 

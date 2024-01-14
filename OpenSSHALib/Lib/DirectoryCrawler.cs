@@ -18,19 +18,11 @@ public static class DirectoryCrawler
         return contains;
     }
 
-    public static IEnumerable<SshPublicKey> GetAllKeys()
-    {
-        var list = new List<SshPublicKey>();
-        foreach (var filepath in Directory.EnumerateFiles(
-                     SshConfigFilesExtension.GetBaseSshPath()).Where(e =>
-                     !e.FileNameStartsWithAny(SettingsFileHandler.Settings.FileNamesToSkipWhenSearchingForKeys) &&
-                     e.EndsWith(".pub")))
+    public static IEnumerable<SshPublicKey> GetAllKeys() => Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*.pub", SearchOption.AllDirectories).Select(
+        e =>
         {
-            var key = new SshPublicKey(filepath);
+            var key = new SshPublicKey(e);
             key.GetPrivateKey();
-            list.Add(key);
-        }
-
-        return list;
-    }
+            return key;
+        });
 }

@@ -35,6 +35,8 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 
         AddKey = ReactiveCommand.CreateFromTask<string, AddKeyWindowViewModel?>(async b =>
         {
+            _createKey = bool.Parse(b);
+            if (!_createKey) return null;
             if (File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName))
             {
                 var box = MessageBoxManager.GetMessageBoxStandard("Keyfile does already exists",
@@ -42,8 +44,6 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                 await box.ShowAsync();
                 return null;
             } // TODO: Remove, when Validation works.
-
-            _createKey = bool.Parse(b);
             return this;
         });
         _sshKeyTypes = new ObservableCollection<SshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
