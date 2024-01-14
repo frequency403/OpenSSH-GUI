@@ -64,8 +64,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> NotImplementedMessage => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
-        var msgBox = MessageBoxManager.GetMessageBoxStandard("Not Implemented jet",
-            "This function is not implemented jet, but planned!", ButtonEnum.Ok, Icon.Info);
+        var msgBox = MessageBoxManager.GetMessageBoxStandard("Not Implemented yet",
+            "This function is not implemented yet, but planned!", ButtonEnum.Ok, Icon.Info);
         await msgBox.ShowAsync();
         return e;
     });

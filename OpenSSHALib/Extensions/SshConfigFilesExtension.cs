@@ -4,7 +4,7 @@ namespace OpenSSHALib.Extensions;
 
 public static class SshConfigFilesExtension
 {
-    private const string SshPathWithVariableLinux = "$HOME/.ssh";
+    private const string SshPathWithVariableLinux = "%HOME%/.ssh";
     private const string SshPathWithVariableWindows = "%USERPROFILE%\\.ssh";
     private const string SshRootPathLinux = "/etc/ssh";
     private const string SshRootPathWin = "%PROGRAMDATA%\\ssh";
