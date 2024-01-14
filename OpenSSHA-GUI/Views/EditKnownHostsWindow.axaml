@@ -12,8 +12,7 @@
         Width="800"
         Height="600"
         Icon="/Assets/appicon.ico"
-        Title="{x:Static main:StringsAndTexts.EditKnownHostsWindowTitle}"
-        >
+        Title="{x:Static main:StringsAndTexts.EditKnownHostsWindowTitle}">
     <Window.Styles>
         <Style Selector="Expander:expanded ToggleButton.whole-host">
             <Setter Property="IsVisible" Value="False" />
@@ -39,7 +38,7 @@
                 <Expander.Header>
                     <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
                         <TextBlock Grid.Column="0" Text="{Binding Host}" HorizontalAlignment="Center"
-                               FontWeight="Bold" />
+                                   FontWeight="Bold" />
                         <ToggleButton Grid.Column="1" IsChecked="False" Classes="whole-host"
                                       Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
                             <ToolTip.Tip>
@@ -54,25 +53,30 @@
                     </Grid>
                 </Expander.Header>
                 <Grid RowDefinitions="* *" ColumnDefinitions="* * *">
-                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="0 5">
-                        <Grid  ColumnDefinitions="* * *">
-                            <TextBlock Grid.Column="0" Text="KeyType" HorizontalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="Fingerprint" HorizontalAlignment="Center"/>
-                            <TextBlock Grid.Column="2" Text="Mark for deletion" HorizontalAlignment="Center"/>
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="DimGray"
+                            BorderThickness="0 0 0 1" Margin="0 5">
+                        <Grid ColumnDefinitions="* * *">
+                            <TextBlock Grid.Column="0" Text="KeyType" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="Fingerprint" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="Mark for deletion" HorizontalAlignment="Center" />
                         </Grid>
                     </Border>
-                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}" HorizontalAlignment="Stretch">
+                    <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}"
+                                  HorizontalAlignment="Stretch">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="dataModels:KnownHostKey">
                                 <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Padding="5">
                                     <Grid ColumnDefinitions="* * *">
-                                        <TextBlock Grid.Column="0" Text="{Binding KeyType }" HorizontalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" HorizontalAlignment="Center">
+                                        <TextBlock Grid.Column="0" Text="{Binding KeyType }"
+                                                   HorizontalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Fingerprint}"
+                                                   HorizontalAlignment="Center">
                                             <ToolTip.Tip>
                                                 <Label Content="{Binding Fingerprint}" />
                                             </ToolTip.Tip>
                                         </TextBlock>
-                                        <ToggleButton Grid.Column="2" IsChecked="{Binding MarkedForDeletion}" HorizontalAlignment="Center" VerticalAlignment="Top">
+                                        <ToggleButton Grid.Column="2" IsChecked="{Binding MarkedForDeletion}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Top">
                                             <ToolTip.Tip>
                                                 <Label
                                                     Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
@@ -114,21 +118,21 @@
                 </Grid>
             </TabItem>
         </TabControl>
-            <Grid Grid.Row="1" HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="* *">
-                <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Background="Red" Margin="5 0"
-                        Command="{Binding ProcessData}" CommandParameter="false">
-                    <ToolTip.Tip>
-                        <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}" />
-                    </ToolTip.Tip>
-                    <avalonia:MaterialIcon Kind="Cancel" />
-                </Button>
-                <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="Green" Margin="5 0"
-                        Command="{Binding ProcessData}" CommandParameter="true">
-                    <ToolTip.Tip>
-                        <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}" />
-                    </ToolTip.Tip>
-                    <avalonia:MaterialIcon Kind="FloppyDisk" />
-                </Button>
-            </Grid>
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="* *">
+            <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Background="Red" Margin="5 0"
+                    Command="{Binding ProcessData}" CommandParameter="false">
+                <ToolTip.Tip>
+                    <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}" />
+                </ToolTip.Tip>
+                <avalonia:MaterialIcon Kind="Cancel" />
+            </Button>
+            <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="Green" Margin="5 0"
+                    Command="{Binding ProcessData}" CommandParameter="true">
+                <ToolTip.Tip>
+                    <Label Content="{x:Static main:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}" />
+                </ToolTip.Tip>
+                <avalonia:MaterialIcon Kind="FloppyDisk" />
+            </Button>
+        </Grid>
     </Grid>
 </Window>

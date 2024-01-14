@@ -2,7 +2,6 @@
 using System.Globalization;
 using Avalonia.Data.Converters;
 using OpenSSHALib.Enums;
-using OpenSSHALib.Models;
 
 namespace OpenSSHA_GUI.Converters;
 

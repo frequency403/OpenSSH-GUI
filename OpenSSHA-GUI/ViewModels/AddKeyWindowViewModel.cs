@@ -4,12 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using DynamicData;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
-using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
@@ -30,13 +27,12 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 
     public AddKeyWindowViewModel()
     {
-
         this.ValidationRule(
             e => e.KeyName,
             name => File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + name),
             "Filename does already exist!"
         ); // TODO: Validation does not yet work correctly, need further fixing.
-        
+
         AddKey = ReactiveCommand.CreateFromTask<string, AddKeyWindowViewModel?>(async b =>
         {
             if (File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName))
@@ -46,6 +42,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                 await box.ShowAsync();
                 return null;
             } // TODO: Remove, when Validation works.
+
             _createKey = bool.Parse(b);
             return this;
         });
@@ -77,8 +74,8 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         get => _sshKeyTypes;
         set => this.RaiseAndSetIfChanged(ref _sshKeyTypes, value);
     }
-    
-    
+
+
     public string KeyName
     {
         get => _keyName;
@@ -87,6 +84,8 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 
     public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
     public string Password { get; set; } = "";
+
+    public ValidationContext ValidationContext { get; } = new();
 
     public async ValueTask<SshPublicKey?> RunKeyGen()
     {
@@ -103,7 +102,8 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                 //     $"-f \"{fullFilePath}\"",
                 //     $"-N \"{Password}\""
                 // },
-                Arguments = $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -C \"{Comment}\" -f \"{fullFilePath}\" -N \"{Password}\" ",
+                Arguments =
+                    $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -C \"{Comment}\" -f \"{fullFilePath}\" -N \"{Password}\" ",
                 CreateNoWindow = true,
                 FileName = "ssh-keygen",
                 RedirectStandardOutput = true,
@@ -119,6 +119,4 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         newKey.GetPrivateKey();
         return proc.ExitCode == 0 ? newKey : null;
     }
-
-    public ValidationContext ValidationContext { get; } = new ();
 }

@@ -24,7 +24,9 @@ public static class SettingsFileHandler
 
     public static SettingsFile Settings { get; private set; }
 
-    public static bool IsFileInitialized { get; private set; } = false;
+    public static bool IsFileInitialized { get; private set; }
+
+    private static bool FileOverflowCheck => Settings.LastUsedServers.Count > Settings.MaxSavedServers;
 
     private static void WriteIntoFile()
     {
@@ -40,8 +42,6 @@ public static class SettingsFileHandler
         file.Write(Encoding.Default.GetBytes(JsonSerializer.Serialize(Settings, JsonSerializerOptions)));
     }
 
-    private static bool FileOverflowCheck => Settings.LastUsedServers.Count > Settings.MaxSavedServers;
-    
     public static bool InitSettingsFile(bool deleteBeforeInit = false)
     {
         try
@@ -70,11 +70,13 @@ public static class SettingsFileHandler
                 ShrinkKnownServers();
                 InitSettingsFile();
             }
+
             IsFileInitialized = true;
             return IsFileInitialized;
         }
         catch (Exception e)
         {
+            Console.WriteLine(e);
             return IsFileInitialized;
         }
     }
@@ -84,10 +86,7 @@ public static class SettingsFileHandler
         try
         {
             var baseValue = Settings.LastUsedServers.Count - Settings.MaxSavedServers;
-            for (var i = 0; i < baseValue; i++)
-            {
-                Settings.LastUsedServers.Remove(Settings.LastUsedServers.First().Key);
-            }
+            for (var i = 0; i < baseValue; i++) Settings.LastUsedServers.Remove(Settings.LastUsedServers.First().Key);
 
             using var settingsFile = File.Open(SettingsFilePath, FileMode.Truncate);
             settingsFile.Write(Encoding.Default.GetBytes(JsonSerializer.Serialize(Settings, JsonSerializerOptions)));
@@ -100,7 +99,7 @@ public static class SettingsFileHandler
 
         return true;
     }
-    
+
     public static bool AddKnownServerToFile(string host, string username)
     {
         try
@@ -114,6 +113,7 @@ public static class SettingsFileHandler
             Debug.WriteLine(e.Message);
             return false;
         }
+
         return true;
     }
 
@@ -123,13 +123,15 @@ public static class SettingsFileHandler
         {
             Settings.LastUsedServers.Add(host, username);
             await using var settingsFile = File.Open(SettingsFilePath, FileMode.Truncate);
-            await settingsFile.WriteAsync(Encoding.Default.GetBytes(JsonSerializer.Serialize(Settings, JsonSerializerOptions)));
+            await settingsFile.WriteAsync(
+                Encoding.Default.GetBytes(JsonSerializer.Serialize(Settings, JsonSerializerOptions)));
         }
         catch (Exception e)
         {
             Debug.WriteLine(e.Message);
             return false;
         }
+
         return true;
     }
 }

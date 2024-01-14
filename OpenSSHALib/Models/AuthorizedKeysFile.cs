@@ -1,43 +1,40 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
-using DynamicData;
 using ReactiveUI;
 
 namespace OpenSSHALib.Models;
 
 public class AuthorizedKeysFile : ReactiveObject
 {
-    private ObservableCollection<AuthorizedKey> _authorizedKeys = [];
-    public ObservableCollection<AuthorizedKey> AuthorizedKeys
-    {
-        get => _authorizedKeys;
-        set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
-    }
-    
-    private bool IsFileFromServer { get; }
     private readonly string _fileContentsOrPath;
-    
+    private ObservableCollection<AuthorizedKey> _authorizedKeys = [];
+
     public AuthorizedKeysFile(string fileContentsOrPath, bool fromServer = false)
     {
         IsFileFromServer = fromServer;
         _fileContentsOrPath = fileContentsOrPath;
         if (IsFileFromServer)
-        {
             LoadFileContents(_fileContentsOrPath);
-        }
         else
-        {
             ReadAndLoadFileContents(_fileContentsOrPath);
-        }
     }
+
+    public ObservableCollection<AuthorizedKey> AuthorizedKeys
+    {
+        get => _authorizedKeys;
+        set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
+    }
+
+    private bool IsFileFromServer { get; }
 
     private void LoadFileContents(string fileContents)
     {
         AuthorizedKeys =
-            new ObservableCollection<AuthorizedKey>(fileContents.TrimEnd().Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
+            new ObservableCollection<AuthorizedKey>(fileContents.TrimEnd()
+                .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
                 .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
     }
-    
+
     private void ReadAndLoadFileContents(string pathToFile)
     {
         if (!File.Exists(pathToFile)) File.Create(pathToFile);
@@ -61,7 +58,7 @@ public class AuthorizedKeysFile : ReactiveObject
         AuthorizedKeys = new ObservableCollection<AuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
         return countBefore != AuthorizedKeys.Count;
     }
-    
+
     public AuthorizedKeysFile PersistChangesInFile()
     {
         if (IsFileFromServer) return this;
@@ -90,8 +87,13 @@ public class AuthorizedKeysFile : ReactiveObject
         }
     }
 
-    public string ExportFileContent(bool local = true, PlatformID? platform = null) =>
-     local ? 
-            AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}\r\n") : 
-            AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
+    public string ExportFileContent(bool local = true, PlatformID? platform = null)
+    {
+        return local
+            ? AuthorizedKeys.Where(e => !e.MarkedForDeletion)
+                .Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}\r\n")
+            : AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("",
+                (s, key) => s +=
+                    $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
+    }
 }

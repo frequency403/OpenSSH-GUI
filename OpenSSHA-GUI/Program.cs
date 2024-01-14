@@ -13,13 +13,15 @@ internal sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        if (!SettingsFileHandler.IsFileInitialized) 
-            if (!SettingsFileHandler.InitSettingsFile()) 
+        Console.WriteLine("Starting");
+        if (!SettingsFileHandler.IsFileInitialized)
+            if (!SettingsFileHandler.InitSettingsFile())
                 return;
-        
+        Console.WriteLine("Initialized Settings");
         if (!InitializationRoutine.IsProgramStartReady)
             if (!InitializationRoutine.MakeProgramStartReady())
                 return;
+        Console.WriteLine("Build Avalonia app");
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }

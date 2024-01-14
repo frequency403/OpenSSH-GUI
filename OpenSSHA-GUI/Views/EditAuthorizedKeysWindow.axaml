@@ -44,9 +44,10 @@
         </DataTemplate>
         <DataTemplate DataType="models:SshPublicKey">
             <Grid ColumnDefinitions="* * *">
-                <TextBlock Grid.Column="0" Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"/>
-                <TextBlock Grid.Column="1" Text="{Binding Fingerprint}"/>
-                <TextBlock Grid.Column="2" Text="{Binding Comment}"/>
+                <TextBlock Grid.Column="0"
+                           Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
+                <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" />
+                <TextBlock Grid.Column="2" Text="{Binding Comment}" />
             </Grid>
         </DataTemplate>
     </Window.DataTemplates>
@@ -71,62 +72,61 @@
                     HorizontalContentAlignment="Stretch">
             <TabItem Header="Local" Margin="10">
                 <ToolTip.Tip>
-                    <Label Content="File content from local machine"/>
+                    <Label Content="File content from local machine" />
                 </ToolTip.Tip>
                 <ItemsControl ItemsSource="{Binding AuthorizedKeysFileLocal.AuthorizedKeys}" />
             </TabItem>
             <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnection.IsConnected}">
                 <ToolTip.Tip>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="File content from"/>
-                        <Label Content="{Binding ServerConnection.ConnectionString}"/>
+                        <Label Content="File content from" />
+                        <Label Content="{Binding ServerConnection.ConnectionString}" />
                     </StackPanel>
                 </ToolTip.Tip>
                 <Grid RowDefinitions="10* *" ColumnDefinitions="* *">
-                    <ItemsControl Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" 
+                    <ItemsControl Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
                                   ItemsSource="{Binding AuthorizedKeysFileRemote.AuthorizedKeys}" />
-                    <ComboBox Grid.Row="1" Grid.Column="0" 
+                    <ComboBox Grid.Row="1" Grid.Column="0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
-                              ItemsSource="{Binding PublicKeys}" 
+                              ItemsSource="{Binding PublicKeys}"
                               SelectedItem="{Binding SelectedKey}"
                               IsVisible="{Binding KeyAddPossible}"
-                              Margin="5"/>
-                    <Button Grid.Row="1" Grid.Column="1" 
+                              Margin="5" />
+                    <Button Grid.Row="1" Grid.Column="1"
                             HorizontalAlignment="Stretch"
-                            IsVisible="{Binding KeyAddPossible}" 
+                            IsVisible="{Binding KeyAddPossible}"
                             IsEnabled="{Binding AddButtonEnabled}"
                             Command="{Binding AddKey}"
                             CommandParameter="{Binding SelectedKey}"
                             Margin="5"
-                            Background="YellowGreen"
-                            >
+                            Background="YellowGreen">
                         <ToolTip.Tip>
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Add key to authorized_keys file of"/>
-                                <Label Content="{Binding ServerConnection.ConnectionString}"/>
+                                <Label Content="Add key to authorized_keys file of" />
+                                <Label Content="{Binding ServerConnection.ConnectionString}" />
                             </StackPanel>
                         </ToolTip.Tip>
-                        <materialIcons:MaterialIcon Kind="Add"/>
+                        <materialIcons:MaterialIcon Kind="Add" />
                     </Button>
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5 0" 
-                Command="{Binding Submit}" 
+        <Button Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5 0"
+                Command="{Binding Submit}"
                 CommandParameter="false" Background="Red">
             <ToolTip.Tip>
-                <Label Content="Cancel and close"/>
+                <Label Content="Cancel and close" />
             </ToolTip.Tip>
-            <materialIcons:MaterialIcon Kind="Cancel"/>
+            <materialIcons:MaterialIcon Kind="Cancel" />
         </Button>
-        <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5 0" 
-                Command="{Binding Submit}" 
+        <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5 0"
+                Command="{Binding Submit}"
                 CommandParameter="true" Background="Green">
             <ToolTip.Tip>
-                <Label Content="Save changes and close"/>
+                <Label Content="Save changes and close" />
             </ToolTip.Tip>
-            <materialIcons:MaterialIcon Kind="FloppyDisk"/>
+            <materialIcons:MaterialIcon Kind="FloppyDisk" />
         </Button>
     </Grid>
 </Window>

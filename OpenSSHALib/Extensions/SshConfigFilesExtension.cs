@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-using OpenSSHALib.Enums;
-using OpenSSHALib.Lib;
+﻿using OpenSSHALib.Enums;
 
 namespace OpenSSHALib.Extensions;
 
@@ -24,18 +22,19 @@ public static class SshConfigFilesExtension
                 $"Platform {Environment.OSVersion.Platform.ToString().ToLower()} is not supported!")
         });
     }
-    
+
     public static string GetBaseSshPath(PlatformID? platformId = null)
     {
         return Environment.ExpandEnvironmentVariables((platformId ?? Environment.OSVersion.Platform) switch
         {
-            PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE => SshPathWithVariableWindows,
+            PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE =>
+                SshPathWithVariableWindows,
             PlatformID.Unix or PlatformID.MacOSX => SshPathWithVariableLinux,
             _ => throw new NotSupportedException(
                 $"Platform {Environment.OSVersion.Platform.ToString().ToLower()} is not supported!")
         });
-    } 
-    
+    }
+
     public static string GetPathOfFile(this SshConfigFiles files, PlatformID? platform = null)
     {
         return Environment.ExpandEnvironmentVariables((platform ?? Environment.OSVersion.Platform) switch

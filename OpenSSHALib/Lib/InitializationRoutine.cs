@@ -7,7 +7,7 @@ public static class InitializationRoutine
 {
     public static bool IsProgramStartReady => Directory.Exists(SshConfigFilesExtension.GetBaseSshPath()) &&
                                               File.Exists(SshConfigFiles.Known_Hosts.GetPathOfFile());
-    
+
     public static bool MakeProgramStartReady()
     {
         try
@@ -25,10 +25,12 @@ public static class InitializationRoutine
 
             if (!IsProgramStartReady) MakeProgramStartReady();
         }
-        catch (Exception)
+        catch (Exception d)
         {
+            Console.WriteLine(d);
             return IsProgramStartReady;
         }
-        return IsProgramStartReady; 
+
+        return IsProgramStartReady;
     }
 }

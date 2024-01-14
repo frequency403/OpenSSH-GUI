@@ -62,7 +62,7 @@ public abstract class SshKey
             return null;
         }
     }
-    
+
     public string? ExportKey()
     {
         try

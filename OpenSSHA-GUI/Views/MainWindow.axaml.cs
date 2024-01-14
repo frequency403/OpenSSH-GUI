@@ -32,7 +32,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
         interaction.SetOutput(await dialog.ShowDialog<ConnectToServerViewModel>(this));
     }
-    
+
     private async Task DoShowEditAuthorizedKeysWindowAsync(
         InteractionContext<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> interaction)
     {
@@ -43,7 +43,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
         interaction.SetOutput(await dialog.ShowDialog<EditAuthorizedKeysViewModel>(this));
     }
-    
+
     private async Task DoShowExportWindowAsync(
         InteractionContext<ExportWindowViewModel, ExportWindowViewModel?> interaction)
     {

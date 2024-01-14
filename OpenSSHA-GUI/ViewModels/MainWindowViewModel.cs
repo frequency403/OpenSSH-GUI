@@ -17,16 +17,14 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
+
+    public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys =
+        new();
+
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
-    public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys = new();
-    public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
-
-    public MainWindowViewModel()
-    {
-        EvaluateAppropriateIcon();
-    }
 
     private MaterialIcon _itemsCount = new()
     {
@@ -35,35 +33,21 @@ public class MainWindowViewModel : ViewModelBase
         Height = 20
     };
 
+    private ServerConnection _serverConnection = new("123", "123", "123");
+
+    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
+
+    public MainWindowViewModel()
+    {
+        EvaluateAppropriateIcon();
+    }
+
     public MaterialIcon ItemsCount
     {
         get => _itemsCount;
         set => this.RaiseAndSetIfChanged(ref _itemsCount, value);
     }
 
-    private void EvaluateAppropriateIcon()
-    {
-        ItemsCount = new MaterialIcon
-        {
-            Kind = SshKeys.Count switch
-            {
-                1 => MaterialIconKind.NumericOne,
-                2 => MaterialIconKind.NumericTwo,
-                3 => MaterialIconKind.NumericThree,
-                4 => MaterialIconKind.NumericFour,
-                5 => MaterialIconKind.NumericFive,
-                6 => MaterialIconKind.NumericSix,
-                7 => MaterialIconKind.NumericSeven,
-                8 => MaterialIconKind.NumericEight,
-                9 => MaterialIconKind.NumericNine,
-                10 => MaterialIconKind.Numeric10,
-                _ => MaterialIconKind.Infinity
-            },
-            Width = 20,
-            Height = 20
-        };
-    }
-    
     public ReactiveCommand<Unit, Unit> NotImplementedMessage => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
         var msgBox = MessageBoxManager.GetMessageBoxStandard("Not Implemented jet",
@@ -71,7 +55,7 @@ public class MainWindowViewModel : ViewModelBase
         await msgBox.ShowAsync();
         return e;
     });
-    
+
     public ReactiveCommand<string, Unit?> OpenBrowser => ReactiveCommand.Create<string, Unit?>(e =>
     {
         var url = int.Parse(e) switch
@@ -80,7 +64,7 @@ public class MainWindowViewModel : ViewModelBase
             2 => "https://github.com/frequency403/OpenSSH-GUI#authors",
             _ => "https://github.com/frequency403/OpenSSH-GUI"
         };
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             url = url.Replace("&", "^&");
@@ -94,9 +78,10 @@ public class MainWindowViewModel : ViewModelBase
         {
             Process.Start("open", url);
         }
+
         return null;
     });
-    
+
     public ReactiveCommand<Unit, Unit> DisconnectServer => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
         var messageBoxText = "Disconnected successfully!";
@@ -114,20 +99,22 @@ public class MainWindowViewModel : ViewModelBase
             messageBoxText = "Nothing to disconnect from!";
             messageBoxIcon = Icon.Error;
         }
+
         var msgBox = MessageBoxManager.GetMessageBoxStandard("Disconnect from Server", messageBoxText,
             ButtonEnum.Ok, messageBoxIcon);
         await msgBox.ShowAsync();
         return e;
     });
-    
-    public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow => ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
-    {
-        var connectToServer = new ConnectToServerViewModel(ref _sshKeys);
-        var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
-        if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
-        return windowResult;
-    });
-    
+
+    public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow =>
+        ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
+        {
+            var connectToServer = new ConnectToServerViewModel(ref _sshKeys);
+            var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
+            if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
+            return windowResult;
+        });
+
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
@@ -163,7 +150,8 @@ public class MainWindowViewModel : ViewModelBase
             {
                 try
                 {
-                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel(ref _serverConnection, ref _sshKeys);
+                    var editAuthorizedKeysViewModel =
+                        new EditAuthorizedKeysViewModel(ref _serverConnection, ref _sshKeys);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
                 catch (Exception exception)
@@ -173,9 +161,8 @@ public class MainWindowViewModel : ViewModelBase
                     await messageBox.ShowAsync();
                     return null;
                 }
-                
             });
-    
+
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
         {
@@ -217,17 +204,38 @@ public class MainWindowViewModel : ViewModelBase
             return u;
         });
 
-    private ServerConnection _serverConnection = new ("123", "123", "123");
     public ServerConnection ServerConnection
     {
         get => _serverConnection;
         set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
-    
-    private ObservableCollection<SshPublicKey> _sshKeys = new(DirectoryCrawler.GetAllKeys());
+
     public ObservableCollection<SshPublicKey> SshKeys
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
+    }
+
+    private void EvaluateAppropriateIcon()
+    {
+        ItemsCount = new MaterialIcon
+        {
+            Kind = SshKeys.Count switch
+            {
+                1 => MaterialIconKind.NumericOne,
+                2 => MaterialIconKind.NumericTwo,
+                3 => MaterialIconKind.NumericThree,
+                4 => MaterialIconKind.NumericFour,
+                5 => MaterialIconKind.NumericFive,
+                6 => MaterialIconKind.NumericSix,
+                7 => MaterialIconKind.NumericSeven,
+                8 => MaterialIconKind.NumericEight,
+                9 => MaterialIconKind.NumericNine,
+                10 => MaterialIconKind.Numeric10,
+                _ => MaterialIconKind.Infinity
+            },
+            Width = 20,
+            Height = 20
+        };
     }
 }

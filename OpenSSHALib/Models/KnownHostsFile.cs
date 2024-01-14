@@ -10,6 +10,8 @@ public class KnownHostsFile : ReactiveObject
     private readonly string _fileKnownHostsPath = "";
     private readonly bool _isFromServer;
 
+    private ObservableCollection<KnownHost> _knownHosts = [];
+
     public KnownHostsFile(string knownHostsPathOrContent, bool fromServer = false)
     {
         _isFromServer = fromServer;
@@ -20,11 +22,10 @@ public class KnownHostsFile : ReactiveObject
         else
         {
             _fileKnownHostsPath = knownHostsPathOrContent;
-            ReadContent(); 
+            ReadContent();
         }
     }
 
-    private ObservableCollection<KnownHost> _knownHosts = [];
     public ObservableCollection<KnownHost> KnownHosts
     {
         get => _knownHosts;
@@ -39,10 +40,10 @@ public class KnownHostsFile : ReactiveObject
             .GroupBy(e => e.Split(' ')[0])
             .Select(e => new KnownHost(e)));
     }
-    
+
     public async Task ReadContentAsync(FileStream? stream = null)
     {
-        if(_isFromServer) return;
+        if (_isFromServer) return;
         if (stream is null)
         {
             await using var fileStream = File.OpenRead(_fileKnownHostsPath);
@@ -58,7 +59,7 @@ public class KnownHostsFile : ReactiveObject
 
     public void ReadContent(FileStream? stream = null)
     {
-        if(_isFromServer) return;
+        if (_isFromServer) return;
         if (stream is null)
         {
             using var fileStream = File.OpenRead(_fileKnownHostsPath);
@@ -79,7 +80,7 @@ public class KnownHostsFile : ReactiveObject
 
     public async Task UpdateFile()
     {
-        if(_isFromServer) return;
+        if (_isFromServer) return;
         await using var fileStream = File.OpenWrite(_fileKnownHostsPath);
         fileStream.SetLength(0);
         await fileStream.FlushAsync();

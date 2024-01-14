@@ -11,6 +11,10 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase
 {
+    private ObservableCollection<KnownHost> _knownHostsLocal = [];
+
+    private ObservableCollection<KnownHost> _knownHostsRemote = [];
+
     public EditKnownHostsViewModel(ref ServerConnection serverConnection)
     {
         ServerConnection = serverConnection;
@@ -22,9 +26,9 @@ public class EditKnownHostsViewModel : ViewModelBase
         {
             if (!bool.Parse(e)) return this;
             KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
-            if(ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
+            if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
             await KnownHostsFileLocal.UpdateFile();
-            if(ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
+            if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
             return this;
         });
         DeleteHost = ReactiveCommand.Create<KnownHost, Unit>(e =>
@@ -46,18 +50,16 @@ public class EditKnownHostsViewModel : ViewModelBase
     }
 
     public ServerConnection ServerConnection { get; }
-    
+
     private KnownHostsFile KnownHostsFileLocal { get; }
     private KnownHostsFile KnownHostsFileRemote { get; }
-    
-    private ObservableCollection<KnownHost> _knownHostsRemote = [];
+
     public ObservableCollection<KnownHost> KnownHostsRemote
     {
         get => _knownHostsRemote;
         private set => this.RaiseAndSetIfChanged(ref _knownHostsRemote, value);
     }
-    
-    private ObservableCollection<KnownHost> _knownHostsLocal = [];
+
     public ObservableCollection<KnownHost> KnownHostsLocal
     {
         get => _knownHostsLocal;

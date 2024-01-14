@@ -265,7 +265,7 @@
                 <Border Grid.Column="2" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
-                        <Label Content="Right click for options"/>
+                        <Label Content="Right click for options" />
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
@@ -285,14 +285,14 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator />
-                            <MenuItem Header="Remote user ssh config" 
+                            <MenuItem Header="Remote user ssh config"
                                       IsEnabled="{Binding ServerConnection.IsConnected}"
                                       Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ServerNetworkOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Remote machine sshd_config" 
+                            <MenuItem Header="Remote machine sshd_config"
                                       IsEnabled="{Binding ServerConnection.IsConnected}"
                                       Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
@@ -309,7 +309,7 @@
                 <Border Grid.Column="3" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
-                        <Label Content="Right click for help"/>
+                        <Label Content="Right click for help" />
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
