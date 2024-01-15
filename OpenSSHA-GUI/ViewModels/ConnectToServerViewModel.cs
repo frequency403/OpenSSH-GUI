@@ -46,7 +46,7 @@ public class ConnectToServerViewModel : ViewModelBase
                 {
                     if (!ValidData) throw new ArgumentException("Missing hostname/ip, username or password!");
                     ServerConnection = AuthWithPublicKey
-                        ? new ServerConnection(Hostname, Username, SelectedPublicKey)
+                        ? new ServerConnection(Hostname, Username, SelectedPublicKey!)
                         : new ServerConnection(Hostname, Username, Password);
                     if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
 
@@ -107,7 +107,7 @@ public class ConnectToServerViewModel : ViewModelBase
     public ServerConnection ServerConnection
     {
         get => _serverConnection;
-        set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
+        private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
 
     public SettingsFile ProgramSettings { get; } = SettingsFileHandler.Settings;

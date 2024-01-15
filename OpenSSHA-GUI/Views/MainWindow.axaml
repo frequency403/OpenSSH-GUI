@@ -16,6 +16,7 @@
         Title="{x:Static main:StringsAndTexts.MainWindowTitle}">
     <Window.Resources>
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
+        <converters:PlatformIdConverter x:Key="PlatformIdConverter"/>
     </Window.Resources>
     <Grid RowDefinitions="* 7* *" ColumnDefinitions="* * *" Margin="20 5" HorizontalAlignment="Stretch">
 
@@ -212,14 +213,19 @@
                 <Border Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Background="Gray" Margin="10 5" Padding="7" CornerRadius="5">
                     <ToolTip.Tip>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="Open connection" IsVisible="{Binding ServerConnection.IsConnected}" />
-                            <Label Content="{Binding ServerConnection.ConnectionString}"
-                                   IsVisible="{Binding ServerConnection.IsConnected}" />
-                            <Label
-                                Content="Currently disconnected. Right click to open connection menu to establish a connection"
-                                IsVisible="{Binding !ServerConnection.IsConnected}" />
+                        <StackPanel>
+                            <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *" IsVisible="{Binding ServerConnection.IsConnected}">
+                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Content="{Binding ServerConnection.ConnectionString}" FontWeight="Bold"/>
+                                <Label Grid.Row="1" Grid.Column="0" Content="ServerOS:"/>
+                                <Label Grid.Row="1" Grid.Column="1" Content="{Binding ServerConnection.ServerOs, Converter={StaticResource PlatformIdConverter}}" FontWeight="Bold"/>
+                                <Label Grid.Row="2" Grid.Column="0" Content="Connected on:"/>
+                                <Label Grid.Row="2" Grid.Column="1" Content="{Binding ServerConnection.ConnectionTime}"/>
+                            </Grid>
+                            <Label Content="Currently disconnected. Right click to open connection menu to establish a connection"
+                                   IsVisible="{Binding !ServerConnection.IsConnected}" />
                         </StackPanel>
+                        
+                        
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">

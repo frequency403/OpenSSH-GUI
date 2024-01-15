@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Disposables;
 using Avalonia.ReactiveUI;
 using OpenSSHA_GUI.ViewModels;
 using ReactiveUI;

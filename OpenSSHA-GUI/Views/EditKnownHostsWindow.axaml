@@ -12,6 +12,7 @@
         Width="800"
         Height="600"
         Icon="/Assets/appicon.ico"
+        x:Name="EditKnownHosts"
         Title="{x:Static main:StringsAndTexts.EditKnownHostsWindowTitle}">
     <Window.Styles>
         <Style Selector="Expander:expanded ToggleButton.whole-host">

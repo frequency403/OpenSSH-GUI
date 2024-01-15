@@ -12,32 +12,34 @@ public static class SshConfigFilesExtension
     private const char DirSeparatorWin = '\\';
     private const char DirSeparatorLinux = '/';
 
-    public static string GetRootSshPath(PlatformID? platformId = null)
+    public static string GetRootSshPath(bool resolve = true, PlatformID? platformId = null)
     {
-        return Environment.ExpandEnvironmentVariables((platformId ?? Environment.OSVersion.Platform) switch
+        var path = (platformId ?? Environment.OSVersion.Platform) switch
         {
             PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE => SshRootPathWin,
             PlatformID.Unix or PlatformID.MacOSX => SshRootPathLinux,
             _ => throw new NotSupportedException(
                 $"Platform {Environment.OSVersion.Platform.ToString().ToLower()} is not supported!")
-        });
+        };
+        return resolve ? Environment.ExpandEnvironmentVariables(path) : path;
     }
 
-    public static string GetBaseSshPath(PlatformID? platformId = null)
+    public static string GetBaseSshPath(bool resolve = true, PlatformID? platformId = null)
     {
-        return Environment.ExpandEnvironmentVariables((platformId ?? Environment.OSVersion.Platform) switch
+        var path = (platformId ?? Environment.OSVersion.Platform) switch
         {
             PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE =>
                 SshPathWithVariableWindows,
             PlatformID.Unix or PlatformID.MacOSX => SshPathWithVariableLinux,
             _ => throw new NotSupportedException(
                 $"Platform {Environment.OSVersion.Platform.ToString().ToLower()} is not supported!")
-        });
+        };
+        return resolve ? Environment.ExpandEnvironmentVariables(path) : path;
     }
 
-    public static string GetPathOfFile(this SshConfigFiles files, PlatformID? platform = null)
+    public static string GetPathOfFile(this SshConfigFiles files, bool resolve = true, PlatformID? platform = null)
     {
-        return Environment.ExpandEnvironmentVariables((platform ?? Environment.OSVersion.Platform) switch
+        var path = (platform ?? Environment.OSVersion.Platform) switch
         {
             PlatformID.Win32S or PlatformID.Win32Windows or PlatformID.Win32NT or PlatformID.WinCE =>
                 files switch
@@ -60,6 +62,7 @@ public static class SshConfigFilesExtension
             _ =>
                 throw new NotSupportedException(
                     $"Platform {Environment.OSVersion.Platform.ToString().ToLower()} is not supported!")
-        }) + Enum.GetName(files).ToLower();
+        } + Enum.GetName(files)!.ToLower();
+        return resolve ? Environment.ExpandEnvironmentVariables(path) : path;
     }
 }

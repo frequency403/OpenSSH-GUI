@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Lib;
@@ -11,10 +10,10 @@ namespace OpenSSHA_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase
 {
-    private ObservableCollection<KnownHost> _knownHostsLocal = [];
+    private readonly ObservableCollection<KnownHost> _knownHostsLocal = [];
 
-    private ObservableCollection<KnownHost> _knownHostsRemote = [];
-
+    private readonly ObservableCollection<KnownHost> _knownHostsRemote = [];
+    
     public EditKnownHostsViewModel(ref ServerConnection serverConnection)
     {
         ServerConnection = serverConnection;
@@ -31,22 +30,6 @@ public class EditKnownHostsViewModel : ViewModelBase
             if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
             return this;
         });
-        DeleteHost = ReactiveCommand.Create<KnownHost, Unit>(e =>
-        {
-            e.KeysDeletionSwitch();
-            return new Unit();
-        });
-        DeleteKey = ReactiveCommand.Create<KnownHostKey, Unit>(e =>
-        {
-            e.MarkedForDeletion = true;
-            return new Unit();
-        });
-        ResetChangesAndReload = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
-        {
-            await KnownHostsFileLocal.ReadContentAsync();
-            KnownHostsLocal = new ObservableCollection<KnownHost>(KnownHostsFileLocal.KnownHosts);
-            return e;
-        });
     }
 
     public ServerConnection ServerConnection { get; }
@@ -57,17 +40,14 @@ public class EditKnownHostsViewModel : ViewModelBase
     public ObservableCollection<KnownHost> KnownHostsRemote
     {
         get => _knownHostsRemote;
-        private set => this.RaiseAndSetIfChanged(ref _knownHostsRemote, value);
+        private init => this.RaiseAndSetIfChanged(ref _knownHostsRemote, value);
     }
 
     public ObservableCollection<KnownHost> KnownHostsLocal
     {
         get => _knownHostsLocal;
-        private set => this.RaiseAndSetIfChanged(ref _knownHostsLocal, value);
+        private init => this.RaiseAndSetIfChanged(ref _knownHostsLocal, value);
     }
 
     public ReactiveCommand<string, EditKnownHostsViewModel> ProcessData { get; }
-    public ReactiveCommand<Unit, Unit> ResetChangesAndReload { get; }
-    public ReactiveCommand<KnownHost, Unit> DeleteHost { get; }
-    public ReactiveCommand<KnownHostKey, Unit> DeleteKey { get; }
 }

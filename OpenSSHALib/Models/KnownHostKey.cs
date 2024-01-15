@@ -29,7 +29,4 @@ public class KnownHostKey : ReactiveObject
         get => _markedForDeletion;
         set => this.RaiseAndSetIfChanged(ref _markedForDeletion, value);
     }
-
-
-    public long KeySize => Convert.FromBase64String(Fingerprint).LongLength;
 }

@@ -35,9 +35,9 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
         AddKey = ReactiveCommand.CreateFromTask<SshPublicKey, SshPublicKey?>(async e =>
         {
             await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
+            var keyExport = await SelectedKey!.ExportKeyAsync();
             AddButtonEnabled =
-                !AuthorizedKeysFileRemote.AuthorizedKeys.Any(
-                    e => e.Fingerprint == SelectedKey.ExportKey().Split(' ')[1]);
+                AuthorizedKeysFileRemote.AuthorizedKeys.All(key => key.Fingerprint != keyExport!.Split(' ')[1]);
             return e;
         });
     }
@@ -54,7 +54,7 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
         set
         {
             AddButtonEnabled =
-                !AuthorizedKeysFileRemote.AuthorizedKeys.Any(e => e.Fingerprint == value.ExportKey().Split(' ')[1]);
+                AuthorizedKeysFileRemote.AuthorizedKeys.All(e => e.Fingerprint != value!.ExportKey()!.Split(' ')[1]);
             this.RaiseAndSetIfChanged(ref _selectedKey, value);
         }
     }
@@ -73,10 +73,10 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
 
-    public AuthorizedKeysFile AuthorizedKeysFileLocal { get; set; } =
+    public AuthorizedKeysFile AuthorizedKeysFileLocal { get; } =
         new(SshConfigFiles.Authorized_Keys.GetPathOfFile());
 
-    public AuthorizedKeysFile AuthorizedKeysFileRemote { get; set; }
+    public AuthorizedKeysFile AuthorizedKeysFileRemote { get; }
     public ReactiveCommand<string, EditAuthorizedKeysViewModel> Submit { get; }
     public ReactiveCommand<SshPublicKey, SshPublicKey?> AddKey { get; }
 }

@@ -11,7 +11,16 @@ public class ServerConnection : ReactiveObject, IDisposable
 {
     private bool _isConnected;
     private SshClient _sshClient;
+    
+    
+    private TimeOnly _connectionTime = TimeOnly.FromDateTime(DateTime.Now);
 
+    public TimeOnly ConnectionTime
+    {
+        get => _connectionTime;
+        set => this.RaiseAndSetIfChanged(ref _connectionTime, value);
+    }
+    
     public ServerConnection(string hostname, string user, string password)
     {
         Hostname = hostname;
@@ -21,6 +30,7 @@ public class ServerConnection : ReactiveObject, IDisposable
         {
             KeepAliveInterval = TimeSpan.FromSeconds(10)
         };
+        ConnectionTime = TimeOnly.FromDateTime(DateTime.Now);
     }
 
     public ServerConnection(string hostname, string user, SshPublicKey key)
@@ -34,10 +44,10 @@ public class ServerConnection : ReactiveObject, IDisposable
         };
     }
 
-    public string Hostname { get; }
-    public string Username { get; }
-    public string Password { get; }
-    public SshPublicKey? AuthKey { get; set; }
+    private string Hostname { get; }
+    private string Username { get; }
+    private string? Password { get; }
+    private SshPublicKey? AuthKey { get; }
 
     private SshClient ClientConnection
     {
@@ -52,10 +62,38 @@ public class ServerConnection : ReactiveObject, IDisposable
     }
 
     public string ConnectionString => IsConnected ? $"{Username}@{Hostname}" : "";
-    private PlatformID ServerOs { get; set; } = PlatformID.Other;
+    public PlatformID ServerOs { get; set; } = PlatformID.Other;
     private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
+    private string CreateEmptyFileCommand => ServerOs == PlatformID.Win32NT ? "echo. >" : "touch";
+    
+    private string ResolveRemoteEnvVariables(string originalPath)
+    {
+        if (!IsConnected) return originalPath;
+        return originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries).Aggregate("", (s, s1) =>
+        {
+            if (s1.Contains('\\') || s1.Contains('/'))
+            {
+                s += s1.Trim();
+            }
+            else
+            {
+                s += ClientConnection.RunCommand(ServerOs is PlatformID.Unix or PlatformID.MacOSX ? $"echo ${s1}" : $"echo %{s1}%").Result.Trim();
+            }
+            return s;
+        });
+    }
 
-
+    private void CheckForFilesAndCreateThemIfTheyNotExist()
+    {
+        if(!ClientConnection.IsConnected) return;
+        var authorizedKeysFileCheck = ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
+        var knownHostsFileCheck = ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
+        if (authorizedKeysFileCheck.ExitStatus != 0)
+            ClientConnection.RunCommand(
+                $"{CreateEmptyFileCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
+        if(knownHostsFileCheck.ExitStatus != 0) ClientConnection.RunCommand($"{CreateEmptyFileCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
+    }
+    
     /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
     void IDisposable.Dispose()
     {
@@ -82,7 +120,11 @@ public class ServerConnection : ReactiveObject, IDisposable
         {
             ClientConnection.Connect();
             IsConnected = ClientConnection.IsConnected;
-            if (IsConnected) ServerOs = GetServerOs();
+            if (IsConnected)
+            {
+                ServerOs = GetServerOs();
+                CheckForFilesAndCreateThemIfTheyNotExist();
+            }
             if (ServerOs != PlatformID.Other) return IsConnected;
             exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");
             return false;
@@ -92,22 +134,6 @@ public class ServerConnection : ReactiveObject, IDisposable
             exception = e;
             return false;
         }
-    }
-
-    public bool ReopenConnection()
-    {
-        if (IsConnected) return false;
-        ClientConnection = new SshClient(Hostname, Username, Password);
-        try
-        {
-            ClientConnection.Connect();
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-
-        return IsConnected;
     }
 
     public bool CloseConnection([NotNullWhen(false)] out Exception? ex)
@@ -132,7 +158,7 @@ public class ServerConnection : ReactiveObject, IDisposable
             ? new KnownHostsFile("", true)
             : new KnownHostsFile(
                 ClientConnection
-                    .RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOs)}").Result,
+                    .RunCommand($"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs))}").Result,
                 true);
     }
 
@@ -140,7 +166,7 @@ public class ServerConnection : ReactiveObject, IDisposable
     {
         if (!IsConnected) return false;
         var command = ClientConnection.RunCommand(
-            $"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {SshConfigFiles.Known_Hosts.GetPathOfFile(ServerOs)}");
+            $"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs))}");
         return command.ExitStatus == 0;
     }
 
@@ -149,7 +175,7 @@ public class ServerConnection : ReactiveObject, IDisposable
         if (!IsConnected) return new AuthorizedKeysFile("", true);
         return new AuthorizedKeysFile(
             ClientConnection
-                .RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(ServerOs)}")
+                .RunCommand($"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
                 .Result, true);
     }
 
@@ -158,7 +184,7 @@ public class ServerConnection : ReactiveObject, IDisposable
         if (!IsConnected) return false;
         return ClientConnection
             .RunCommand(
-                $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {SshConfigFiles.Authorized_Keys.GetPathOfFile(ServerOs)}")
+                $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
             .ExitStatus == 0;
     }
 }
