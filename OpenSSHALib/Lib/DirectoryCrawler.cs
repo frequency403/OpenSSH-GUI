@@ -9,11 +9,6 @@ public static class DirectoryCrawler
     {
         return Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*.pub", SearchOption.AllDirectories)
             .Select(
-                e =>
-                {
-                    var key = new SshPublicKey(e);
-                    key.GetPrivateKey();
-                    return key;
-                });
+                e => new SshPublicKey(e));
     }
 }

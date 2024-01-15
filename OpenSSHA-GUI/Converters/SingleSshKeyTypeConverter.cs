@@ -9,11 +9,11 @@ public class SingleSshKeyTypeConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return Enum.GetName(typeof(KeyType), (KeyType)value);
+        return value is not null ? Enum.GetName(typeof(KeyType), (KeyType)value) : "";
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        return Enum.Parse<KeyType>((string)value);
+        return value is not null ? Enum.Parse<KeyType>((string)value) : "";
     }
 }

@@ -40,7 +40,7 @@ public abstract class SshKey
     }
 
     public string AbsoluteFilePath { get; protected set; }
-    protected bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
+    private bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
     public string KeyTypeString => IsPublicKey ? "public" : "private";
     public string Filename { get; protected set; }
     public string Comment { get; protected set; }
@@ -77,10 +77,5 @@ public abstract class SshKey
             Debug.WriteLine(e);
             return null;
         }
-    }
-
-    public virtual void DeleteKey()
-    {
-        File.Delete(AbsoluteFilePath);
     }
 }

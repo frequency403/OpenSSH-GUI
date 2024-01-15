@@ -56,16 +56,18 @@
                   IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
             <Label Content="Use public key" />
         </CheckBox>
-        <AutoCompleteBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
+        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
                          Height="25"
                          IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"
-                         ItemsSource="{Binding  ProgramSettings.LastUsedServers.Keys}"
-                         FilterMode="Contains" />
-        <AutoCompleteBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
+                         />
+        <!-- ItemsSource="{Binding  ProgramSettings.LastUsedServers.Keys}" -->
+        <!-- FilterMode="StartsWith" IsTextCompletionEnabled="True" -->
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
                          Height="25"
                          IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"
-                         ItemsSource="{Binding ProgramSettings.LastUsedServers.Values}"
-                         FilterMode="Contains" />
+                         />
+        <!-- ItemsSource="{Binding ProgramSettings.LastUsedServers.Values}" -->
+        <!-- FilterMode="StartsWith" IsTextCompletionEnabled="True" -->
         <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*"
                  Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}"
                  IsVisible="{Binding !AuthWithPublicKey}" VerticalAlignment="Bottom" />

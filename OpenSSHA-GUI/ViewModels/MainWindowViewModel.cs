@@ -212,7 +212,7 @@ public class MainWindowViewModel : ViewModelBase
     public ServerConnection ServerConnection
     {
         get => _serverConnection;
-        set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
+        private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
 
     public ObservableCollection<SshPublicKey> SshKeys

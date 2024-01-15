@@ -20,7 +20,7 @@ public class AuthorizedKey
     }
 
     public KeyType KeyType { get; }
-    public string KeyTypeDeclarationInFile { get; }
+    private string KeyTypeDeclarationInFile { get; }
     public string Fingerprint { get; }
     public string Comment { get; }
     public bool MarkedForDeletion { get; set; }

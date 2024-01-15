@@ -30,8 +30,8 @@
                     VerticalAlignment="Top" Margin="20">
             <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
                    Target="KeyFileNameTextBox" />
-            <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}"/>
-            <TextBlock x:Name="KeyFileNameValidation" Foreground="Red" FontSize="12"/>
+            <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
+            <TextBlock x:Name="KeyFileNameValidation" Foreground="Red" FontSize="12" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
@@ -62,14 +62,15 @@
                    Target="CommentTextBox" />
             <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
-        <Button Grid.Row="2" Grid.Column="1" Margin="0 0 0 10" Background="ForestGreen" HorizontalAlignment="Center"
-                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true" IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
+        <Button Grid.Row="2" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true"
+                IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
-        <Button Grid.Row="2" Grid.Column="0" Margin="0 0 0 10" Background="DimGray" HorizontalAlignment="Center"
+        <Button Grid.Row="2" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
                 VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="false">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />

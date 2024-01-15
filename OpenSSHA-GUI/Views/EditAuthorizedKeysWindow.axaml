@@ -25,9 +25,9 @@
             <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="5">
                 <Grid ColumnDefinitions="* 3* 2* *">
                     <TextBlock Grid.Column="0"
-                               Text="{Binding KeyType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" />
-                    <TextBlock Grid.Column="2" Text="{Binding Comment}" />
+                               Text="{Binding KeyType, Converter={StaticResource SingleSshKeyTypeConverter}}" HorizontalAlignment="Left"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Comment}" HorizontalAlignment="Right"/>
                     <ToggleButton Grid.Column="3" IsChecked="{Binding MarkedForDeletion}"
                                   HorizontalAlignment="Center">
                         <ToolTip.Tip>

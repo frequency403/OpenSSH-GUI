@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using Avalonia;
 
 namespace OpenSSHALib.Lib;
 
@@ -10,13 +8,6 @@ public static class SettingsFileHandler
 {
     private static readonly string SettingsFileName = "OpenSSH-GUI.settings";
 
-    // private static readonly string SettingsFileBasePath =
-    //     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-    //     Path.DirectorySeparatorChar + Assembly.GetEntryAssembly().GetName().Name;
-
-    private static string SettingsFileBasePath => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                              Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(_assemblyLocation);
-    
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -24,9 +15,21 @@ public static class SettingsFileHandler
         WriteIndented = true
     };
 
+    private static string _assemblyLocation =
+        Directory.EnumerateFiles(AppContext.BaseDirectory /*, "OpenSSHA-GUI"*/).First();
+
+    // private static readonly string SettingsFileBasePath =
+    //     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+    //     Path.DirectorySeparatorChar + Assembly.GetEntryAssembly().GetName().Name;
+
+    private static string SettingsFileBasePath => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
+                                                  Path.DirectorySeparatorChar +
+                                                  Path.GetFileNameWithoutExtension(_assemblyLocation);
+
     private static string SettingsFilePath => SettingsFileBasePath + Path.DirectorySeparatorChar + SettingsFileName;
 
-    public static SettingsFile Settings { get; private set; }
+    public static SettingsFile Settings { get; private set; } = Defaults;
+
     private static SettingsFile Defaults => new()
     {
         Version = $"v{FileVersionInfo.GetVersionInfo(_assemblyLocation).FileVersion}",
@@ -45,7 +48,6 @@ public static class SettingsFileHandler
         file.Write(Encoding.Default.GetBytes(JsonSerializer.Serialize(Settings, JsonSerializerOptions)));
     }
 
-    private static string _assemblyLocation = Assembly.GetExecutingAssembly().Location;
     public static bool InitSettingsFile(string assemblyLocation, bool deleteBeforeInit = false)
     {
         _assemblyLocation = assemblyLocation;
@@ -81,7 +83,6 @@ public static class SettingsFileHandler
         }
         catch (Exception e)
         {
-            Settings = Defaults;
             Console.WriteLine(e);
             return IsFileInitialized;
         }
@@ -106,7 +107,7 @@ public static class SettingsFileHandler
         return true;
     }
 
-    public static bool AddKnownServerToFile(string host, string username, string assemblyLocation)
+    public static bool AddKnownServerToFile(string host, string username)
     {
         try
         {

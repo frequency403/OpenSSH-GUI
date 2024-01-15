@@ -57,7 +57,7 @@ public class KnownHostsFile : ReactiveObject
         }
     }
 
-    public void ReadContent(FileStream? stream = null)
+    private void ReadContent(FileStream? stream = null)
     {
         if (_isFromServer) return;
         if (stream is null)
