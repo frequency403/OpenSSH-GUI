@@ -5,8 +5,8 @@ namespace OpenSSHALib.Lib;
 
 public static class InitializationRoutine
 {
-    public static bool IsProgramStartReady => Directory.Exists(SshConfigFilesExtension.GetBaseSshPath()) &&
-                                              File.Exists(SshConfigFiles.Known_Hosts.GetPathOfFile());
+    private static bool IsProgramStartReady => Directory.Exists(SshConfigFilesExtension.GetBaseSshPath()) &&
+                                               File.Exists(SshConfigFiles.Known_Hosts.GetPathOfFile());
 
     public static bool MakeProgramStartReady()
     {

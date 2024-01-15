@@ -1,7 +1,6 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using OpenSSHALib.Lib;
 
 namespace OpenSSHA_GUI;
 
@@ -13,7 +12,6 @@ internal sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        Console.WriteLine("Build Avalonia app");
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }

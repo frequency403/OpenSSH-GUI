@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -12,6 +14,7 @@ using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
 using ReactiveUI.Validation.Extensions;
+using ReactiveUI.Validation.Helpers;
 
 namespace OpenSSHA_GUI.ViewModels;
 
@@ -25,26 +28,34 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 
     private ObservableCollection<SshKeyType> _sshKeyTypes;
 
+    private bool _isKeyFileNameValid = false;
+    public bool IsKeyFileNameValid
+    {
+        get => _isKeyFileNameValid;
+        set => this.RaiseAndSetIfChanged(ref _isKeyFileNameValid, value);
+    }
+
+    private ValidationHelper _keyNameValidationHelper;
+
+    public ValidationHelper KeyNameValidationHelper
+    {
+        get => _keyNameValidationHelper;
+        set => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
+    }
+    
     public AddKeyWindowViewModel()
     {
-        this.ValidationRule(
-            e => e.KeyName,
-            name => File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + name),
-            "Filename does already exist!"
-        ); // TODO: Validation does not yet work correctly, need further fixing.
 
+        _keyNameValidationHelper = this.ValidationRule(
+            e => e.KeyName,
+            name => !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + name),
+            "Filename does already exist!"
+        ); 
         AddKey = ReactiveCommand.CreateFromTask<string, AddKeyWindowViewModel?>(async b =>
         {
             _createKey = bool.Parse(b);
             if (!_createKey) return null;
-            if (File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName))
-            {
-                var box = MessageBoxManager.GetMessageBoxStandard("Keyfile does already exists",
-                    "The filename you requested exists already. Aborting.", ButtonEnum.Ok, Icon.Error);
-                await box.ShowAsync();
-                return null;
-            } // TODO: Remove, when Validation works.
-            return this;
+            return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName) ? this : null;
         });
         _sshKeyTypes = new ObservableCollection<SshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
         _selectedKeyType = _sshKeyTypes.First();
@@ -95,13 +106,6 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         {
             StartInfo = new ProcessStartInfo
             {
-                // ArgumentList =
-                // {
-                //     $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()}",
-                //     $"-C \"{Comment}\"",
-                //     $"-f \"{fullFilePath}\"",
-                //     $"-N \"{Password}\""
-                // },
                 Arguments =
                     $"-t {Enum.GetName(SelectedKeyType.BaseType)!.ToLower()} -C \"{Comment}\" -f \"{fullFilePath}\" -N \"{Password}\" ",
                 CreateNoWindow = true,

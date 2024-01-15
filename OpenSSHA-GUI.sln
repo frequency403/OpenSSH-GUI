@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSSHA-GUI", "OpenSSHA-GU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSSHALib", "OpenSSHALib\OpenSSHALib.csproj", "{08608099-A6CD-405A-A3F0-70934D94D519}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSSHA-GUITests", "OpenSSHA-GUITests\OpenSSHA-GUITests.csproj", "{2CFEA7E7-DA50-446C-8934-210FB4342B77}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,9 +19,5 @@ Global
 		{08608099-A6CD-405A-A3F0-70934D94D519}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08608099-A6CD-405A-A3F0-70934D94D519}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08608099-A6CD-405A-A3F0-70934D94D519}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2CFEA7E7-DA50-446C-8934-210FB4342B77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2CFEA7E7-DA50-446C-8934-210FB4342B77}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2CFEA7E7-DA50-446C-8934-210FB4342B77}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2CFEA7E7-DA50-446C-8934-210FB4342B77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Material.Icons;
@@ -34,16 +35,6 @@ public class MainWindowViewModel : ViewModelBase
         Height = 20
     };
 
-    private static void Initialization()
-    {
-        if (!SettingsFileHandler.IsFileInitialized)
-            if (!SettingsFileHandler.InitSettingsFile())
-                return;
-        if (!InitializationRoutine.IsProgramStartReady)
-            if (!InitializationRoutine.MakeProgramStartReady())
-                return;
-    }
-    
     private ServerConnection _serverConnection;
 
     private ObservableCollection<SshPublicKey> _sshKeys;
@@ -228,6 +219,12 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
+    }
+
+    private static void Initialization()
+    {
+        SettingsFileHandler.InitSettingsFile(Assembly.GetExecutingAssembly().Location);
+        InitializationRoutine.MakeProgramStartReady();
     }
 
     private void EvaluateAppropriateIcon()
