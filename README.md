@@ -1,6 +1,16 @@
 OpenSSHA-GUI
 
-A GUI for managing your SSH Keys
+A GUI for managing your SSH Keys - on Windows, Linux and macOS!  
+
+The primary reason for creating this project was to give "end-users"  
+a modern looking GUI for managing their SSH Keys - and making it easier  
+to deploy them to a server of their choice.
+
+The program I found -> [PuSSHy](https://github.com/klimenta/pusshy) was, in my opinion  
+not as user-friendly as it could be. I also wanted to use this program on my different  
+machines, running on Linux and macOS. So I decided to create my own!   
+
+I hope you like it!
 
 ### Installing
 
@@ -87,6 +97,18 @@ If you want to remove the whole host, just toggle the button on the top label.
 See also the list of
 [contributors](https://github.com/frequency403/OpenSSH-GUI/contributors)
 who participated in this project.
+
+## Used Libraries / Technologies
+
+- [Avalonia UI](https://avaloniaui.net/) - Reactive UI
+
+- [ReactiveUI.Validation](https://github.com/reactiveui/ReactiveUI.Validation/)
+
+- [MessageBox.Avalonia](https://github.com/AvaloniaCommunity/MessageBox.Avalonia)
+
+- [Material.Icons](https://github.com/SKProCH/Material.Icons)  
+
+- [SSH.NET](https://github.com/sshnet/SSH.NET)
 
 ## License
 
