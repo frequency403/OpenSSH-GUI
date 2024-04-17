@@ -13,7 +13,7 @@ public static class InitializationRoutine
         try
         {
             if (IsProgramStartReady) return IsProgramStartReady;
-            if (SettingsFileHandler.IsFileInitialized)
+            if (SettingsFileHandler.Instance.IsFileInitialized)
             {
                 if (!Directory.Exists(SshConfigFilesExtension.GetBaseSshPath()))
                     Directory.CreateDirectory(SshConfigFilesExtension.GetBaseSshPath());

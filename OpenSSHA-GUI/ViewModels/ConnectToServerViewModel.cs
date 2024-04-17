@@ -99,7 +99,7 @@ public class ConnectToServerViewModel : ViewModelBase
         });
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
         {
-            await SettingsFileHandler.AddKnownServerToFileAsync(Hostname, Username);
+            await SettingsFileHandler.Instance.AddKnownServerToFileAsync(Hostname, Username);
             return this;
         });
     }
@@ -109,8 +109,6 @@ public class ConnectToServerViewModel : ViewModelBase
         get => _serverConnection;
         private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
-
-    public SettingsFile ProgramSettings { get; } = SettingsFileHandler.Settings;
 
     private bool ValidData => SelectedPublicKey is null
         ? Hostname != "" && Username != "" && Password != ""
