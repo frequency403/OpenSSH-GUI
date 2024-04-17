@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Models;
@@ -12,10 +13,8 @@ public class ServerConnection : ReactiveObject, IDisposable
     private bool _isConnected;
     private SshClient _sshClient;
     
-    
-    private TimeOnly _connectionTime = TimeOnly.FromDateTime(DateTime.Now);
-
-    public TimeOnly ConnectionTime
+    private DateTime _connectionTime = DateTime.Now;
+    public DateTime ConnectionTime
     {
         get => _connectionTime;
         set => this.RaiseAndSetIfChanged(ref _connectionTime, value);
@@ -30,7 +29,7 @@ public class ServerConnection : ReactiveObject, IDisposable
         {
             KeepAliveInterval = TimeSpan.FromSeconds(10)
         };
-        ConnectionTime = TimeOnly.FromDateTime(DateTime.Now);
+        ConnectionTime = DateTime.Now;
     }
 
     public ServerConnection(string hostname, string user, SshPublicKey key)
@@ -42,6 +41,7 @@ public class ServerConnection : ReactiveObject, IDisposable
         {
             KeepAliveInterval = TimeSpan.FromSeconds(10)
         };
+        ConnectionTime = DateTime.Now;
     }
 
     private string Hostname { get; }
@@ -124,6 +124,7 @@ public class ServerConnection : ReactiveObject, IDisposable
             {
                 ServerOs = GetServerOs();
                 CheckForFilesAndCreateThemIfTheyNotExist();
+                ConnectionTime = DateTime.Now;
             }
             if (ServerOs != PlatformID.Other) return IsConnected;
             exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");

@@ -223,7 +223,6 @@ public class MainWindowViewModel : ViewModelBase
 
     private static void Initialization()
     {
-        SettingsFileHandler.InitSettingsFile(Assembly.GetExecutingAssembly().Location);
         InitializationRoutine.MakeProgramStartReady();
     }
 
