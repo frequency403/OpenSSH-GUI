@@ -42,7 +42,13 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         RxApp.MainThreadScheduler.Schedule(Initialization);
-        _sshKeys = new ObservableCollection<SshPublicKey>(DirectoryCrawler.GetAllKeys());
+        _sshKeys = new ObservableCollection<SshPublicKey>(DirectoryCrawler.GetAllKeys(out var errors));
+
+        foreach (var error in errors)
+        {
+            Console.WriteLine($"Problem loading \"{error.File}\": {error.Exception.Message}");
+        }
+        
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }
