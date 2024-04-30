@@ -150,4 +150,7 @@
     <data name="MainWindowViewModelExportKeyErrorMessage" xml:space="preserve">
         <value>Could not open or read keyfile!</value>
     </data>
+    <data name="MainWindowViewModelProblemLoadingFileText" xml:space="preserve">
+        <value>Problem loading "{0}": {1}</value>
+    </data>
 </root>

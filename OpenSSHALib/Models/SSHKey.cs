@@ -69,7 +69,9 @@ public abstract class SshKey
                 }
             };
             convertProcess.Start();
-            originalOutput = convertProcess.StandardOutput.ReadToEnd();
+            var stdout = convertProcess.StandardOutput.ReadToEnd();
+            var stderr = convertProcess.StandardError.ReadToEnd();
+            originalOutput = stdout;
 // @todo
         }
         filePath = filePath.Replace(".ppk", "");
@@ -95,7 +97,9 @@ public abstract class SshKey
             }
         };
         readerProcess.Start();
-        return readerProcess.StandardOutput.ReadToEnd();
+        var stdout = readerProcess.StandardOutput.ReadToEnd();
+        var stderr = readerProcess.StandardError.ReadToEnd();
+        return stdout;
     }
     protected SshKey(string absoluteFilePath)
     {
@@ -104,14 +108,18 @@ public abstract class SshKey
         Filename = Path.GetFileName(AbsoluteFilePath);
         var outputOfProcess = ReadSshFile(ref absoluteFilePath).Split(' ').ToList();
         if (!string.Equals(AbsoluteFilePath, absoluteFilePath)) AbsoluteFilePath = absoluteFilePath;
+
         var intToParse = outputOfProcess.First();
-        outputOfProcess.Remove(intToParse);
-        var currentLastItem = outputOfProcess.Last();
-        var keyTypeText = currentLastItem.Replace("(", "").Replace(")", "").Trim();
-        outputOfProcess.Remove(currentLastItem);
+        outputOfProcess.RemoveAt(0);
+
         Fingerprint = outputOfProcess.First();
-        outputOfProcess.Remove(Fingerprint);
-        Comment = outputOfProcess.Aggregate("", (a, b) => a += $" {b}").Trim();
+        outputOfProcess.RemoveAt(0);
+
+        var keyTypeText = outputOfProcess.Last().Trim('(', ')');
+        outputOfProcess.RemoveAt(outputOfProcess.Count - 1);
+
+        Comment = string.Join(" ", outputOfProcess);
+
 
         
 

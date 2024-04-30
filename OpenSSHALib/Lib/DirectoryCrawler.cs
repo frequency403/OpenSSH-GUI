@@ -1,13 +1,11 @@
 ﻿using OpenSSHALib.Extensions;
+using OpenSSHALib.Lib.Structs;
 using OpenSSHALib.Models;
-using Renci.SshNet.Security;
 
 namespace OpenSSHALib.Lib;
 
 public static class DirectoryCrawler
 {
-    public readonly record struct SshCrawlError(string File, Exception Exception);
-    
     public static IEnumerable<SshPublicKey> GetAllKeys(out List<SshCrawlError> errors)
     {
         var errorList = new List<SshCrawlError>();

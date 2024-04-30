@@ -46,7 +46,7 @@ public class MainWindowViewModel : ViewModelBase
 
         foreach (var error in errors)
         {
-            Console.WriteLine($"Problem loading \"{error.File}\": {error.Exception.Message}");
+            Console.WriteLine(StringsAndTexts.MainWindowViewModelProblemLoadingFileText, error.File, error.Exception.Message);
         }
         
         _serverConnection = new ServerConnection("123", "123", "123");

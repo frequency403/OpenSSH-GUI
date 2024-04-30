@@ -436,5 +436,14 @@ namespace OpenSSHA_GUI {
                 return ResourceManager.GetString("MainWindowViewModelExportKeyErrorMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Problem loading &quot;{0}&quot;: {1}.
+        /// </summary>
+        public static string MainWindowViewModelProblemLoadingFileText {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProblemLoadingFileText", resourceCulture);
+            }
+        }
     }
 }

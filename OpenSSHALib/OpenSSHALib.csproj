@@ -9,9 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.1.999-cibuild0043576-beta"/>
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.999-cibuild0043576-beta"/>
-        <PackageReference Include="SSH.NET" Version="2023.0.1"/>
+        <PackageReference Include="Avalonia" Version="11.0.10" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
+        <PackageReference Include="SSH.NET" Version="2024.0.0" />
     </ItemGroup>
 
 </Project>
