@@ -4,7 +4,7 @@ public class SshPublicKey : SshKey
 {
     public SshPublicKey(string absoluteFilePath) : base(absoluteFilePath)
     {
-        PrivateKey = new SshPrivateKey(AbsoluteFilePath.Replace(".pub", ""));
+        PrivateKey = new SshPrivateKey(absoluteFilePath.Replace(".pub", ""));
     }
 
     public SshPrivateKey PrivateKey { get; protected set; }
