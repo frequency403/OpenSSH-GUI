@@ -1,8 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Models;
+using Renci.SshNet;
+using Renci.SshNet.Security.Cryptography.Ciphers;
 
 namespace OpenSSHALib.Lib.Structs;
 
@@ -76,9 +79,11 @@ public record struct PpkKey
     private void WritePrivateKeyToFile(string privateFilePath)
     {
         using var streamWriter = new StreamWriter(File.OpenWrite(privateFilePath));
-        streamWriter.WriteLine(BeginOpenSshPrivateKey);
-        streamWriter.WriteLine(PrivateKeyString);
-        streamWriter.WriteLine(EndOpenSshPrivateKey);
+        streamWriter.Write(string.Join("\n", BeginOpenSshPrivateKey, PrivateKeyString.Replace("\n", "").Wrap(70), EndOpenSshPrivateKey, '\n'));
+        // streamWriter.WriteLine(BeginOpenSshPrivateKey);
+        // var converted =PrivateKeyString.Replace("\n", "").Wrap(70);
+        // streamWriter.WriteLine(converted);
+        // streamWriter.WriteLine(EndOpenSshPrivateKey);
     }
     
     public SshPublicKey ConvertToOpenSshKey()
