@@ -4,11 +4,7 @@
     &lt;TestId&gt;NUnit3x::5B020E47-0F52-49C5-8D9F-23184B795186::net8.0::OpenSSHA_Tests.Tests.Test1&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e4d8383d_002Dd213_002D4e86_002D8428_002D2201649b92ec/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestCommand" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::5B020E47-0F52-49C5-8D9F-23184B795186::net8.0::OpenSSHA_Tests.Tests.Test1&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
+	
 	
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=OpenSSHA_002DGUI_002FStringsAndTexts/@EntryIndexedValue">True</s:Boolean>
 	
