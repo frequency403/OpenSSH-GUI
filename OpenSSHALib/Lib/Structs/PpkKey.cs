@@ -1,11 +1,17 @@
 ﻿using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Text;
 using OpenSSHALib.Enums;
-using OpenSSHALib.Extensions;
 using OpenSSHALib.Models;
-using Renci.SshNet;
-using Renci.SshNet.Security.Cryptography.Ciphers;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.Pkcs;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Utilities.IO.Pem;
+using SshNet.PuttyKeyFile;
+using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
+using PemWriter = Org.BouncyCastle.Utilities.IO.Pem.PemWriter;
 
 namespace OpenSSHALib.Lib.Structs;
 
@@ -73,45 +79,66 @@ public record struct PpkKey
             }
         }
 
-        return string.Join("\n", lines, startPosition, linesToExtract);
-    }
-
-    private void WritePrivateKeyToFile(string privateFilePath)
-    {
-        using var streamWriter = new StreamWriter(File.OpenWrite(privateFilePath));
-        streamWriter.Write(string.Join("\n", BeginOpenSshPrivateKey, PrivateKeyString.Replace("\n", "").Wrap(70), EndOpenSshPrivateKey, '\n'));
-        // streamWriter.WriteLine(BeginOpenSshPrivateKey);
-        // var converted =PrivateKeyString.Replace("\n", "").Wrap(70);
-        // streamWriter.WriteLine(converted);
-        // streamWriter.WriteLine(EndOpenSshPrivateKey);
+        return string.Join("", lines, startPosition, linesToExtract);
     }
     
-    public SshPublicKey ConvertToOpenSshKey()
+    public SshPublicKey? ConvertToOpenSshKey()
     {
+        return null;
+        // var privateFilePath = FilePath.Replace(".ppk", "");
+        //
+        // var publicFilePath = privateFilePath + ".pub";
+        //
+        // var convertFromPpk = new Process
+        // {
+        //     StartInfo = !OperatingSystem.IsWindows() ? new ProcessStartInfo
+        //     {
+        //         WindowStyle = ProcessWindowStyle.Hidden,
+        //         RedirectStandardOutput = true,
+        //         RedirectStandardError = true,
+        //         CreateNoWindow = true,
+        //         Arguments = $"{FilePath} -O private-openssh -o \"{privateFilePath}\"",
+        //         FileName = "puttygen"
+        //     } : new ProcessStartInfo
+        //     {
+        //         WindowStyle = ProcessWindowStyle.Hidden,
+        //         RedirectStandardOutput = true,
+        //         RedirectStandardError = true,
+        //         CreateNoWindow = true,
+        //         Arguments = $"/keygen {FilePath} -o \"{privateFilePath}\"",
+        //         FileName = "winscp.com"
+        //     }
+        // };
+        // convertFromPpk.Start();
+        //
+        // var convertError = convertFromPpk.StandardError.ReadToEnd();
+        // var convertSuccess = convertFromPpk.StandardOutput.ReadToEnd();
+        //
+        // if (!string.IsNullOrWhiteSpace(convertError)) return null;
+        //
         // var directory = Directory.GetParent(FilePath)!.CreateSubdirectory("PPK");
         // var newFileDestination = Path.Combine(directory.FullName, Path.GetFileName(FilePath));
         // File.Move(FilePath, newFileDestination);
-        var privateFilePath = FilePath.Replace(".ppk", "");
         // FilePath = newFileDestination;
-        var publicFilePath = privateFilePath + ".pub";
-        WritePrivateKeyToFile(privateFilePath);
-        var convertProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                Arguments = $"-y -f \"{privateFilePath}\"",
-                FileName = "ssh-keygen"
-            }
-        };
-        convertProcess.Start();
-        var error = convertProcess.StandardError.ReadToEnd();
-        var output = convertProcess.StandardOutput.ReadToEnd();
-        if(string.IsNullOrWhiteSpace(error)) File.WriteAllText(publicFilePath, output);
-        return new SshPublicKey(publicFilePath);
+        //
+        //
+        // var extractPubKey = new Process
+        // {
+        //     StartInfo = new ProcessStartInfo
+        //     {
+        //         WindowStyle = ProcessWindowStyle.Hidden,
+        //         RedirectStandardOutput = true,
+        //         RedirectStandardError = true,
+        //         CreateNoWindow = true,
+        //         Arguments = $"-y -f \"{privateFilePath}\"",
+        //         FileName = "ssh-keygen"
+        //     }
+        // };
+        // extractPubKey.Start();
+        // var error = extractPubKey.StandardError.ReadToEnd();
+        // var output = extractPubKey.StandardOutput.ReadToEnd();
+        // if(string.IsNullOrWhiteSpace(error)) File.WriteAllText(publicFilePath, output);
+        // return new SshPublicKey(publicFilePath);
     }
 
     // public override string ToString()
