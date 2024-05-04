@@ -1,3 +1,5 @@
+using OpenSSHALib.Lib.Structs;
+
 namespace OpenSSHA_Tests;
 
 public class Tests
@@ -10,5 +12,9 @@ public class Tests
     [Test]
     public void Test1()
     {
+        var ppKey = new PpkKey(@"C:\Users\frequ\.ssh\id_rsa_puttyKeygen.ppk");
+        var openSsh = ppKey.ConvertToOpenSshKey(out var errorMessage);
+        if(openSsh is null) Console.WriteLine(errorMessage);
+        
     }
 }
