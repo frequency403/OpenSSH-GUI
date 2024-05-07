@@ -10,7 +10,8 @@ public static class DirectoryCrawler
     {
         var errorList = new List<SshCrawlError>();
         errors = errorList;
-        return Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*.pub", SearchOption.AllDirectories)
+        
+        var sshKeyList =Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*.pub", SearchOption.AllDirectories)
             .Select(filePath =>
             {
                 try
@@ -22,7 +23,22 @@ public static class DirectoryCrawler
                     errorList.Add(new SshCrawlError(filePath, ex));
                     return null;
                 }
-            })
-            .Where(x => x != null)!;
+            }).ToList();
+            sshKeyList.AddRange(Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*.ppk", SearchOption.TopDirectoryOnly)
+                    .Select(filePath =>
+                    {
+                        try
+                        {
+                            var key = new PpkKey(filePath).ConvertToOpenSshKey(out string error);
+                            if (!string.IsNullOrWhiteSpace(error)) throw new Exception(error);
+                            return key;
+                        }
+                        catch (Exception ex)
+                        {
+                            errorList.Add(new SshCrawlError(filePath, ex));
+                            return null;
+                        }
+                    }).ToList());
+        return sshKeyList.Where(x => x != null);
     }
 }

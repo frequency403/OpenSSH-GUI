@@ -1,13 +1,8 @@
 ﻿namespace OpenSSHALib.Models;
 
-public class SshPublicKey : SshKey
+public class SshPublicKey(string absoluteFilePath) : SshKey(absoluteFilePath)
 {
-    public SshPublicKey(string absoluteFilePath) : base(absoluteFilePath)
-    {
-        PrivateKey = new SshPrivateKey(absoluteFilePath.Replace(".pub", ""));
-    }
-
-    public SshPrivateKey PrivateKey { get; protected set; }
+    public SshPrivateKey PrivateKey { get; protected set; } = new(absoluteFilePath.Replace(".pub", ""));
 
     public void DeleteKey()
     {
