@@ -7,6 +7,7 @@
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:converters="clr-namespace:OpenSSHA_GUI.Converters"
         xmlns:main="clr-namespace:OpenSSHA_GUI"
+        xmlns:interfaces="clr-namespace:OpenSSHALib.Interfaces;assembly=OpenSSHALib"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSHA_GUI.Views.EditAuthorizedKeysWindow"
         x:DataType="viewModels:EditAuthorizedKeysViewModel"
@@ -21,7 +22,7 @@
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
     </Window.Resources>
     <Window.DataTemplates>
-        <DataTemplate DataType="models:AuthorizedKey">
+        <DataTemplate DataType="interfaces:IAuthorizedKey">
             <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="5">
                 <Grid ColumnDefinitions="* 3* 2* *">
                     <TextBlock Grid.Column="0"
@@ -42,7 +43,7 @@
                 </Grid>
             </Border>
         </DataTemplate>
-        <DataTemplate DataType="models:SshPublicKey">
+        <DataTemplate DataType="interfaces:ISshPublicKey">
             <Grid ColumnDefinitions="* * *">
                 <TextBlock Grid.Column="0"
                            Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />

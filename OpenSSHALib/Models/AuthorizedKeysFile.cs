@@ -1,13 +1,15 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
+using OpenSSHALib.Interfaces;
 using ReactiveUI;
 
 namespace OpenSSHALib.Models;
 
-public class AuthorizedKeysFile : ReactiveObject
+
+public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
 {
     private readonly string _fileContentsOrPath;
-    private ObservableCollection<AuthorizedKey> _authorizedKeys = [];
+    private ObservableCollection<IAuthorizedKey> _authorizedKeys = [];
 
     public AuthorizedKeysFile(string fileContentsOrPath, bool fromServer = false)
     {
@@ -19,7 +21,7 @@ public class AuthorizedKeysFile : ReactiveObject
             ReadAndLoadFileContents(_fileContentsOrPath);
     }
 
-    public ObservableCollection<AuthorizedKey> AuthorizedKeys
+    public ObservableCollection<IAuthorizedKey> AuthorizedKeys
     {
         get => _authorizedKeys;
         set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
@@ -30,7 +32,7 @@ public class AuthorizedKeysFile : ReactiveObject
     private void LoadFileContents(string fileContents)
     {
         AuthorizedKeys =
-            new ObservableCollection<AuthorizedKey>(fileContents.TrimEnd()
+            new ObservableCollection<IAuthorizedKey>(fileContents.TrimEnd()
                 .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
                 .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
     }
@@ -43,7 +45,7 @@ public class AuthorizedKeysFile : ReactiveObject
         LoadFileContents(streamReader.ReadToEnd());
     }
 
-    public bool AddAuthorizedKey(SshPublicKey key)
+    public bool AddAuthorizedKey(ISshPublicKey key)
     {
         if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
         var export = key.ExportKey();
@@ -52,14 +54,14 @@ public class AuthorizedKeysFile : ReactiveObject
         return true;
     }
 
-    public bool ApplyChanges(IEnumerable<AuthorizedKey> keys)
+    public bool ApplyChanges(IEnumerable<IAuthorizedKey> keys)
     {
         var countBefore = AuthorizedKeys.Count;
-        AuthorizedKeys = new ObservableCollection<AuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
+        AuthorizedKeys = new ObservableCollection<IAuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
         return countBefore != AuthorizedKeys.Count;
     }
 
-    public AuthorizedKeysFile PersistChangesInFile()
+    public IAuthorizedKeysFile PersistChangesInFile()
     {
         if (IsFileFromServer) return this;
         using var fileStream = File.Open(_fileContentsOrPath, FileMode.Truncate);
@@ -69,7 +71,7 @@ public class AuthorizedKeysFile : ReactiveObject
         return this;
     }
 
-    public async Task<bool> AddAuthorizedKeyAsync(SshPublicKey key)
+    public async Task<bool> AddAuthorizedKeyAsync(ISshPublicKey key)
     {
         if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
         var export = await key.ExportKeyAsync();
@@ -78,7 +80,7 @@ public class AuthorizedKeysFile : ReactiveObject
         return true;
     }
 
-    public bool RemoveAuthorizedKey(SshPublicKey key)
+    public bool RemoveAuthorizedKey(ISshPublicKey key)
     {
         if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint)) return false;
         {

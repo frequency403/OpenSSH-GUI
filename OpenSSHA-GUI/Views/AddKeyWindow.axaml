@@ -6,9 +6,10 @@
         xmlns:cv="clr-namespace:OpenSSHA_GUI.Converters"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:openSshaGui="clr-namespace:OpenSSHA_GUI"
+        xmlns:keygen="clr-namespace:SshNet.Keygen;assembly=SshNet.Keygen"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
-        Height="350"
+        Height="450"
         x:Class="OpenSSHA_GUI.Views.AddKeyWindow"
         x:DataType="vm:AddKeyWindowViewModel"
         Icon="/Assets/appicon.ico"
@@ -25,7 +26,7 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:AddKeyWindowViewModel />
     </Design.DataContext>
-    <Grid ColumnDefinitions="* *" RowDefinitions="* * *">
+    <Grid ColumnDefinitions="* *" RowDefinitions="* * * * *">
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" Margin="20">
             <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
@@ -42,6 +43,12 @@
                       SelectedItem="{Binding SelectedKeyType.CurrentBitSize}"
                       IsVisible="{Binding !SelectedKeyType.HasDefaultBitSize}" />
         </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
+                    HorizontalAlignment="Stretch" Margin="20 0 20 10">
+            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
+                   Target="PasswordTextBox" />
+            <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
+        </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
             <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}"
@@ -50,28 +57,27 @@
                       ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}"
                       SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
-                    HorizontalAlignment="Stretch" Margin="20 0 20 10">
-            <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
-                   Target="PasswordTextBox" />
-            <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
-        </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
             <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
                    Target="CommentTextBox" />
             <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
-        <Button Grid.Row="2" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="true"
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top">
+            <Label Content="KeyFormat"/>
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}" 
+                      SelectedItem="{Binding KeyFormat}"/>
+        </StackPanel>
+        <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch" Command="{Binding AddKey}" CommandParameter="true"
                 IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
-        <Button Grid.Row="2" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom" Command="{Binding AddKey}" CommandParameter="false">
+        
+        <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" Command="{Binding AddKey}" CommandParameter="false">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
             </ToolTip.Tip>

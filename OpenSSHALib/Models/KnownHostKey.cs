@@ -1,9 +1,10 @@
 ﻿using OpenSSHALib.Enums;
+using OpenSSHALib.Interfaces;
 using ReactiveUI;
 
 namespace OpenSSHALib.Models;
 
-public class KnownHostKey : ReactiveObject
+public class KnownHostKey : ReactiveObject, IKnownHostKey
 {
     private bool _markedForDeletion;
 

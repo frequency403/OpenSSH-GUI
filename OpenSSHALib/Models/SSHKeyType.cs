@@ -1,9 +1,10 @@
 ﻿using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
+using OpenSSHALib.Interfaces;
 
 namespace OpenSSHALib.Models;
 
-public class SshKeyType
+public class SshKeyType : ISshKeyType
 {
     public SshKeyType(KeyType baseType)
     {

@@ -6,6 +6,7 @@
         xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
         xmlns:models="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
         xmlns:converters="clr-namespace:OpenSSHA_GUI.Converters"
+        xmlns:interfaces="clr-namespace:OpenSSHALib.Interfaces;assembly=OpenSSHALib"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="600"
         Height="200"
@@ -18,11 +19,18 @@
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
     </Window.Resources>
     <Window.DataTemplates>
-        <DataTemplate DataType="models:SshPublicKey">
+        <DataTemplate DataType="interfaces:ISshPublicKey">
             <Grid ColumnDefinitions="* * *">
-                <TextBlock Grid.Column="0"
-                           Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
-                           Margin="5" />
+                <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="["/>
+                        <TextBlock Text="{Binding Format}"/>
+                        <TextBlock Text="]"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                               Margin="5" />
+                </StackPanel>
+                
                 <Separator Grid.Column="1" />
                 <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
             </Grid>
@@ -56,18 +64,20 @@
                   IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
             <Label Content="Use public key" />
         </CheckBox>
-        <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
+        <AutoCompleteBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
                          Height="25"
                          IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"
+                         ItemsSource="{Binding  Settings.Settings.LastUsedServers.Keys}"
+                         FilterMode="StartsWith" IsTextCompletionEnabled="True"
                          />
-        <!-- ItemsSource="{Binding  ProgramSettings.LastUsedServers.Keys}" -->
-        <!-- FilterMode="StartsWith" IsTextCompletionEnabled="True" -->
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
+        
+        <AutoCompleteBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
                          Height="25"
                          IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"
+                         ItemsSource="{Binding Settings.Settings.LastUsedServers.Values}"
+                         FilterMode="StartsWith" IsTextCompletionEnabled="True"
                          />
-        <!-- ItemsSource="{Binding ProgramSettings.LastUsedServers.Values}" -->
-        <!-- FilterMode="StartsWith" IsTextCompletionEnabled="True" -->
+        
         <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*"
                  Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}"
                  IsVisible="{Binding !AuthWithPublicKey}" VerticalAlignment="Bottom" />

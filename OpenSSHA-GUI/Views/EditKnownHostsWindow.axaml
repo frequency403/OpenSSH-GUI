@@ -6,6 +6,7 @@
         xmlns:dataModels="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:main="clr-namespace:OpenSSHA_GUI"
+        xmlns:interfaces="clr-namespace:OpenSSHALib.Interfaces;assembly=OpenSSHALib"
         mc:Ignorable="d"
         x:Class="OpenSSHA_GUI.Views.EditKnownHostsWindow"
         x:DataType="viewModels:EditKnownHostsViewModel"
@@ -65,7 +66,7 @@
                     <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}"
                                   HorizontalAlignment="Stretch">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="dataModels:KnownHostKey">
+                            <DataTemplate DataType="interfaces:IKnownHostKey">
                                 <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Padding="5">
                                     <Grid ColumnDefinitions="* * *">
                                         <TextBlock Grid.Column="0" Text="{Binding KeyType }"

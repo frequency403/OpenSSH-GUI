@@ -1,25 +1,27 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
+using OpenSSHALib.Interfaces;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel : ViewModelBase
+public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> logger) : ViewModelBase(logger)
 {
     private bool _addButtonEnabled;
 
-    private ObservableCollection<SshPublicKey> _publicKeys;
+    private ObservableCollection<ISshPublicKey?> _publicKeys;
 
-    private SshPublicKey? _selectedKey;
+    private ISshPublicKey? _selectedKey;
 
-    private ServerConnection _serverConnection;
-
-    public EditAuthorizedKeysViewModel(ref ServerConnection serverConnection,
-        ref ObservableCollection<SshPublicKey> keys)
+    private IServerConnection _serverConnection;
+    
+    public void SetConnectionAndKeys(ref IServerConnection serverConnection,
+        ref ObservableCollection<ISshPublicKey?> keys)
     {
         _serverConnection = serverConnection;
         _publicKeys = keys;
@@ -32,7 +34,7 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
             ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
             return this;
         });
-        AddKey = ReactiveCommand.CreateFromTask<SshPublicKey, SshPublicKey?>(async e =>
+        AddKey = ReactiveCommand.CreateFromTask<ISshPublicKey, ISshPublicKey?>(async e =>
         {
             await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
             var keyExport = await SelectedKey!.ExportKeyAsync();
@@ -48,7 +50,7 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _addButtonEnabled, value);
     }
 
-    public SshPublicKey? SelectedKey
+    public ISshPublicKey? SelectedKey
     {
         get => _selectedKey;
         set
@@ -59,7 +61,7 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
         }
     }
 
-    public ObservableCollection<SshPublicKey> PublicKeys
+    public ObservableCollection<ISshPublicKey> PublicKeys
     {
         get => _publicKeys;
         set => this.RaiseAndSetIfChanged(ref _publicKeys, value);
@@ -67,16 +69,16 @@ public class EditAuthorizedKeysViewModel : ViewModelBase
 
     public bool KeyAddPossible => PublicKeys.Count > 0;
 
-    public ServerConnection ServerConnection
+    public IServerConnection ServerConnection
     {
         get => _serverConnection;
         set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
 
-    public AuthorizedKeysFile AuthorizedKeysFileLocal { get; } =
-        new(SshConfigFiles.Authorized_Keys.GetPathOfFile());
+    public IAuthorizedKeysFile AuthorizedKeysFileLocal { get; } =
+        new AuthorizedKeysFile(SshConfigFiles.Authorized_Keys.GetPathOfFile());
 
-    public AuthorizedKeysFile AuthorizedKeysFileRemote { get; }
-    public ReactiveCommand<string, EditAuthorizedKeysViewModel> Submit { get; }
-    public ReactiveCommand<SshPublicKey, SshPublicKey?> AddKey { get; }
+    public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
+    public ReactiveCommand<string, EditAuthorizedKeysViewModel> Submit { get; private set; }
+    public ReactiveCommand<ISshPublicKey, ISshPublicKey?> AddKey { get; private set; }
 }

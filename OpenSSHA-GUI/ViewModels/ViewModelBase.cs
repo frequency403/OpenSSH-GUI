@@ -1,5 +1,9 @@
-﻿using ReactiveUI;
+﻿using Microsoft.Extensions.Logging;
+using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
 
-public class ViewModelBase : ReactiveObject;
+public class ViewModelBase(ILogger logger) : ReactiveObject
+{
+    protected ILogger _logger = logger;
+}

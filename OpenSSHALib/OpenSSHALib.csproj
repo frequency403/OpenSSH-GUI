@@ -11,6 +11,11 @@
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.0.10" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-preview.3.24172.9" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0-preview.3.24172.9" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10389" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00972" />
         <PackageReference Include="SSH.NET" Version="2024.0.0" />
         <PackageReference Include="SshNet.Keygen" Version="2024.0.0.2-beta" />
         <PackageReference Include="SshNet.PuttyKeyFile" Version="2024.0.0.2-beta" />

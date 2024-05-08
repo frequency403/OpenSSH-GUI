@@ -1,8 +1,9 @@
 ﻿using OpenSSHALib.Enums;
+using OpenSSHALib.Interfaces;
 
 namespace OpenSSHALib.Models;
 
-public class AuthorizedKey
+public class AuthorizedKey : IAuthorizedKey
 {
     public AuthorizedKey(string keyEntry)
     {

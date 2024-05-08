@@ -1,21 +1,22 @@
-﻿using ReactiveUI;
+﻿using OpenSSHALib.Interfaces;
+using ReactiveUI;
 
 namespace OpenSSHALib.Models;
 
-public class KnownHost : ReactiveObject
+public class KnownHost : ReactiveObject, IKnownHost
 {
-    private List<KnownHostKey> _keys = [];
+    private List<IKnownHostKey> _keys = [];
 
     public KnownHost(IGrouping<string, string> knownHosts)
     {
         Host = knownHosts.Key;
-        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim())).ToList();
+        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim()) as IKnownHostKey).ToList();
     }
 
     public string Host { get; }
     public bool DeleteWholeHost => Keys.All(e => e.MarkedForDeletion);
 
-    public List<KnownHostKey> Keys
+    public List<IKnownHostKey> Keys
     {
         get => _keys;
         set => this.RaiseAndSetIfChanged(ref _keys, value);
@@ -42,11 +43,11 @@ public class KnownHost : ReactiveObject
     public string GetAllEntries()
     {
         return DeleteWholeHost
-            ? KnownHostsFile.LineEnding
+            ? IKnownHostsFile.LineEnding
             : Keys
                 .Where(e => !e.MarkedForDeletion)
                 .Aggregate("",
                     (current, knownHostsKey) =>
-                        current + $"{Host} {knownHostsKey.EntryWithoutHost}{KnownHostsFile.LineEnding}");
+                        current + $"{Host} {knownHostsKey.EntryWithoutHost}{IKnownHostsFile.LineEnding}");
     }
 }

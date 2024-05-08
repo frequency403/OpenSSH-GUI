@@ -1,4 +1,5 @@
 using OpenSSHALib.Lib.Structs;
+using OpenSSHALib.Models;
 
 namespace OpenSSHA_Tests;
 

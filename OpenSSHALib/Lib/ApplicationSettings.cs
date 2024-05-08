@@ -2,26 +2,39 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using OpenSSHALib.Interfaces;
 
 namespace OpenSSHALib.Lib;
 
-public class SettingsFileHandler
+public class ApplicationSettings : IApplicationSettings
 {
-    private static readonly Lazy<SettingsFileHandler> Lazy = new(() => new SettingsFileHandler());
-    public static SettingsFileHandler Instance => Lazy.Value;
+    private ILogger _logger;
+    
+    public ApplicationSettings(ILogger<IApplicationSettings> logger)
+    {
+        _logger = logger;
+        try
+        {
+            if (!Directory.Exists(SettingsFileBasePath)) Directory.CreateDirectory(SettingsFileBasePath);
+            if (!File.Exists(SettingsFilePath)) WriteCurrentSettingsToFile(FileMode.CreateNew);
+            using var streamReader = new StreamReader(SettingsFilePath);
+            Settings = JsonSerializer.Deserialize<SettingsFile>(streamReader.ReadToEnd()) ?? new SettingsFile();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error while initializing application settings! Continuing with default settings");
+        }
+    }
     
     private static string SettingsFileName => AppDomain.CurrentDomain.FriendlyName + ".json";
-    private readonly string _assemblyLocation;
     private string SettingsFileBasePath =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            Path.GetFileNameWithoutExtension(_assemblyLocation));
+            AppDomain.CurrentDomain.FriendlyName);
     private string SettingsFilePath => Path.Combine(SettingsFileBasePath, SettingsFileName);
-
-    
-    public bool IsFileInitialized { get; private set; }
     private bool FileOverflowCheck => Settings.LastUsedServers.Count > Settings.MaxSavedServers;
 
-    public SettingsFile Settings { get; private set; } = new();
+    public ISettingsFile Settings { get; private set; } = new SettingsFile();
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -30,23 +43,6 @@ public class SettingsFileHandler
     };
 
     private readonly SemaphoreSlim _semaphoreSlim = new (1, 1);
-    public SettingsFileHandler(bool deleteBeforeInit = false)
-    {
-        _assemblyLocation = Assembly.GetEntryAssembly()!.Location;
-        try
-        {
-            if (!Directory.Exists(SettingsFileBasePath)) Directory.CreateDirectory(SettingsFileBasePath);
-            if (File.Exists(SettingsFilePath) && deleteBeforeInit) File.Delete(SettingsFilePath);
-            if (!File.Exists(SettingsFilePath)) WriteCurrentSettingsToFile(FileMode.CreateNew);
-            using var streamReader = new StreamReader(SettingsFilePath);
-            Settings = JsonSerializer.Deserialize<SettingsFile>(streamReader.ReadToEnd()) ?? new SettingsFile();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-    }
-
     private void WriteCurrentSettingsToFile(FileMode mode = FileMode.Truncate) => WriteCurrentSettingsToFileAsync(mode).Wait();
     private async Task WriteCurrentSettingsToFileAsync(FileMode mode = FileMode.Truncate)
     {
@@ -59,7 +55,7 @@ public class SettingsFileHandler
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, "Error while writing to settings file!");
         }
         finally
         {
@@ -78,7 +74,7 @@ public class SettingsFileHandler
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e);
+            _logger.LogError(e, "Error shrinking known servers");
             return false;
         }
 
@@ -99,7 +95,7 @@ public class SettingsFileHandler
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e.Message);
+            _logger.LogError(e, "Error adding known server to file");
             return false;
         }
 

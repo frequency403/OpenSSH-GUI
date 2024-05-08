@@ -1,13 +1,15 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenSSHALib.Enums;
-using OpenSSHALib.Lib.Structs;
+using OpenSSHALib.Interfaces;
+using Renci.SshNet;
+using Renci.SshNet.Security;
+using SshNet.Keygen;
 
 namespace OpenSSHALib.Models;
 
-public abstract partial class SshKey
+public abstract partial class SshKey : ISshKey
 {
     
     [GeneratedRegex(@"\(([^)]*)\)")]
@@ -53,17 +55,19 @@ public abstract partial class SshKey
         {
             throw new ArgumentException($"{keyTypeText} is not a valid enum member of {typeof(KeyType)}");
         }
+        Format = SshKeyFormat.OpenSSH;
     }
 
+    public SshKeyFormat Format { get; }
     public string AbsoluteFilePath { get; protected set; }
-    private bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
+    public bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
     public string KeyTypeString => IsPublicKey ? "public" : "private";
     public string Filename { get; protected set; }
     public string Comment { get; protected set; }
-    public SshKeyType KeyType { get; } = new(Enums.KeyType.RSA);
+    public ISshKeyType KeyType { get; } = new SshKeyType(Enums.KeyType.RSA);
     public string Fingerprint { get; protected set; }
 
-    public async Task<string?> ExportKeyAsync()
+    public async Task<string> ExportKeyAsync(SshKeyFormat format = SshKeyFormat.OpenSSH)
     {
         try
         {
@@ -79,20 +83,16 @@ public abstract partial class SshKey
         }
     }
 
-    public string? ExportKey()
+    public void DeleteKey()
     {
-        try
+        if (this is ISshPublicKey pub)
         {
-            using var fileStream = File.OpenRead(AbsoluteFilePath);
-            using var memoryStream = new MemoryStream();
-            fileStream.CopyTo(memoryStream);
-            return Encoding.Default.GetString(memoryStream.ToArray());
+            pub.PrivateKey.DeleteKey();
         }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e);
-            return null;
-        }
+        File.Delete(AbsoluteFilePath);
     }
+    
+    public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH) => ExportKeyAsync().Result;
 
+    public abstract IPrivateKeySource GetRenciKeyType();
 }

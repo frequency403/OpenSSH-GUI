@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Material.Icons;
 using Material.Icons.Avalonia;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using OpenSSHALib.Interfaces;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
@@ -35,20 +37,20 @@ public class MainWindowViewModel : ViewModelBase
         Height = 20
     };
 
-    private ServerConnection _serverConnection;
+    private IServerConnection _serverConnection;
 
-    private ObservableCollection<SshPublicKey> _sshKeys;
+    private ObservableCollection<ISshKey?> _sshKeys;
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(ILogger<MainWindowViewModel> logger) : base(logger)
     {
-        RxApp.MainThreadScheduler.Schedule(Initialization);
-        _sshKeys = new ObservableCollection<SshPublicKey>(DirectoryCrawler.GetAllKeys(out var errors));
-
-        foreach (var error in errors)
+        _sshKeys = new ObservableCollection<ISshKey?>(App.ServiceProvider.GetRequiredService<DirectoryCrawler>().GetAllKeys(out var errors));
+        if (errors.Count != 0)
         {
-            Console.WriteLine(StringsAndTexts.MainWindowViewModelProblemLoadingFileText, error.File, error.Exception.Message);
+            MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, errors
+                .Select(error => string.Format(StringsAndTexts.MainWindowViewModelProblemLoadingFileText, error.File,
+                    error.Exception.Message))
+                .Aggregate("\n", (first, second) => first += second), ButtonEnum.Ok, Icon.Error);
         }
-        
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }
@@ -120,7 +122,8 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow =>
         ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
         {
-            var connectToServer = new ConnectToServerViewModel(ref _sshKeys);
+            var connectToServer = App.ServiceProvider.GetRequiredService<ConnectToServerViewModel>();
+            connectToServer.SetKeys(ref _sshKeys);
             var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
             if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
             return windowResult;
@@ -129,14 +132,15 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
-            var editKnownHosts = new EditKnownHostsViewModel(ref _serverConnection);
+            var editKnownHosts = App.ServiceProvider.GetRequiredService<EditKnownHostsViewModel>();
+            editKnownHosts.SetServerConnection(ref _serverConnection);
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
 
-    public ReactiveCommand<SshKey, ExportWindowViewModel?> OpenExportKeyWindow =>
-        ReactiveCommand.CreateFromTask<SshKey, ExportWindowViewModel?>(async key =>
+    public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPublic =>
+        ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>
         {
-            var keyExport = await key.ExportKeyAsync();
+            var keyExport = key is IPpkKey ppkKey ? await ppkKey.ExportKeyAsync() : await ((ISshPublicKey)key).ExportKeyAsync();
             if (keyExport is null)
             {
                 var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
@@ -146,12 +150,30 @@ public class MainWindowViewModel : ViewModelBase
                 return null;
             }
 
-            var exportViewModel = new ExportWindowViewModel
+            var exportViewModel = App.ServiceProvider.GetRequiredService<ExportWindowViewModel>();
+            exportViewModel.Export = keyExport;
+            exportViewModel.WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
+                key.KeyTypeString, key.Fingerprint);
+            return await ShowExportWindow.Handle(exportViewModel);
+        });
+    
+    public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPrivate =>
+        ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>
+        {
+            var keyExport = key is IPpkKey ppkKey ? await ppkKey.ExportKeyAsync(false) : await ((ISshPublicKey)key).PrivateKey.ExportKeyAsync();
+            if (keyExport is null)
             {
-                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
-                    key.KeyTypeString, key.Fingerprint),
-                Export = keyExport
-            };
+                var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
+                    StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
+                    ButtonEnum.Ok, Icon.Error);
+                await alert.ShowAsync();
+                return null;
+            }
+
+            var exportViewModel = App.ServiceProvider.GetRequiredService<ExportWindowViewModel>();
+            exportViewModel.Export = keyExport;
+            exportViewModel.WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
+                key.KeyTypeString, key.Fingerprint);
             return await ShowExportWindow.Handle(exportViewModel);
         });
 
@@ -162,7 +184,9 @@ public class MainWindowViewModel : ViewModelBase
                 try
                 {
                     var editAuthorizedKeysViewModel =
-                        new EditAuthorizedKeysViewModel(ref _serverConnection, ref _sshKeys);
+                        App.ServiceProvider.GetRequiredService<EditAuthorizedKeysViewModel>();
+                    var keys = new ObservableCollection<ISshPublicKey?>(_sshKeys.Select(e => e as ISshPublicKey));
+                    editAuthorizedKeysViewModel.SetConnectionAndKeys(ref _serverConnection, ref keys);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
                 catch (Exception exception)
@@ -177,7 +201,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
         {
-            var create = new AddKeyWindowViewModel();
+            var create = App.ServiceProvider.GetRequiredService<AddKeyWindowViewModel>();
             var result = await ShowCreate.Handle(create);
             if (result == null) return result;
             Exception? exception = null;
@@ -201,8 +225,8 @@ public class MainWindowViewModel : ViewModelBase
             return result;
         });
 
-    public ReactiveCommand<SshPublicKey, SshPublicKey?> DeleteKey =>
-        ReactiveCommand.CreateFromTask<SshPublicKey, SshPublicKey?>(async u =>
+    public ReactiveCommand<ISshPublicKey, ISshPublicKey?> DeleteKey =>
+        ReactiveCommand.CreateFromTask<ISshPublicKey, ISshPublicKey?>(async u =>
         {
             var box = MessageBoxManager.GetMessageBoxStandard(
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename, u.PrivateKey.Filename),
@@ -215,22 +239,18 @@ public class MainWindowViewModel : ViewModelBase
             return u;
         });
 
-    public ServerConnection ServerConnection
+    public IServerConnection ServerConnection
     {
         get => _serverConnection;
         private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
 
-    public ObservableCollection<SshPublicKey> SshKeys
+    public ObservableCollection<ISshKey?> SshKeys
     {
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
     }
-
-    private static void Initialization()
-    {
-        InitializationRoutine.MakeProgramStartReady();
-    }
+    
 
     private void EvaluateAppropriateIcon()
     {

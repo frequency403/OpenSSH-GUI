@@ -1,16 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text;
+using OpenSSHALib.Interfaces;
 using ReactiveUI;
 
 namespace OpenSSHALib.Models;
 
-public class KnownHostsFile : ReactiveObject
+public class KnownHostsFile : ReactiveObject, IKnownHostsFile
 {
-    internal static string LineEnding = "\r\n";
+    public static string LineEnding { get; set; } = "\r\n";
     private readonly string _fileKnownHostsPath = "";
     private readonly bool _isFromServer;
 
-    private ObservableCollection<KnownHost> _knownHosts = [];
+    private ObservableCollection<IKnownHost> _knownHosts = [];
 
     public KnownHostsFile(string knownHostsPathOrContent, bool fromServer = false)
     {
@@ -26,7 +27,7 @@ public class KnownHostsFile : ReactiveObject
         }
     }
 
-    public ObservableCollection<KnownHost> KnownHosts
+    public ObservableCollection<IKnownHost> KnownHosts
     {
         get => _knownHosts;
         private set => this.RaiseAndSetIfChanged(ref _knownHosts, value);
@@ -34,7 +35,7 @@ public class KnownHostsFile : ReactiveObject
 
     private void SetKnownHosts(string fileContent)
     {
-        KnownHosts = new ObservableCollection<KnownHost>(fileContent
+        KnownHosts = new ObservableCollection<IKnownHost>(fileContent
             .Split(LineEnding)
             .Where(e => !string.IsNullOrEmpty(e))
             .GroupBy(e => e.Split(' ')[0])
@@ -73,9 +74,9 @@ public class KnownHostsFile : ReactiveObject
         }
     }
 
-    public void SyncKnownHosts(IEnumerable<KnownHost> newKnownHosts)
+    public void SyncKnownHosts(IEnumerable<IKnownHost> newKnownHosts)
     {
-        KnownHosts = new ObservableCollection<KnownHost>(newKnownHosts);
+        KnownHosts = new ObservableCollection<IKnownHost>(newKnownHosts);
     }
 
     public async Task UpdateFile()

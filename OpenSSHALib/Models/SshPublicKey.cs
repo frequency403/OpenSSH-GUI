@@ -1,12 +1,17 @@
-﻿namespace OpenSSHALib.Models;
+﻿using OpenSSHALib.Interfaces;
+using Renci.SshNet;
 
-public class SshPublicKey(string absoluteFilePath) : SshKey(absoluteFilePath)
+namespace OpenSSHALib.Models;
+
+public class SshPublicKey(string absoluteFilePath) : SshKey(absoluteFilePath), ISshPublicKey
 {
-    public SshPrivateKey PrivateKey { get; protected set; } = new(absoluteFilePath.Replace(".pub", ""));
-
+    public ISshKey PrivateKey { get; protected set; } = new SshPrivateKey(absoluteFilePath.Replace(".pub", ""));
+    
     public void DeleteKey()
     {
         File.Delete(AbsoluteFilePath);
         File.Delete(PrivateKey.AbsoluteFilePath);
     }
+
+    public override IPrivateKeySource GetRenciKeyType() => PrivateKey.GetRenciKeyType();
 }

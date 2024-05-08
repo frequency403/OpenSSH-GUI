@@ -4,8 +4,11 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using OpenSSHALib.Interfaces;
 using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
@@ -19,8 +22,8 @@ public class ConnectToServerViewModel : ViewModelBase
     private string _hostName = "";
     private string _password = "";
 
-    private SshPublicKey? _selectedPublicKey;
-    private ServerConnection _serverConnection = new("123", "123", "123");
+    private ISshKey? _selectedPublicKey;
+    private IServerConnection _serverConnection = new ServerConnection("123", "123", "123");
 
     private IBrush _statusButtonBackground = Brushes.Gray;
 
@@ -33,10 +36,11 @@ public class ConnectToServerViewModel : ViewModelBase
     private bool _uploadButtonEnabled;
     private string _userName = "";
 
-    public ConnectToServerViewModel(ref ObservableCollection<SshPublicKey> currentKeys)
+    public IApplicationSettings Settings { get; }
+
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, IApplicationSettings settings) : base(logger)
     {
-        PublicKeys = currentKeys;
-        _selectedPublicKey = PublicKeys.FirstOrDefault();
+        Settings = settings;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
         {
@@ -46,7 +50,7 @@ public class ConnectToServerViewModel : ViewModelBase
                 {
                     if (!ValidData) throw new ArgumentException("Missing hostname/ip, username or password!");
                     ServerConnection = AuthWithPublicKey
-                        ? new ServerConnection(Hostname, Username, SelectedPublicKey!)
+                        ? new ServerConnection(Hostname, Username, SelectedPublicKey as ISshPublicKey)
                         : new ServerConnection(Hostname, Username, Password);
                     if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
 
@@ -99,12 +103,18 @@ public class ConnectToServerViewModel : ViewModelBase
         });
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
         {
-            await SettingsFileHandler.Instance.AddKnownServerToFileAsync(Hostname, Username);
+            await App.ServiceProvider.GetRequiredService<IApplicationSettings>().AddKnownServerToFileAsync(Hostname, Username);
             return this;
         });
     }
 
-    public ServerConnection ServerConnection
+    public void SetKeys(ref ObservableCollection<ISshKey?> currentKeys)
+    {
+        PublicKeys = currentKeys;
+        _selectedPublicKey = PublicKeys.FirstOrDefault();
+    }
+
+    public IServerConnection ServerConnection
     {
         get => _serverConnection;
         private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
@@ -126,13 +136,13 @@ public class ConnectToServerViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _authWithPublicKey, value);
     }
 
-    public SshPublicKey? SelectedPublicKey
+    public ISshKey? SelectedPublicKey
     {
         get => _selectedPublicKey;
         set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
     }
 
-    public ObservableCollection<SshPublicKey> PublicKeys { get; }
+    public ObservableCollection<ISshKey?> PublicKeys { get; private set; }
 
     public string Hostname
     {

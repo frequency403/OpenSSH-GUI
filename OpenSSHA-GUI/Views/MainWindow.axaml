@@ -3,10 +3,10 @@
         xmlns:vm="using:OpenSSHA_GUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:main="clr-namespace:OpenSSHA_GUI"
         xmlns:converters="clr-namespace:OpenSSHA_GUI.Converters"
+        xmlns:interfaces="clr-namespace:OpenSSHALib.Interfaces;assembly=OpenSSHALib"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSHA_GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -65,43 +65,42 @@
                               VerticalAlignment="Stretch"
                               Name="TheItemsGrid">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="models:SshPublicKey">
+                        <DataTemplate DataType="interfaces:ISshKey">
                             <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="5" BorderBrush="DimGray"
                                     Margin="0 0 0 5">
                                 <Grid ColumnDefinitions="* 3* * *">
                                     <ToolTip.Tip>
-                                        <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
+                                        <Grid ColumnDefinitions="* * *" RowDefinitions="* *">
                                             <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
                                                    Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
                                                    FontWeight="Bold" />
-                                            <TextPresenter Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
-                                                           Text="{Binding Filename}" VerticalAlignment="Center" />
-
+                                            <TextPresenter Grid.ColumnSpan="2" Grid.Row="0" Grid.Column="1" Text="{Binding Filename}" VerticalAlignment="Center" />
                                             <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"
-                                                   Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsPrivateKeyFilenameText}"
-                                                   FontWeight="Bold" />
-                                            <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-                                                           Text="{Binding PrivateKey.Filename}"
-                                                           VerticalAlignment="Center" />
-
-                                            <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
                                                    Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
                                                    FontWeight="Bold" />
-                                            <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                            <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                                                            Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center" />
                                         </Grid>
                                     </ToolTip.Tip>
-                                    <TextBlock Grid.Column="0"
-                                               Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
-                                               Margin="5"
-                                               HorizontalAlignment="Center" />
+                                    <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="* *">
+                                        <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="["/>
+                                            <TextBlock Text="{Binding Format}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="]"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                                                   Margin="5"
+                                                   HorizontalAlignment="Center" />
+                                    </Grid>
+                                    
                                     <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
                                                HorizontalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"
                                                HorizontalAlignment="Center" />
                                     <Grid Grid.Column="3" ColumnDefinitions="* * *" HorizontalAlignment="Center">
                                         <Button Grid.Column="0" HorizontalAlignment="Center"
-                                                Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
+                                                Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
                                                 CommandParameter="{Binding .}">
                                             <ToolTip.Tip>
                                                 <Label
@@ -113,8 +112,8 @@
                                             </StackPanel>
                                         </Button>
                                         <Button Grid.Column="1" HorizontalAlignment="Center"
-                                                Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindow}"
-                                                CommandParameter="{Binding PrivateKey}">
+                                                Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindowPrivate}"
+                                                CommandParameter="{Binding .}">
                                             <ToolTip.Tip>
                                                 <Label
                                                     Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />

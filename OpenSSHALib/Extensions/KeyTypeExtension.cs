@@ -1,11 +1,12 @@
 ﻿using OpenSSHALib.Enums;
+using OpenSSHALib.Interfaces;
 using OpenSSHALib.Models;
 
 namespace OpenSSHALib.Extensions;
 
 public static class KeyTypeExtension
 {
-    public static IEnumerable<SshKeyType> GetAvailableKeyTypes()
+    public static IEnumerable<ISshKeyType> GetAvailableKeyTypes()
     {
         return Enum.GetValues<KeyType>().Select(keyType => new SshKeyType(keyType)).ToList();
     }
@@ -16,7 +17,6 @@ public static class KeyTypeExtension
         return type switch
         {
             KeyType.RSA => [1024, 2048, 3072, 4096],
-            KeyType.DSA => [1024],
             KeyType.ECDSA => [256, 384, 521],
             _ => []
         };
