@@ -1,3 +1,11 @@
+#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 14.01.2024 - 10:01:29
+// Last edit: 08.05.2024 - 22:05:59
+
+#endregion
+
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;

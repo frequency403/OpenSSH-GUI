@@ -1,4 +1,12 @@
-﻿using OpenSSHALib.Enums;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:03
+
+#endregion
+
+using OpenSSHALib.Enums;
 
 namespace OpenSSHALib.Extensions;
 
@@ -34,8 +42,9 @@ public static class SshConfigFilesExtension
         return resolve ? Environment.ExpandEnvironmentVariables(path) : path;
     }
 
-    public static string GetPathOfFile(this SshConfigFiles files, bool resolve = true, PlatformID? platform = null) =>
-        Path.Combine(files switch
+    public static string GetPathOfFile(this SshConfigFiles files, bool resolve = true, PlatformID? platform = null)
+    {
+        return Path.Combine(files switch
         {
             SshConfigFiles.Authorized_Keys or
                 SshConfigFiles.Known_Hosts or
@@ -43,4 +52,5 @@ public static class SshConfigFilesExtension
             SshConfigFiles.Sshd_Config => GetRootSshPath(resolve, platform),
             _ => throw new ArgumentException("Invalid value for \"files\"")
         }, Enum.GetName(files)!.ToLower());
+    }
 }

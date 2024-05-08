@@ -1,4 +1,12 @@
-﻿using OpenSSHALib.Enums;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:55
+
+#endregion
+
+using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Interfaces;
 
@@ -17,7 +25,7 @@ public class SshKeyType : ISshKeyType
     }
 
     public KeyType BaseType { get; }
-    public string KeyTypeText { get; private set; }
+    public string KeyTypeText { get; }
     public bool HasDefaultBitSize { get; }
     public int CurrentBitSize { get; set; }
     public IEnumerable<int> PossibleBitSizes { get; }

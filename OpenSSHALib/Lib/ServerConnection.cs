@@ -1,4 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:56
+
+#endregion
+
+using System.Diagnostics.CodeAnalysis;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Interfaces;
@@ -10,15 +18,10 @@ namespace OpenSSHALib.Lib;
 
 public class ServerConnection : ReactiveObject, IServerConnection
 {
+    private readonly IConnectionCredentials ConnectionCredentials;
+    private DateTime _connectionTime = DateTime.Now;
     private bool _isConnected;
     private SshClient _sshClient;
-    
-    private DateTime _connectionTime = DateTime.Now;
-    public DateTime ConnectionTime
-    {
-        get => _connectionTime;
-        set => this.RaiseAndSetIfChanged(ref _connectionTime, value);
-    }
 
     public ServerConnection(IConnectionCredentials credentials)
     {
@@ -26,26 +29,38 @@ public class ServerConnection : ReactiveObject, IServerConnection
         _sshClient = new SshClient(credentials.GetConnectionInfo()) { KeepAliveInterval = TimeSpan.FromSeconds(10) };
         ConnectionTime = DateTime.Now;
     }
-    
+
     public ServerConnection(string hostname, string user, string password) : this(new PasswordConnectionCredentials
     {
         Hostname = hostname,
         Username = user,
         Password = password
-    }) { }
+    })
+    {
+    }
 
     public ServerConnection(string hostname, string user, ISshKey key) : this(new KeyConnectionCredentials
     {
         Hostname = hostname,
         Username = user,
         PublicKey = key
-    }) { }
-    
-    private IConnectionCredentials ConnectionCredentials;
+    })
+    {
+    }
+
     private SshClient ClientConnection
     {
         get => _sshClient;
         set => this.RaiseAndSetIfChanged(ref _sshClient, value);
+    }
+
+    private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
+    private string CreateEmptyFileCommand => ServerOs == PlatformID.Win32NT ? "echo. >" : "touch";
+
+    public DateTime ConnectionTime
+    {
+        get => _connectionTime;
+        set => this.RaiseAndSetIfChanged(ref _connectionTime, value);
     }
 
     public bool IsConnected
@@ -54,56 +69,15 @@ public class ServerConnection : ReactiveObject, IServerConnection
         set => this.RaiseAndSetIfChanged(ref _isConnected, value);
     }
 
-    public string ConnectionString => IsConnected ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : "";
-    public PlatformID ServerOs { get; set; } = PlatformID.Other;
-    private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
-    private string CreateEmptyFileCommand => ServerOs == PlatformID.Win32NT ? "echo. >" : "touch";
-    
-    private string ResolveRemoteEnvVariables(string originalPath)
-    {
-        if (!IsConnected) return originalPath;
-        return originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries).Aggregate("", (s, s1) =>
-        {
-            if (s1.Contains('\\') || s1.Contains('/'))
-            {
-                s += s1.Trim();
-            }
-            else
-            {
-                s += ClientConnection.RunCommand(ServerOs is PlatformID.Unix or PlatformID.MacOSX ? $"echo ${s1}" : $"echo %{s1}%").Result.Trim();
-            }
-            return s;
-        });
-    }
+    public string ConnectionString =>
+        IsConnected ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : "";
 
-    private void CheckForFilesAndCreateThemIfTheyNotExist()
-    {
-        if(!ClientConnection.IsConnected) return;
-        var authorizedKeysFileCheck = ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
-        var knownHostsFileCheck = ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
-        if (authorizedKeysFileCheck.ExitStatus != 0)
-            ClientConnection.RunCommand(
-                $"{CreateEmptyFileCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
-        if(knownHostsFileCheck.ExitStatus != 0) ClientConnection.RunCommand($"{CreateEmptyFileCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
-    }
-    
+    public PlatformID ServerOs { get; set; } = PlatformID.Other;
+
     /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
     void IDisposable.Dispose()
     {
         GC.SuppressFinalize(this);
-    }
-
-    private PlatformID GetServerOs()
-    {
-        var linuxCommand = ClientConnection.RunCommand("uname -s");
-        var windowsCommand = ClientConnection.RunCommand("ver");
-
-        var isWindows = windowsCommand.ExitStatus == 0;
-        var isLinux = linuxCommand.ExitStatus == 0;
-
-        if (isWindows && !isLinux) return PlatformID.Win32NT;
-        if (isLinux && !isWindows) return PlatformID.Unix;
-        return PlatformID.Other;
     }
 
     public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
@@ -119,6 +93,7 @@ public class ServerConnection : ReactiveObject, IServerConnection
                 CheckForFilesAndCreateThemIfTheyNotExist();
                 ConnectionTime = DateTime.Now;
             }
+
             if (ServerOs != PlatformID.Other) return IsConnected;
             exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");
             return false;
@@ -152,7 +127,9 @@ public class ServerConnection : ReactiveObject, IServerConnection
             ? new KnownHostsFile("", true)
             : new KnownHostsFile(
                 ClientConnection
-                    .RunCommand($"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs))}").Result,
+                    .RunCommand(
+                        $"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs))}")
+                    .Result,
                 true);
     }
 
@@ -169,7 +146,8 @@ public class ServerConnection : ReactiveObject, IServerConnection
         if (!IsConnected) return new AuthorizedKeysFile("", true);
         return new AuthorizedKeysFile(
             ClientConnection
-                .RunCommand($"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
+                .RunCommand(
+                    $"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
                 .Result, true);
     }
 
@@ -180,5 +158,47 @@ public class ServerConnection : ReactiveObject, IServerConnection
             .RunCommand(
                 $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
             .ExitStatus == 0;
+    }
+
+    private string ResolveRemoteEnvVariables(string originalPath)
+    {
+        if (!IsConnected) return originalPath;
+        return originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries).Aggregate("", (s, s1) =>
+        {
+            if (s1.Contains('\\') || s1.Contains('/'))
+                s += s1.Trim();
+            else
+                s += ClientConnection
+                    .RunCommand(ServerOs is PlatformID.Unix or PlatformID.MacOSX ? $"echo ${s1}" : $"echo %{s1}%")
+                    .Result.Trim();
+            return s;
+        });
+    }
+
+    private void CheckForFilesAndCreateThemIfTheyNotExist()
+    {
+        if (!ClientConnection.IsConnected) return;
+        var authorizedKeysFileCheck =
+            ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
+        var knownHostsFileCheck =
+            ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
+        if (authorizedKeysFileCheck.ExitStatus != 0)
+            ClientConnection.RunCommand(
+                $"{CreateEmptyFileCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
+        if (knownHostsFileCheck.ExitStatus != 0)
+            ClientConnection.RunCommand($"{CreateEmptyFileCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
+    }
+
+    private PlatformID GetServerOs()
+    {
+        var linuxCommand = ClientConnection.RunCommand("uname -s");
+        var windowsCommand = ClientConnection.RunCommand("ver");
+
+        var isWindows = windowsCommand.ExitStatus == 0;
+        var isLinux = linuxCommand.ExitStatus == 0;
+
+        if (isWindows && !isLinux) return PlatformID.Win32NT;
+        if (isLinux && !isWindows) return PlatformID.Unix;
+        return PlatformID.Other;
     }
 }

@@ -1,35 +1,23 @@
-﻿using System.Diagnostics;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:58
+
+#endregion
+
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Interfaces;
 using Renci.SshNet;
-using Renci.SshNet.Security;
 using SshNet.Keygen;
 
 namespace OpenSSHALib.Models;
 
 public abstract partial class SshKey : ISshKey
 {
-    
-    [GeneratedRegex(@"\(([^)]*)\)")]
-    private static partial Regex BracesRegex();
-    
-    private string ReadSshFile(ref string filePath)
-    {
-        using var readerProcess = new Process();
-        readerProcess.StartInfo = new ProcessStartInfo
-        {
-            WindowStyle = ProcessWindowStyle.Hidden,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true,
-            Arguments = $"-l -f {filePath}",
-            FileName = "ssh-keygen"
-        };
-        readerProcess.Start();
-        return readerProcess.StandardOutput.ReadToEnd();
-    }
     protected SshKey(string absoluteFilePath)
     {
         AbsoluteFilePath = absoluteFilePath;
@@ -55,6 +43,7 @@ public abstract partial class SshKey : ISshKey
         {
             throw new ArgumentException($"{keyTypeText} is not a valid enum member of {typeof(KeyType)}");
         }
+
         Format = SshKeyFormat.OpenSSH;
     }
 
@@ -85,14 +74,41 @@ public abstract partial class SshKey : ISshKey
 
     public void DeleteKey()
     {
-        if (this is ISshPublicKey pub)
-        {
-            pub.PrivateKey.DeleteKey();
-        }
+        if (this is ISshPublicKey pub) pub.PrivateKey.DeleteKey();
         File.Delete(AbsoluteFilePath);
     }
-    
-    public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH) => ExportKeyAsync().Result;
+
+    public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH)
+    {
+        return ExportKeyAsync().Result;
+    }
 
     public abstract IPrivateKeySource GetRenciKeyType();
+
+    public ISshKey Convert(SshKeyFormat format)
+    {
+        if (format == Format) return this;
+        // @TODO
+        return this;
+    }
+    
+    
+    [GeneratedRegex(@"\(([^)]*)\)")]
+    private static partial Regex BracesRegex();
+
+    private string ReadSshFile(ref string filePath)
+    {
+        using var readerProcess = new Process();
+        readerProcess.StartInfo = new ProcessStartInfo
+        {
+            WindowStyle = ProcessWindowStyle.Hidden,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            Arguments = $"-l -f {filePath}",
+            FileName = "ssh-keygen"
+        };
+        readerProcess.Start();
+        return readerProcess.StandardOutput.ReadToEnd();
+    }
 }

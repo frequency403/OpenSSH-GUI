@@ -1,10 +1,17 @@
-﻿using System.Collections.ObjectModel;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:58
+
+#endregion
+
+using System.Collections.ObjectModel;
 using System.Text;
 using OpenSSHALib.Interfaces;
 using ReactiveUI;
 
 namespace OpenSSHALib.Models;
-
 
 public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
 {
@@ -21,28 +28,12 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
             ReadAndLoadFileContents(_fileContentsOrPath);
     }
 
+    private bool IsFileFromServer { get; }
+
     public ObservableCollection<IAuthorizedKey> AuthorizedKeys
     {
         get => _authorizedKeys;
         set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
-    }
-
-    private bool IsFileFromServer { get; }
-
-    private void LoadFileContents(string fileContents)
-    {
-        AuthorizedKeys =
-            new ObservableCollection<IAuthorizedKey>(fileContents.TrimEnd()
-                .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
-                .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
-    }
-
-    private void ReadAndLoadFileContents(string pathToFile)
-    {
-        if (!File.Exists(pathToFile)) File.Create(pathToFile);
-        using var fileStream = File.OpenRead(pathToFile);
-        using var streamReader = new StreamReader(fileStream);
-        LoadFileContents(streamReader.ReadToEnd());
     }
 
     public bool AddAuthorizedKey(ISshPublicKey key)
@@ -97,5 +88,21 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
             : AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("",
                 (s, key) => s +=
                     $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
+    }
+
+    private void LoadFileContents(string fileContents)
+    {
+        AuthorizedKeys =
+            new ObservableCollection<IAuthorizedKey>(fileContents.TrimEnd()
+                .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
+                .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
+    }
+
+    private void ReadAndLoadFileContents(string pathToFile)
+    {
+        if (!File.Exists(pathToFile)) File.Create(pathToFile);
+        using var fileStream = File.OpenRead(pathToFile);
+        using var streamReader = new StreamReader(fileStream);
+        LoadFileContents(streamReader.ReadToEnd());
     }
 }

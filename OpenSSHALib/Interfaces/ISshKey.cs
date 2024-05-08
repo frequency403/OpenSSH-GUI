@@ -1,5 +1,12 @@
-﻿using Renci.SshNet;
-using Renci.SshNet.Security;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:54
+
+#endregion
+
+using Renci.SshNet;
 using SshNet.Keygen;
 
 namespace OpenSSHALib.Interfaces;
@@ -18,4 +25,5 @@ public interface ISshKey
     public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH);
     public IPrivateKeySource GetRenciKeyType();
     void DeleteKey();
+    ISshKey Convert(SshKeyFormat format);
 }

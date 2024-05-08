@@ -1,4 +1,12 @@
-﻿using System;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 21.01.2024 - 23:01:53
+// Last edit: 08.05.2024 - 22:05:04
+
+#endregion
+
+using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
 

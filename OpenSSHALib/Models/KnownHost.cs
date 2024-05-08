@@ -1,4 +1,12 @@
-﻿using OpenSSHALib.Interfaces;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:58
+
+#endregion
+
+using OpenSSHALib.Interfaces;
 using ReactiveUI;
 
 namespace OpenSSHALib.Models;
@@ -13,6 +21,8 @@ public class KnownHost : ReactiveObject, IKnownHost
         Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim()) as IKnownHostKey).ToList();
     }
 
+    private bool SwitchToggled { get; set; }
+
     public string Host { get; }
     public bool DeleteWholeHost => Keys.All(e => e.MarkedForDeletion);
 
@@ -21,8 +31,6 @@ public class KnownHost : ReactiveObject, IKnownHost
         get => _keys;
         set => this.RaiseAndSetIfChanged(ref _keys, value);
     }
-
-    private bool SwitchToggled { get; set; }
 
     public void KeysDeletionSwitch()
     {

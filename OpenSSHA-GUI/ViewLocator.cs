@@ -1,3 +1,11 @@
+#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 20.12.2023 - 23:12:01
+// Last edit: 08.05.2024 - 22:05:56
+
+#endregion
+
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;

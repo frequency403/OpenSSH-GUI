@@ -1,5 +1,10 @@
-using OpenSSHALib.Lib.Structs;
-using OpenSSHALib.Models;
+#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:07
+
+#endregion
 
 namespace OpenSSHA_Tests;
 
@@ -13,9 +18,5 @@ public class Tests
     [Test]
     public void Test1()
     {
-        var ppKey = new PpkKey(@"C:\Users\frequ\.ssh\id_rsa_puttyKeygen.ppk");
-        var openSsh = ppKey.ConvertToOpenSshKey(out var errorMessage);
-        if(openSsh is null) Console.WriteLine(errorMessage);
-        
     }
 }

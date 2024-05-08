@@ -1,4 +1,12 @@
-﻿using System;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:04
+
+#endregion
+
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -14,7 +22,6 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSHALib.Interfaces;
 using OpenSSHALib.Lib;
-using OpenSSHALib.Models;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
@@ -43,14 +50,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(ILogger<MainWindowViewModel> logger) : base(logger)
     {
-        _sshKeys = new ObservableCollection<ISshKey?>(App.ServiceProvider.GetRequiredService<DirectoryCrawler>().GetAllKeys(out var errors));
-        if (errors.Count != 0)
-        {
-            MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, errors
-                .Select(error => string.Format(StringsAndTexts.MainWindowViewModelProblemLoadingFileText, error.File,
-                    error.Exception.Message))
-                .Aggregate("\n", (first, second) => first += second), ButtonEnum.Ok, Icon.Error);
-        }
+        _sshKeys = new ObservableCollection<ISshKey?>(App.ServiceProvider.GetRequiredService<DirectoryCrawler>()
+            .GetAllKeys());
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }
@@ -140,7 +141,9 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPublic =>
         ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>
         {
-            var keyExport = key is IPpkKey ppkKey ? await ppkKey.ExportKeyAsync() : await ((ISshPublicKey)key).ExportKeyAsync();
+            var keyExport = key is IPpkKey ppkKey
+                ? await ppkKey.ExportKeyAsync()
+                : await ((ISshPublicKey)key).ExportKeyAsync();
             if (keyExport is null)
             {
                 var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
@@ -156,11 +159,13 @@ public class MainWindowViewModel : ViewModelBase
                 key.KeyTypeString, key.Fingerprint);
             return await ShowExportWindow.Handle(exportViewModel);
         });
-    
+
     public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPrivate =>
         ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>
         {
-            var keyExport = key is IPpkKey ppkKey ? await ppkKey.ExportKeyAsync(false) : await ((ISshPublicKey)key).PrivateKey.ExportKeyAsync();
+            var keyExport = key is IPpkKey ppkKey
+                ? await ppkKey.ExportKeyAsync(false)
+                : await ((ISshPublicKey)key).PrivateKey.ExportKeyAsync();
             if (keyExport is null)
             {
                 var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
@@ -250,7 +255,7 @@ public class MainWindowViewModel : ViewModelBase
         get => _sshKeys;
         set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
     }
-    
+
 
     private void EvaluateAppropriateIcon()
     {

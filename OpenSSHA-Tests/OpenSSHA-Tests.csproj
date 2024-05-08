@@ -23,8 +23,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\OpenSSHA-GUI\OpenSSHA-GUI.csproj" />
-      <ProjectReference Include="..\OpenSSHALib\OpenSSHALib.csproj" />
+        <ProjectReference Include="..\OpenSSHA-GUI\OpenSSHA-GUI.csproj"/>
+        <ProjectReference Include="..\OpenSSHALib\OpenSSHALib.csproj"/>
     </ItemGroup>
 
 </Project>

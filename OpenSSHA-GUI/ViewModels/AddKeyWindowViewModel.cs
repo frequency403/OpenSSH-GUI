@@ -1,4 +1,12 @@
-﻿using System;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:06
+
+#endregion
+
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -8,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Interfaces;
-using OpenSSHALib.Lib.Structs;
 using OpenSSHALib.Models;
 using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
@@ -19,16 +26,18 @@ using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
 using SshNet.Keygen.SshKeyEncryption;
 using SshKey = SshNet.Keygen.SshKey;
+using SshKeyType = SshNet.Keygen.SshKeyType;
 
 namespace OpenSSHA_GUI.ViewModels;
 
 public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 {
+    private readonly ValidationHelper _keyNameValidationHelper = new(new ValidationContext());
     private bool _createKey;
 
-    private string _keyName = "id_rsa";
+    private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
 
-    private readonly ValidationHelper _keyNameValidationHelper = new(new ValidationContext());
+    private string _keyName = "id_rsa";
 
     private ISshKeyType _selectedKeyType;
 
@@ -84,8 +93,6 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         set => this.RaiseAndSetIfChanged(ref _sshKeyTypes, value);
     }
 
-    private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
-
     public SshKeyFormat KeyFormat
     {
         get => _keyFormat;
@@ -116,9 +123,9 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
             {
                 KeyType = SelectedKeyType.BaseType switch
                 {
-                    KeyType.RSA => SshNet.Keygen.SshKeyType.RSA,
-                    KeyType.ECDSA => SshNet.Keygen.SshKeyType.ECDSA,
-                    KeyType.ED25519 => SshNet.Keygen.SshKeyType.ED25519,
+                    KeyType.RSA => SshKeyType.RSA,
+                    KeyType.ECDSA => SshKeyType.ECDSA,
+                    KeyType.ED25519 => SshKeyType.ED25519,
                     _ => throw new ArgumentOutOfRangeException()
                 },
                 Comment = Comment,
@@ -131,26 +138,29 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
             await using var privateStream = new MemoryStream();
             var k = SshKey.Generate(privateStream, sshKeyGenerateInfo);
             switch (KeyFormat)
-                {
-                    case SshKeyFormat.PuTTYv2:
-                    case SshKeyFormat.PuTTYv3:
-                        await using (var privateStreamWriter = new StreamWriter(File.Create(fullFilePath + ".ppk")))
-                        {
-                            await privateStreamWriter.WriteAsync(k.ToPuttyFormat());
-                        }
-                        return new PpkKey(fullFilePath + ".ppk");
-                    case SshKeyFormat.OpenSSH:
-                    default:
-                        await using (var privateStreamWriter = new StreamWriter(File.Create(fullFilePath)))
-                        {
-                            await privateStreamWriter.WriteAsync(k.ToOpenSshFormat());
-                        }
-                        await using (var publicStreamWriter = new StreamWriter(File.Create(fullFilePath + ".pub")))
-                        {
-                            await publicStreamWriter.WriteAsync(k.ToOpenSshPublicFormat());
-                        }
-                        return new SshPublicKey(fullFilePath + ".pub");
-                }
+            {
+                case SshKeyFormat.PuTTYv2:
+                case SshKeyFormat.PuTTYv3:
+                    await using (var privateStreamWriter = new StreamWriter(File.Create(fullFilePath + ".ppk")))
+                    {
+                        await privateStreamWriter.WriteAsync(k.ToPuttyFormat());
+                    }
+
+                    return new PpkKey(fullFilePath + ".ppk");
+                case SshKeyFormat.OpenSSH:
+                default:
+                    await using (var privateStreamWriter = new StreamWriter(File.Create(fullFilePath)))
+                    {
+                        await privateStreamWriter.WriteAsync(k.ToOpenSshFormat());
+                    }
+
+                    await using (var publicStreamWriter = new StreamWriter(File.Create(fullFilePath + ".pub")))
+                    {
+                        await publicStreamWriter.WriteAsync(k.ToOpenSshPublicFormat());
+                    }
+
+                    return new SshPublicKey(fullFilePath + ".pub");
+            }
         }
         catch (Exception e)
         {

@@ -1,4 +1,12 @@
-﻿using OpenSSHALib.Enums;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:01
+
+#endregion
+
+using OpenSSHALib.Enums;
 using OpenSSHALib.Interfaces;
 using ReactiveUI;
 
@@ -20,8 +28,9 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
         Fingerprint = splitted[1].Replace("\n", "").Replace("\r", "");
     }
 
-    public KeyType KeyType { get; }
     private string TypeDeclarationInFile { get; }
+
+    public KeyType KeyType { get; }
     public string Fingerprint { get; }
     public string EntryWithoutHost { get; }
 

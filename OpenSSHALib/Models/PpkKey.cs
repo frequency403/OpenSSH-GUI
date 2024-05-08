@@ -1,4 +1,12 @@
-﻿using System.Diagnostics;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:54
+
+#endregion
+
+using System.Diagnostics;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Interfaces;
 using Renci.SshNet;
@@ -8,8 +16,7 @@ using SshNet.PuttyKeyFile;
 
 namespace OpenSSHALib.Models;
 
-
-public class PpkKey : IPpkKey
+public record PpkKey : IPpkKey
 {
     private const string EncryptionLineStart = "Encryption:";
     private const string PrivateKeyLineStart = "Private-Lines:";
@@ -18,7 +25,7 @@ public class PpkKey : IPpkKey
     private const string CommentLineStart = "Comment:";
     private const string MacLineStart = "Private-MAC:";
     private readonly PuttyKeyFile _keyFile;
-    public SshKeyFormat Format { get; }
+
     public PpkKey(string absoluteFilePath)
     {
         if (!File.Exists(absoluteFilePath)) return;
@@ -38,9 +45,11 @@ public class PpkKey : IPpkKey
             }
             : SshKeyFormat.OpenSSH;
         KeyTypeString = lines.FirstOrDefault(e => e.StartsWith(DefinitionLineStart)).Split('-')[0].Trim();
-        KeyType = new Models.SshKeyType(Enum.TryParse<KeyType>(lines.FirstOrDefault(e => e.StartsWith(DefinitionLineStart)).Split('-')[0].Trim(), out var parsedKeyType)
-            ? parsedKeyType
-            : OpenSSHALib.Enums.KeyType.RSA);
+        KeyType = new SshKeyType(
+            Enum.TryParse<KeyType>(lines.FirstOrDefault(e => e.StartsWith(DefinitionLineStart)).Split('-')[0].Trim(),
+                out var parsedKeyType)
+                ? parsedKeyType
+                : Enums.KeyType.RSA);
         EncryptionType = Enum.TryParse<EncryptionType>(
             lines.FirstOrDefault(e => e.StartsWith(EncryptionLineStart)).Replace(EncryptionLineStart, "").Trim(),
             out var parsedEncryptionType)
@@ -51,15 +60,18 @@ public class PpkKey : IPpkKey
         PrivateKeyString = ExtractLines(lines, PrivateKeyLineStart);
         PublicKeyString = ExtractLines(lines, PublicKeyLineStart);
         PrivateMAC = (lines.FirstOrDefault(e => e.StartsWith(MacLineStart)) ?? "").Replace(MacLineStart, "").Trim();
-        
+        Fingerprint = PrivateMAC;
     }
+
+    public SshKeyFormat Format { get; }
 
     public string AbsoluteFilePath { get; private set; }
     public string KeyTypeString { get; }
-    public string Filename { get; } 
+    public string Filename { get; }
     public ISshKeyType KeyType { get; }
     public string Fingerprint { get; }
-    public bool IsPublicKey { get; }
+    public bool IsPublicKey { get; } = true;
+
     public Task<string> ExportKeyAsync(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH)
     {
         return Task.FromResult(publicKey
@@ -76,9 +88,21 @@ public class PpkKey : IPpkKey
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
             });
     }
-    public string ExportKey(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH) => ExportKeyAsync(publicKey, format).Result;
-    public Task<string> ExportKeyAsync(SshKeyFormat format = SshKeyFormat.OpenSSH) => ExportKeyAsync(true, format);
-    public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH) => ExportKeyAsync(format).Result;
+
+    public string ExportKey(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH)
+    {
+        return ExportKeyAsync(publicKey, format).Result;
+    }
+
+    public Task<string> ExportKeyAsync(SshKeyFormat format = SshKeyFormat.OpenSSH)
+    {
+        return ExportKeyAsync(true, format);
+    }
+
+    public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH)
+    {
+        return ExportKeyAsync(format).Result;
+    }
 
     public EncryptionType EncryptionType { get; }
 
@@ -90,26 +114,6 @@ public class PpkKey : IPpkKey
 
     public string PrivateMAC { get; }
 
-    private string ExtractLines(string[] lines, string marker)
-    {
-        var startPosition = 0;
-        var linesToExtract = 0;
-        foreach (var line in lines.Select((content, index) => (content, index)))
-        {
-            if (startPosition == 0)
-            {
-                if (line.content.Contains(marker))
-                {
-                    linesToExtract = int.Parse(line.content.Replace(marker, "").Trim());
-                    startPosition = line.index + 1;
-                    break;
-                }
-            }
-        }
-
-        return string.Join("", lines, startPosition, linesToExtract);
-    }
-
     public ISshPublicKey? ConvertToOpenSshKey(out string errorMessage, bool temp = false)
     {
         try
@@ -118,7 +122,8 @@ public class PpkKey : IPpkKey
             var privateFilePath = AbsoluteFilePath.Replace(".ppk", "");
             var publicFilePath = AbsoluteFilePath.Replace(".ppk", ".pub");
             if (File.Exists(privateFilePath)) privateFilePath += $"_{DateTime.Now:yy_MM_dd_HH_mm}";
-            if (File.Exists(publicFilePath)) publicFilePath = publicFilePath.Replace(".pub", $"{DateTime.Now:yy_MM_dd_HH_mm}.pub");
+            if (File.Exists(publicFilePath))
+                publicFilePath = publicFilePath.Replace(".pub", $"{DateTime.Now:yy_MM_dd_HH_mm}.pub");
             File.WriteAllText(privateFilePath, key.ToOpenSshFormat());
             var extractPubKey = new Process
             {
@@ -150,10 +155,37 @@ public class PpkKey : IPpkKey
         }
     }
 
-    public IPrivateKeySource GetRenciKeyType() => _keyFile;
+    public IPrivateKeySource GetRenciKeyType()
+    {
+        return _keyFile;
+    }
+
     public void DeleteKey()
     {
         File.Delete(AbsoluteFilePath);
+    }
+    
+    public ISshKey Convert(SshKeyFormat format)
+    {
+        if (format.Equals(Format)) return this;
+        // @TODO
+        return this;
+    }
+
+    private string ExtractLines(string[] lines, string marker)
+    {
+        var startPosition = 0;
+        var linesToExtract = 0;
+        foreach (var line in lines.Select((content, index) => (content, index)))
+            if (startPosition == 0)
+                if (line.content.Contains(marker))
+                {
+                    linesToExtract = int.Parse(line.content.Replace(marker, "").Trim());
+                    startPosition = line.index + 1;
+                    break;
+                }
+
+        return string.Join("", lines, startPosition, linesToExtract);
     }
 
     // public override string ToString()

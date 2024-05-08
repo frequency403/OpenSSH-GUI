@@ -1,4 +1,12 @@
-﻿using System;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:00
+
+#endregion
+
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -10,7 +18,6 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSHALib.Interfaces;
 using OpenSSHALib.Lib;
-using OpenSSHALib.Models;
 using ReactiveUI;
 
 namespace OpenSSHA_GUI.ViewModels;
@@ -36,9 +43,8 @@ public class ConnectToServerViewModel : ViewModelBase
     private bool _uploadButtonEnabled;
     private string _userName = "";
 
-    public IApplicationSettings Settings { get; }
-
-    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, IApplicationSettings settings) : base(logger)
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, IApplicationSettings settings) :
+        base(logger)
     {
         Settings = settings;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
@@ -50,7 +56,7 @@ public class ConnectToServerViewModel : ViewModelBase
                 {
                     if (!ValidData) throw new ArgumentException("Missing hostname/ip, username or password!");
                     ServerConnection = AuthWithPublicKey
-                        ? new ServerConnection(Hostname, Username, SelectedPublicKey as ISshPublicKey)
+                        ? new ServerConnection(Hostname, Username, SelectedPublicKey)
                         : new ServerConnection(Hostname, Username, Password);
                     if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
 
@@ -103,16 +109,13 @@ public class ConnectToServerViewModel : ViewModelBase
         });
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
         {
-            await App.ServiceProvider.GetRequiredService<IApplicationSettings>().AddKnownServerToFileAsync(Hostname, Username);
+            await App.ServiceProvider.GetRequiredService<IApplicationSettings>()
+                .AddKnownServerToFileAsync(Hostname, Username);
             return this;
         });
     }
 
-    public void SetKeys(ref ObservableCollection<ISshKey?> currentKeys)
-    {
-        PublicKeys = currentKeys;
-        _selectedPublicKey = PublicKeys.FirstOrDefault();
-    }
+    public IApplicationSettings Settings { get; }
 
     public IServerConnection ServerConnection
     {
@@ -189,4 +192,10 @@ public class ConnectToServerViewModel : ViewModelBase
     public ReactiveCommand<Unit, ConnectToServerViewModel> SubmitConnection { get; }
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+
+    public void SetKeys(ref ObservableCollection<ISshKey?> currentKeys)
+    {
+        PublicKeys = currentKeys;
+        _selectedPublicKey = PublicKeys.FirstOrDefault();
+    }
 }

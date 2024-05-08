@@ -6,7 +6,6 @@
         xmlns:cv="clr-namespace:OpenSSHA_GUI.Converters"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:openSshaGui="clr-namespace:OpenSSHA_GUI"
-        xmlns:keygen="clr-namespace:SshNet.Keygen;assembly=SshNet.Keygen"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
         Height="450"
@@ -65,19 +64,21 @@
         </StackPanel>
         <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
-            <Label Content="KeyFormat"/>
-            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}" 
-                      SelectedItem="{Binding KeyFormat}"/>
+            <Label Content="KeyFormat" />
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
+                      SelectedItem="{Binding KeyFormat}" />
         </StackPanel>
-        <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch" Command="{Binding AddKey}" CommandParameter="true"
+        <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+                Command="{Binding AddKey}" CommandParameter="true"
                 IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
-        
-        <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" Command="{Binding AddKey}" CommandParameter="false">
+
+        <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
+                Command="{Binding AddKey}" CommandParameter="false">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshaGui:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
             </ToolTip.Tip>

@@ -1,4 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:59
+
+#endregion
+
+using System.Collections.ObjectModel;
 using System.Text;
 using OpenSSHALib.Interfaces;
 using ReactiveUI;
@@ -7,7 +15,6 @@ namespace OpenSSHALib.Models;
 
 public class KnownHostsFile : ReactiveObject, IKnownHostsFile
 {
-    public static string LineEnding { get; set; } = "\r\n";
     private readonly string _fileKnownHostsPath = "";
     private readonly bool _isFromServer;
 
@@ -27,19 +34,12 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
         }
     }
 
+    public static string LineEnding { get; set; } = "\r\n";
+
     public ObservableCollection<IKnownHost> KnownHosts
     {
         get => _knownHosts;
         private set => this.RaiseAndSetIfChanged(ref _knownHosts, value);
-    }
-
-    private void SetKnownHosts(string fileContent)
-    {
-        KnownHosts = new ObservableCollection<IKnownHost>(fileContent
-            .Split(LineEnding)
-            .Where(e => !string.IsNullOrEmpty(e))
-            .GroupBy(e => e.Split(' ')[0])
-            .Select(e => new KnownHost(e)));
     }
 
     public async Task ReadContentAsync(FileStream? stream = null)
@@ -55,22 +55,6 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
         {
             using var streamReader = new StreamReader(stream);
             SetKnownHosts(await streamReader.ReadToEndAsync());
-        }
-    }
-
-    private void ReadContent(FileStream? stream = null)
-    {
-        if (_isFromServer) return;
-        if (stream is null)
-        {
-            using var fileStream = File.OpenRead(_fileKnownHostsPath);
-            using var streamReader = new StreamReader(fileStream);
-            SetKnownHosts(streamReader.ReadToEnd());
-        }
-        else
-        {
-            using var streamReader = new StreamReader(stream);
-            SetKnownHosts(streamReader.ReadToEnd());
         }
     }
 
@@ -104,5 +88,30 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
             .Aggregate("", (current, host) => current + host.GetAllEntries());
         SetKnownHosts(newContent);
         return newContent;
+    }
+
+    private void SetKnownHosts(string fileContent)
+    {
+        KnownHosts = new ObservableCollection<IKnownHost>(fileContent
+            .Split(LineEnding)
+            .Where(e => !string.IsNullOrEmpty(e))
+            .GroupBy(e => e.Split(' ')[0])
+            .Select(e => new KnownHost(e)));
+    }
+
+    private void ReadContent(FileStream? stream = null)
+    {
+        if (_isFromServer) return;
+        if (stream is null)
+        {
+            using var fileStream = File.OpenRead(_fileKnownHostsPath);
+            using var streamReader = new StreamReader(fileStream);
+            SetKnownHosts(streamReader.ReadToEnd());
+        }
+        else
+        {
+            using var streamReader = new StreamReader(stream);
+            SetKnownHosts(streamReader.ReadToEnd());
+        }
     }
 }

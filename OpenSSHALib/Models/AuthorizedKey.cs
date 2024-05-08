@@ -1,4 +1,12 @@
-﻿using OpenSSHALib.Enums;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:58
+
+#endregion
+
+using OpenSSHALib.Enums;
 using OpenSSHALib.Interfaces;
 
 namespace OpenSSHALib.Models;
@@ -20,8 +28,9 @@ public class AuthorizedKey : IAuthorizedKey
         Comment = split[2];
     }
 
-    public KeyType KeyType { get; }
     private string KeyTypeDeclarationInFile { get; }
+
+    public KeyType KeyType { get; }
     public string Fingerprint { get; }
     public string Comment { get; }
     public bool MarkedForDeletion { get; set; }

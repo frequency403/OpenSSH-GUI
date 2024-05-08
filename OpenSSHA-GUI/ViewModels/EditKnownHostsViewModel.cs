@@ -1,10 +1,17 @@
-﻿using System.Collections.ObjectModel;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:01
+
+#endregion
+
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Interfaces;
-using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
 
@@ -15,24 +22,6 @@ public class EditKnownHostsViewModel(ILogger<EditKnownHostsViewModel> logger) : 
     private ObservableCollection<IKnownHost> _knownHostsLocal = [];
 
     private ObservableCollection<IKnownHost> _knownHostsRemote = [];
-
-    public void SetServerConnection(ref IServerConnection connection)
-    {
-        ServerConnection = connection;
-        KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
-        KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
-        KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
-        KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
-        ProcessData = ReactiveCommand.CreateFromTask<string, EditKnownHostsViewModel>(async e =>
-        {
-            if (!bool.Parse(e)) return this;
-            KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
-            if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
-            await KnownHostsFileLocal.UpdateFile();
-            if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
-            return this;
-        });
-    }
 
     public IServerConnection ServerConnection { get; private set; }
 
@@ -52,4 +41,22 @@ public class EditKnownHostsViewModel(ILogger<EditKnownHostsViewModel> logger) : 
     }
 
     public ReactiveCommand<string, EditKnownHostsViewModel> ProcessData { get; private set; }
+
+    public void SetServerConnection(ref IServerConnection connection)
+    {
+        ServerConnection = connection;
+        KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
+        KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
+        KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
+        KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
+        ProcessData = ReactiveCommand.CreateFromTask<string, EditKnownHostsViewModel>(async e =>
+        {
+            if (!bool.Parse(e)) return this;
+            KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
+            if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
+            await KnownHostsFileLocal.UpdateFile();
+            if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
+            return this;
+        });
+    }
 }

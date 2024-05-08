@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSHA_GUI.ViewModels"
-        xmlns:models="clr-namespace:OpenSSHALib.Models;assembly=OpenSSHALib"
         xmlns:converters="clr-namespace:OpenSSHA_GUI.Converters"
         xmlns:interfaces="clr-namespace:OpenSSHALib.Interfaces;assembly=OpenSSHALib"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
@@ -23,14 +22,14 @@
             <Grid ColumnDefinitions="* * *">
                 <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="["/>
-                        <TextBlock Text="{Binding Format}"/>
-                        <TextBlock Text="]"/>
+                        <TextBlock Text="[" />
+                        <TextBlock Text="{Binding Format}" />
+                        <TextBlock Text="]" />
                     </StackPanel>
                     <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
                                Margin="5" />
                 </StackPanel>
-                
+
                 <Separator Grid.Column="1" />
                 <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
             </Grid>
@@ -68,16 +67,14 @@
                          Height="25"
                          IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"
                          ItemsSource="{Binding  Settings.Settings.LastUsedServers.Keys}"
-                         FilterMode="StartsWith" IsTextCompletionEnabled="True"
-                         />
-        
+                         FilterMode="StartsWith" IsTextCompletionEnabled="True" />
+
         <AutoCompleteBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
                          Height="25"
                          IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"
                          ItemsSource="{Binding Settings.Settings.LastUsedServers.Values}"
-                         FilterMode="StartsWith" IsTextCompletionEnabled="True"
-                         />
-        
+                         FilterMode="StartsWith" IsTextCompletionEnabled="True" />
+
         <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Password}" Watermark="Password" PasswordChar="*"
                  Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}"
                  IsVisible="{Binding !AuthWithPublicKey}" VerticalAlignment="Bottom" />

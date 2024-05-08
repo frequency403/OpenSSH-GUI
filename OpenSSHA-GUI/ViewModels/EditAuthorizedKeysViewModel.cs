@@ -1,10 +1,17 @@
-﻿using System.Collections.ObjectModel;
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 08.05.2024 - 22:05:30
+// Last edit: 08.05.2024 - 22:05:00
+
+#endregion
+
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Extensions;
 using OpenSSHALib.Interfaces;
-using OpenSSHALib.Lib;
 using OpenSSHALib.Models;
 using ReactiveUI;
 
@@ -19,30 +26,6 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
     private ISshPublicKey? _selectedKey;
 
     private IServerConnection _serverConnection;
-    
-    public void SetConnectionAndKeys(ref IServerConnection serverConnection,
-        ref ObservableCollection<ISshPublicKey?> keys)
-    {
-        _serverConnection = serverConnection;
-        _publicKeys = keys;
-        _selectedKey = PublicKeys.FirstOrDefault();
-        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
-        Submit = ReactiveCommand.Create<string, EditAuthorizedKeysViewModel>(e =>
-        {
-            if (!bool.Parse(e)) return this;
-            AuthorizedKeysFileLocal.PersistChangesInFile();
-            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
-            return this;
-        });
-        AddKey = ReactiveCommand.CreateFromTask<ISshPublicKey, ISshPublicKey?>(async e =>
-        {
-            await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
-            var keyExport = await SelectedKey!.ExportKeyAsync();
-            AddButtonEnabled =
-                AuthorizedKeysFileRemote.AuthorizedKeys.All(key => key.Fingerprint != keyExport!.Split(' ')[1]);
-            return e;
-        });
-    }
 
     public bool AddButtonEnabled
     {
@@ -81,4 +64,28 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
     public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
     public ReactiveCommand<string, EditAuthorizedKeysViewModel> Submit { get; private set; }
     public ReactiveCommand<ISshPublicKey, ISshPublicKey?> AddKey { get; private set; }
+
+    public void SetConnectionAndKeys(ref IServerConnection serverConnection,
+        ref ObservableCollection<ISshPublicKey?> keys)
+    {
+        _serverConnection = serverConnection;
+        _publicKeys = keys;
+        _selectedKey = PublicKeys.FirstOrDefault();
+        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
+        Submit = ReactiveCommand.Create<string, EditAuthorizedKeysViewModel>(e =>
+        {
+            if (!bool.Parse(e)) return this;
+            AuthorizedKeysFileLocal.PersistChangesInFile();
+            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
+            return this;
+        });
+        AddKey = ReactiveCommand.CreateFromTask<ISshPublicKey, ISshPublicKey?>(async e =>
+        {
+            await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
+            var keyExport = await SelectedKey!.ExportKeyAsync();
+            AddButtonEnabled =
+                AuthorizedKeysFileRemote.AuthorizedKeys.All(key => key.Fingerprint != keyExport!.Split(' ')[1]);
+            return e;
+        });
+    }
 }
