@@ -36,7 +36,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
         set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
     }
 
-    public bool AddAuthorizedKey(ISshPublicKey key)
+    public bool AddAuthorizedKey(ISshKey key)
     {
         if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
         var export = key.ExportKey();
@@ -62,7 +62,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
         return this;
     }
 
-    public async Task<bool> AddAuthorizedKeyAsync(ISshPublicKey key)
+    public async Task<bool> AddAuthorizedKeyAsync(ISshKey key)
     {
         if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
         var export = await key.ExportKeyAsync();
@@ -71,7 +71,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
         return true;
     }
 
-    public bool RemoveAuthorizedKey(ISshPublicKey key)
+    public bool RemoveAuthorizedKey(ISshKey key)
     {
         if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint)) return false;
         {
@@ -93,7 +93,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     private void LoadFileContents(string fileContents)
     {
         AuthorizedKeys =
-            new ObservableCollection<IAuthorizedKey>(fileContents.TrimEnd()
+            new ObservableCollection<IAuthorizedKey>(fileContents
                 .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
                 .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
     }

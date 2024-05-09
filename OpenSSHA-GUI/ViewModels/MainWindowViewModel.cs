@@ -190,8 +190,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     var editAuthorizedKeysViewModel =
                         App.ServiceProvider.GetRequiredService<EditAuthorizedKeysViewModel>();
-                    var keys = new ObservableCollection<ISshPublicKey?>(_sshKeys.Select(e => e as ISshPublicKey));
-                    editAuthorizedKeysViewModel.SetConnectionAndKeys(ref _serverConnection, ref keys);
+                    editAuthorizedKeysViewModel.SetConnectionAndKeys(ref _serverConnection, ref _sshKeys);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
                 catch (Exception exception)

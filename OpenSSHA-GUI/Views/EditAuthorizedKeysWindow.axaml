@@ -43,7 +43,7 @@
                 </Grid>
             </Border>
         </DataTemplate>
-        <DataTemplate DataType="interfaces:ISshPublicKey">
+        <DataTemplate DataType="interfaces:ISshKey">
             <Grid ColumnDefinitions="* * *">
                 <TextBlock Grid.Column="0"
                            Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />

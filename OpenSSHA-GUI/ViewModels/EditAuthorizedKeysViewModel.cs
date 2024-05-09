@@ -21,9 +21,9 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
 {
     private bool _addButtonEnabled;
 
-    private ObservableCollection<ISshPublicKey?> _publicKeys;
+    private ObservableCollection<ISshKey?> _publicKeys;
 
-    private ISshPublicKey? _selectedKey;
+    private ISshKey? _selectedKey;
 
     private IServerConnection _serverConnection;
 
@@ -33,7 +33,7 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
         set => this.RaiseAndSetIfChanged(ref _addButtonEnabled, value);
     }
 
-    public ISshPublicKey? SelectedKey
+    public ISshKey? SelectedKey
     {
         get => _selectedKey;
         set
@@ -44,7 +44,7 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
         }
     }
 
-    public ObservableCollection<ISshPublicKey> PublicKeys
+    public ObservableCollection<ISshKey> PublicKeys
     {
         get => _publicKeys;
         set => this.RaiseAndSetIfChanged(ref _publicKeys, value);
@@ -63,10 +63,10 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
 
     public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
     public ReactiveCommand<string, EditAuthorizedKeysViewModel> Submit { get; private set; }
-    public ReactiveCommand<ISshPublicKey, ISshPublicKey?> AddKey { get; private set; }
+    public ReactiveCommand<ISshKey, ISshKey?> AddKey { get; private set; }
 
     public void SetConnectionAndKeys(ref IServerConnection serverConnection,
-        ref ObservableCollection<ISshPublicKey?> keys)
+        ref ObservableCollection<ISshKey?> keys)
     {
         _serverConnection = serverConnection;
         _publicKeys = keys;
@@ -79,7 +79,7 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
             ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
             return this;
         });
-        AddKey = ReactiveCommand.CreateFromTask<ISshPublicKey, ISshPublicKey?>(async e =>
+        AddKey = ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async e =>
         {
             await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
             var keyExport = await SelectedKey!.ExportKeyAsync();

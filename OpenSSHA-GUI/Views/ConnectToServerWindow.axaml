@@ -18,7 +18,7 @@
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
     </Window.Resources>
     <Window.DataTemplates>
-        <DataTemplate DataType="interfaces:ISshPublicKey">
+        <DataTemplate DataType="interfaces:ISshKey">
             <Grid ColumnDefinitions="* * *">
                 <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
@@ -29,7 +29,6 @@
                     <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
                                Margin="5" />
                 </StackPanel>
-
                 <Separator Grid.Column="1" />
                 <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
             </Grid>
