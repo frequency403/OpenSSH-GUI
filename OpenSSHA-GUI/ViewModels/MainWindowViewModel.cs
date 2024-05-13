@@ -23,6 +23,7 @@ using MsBox.Avalonia.Enums;
 using OpenSSHALib.Interfaces;
 using OpenSSHALib.Lib;
 using ReactiveUI;
+using SshNet.Keygen;
 
 namespace OpenSSHA_GUI.ViewModels;
 
@@ -30,6 +31,7 @@ public class MainWindowViewModel : ViewModelBase
 {
     public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
+    public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> ShowAppSettings = new();
 
     public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys =
         new();
@@ -229,11 +231,11 @@ public class MainWindowViewModel : ViewModelBase
             return result;
         });
 
-    public ReactiveCommand<ISshPublicKey, ISshPublicKey?> DeleteKey =>
-        ReactiveCommand.CreateFromTask<ISshPublicKey, ISshPublicKey?>(async u =>
+    public ReactiveCommand<ISshKey, ISshKey?> DeleteKey =>
+        ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async u =>
         {
             var box = MessageBoxManager.GetMessageBoxStandard(
-                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename, u.PrivateKey.Filename),
+                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename, u is ISshPublicKey up ? up.PrivateKey.Filename : "nothing else"),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
             var res = await box.ShowAsync();
             if (res != ButtonResult.Yes) return null;
@@ -242,6 +244,42 @@ public class MainWindowViewModel : ViewModelBase
             EvaluateAppropriateIcon();
             return u;
         });
+    
+    public ReactiveCommand<ISshKey, ISshKey?> ConvertKey => ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async key =>
+    {
+        var box = MessageBoxManager.GetMessageBoxStandard("Convert key",
+            "This will convert your key to the other Format (OpenSSH -> PuTTY) or (PuTTY -> OpenSSH).\nDo you want to delete the old file?", ButtonEnum.YesNoAbort, Icon.Warning);
+        var errorBox = MessageBoxManager.GetMessageBoxStandard("Error converting key",
+            "There was an error converting the keyfile. See the log for details.", ButtonEnum.Ok, Icon.Error);
+        var oldIndex = SshKeys.IndexOf(key);
+        
+        
+        var result = await box.ShowAsync();
+        if (result == ButtonResult.Abort) return key;
+
+        var formatted = key is IPpkKey ppk ? ppk.Convert(SshKeyFormat.OpenSSH, _logger) : key.Convert(SshKeyFormat.PuTTYv3, _logger);
+        if (formatted is null)
+        {
+            await errorBox.ShowAsync();
+            return key;
+        }
+        
+        SshKeys.Remove(key);
+        SshKeys.Insert(oldIndex, formatted);
+        
+        if(result == ButtonResult.Yes) key.DeleteKey();
+        
+        return key;
+    });
+    
+    public ReactiveCommand<Unit, ApplicationSettingsViewModel?> OpenAppSettings => ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel?>(async u =>
+    {
+        var vm = App.ServiceProvider.GetRequiredService<ApplicationSettingsViewModel>();
+        var result = await ShowAppSettings.Handle(vm);
+        if (result is null) return result;
+        
+        return result;
+    });
 
     public IServerConnection ServerConnection
     {

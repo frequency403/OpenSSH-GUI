@@ -7,6 +7,8 @@
 #endregion
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Interfaces;
 using Renci.SshNet;
@@ -72,6 +74,11 @@ public record PpkKey : IPpkKey
     public string Fingerprint { get; }
     public bool IsPublicKey { get; } = true;
 
+    public string ExportAuthorizedKeyEntry()
+    {
+        return _keyFile.ToOpenSshPublicFormat();
+    }
+    
     public Task<string> ExportKeyAsync(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH)
     {
         return Task.FromResult(publicKey
@@ -113,39 +120,46 @@ public record PpkKey : IPpkKey
     public string PrivateKeyString { get; }
 
     public string PrivateMAC { get; }
+    
+    public bool IsPuttyKey => Format is not SshKeyFormat.OpenSSH;
 
-    public ISshPublicKey? ConvertToOpenSshKey(out string errorMessage, bool temp = false)
+    public bool MoveFileToSubFolder([NotNullWhen(false)]out Exception? error)
     {
+        error = null;
         try
         {
-            var key = new PuttyKeyFile(AbsoluteFilePath);
-            var privateFilePath = AbsoluteFilePath.Replace(".ppk", "");
-            var publicFilePath = AbsoluteFilePath.Replace(".ppk", ".pub");
-            if (File.Exists(privateFilePath)) privateFilePath += $"_{DateTime.Now:yy_MM_dd_HH_mm}";
-            if (File.Exists(publicFilePath))
-                publicFilePath = publicFilePath.Replace(".pub", $"{DateTime.Now:yy_MM_dd_HH_mm}.pub");
-            File.WriteAllText(privateFilePath, key.ToOpenSshFormat());
-            var extractPubKey = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                    Arguments = $"-y -f \"{privateFilePath}\"",
-                    FileName = "ssh-keygen"
-                }
-            };
-            extractPubKey.Start();
-            errorMessage = extractPubKey.StandardError.ReadToEnd();
-            var output = extractPubKey.StandardOutput.ReadToEnd();
-            if (!string.IsNullOrWhiteSpace(errorMessage)) throw new Exception(errorMessage);
-            File.WriteAllText(publicFilePath, output);
             var directory = Directory.GetParent(AbsoluteFilePath)!.CreateSubdirectory("PPK");
             var newFileDestination = Path.Combine(directory.FullName, Path.GetFileName(AbsoluteFilePath));
             File.Move(AbsoluteFilePath, newFileDestination);
             AbsoluteFilePath = newFileDestination;
+            return true;
+        }
+        catch (Exception e)
+        {
+            error = e;
+            return false;
+        }
+    }
+    
+    public ISshPublicKey? ConvertToOpenSshKey(out string errorMessage, bool temp = false, bool move = true)
+    {
+        errorMessage = "";
+        try
+        {
+            var privateFilePath = Path.Combine(Path.GetDirectoryName(AbsoluteFilePath), Path.GetFileNameWithoutExtension(AbsoluteFilePath));
+            var publicFilePath = Path.ChangeExtension(privateFilePath, ".pub");
+            if (File.Exists(privateFilePath)) privateFilePath += DateTime.Now.ToString("yy_MM_dd_HH_mm");
+            if (File.Exists(publicFilePath)) publicFilePath = Path.ChangeExtension(privateFilePath, ".pub");
+            if (move)
+            {
+                if (!MoveFileToSubFolder(out var ex))
+                {
+                    errorMessage = ex.Message;
+                    return null;
+                }
+            }
+            File.WriteAllText(privateFilePath, _keyFile.ToOpenSshFormat());
+            File.WriteAllText(publicFilePath, _keyFile.ToOpenSshPublicFormat());
             return new SshPublicKey(publicFilePath);
         }
         catch (Exception e)
@@ -165,11 +179,19 @@ public record PpkKey : IPpkKey
         File.Delete(AbsoluteFilePath);
     }
     
-    public ISshKey Convert(SshKeyFormat format)
+    public ISshKey? Convert(SshKeyFormat format)
     {
         if (format.Equals(Format)) return this;
-        // @TODO
-        return this;
+        return ConvertToOpenSshKey(out _, move: false);
+    }
+
+    public ISshKey? Convert(SshKeyFormat format, ILogger logger)
+    {
+        if (format.Equals(Format)) return this;
+        var convertResult = ConvertToOpenSshKey(out var errorMessage, move: false);
+        if (string.IsNullOrWhiteSpace(errorMessage)) return convertResult;
+        logger.LogError("Error converting the key -> {0}", errorMessage);
+        return null;
     }
 
     private string ExtractLines(string[] lines, string marker)

@@ -25,6 +25,7 @@ namespace OpenSSHA_GUI.ViewModels;
 public class ConnectToServerViewModel : ViewModelBase
 {
     private bool _authWithPublicKey;
+    private bool _authWithAllKeys;
 
     private string _hostName = "";
     private string _password = "";
@@ -56,7 +57,7 @@ public class ConnectToServerViewModel : ViewModelBase
                 {
                     if (!ValidData) throw new ArgumentException("Missing hostname/ip, username or password!");
                     ServerConnection = AuthWithPublicKey
-                        ? new ServerConnection(Hostname, Username, SelectedPublicKey)
+                        ? AuthWithAllKeys ? new ServerConnection(Hostname, Username, PublicKeys) : new ServerConnection(Hostname, Username, SelectedPublicKey)
                         : new ServerConnection(Hostname, Username, Password);
                     if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
 
@@ -136,7 +137,21 @@ public class ConnectToServerViewModel : ViewModelBase
     public bool AuthWithPublicKey
     {
         get => _authWithPublicKey;
-        set => this.RaiseAndSetIfChanged(ref _authWithPublicKey, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _authWithPublicKey, value);
+            UpdateComboBoxState();
+        }
+    }
+
+    public bool AuthWithAllKeys
+    {
+        get => _authWithAllKeys;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _authWithAllKeys, value);
+            UpdateComboBoxState();
+        }
     }
 
     public ISshKey? SelectedPublicKey
@@ -189,6 +204,19 @@ public class ConnectToServerViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _statusButtonBackground, value);
     }
 
+    private bool _keyComboBoxEnabled;
+
+    public bool KeyComboBoxEnabled
+    {
+        get => _keyComboBoxEnabled;
+        set => this.RaiseAndSetIfChanged(ref _keyComboBoxEnabled, value);
+    } 
+
+    public void UpdateComboBoxState()
+    {
+        KeyComboBoxEnabled = (!ServerConnection.IsConnected && AuthWithPublicKey) && !AuthWithAllKeys;
+    }
+    
     public ReactiveCommand<Unit, ConnectToServerViewModel> SubmitConnection { get; }
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }

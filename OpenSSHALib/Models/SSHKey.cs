@@ -9,10 +9,13 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using OpenSSHALib.Enums;
 using OpenSSHALib.Interfaces;
 using Renci.SshNet;
+using Renci.SshNet.Security;
 using SshNet.Keygen;
+using SshNet.Keygen.Extensions;
 
 namespace OpenSSHALib.Models;
 
@@ -55,7 +58,13 @@ public abstract partial class SshKey : ISshKey
     public string Comment { get; protected set; }
     public ISshKeyType KeyType { get; } = new SshKeyType(Enums.KeyType.RSA);
     public string Fingerprint { get; protected set; }
+    public bool IsPuttyKey  => Format is not SshKeyFormat.OpenSSH;
 
+    public string ExportAuthorizedKeyEntry()
+    {
+        return new PrivateKeyFile(this is ISshPublicKey pub ? pub.AbsoluteFilePath.Replace(".pub", "") : AbsoluteFilePath).ToOpenSshPublicFormat();
+    }
+    
     public async Task<string> ExportKeyAsync(SshKeyFormat format = SshKeyFormat.OpenSSH)
     {
         try
@@ -88,8 +97,33 @@ public abstract partial class SshKey : ISshKey
     public ISshKey Convert(SshKeyFormat format)
     {
         if (format == Format) return this;
-        // @TODO
+        var priv = this is ISshPublicKey pubk
+            ? new PrivateKeyFile(pubk.PrivateKey.AbsoluteFilePath)
+            : new PrivateKeyFile(AbsoluteFilePath);
+        priv.ToPuttyFormat();
+        File.WriteAllText(Path.Combine(Path.GetFullPath(AbsoluteFilePath), Path.ChangeExtension(Path.GetFileNameWithoutExtension(AbsoluteFilePath),".ppk")), priv.ToPuttyFormat());
         return this;
+    }
+    
+    public ISshKey? Convert(SshKeyFormat format, ILogger logger)
+    {
+        if (format.Equals(Format)) return this;
+        
+        try
+        {
+            var priv = this is ISshPublicKey pubk
+                ? new PrivateKeyFile(pubk.PrivateKey.AbsoluteFilePath)
+                : new PrivateKeyFile(AbsoluteFilePath);
+           var pathToWrite = Path.Combine(Path.GetDirectoryName(AbsoluteFilePath),
+                Path.ChangeExtension(Path.GetFileNameWithoutExtension(AbsoluteFilePath), ".ppk"));
+            File.WriteAllText(pathToWrite, priv.ToPuttyFormat());
+            return new PpkKey(pathToWrite);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error converting the key");
+        }
+        return null;
     }
     
     

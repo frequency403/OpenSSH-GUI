@@ -22,6 +22,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         InitializeComponent();
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
+        this.WhenActivated(action => action(ViewModel!.ShowAppSettings.RegisterHandler(DoShowAppSettingsWindowAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(DoShowExportWindowAsync)));
         this.WhenActivated(action =>
@@ -30,6 +31,17 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(DoShowConnectToServerWindowAsync)));
     }
 
+    private async Task DoShowAppSettingsWindowAsync(
+        InteractionContext<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> interaction)
+    {
+        var dialog = new ApplicationSettingsWindow
+        {
+            DataContext = interaction.Input,
+            WindowStartupLocation = DefaultWindowStartupLocation
+        };
+        interaction.SetOutput(await dialog.ShowDialog<ApplicationSettingsViewModel>(this));
+    }
+    
     private async Task DoShowConnectToServerWindowAsync(
         InteractionContext<ConnectToServerViewModel, ConnectToServerViewModel?> interaction)
     {

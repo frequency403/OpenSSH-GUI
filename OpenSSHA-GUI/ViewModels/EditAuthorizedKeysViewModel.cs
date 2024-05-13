@@ -6,6 +6,7 @@
 
 #endregion
 
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -38,8 +39,11 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
         get => _selectedKey;
         set
         {
+            var valueFingerprint = value.Fingerprint;
+            
+            
             AddButtonEnabled =
-                AuthorizedKeysFileRemote.AuthorizedKeys.All(e => e.Fingerprint != value!.ExportKey()!.Split(' ')[1]);
+                AuthorizedKeysFileRemote.AuthorizedKeys.Count(e => string.Equals(e.Fingerprint, value.Fingerprint, StringComparison.OrdinalIgnoreCase)) == 0;
             this.RaiseAndSetIfChanged(ref _selectedKey, value);
         }
     }
@@ -82,9 +86,9 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
         AddKey = ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async e =>
         {
             await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
-            var keyExport = await SelectedKey!.ExportKeyAsync();
+            var keyExport = await e.ExportKeyAsync();
             AddButtonEnabled =
-                AuthorizedKeysFileRemote.AuthorizedKeys.All(key => key.Fingerprint != keyExport!.Split(' ')[1]);
+                AuthorizedKeysFileRemote.AuthorizedKeys.All(key => key.Fingerprint != keyExport.Split(' ')[1]);
             return e;
         });
     }

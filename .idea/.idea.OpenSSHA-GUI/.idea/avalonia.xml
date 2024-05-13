@@ -5,6 +5,7 @@
       <map>
         <entry key="OpenSSHA-GUI/App.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/AddKeyWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
+        <entry key="OpenSSHA-GUI/Views/ApplicationSettingsWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/ConfirmDialog.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/ConnectToServer.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSHA-GUI/Views/ConnectToServerWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />

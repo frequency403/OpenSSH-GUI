@@ -92,10 +92,10 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
 
     private void LoadFileContents(string fileContents)
     {
-        AuthorizedKeys =
-            new ObservableCollection<IAuthorizedKey>(fileContents
-                .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
-                .Where(e => e != "").Select(e => new AuthorizedKey(e.Trim())));
+        var splittedContents =fileContents
+            .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
+            .Where(e => !string.IsNullOrWhiteSpace(e.Trim()));
+        AuthorizedKeys =  new ObservableCollection<IAuthorizedKey>(splittedContents.Select(e => new AuthorizedKey(e.Trim())));
     }
 
     private void ReadAndLoadFileContents(string pathToFile)

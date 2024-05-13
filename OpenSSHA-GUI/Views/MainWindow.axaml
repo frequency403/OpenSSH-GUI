@@ -70,7 +70,7 @@
                                     Margin="0 0 0 5">
                                 <Grid ColumnDefinitions="* 3* * *">
                                     <ToolTip.Tip>
-                                        <Grid ColumnDefinitions="* * *" RowDefinitions="* *">
+                                        <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
                                             <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
                                                    Content="{x:Static main:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
                                                    FontWeight="Bold" />
@@ -81,25 +81,31 @@
                                                    FontWeight="Bold" />
                                             <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                                                            Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center" />
+                                            <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
+                                                   Content="Key Format/Type:"
+                                                   FontWeight="Bold" />
+                                            <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                                           Text="{Binding Format}" VerticalAlignment="Center" />
                                         </Grid>
                                     </ToolTip.Tip>
-                                    <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="* *">
-                                        <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center">
-                                            <TextBlock Text="[" />
-                                            <TextBlock Text="{Binding Format}" VerticalAlignment="Center" />
-                                            <TextBlock Text="]" />
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
-                                                   Margin="5"
-                                                   HorizontalAlignment="Center" />
-                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Spacing="5" Grid.Row="0" Grid.Column="0"
+                                                VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
+                                            <materialIcons:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
+                                        </Border>
+                                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
+                                            <materialIcons:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                                        </Border>
+                                        <TextBlock
+                                            Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                                            HorizontalAlignment="Center" />
+                                    </StackPanel>
 
                                     <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
                                                HorizontalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"
                                                HorizontalAlignment="Center" />
-                                    <Grid Grid.Column="3" ColumnDefinitions="* * *" HorizontalAlignment="Center">
+                                    <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center">
                                         <Button Grid.Column="0" HorizontalAlignment="Center"
                                                 Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
                                                 CommandParameter="{Binding .}">
@@ -133,6 +139,16 @@
                                                     Content="{x:Static main:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
                                             </ToolTip.Tip>
                                             <materialIcons:MaterialIcon Kind="DeleteOutline" />
+                                        </Button>
+                                        <Button Grid.Column="3" HorizontalAlignment="Center"
+                                                Command="{Binding #TheItemsGrid.((vm:MainWindowViewModel)DataContext).ConvertKey}"
+                                                CommandParameter="{Binding .}"
+                                                Background="DarkCyan">
+                                            <ToolTip.Tip>
+                                                <Label
+                                                    Content="Convert to Opposite Format" />
+                                            </ToolTip.Tip>
+                                            <materialIcons:MaterialIcon Kind="SwapVerticalCircleOutline" />
                                         </Button>
                                     </Grid>
 
@@ -280,7 +296,7 @@
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
-                            <MenuItem Header="Application Settings" Command="{Binding NotImplementedMessage}">
+                            <MenuItem Header="Application Settings" Command="{Binding OpenAppSettings}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
                                 </MenuItem.Icon>

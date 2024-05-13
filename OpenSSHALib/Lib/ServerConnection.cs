@@ -47,6 +47,15 @@ public class ServerConnection : ReactiveObject, IServerConnection
     })
     {
     }
+    
+    public ServerConnection(string hostname, string user, IEnumerable<ISshKey> keys) : this(new MultiKeyConnectionCredentials
+    {
+        Hostname = hostname,
+        Username = user,
+        Keys = keys
+    })
+    {
+    }
 
     private SshClient ClientConnection
     {

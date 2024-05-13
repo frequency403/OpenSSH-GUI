@@ -6,6 +6,7 @@
 
 #endregion
 
+using Microsoft.Extensions.Logging;
 using Renci.SshNet;
 using SshNet.Keygen;
 
@@ -19,11 +20,14 @@ public interface ISshKey
     public string Filename { get; }
     public string Comment { get; }
     public bool IsPublicKey { get; }
+    public bool IsPuttyKey { get;  }
     public ISshKeyType KeyType { get; }
     public string Fingerprint { get; }
     public Task<string> ExportKeyAsync(SshKeyFormat format = SshKeyFormat.OpenSSH);
+    public string ExportAuthorizedKeyEntry();
     public string ExportKey(SshKeyFormat format = SshKeyFormat.OpenSSH);
     public IPrivateKeySource GetRenciKeyType();
     void DeleteKey();
-    ISshKey Convert(SshKeyFormat format);
+    ISshKey? Convert(SshKeyFormat format);
+    ISshKey? Convert(SshKeyFormat format, ILogger logger);
 }

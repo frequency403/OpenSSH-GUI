@@ -45,10 +45,17 @@
         </DataTemplate>
         <DataTemplate DataType="interfaces:ISshKey">
             <Grid ColumnDefinitions="* * *">
-                <TextBlock Grid.Column="0"
-                           Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
-                <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" />
-                <TextBlock Grid.Column="2" Text="{Binding Comment}" />
+                <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal" Margin="5">
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
+                        <materialIcons:MaterialIcon Kind="KeyChain" Foreground="DarkOrange"/>
+                    </Border>
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
+                        <materialIcons:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen"/>
+                    </Border>
+                    <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"/>
+                </StackPanel>
+                <Separator Grid.Column="1" />
+                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
             </Grid>
         </DataTemplate>
     </Window.DataTemplates>

@@ -6,6 +6,7 @@
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
 using OpenSSHALib.Enums;
 using SshNet.Keygen;
 
@@ -17,7 +18,8 @@ public interface IPpkKey : ISshKey
     string PublicKeyString { get; }
     string PrivateKeyString { get; }
     string PrivateMAC { get; }
-    ISshPublicKey? ConvertToOpenSshKey(out string errorMessage, bool temp = false);
+    ISshPublicKey? ConvertToOpenSshKey(out string errorMessage, bool temp = false, bool move = true);
     public Task<string> ExportKeyAsync(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH);
     public string ExportKey(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH);
+    public bool MoveFileToSubFolder([NotNullWhen(false)] out Exception? error);
 }

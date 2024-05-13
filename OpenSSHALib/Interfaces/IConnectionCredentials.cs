@@ -13,6 +13,7 @@ namespace OpenSSHALib.Interfaces;
 public interface IConnectionCredentials
 {
     string Hostname { get; init; }
+    int Port { get; }
     string Username { get; init; }
     ConnectionInfo GetConnectionInfo();
 }

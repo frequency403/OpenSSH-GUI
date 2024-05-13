@@ -15,6 +15,7 @@ namespace OpenSSHALib.Models;
 public abstract class ConnectionCredentials : IConnectionCredentials
 {
     public string Hostname { get; init; }
+    public int Port => Hostname.Contains(':') ? int.Parse(Hostname.Split(':')[1]) : 22;
     public string Username { get; init; }
     public abstract ConnectionInfo GetConnectionInfo();
 }

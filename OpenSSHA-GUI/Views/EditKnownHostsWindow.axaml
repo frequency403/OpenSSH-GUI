@@ -35,7 +35,7 @@
         </Style>
     </Window.Styles>
     <Window.DataTemplates>
-        <DataTemplate DataType="dataModels:KnownHost">
+        <DataTemplate DataType="interfaces:IKnownHost">
             <Expander HorizontalAlignment="Stretch" Margin="5">
                 <Expander.Header>
                     <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">

@@ -13,13 +13,7 @@ namespace OpenSSHALib.Models;
 
 public class SshPublicKey(string absoluteFilePath) : SshKey(absoluteFilePath), ISshPublicKey
 {
-    public ISshKey PrivateKey { get; protected set; } = new SshPrivateKey(absoluteFilePath.Replace(".pub", ""));
-
-    public void DeleteKey()
-    {
-        File.Delete(AbsoluteFilePath);
-        File.Delete(PrivateKey.AbsoluteFilePath);
-    }
+    public ISshKey PrivateKey { get; } = new SshPrivateKey(Path.ChangeExtension(absoluteFilePath, null));
 
     public override IPrivateKeySource GetRenciKeyType()
     {

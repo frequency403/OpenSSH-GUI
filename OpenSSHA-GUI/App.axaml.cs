@@ -61,7 +61,8 @@ public class App : Application
         collection.AddTransient<EditAuthorizedKeysViewModel>();
         collection.AddTransient<ConnectToServerViewModel>();
         collection.AddTransient<AddKeyWindowViewModel>();
-
+        collection.AddTransient<ApplicationSettingsViewModel>();
+        
         // return ServiceCollection
         return collection;
     }
