@@ -3,20 +3,15 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
-        <entry key="OpenSSHA-GUI/App.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/AddKeyWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/ApplicationSettingsWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/ConfirmDialog.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/ConnectToServer.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/ConnectToServerWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/EditAuthorizedKeysView.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/EditAuthorizedKeysWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/EditKnownHostsWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/ExportWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/MainWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
-        <entry key="OpenSSHA-GUI/Views/UploadToServerWindow.axaml" value="OpenSSHA-GUI/OpenSSHA-GUI.csproj" />
         <entry key="OpenSSH_GUI/App.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/AddKeyWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/ConnectToServerWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/EditSavedServerEntry.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/ExportWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/MainWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
       </map>
     </option>
   </component>
