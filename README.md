@@ -1,4 +1,4 @@
-OpenSSHA-GUI
+OpenSSH_GUI
 
 A GUI for managing your SSH Keys - on Windows, Linux and macOS!  
 

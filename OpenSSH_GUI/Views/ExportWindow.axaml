@@ -1,0 +1,35 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        mc:Ignorable="d"
+        Width="500"
+        Height="300"
+        x:Class="OpenSSH_GUI.Views.ExportWindow"
+        x:DataType="viewModels:ExportWindowViewModel"
+        Title="{Binding WindowTitle}"
+        Icon="/Assets/appicon.ico">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <viewModels:ExportWindowViewModel />
+    </Design.DataContext>
+    <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
+        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3">
+            <TextPresenter Name="ExportedText"
+                           Text="{Binding Export}" TextWrapping="Wrap" />
+        </ScrollViewer>
+        <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">
+            <ToolTip.Tip>
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ExportWindowCopyToClipboardToolTipText}" />
+            </ToolTip.Tip>
+            <StackPanel Orientation="Horizontal">
+                <avalonia:MaterialIcon Kind="ContentCopy" />
+                <avalonia:MaterialIcon Kind="Clipboard" />
+            </StackPanel>
+        </Button>
+    </Grid>
+</Window>
