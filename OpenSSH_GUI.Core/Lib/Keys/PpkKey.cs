@@ -7,6 +7,7 @@
 #endregion
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
@@ -100,23 +101,17 @@ public partial record PpkKey : IPpkKey
 
     public async Task ExportToDiskAsync(SshKeyFormat format)
     {
-        var privateFilePath = Path.Combine(Path.GetDirectoryName(AbsoluteFilePath),
-            Path.GetFileNameWithoutExtension(AbsoluteFilePath));
+        var privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, null));
         var publicFilePath = Path.ChangeExtension(privateFilePath, ".pub");
-        if (File.Exists(privateFilePath)) privateFilePath += DateTime.Now.ToString("yy_MM_dd_HH_mm");
-        if (File.Exists(publicFilePath)) publicFilePath += Path.ChangeExtension(privateFilePath, ".pub");
+
+        await using var privateWriter = new StreamWriter(privateFilePath, false);
+        await using var publicWriter = new StreamWriter(publicFilePath, false);
 
         switch (format)
         {
             case SshKeyFormat.OpenSSH:
-                await using (var privateWriter = new StreamWriter(privateFilePath))
-                {
-                    await privateWriter.WriteAsync(ExportOpenSshPrivateKey());
-                }
-                await using (var publicWriter = new StreamWriter(publicFilePath))
-                {
-                    await publicWriter.WriteAsync(ExportOpenSshPublicKey());
-                }
+                await privateWriter.WriteAsync(ExportOpenSshPrivateKey());
+                await publicWriter.WriteAsync(ExportOpenSshPublicKey());
                 break;
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
@@ -124,6 +119,18 @@ public partial record PpkKey : IPpkKey
                 break;
         }
     }
+
+    private string GetUniqueFilePath(string originalFilePath)
+    {
+        if (File.Exists(originalFilePath))
+        {
+            originalFilePath = Path.Combine(
+                Path.GetDirectoryName(originalFilePath),
+                $"{Path.GetFileNameWithoutExtension(originalFilePath)}_{DateTime.Now:yy_MM_dd_HH_mm}");
+        }
+        return originalFilePath;
+    }
+
 
     public bool IsPublicKey { get; } = true;
 

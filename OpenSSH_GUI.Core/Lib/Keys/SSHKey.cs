@@ -101,26 +101,34 @@ public abstract partial class SshKey : ISshKey
         return new AuthorizedKey(ExportAuthorizedKeyEntry());
     }
 
-    public async Task ExportToDiskAsync(SshKeyFormat format = SshKeyFormat.OpenSSH)
+    public async Task ExportToDiskAsync(SshKeyFormat format)
     {
-        if (format.Equals(Format)) return;
-        var privateFilePath = Path.Combine(Path.GetDirectoryName(AbsoluteFilePath),
-            Path.GetFileNameWithoutExtension(AbsoluteFilePath));
-        if (format is not SshKeyFormat.OpenSSH) privateFilePath = Path.ChangeExtension(privateFilePath, ".ppk");
+        if(format.Equals(Format)) return;
+        var privateFilePath = Path.ChangeExtension(AbsoluteFilePath, ".ppk");
+        privateFilePath = GetUniqueFilePath(privateFilePath);
+
+        await using var privateWriter = new StreamWriter(privateFilePath, false);
         switch (format)
         {
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
-                await using (var privateFile = new StreamWriter(privateFilePath))
-                {
-                    await privateFile.WriteAsync(_keySource.ToPuttyFormat());
-                }
-
+                await privateWriter.WriteAsync(ExportPuttyPpkKey());
                 break;
             case SshKeyFormat.OpenSSH:
             default:
                 break;
         }
+    }
+
+    private string GetUniqueFilePath(string originalFilePath)
+    {
+        if (File.Exists(originalFilePath))
+        {
+            originalFilePath = Path.Combine(
+                Path.GetDirectoryName(originalFilePath),
+                $"{Path.GetFileNameWithoutExtension(originalFilePath)}_{DateTime.Now:yy_MM_dd_HH_mm}");
+        }
+        return originalFilePath;
     }
 
     public void DeleteKey()
