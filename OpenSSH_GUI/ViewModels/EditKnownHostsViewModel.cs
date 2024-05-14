@@ -11,8 +11,9 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Interfaces.Misc;
-using OpenSSH_GUI.Core.Models;
+using OpenSSH_GUI.Core.Lib.KnownHosts;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;

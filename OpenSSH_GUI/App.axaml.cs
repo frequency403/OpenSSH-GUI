@@ -14,6 +14,8 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib;
+using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog;
@@ -54,7 +56,6 @@ public class App : Application
 
         collection.AddLogging(e => e.AddSerilog(serilog, true));
         collection.AddSingleton<IApplicationSettings, ApplicationSettings>();
-        collection.AddTransient<DirectoryCrawler>();
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<ExportWindowViewModel>();
         collection.AddTransient<EditKnownHostsViewModel>();
@@ -62,7 +63,8 @@ public class App : Application
         collection.AddTransient<ConnectToServerViewModel>();
         collection.AddTransient<AddKeyWindowViewModel>();
         collection.AddTransient<ApplicationSettingsViewModel>();
-
+        collection.AddTransient<EditSavedServerEntryViewModel>();
+        
         // return ServiceCollection
         return collection;
     }

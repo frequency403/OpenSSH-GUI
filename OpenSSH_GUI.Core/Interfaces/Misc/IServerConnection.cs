@@ -7,12 +7,16 @@
 #endregion
 
 using System.Diagnostics.CodeAnalysis;
+using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
+using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Interfaces.Misc;
 
 public interface IServerConnection : IReactiveObject, IDisposable
 {
+    IConnectionCredentials ConnectionCredentials { get; }
     DateTime ConnectionTime { get; set; }
     bool IsConnected { get; set; }
     string ConnectionString { get; }

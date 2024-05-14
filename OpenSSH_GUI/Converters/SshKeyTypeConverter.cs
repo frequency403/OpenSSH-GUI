@@ -13,7 +13,7 @@ using System.Linq;
 using Avalonia.Data.Converters;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Models;
+using OpenSSH_GUI.Core.Lib.Keys;
 
 namespace OpenSSH_GUI.Converters;
 

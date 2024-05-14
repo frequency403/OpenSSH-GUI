@@ -1,0 +1,67 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="OpenSSH_GUI.Views.EditSavedServerEntry"
+        x:DataType="viewModels:EditSavedServerEntryViewModel"
+        Width="600"
+        Height="200"
+        CanResize="False"
+        Title="EditSavedServerEntry">
+    <Window.Resources>
+        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
+    </Window.Resources>
+    <Window.DataTemplates>
+        <DataTemplate DataType="keys:ISshKey">
+            <Grid ColumnDefinitions="* * *">
+                <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal" Margin="5">
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
+                        <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
+                    </Border>
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
+                        <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                    </Border>
+                    <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
+                </StackPanel>
+                <Separator Grid.Column="1" />
+                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
+            </Grid>
+        </DataTemplate>
+    </Window.DataTemplates>
+    <Grid RowDefinitions="* *" ColumnDefinitions="* * *" Margin="5">
+        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding CredentialsToEdit.Hostname}" Watermark="Hostname" Margin="5 10"
+                 Height="25" VerticalAlignment="Bottom"/>
+
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CredentialsToEdit.Username}" Watermark="Username" Margin="5 10"
+                 Height="25" VerticalAlignment="Bottom"/>
+
+        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Password}" Watermark="Password"
+                 Margin="5 10" Height="25" IsEnabled="{Binding IsPasswordKey}"
+                 IsVisible="{Binding IsPasswordKey}" VerticalAlignment="Bottom" />
+        <ComboBox Grid.Row="0" Grid.Column="2" Margin="5 10" Height="25"
+                  IsEnabled="{Binding !IsPasswordKey}"
+                  IsVisible="{Binding !IsPasswordKey}"
+                  ItemsSource="{Binding Keys}"
+                  SelectedItem="{Binding SelectedKey}"
+                  VerticalAlignment="Bottom" />
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal" HorizontalAlignment="Stretch">
+            <Button Command="{Binding Close}" 
+                    CommandParameter="false"
+                    Foreground="Firebrick">
+                <avalonia:MaterialIcon Kind="CloseCircle"/>
+            </Button>
+            <Button Command="{Binding Close}" 
+                    CommandParameter="true"
+                    Foreground="LawnGreen">
+                <avalonia:MaterialIcon Kind="FloppyDisk"/>
+            </Button>
+        </StackPanel>
+        
+    </Grid>
+    
+</Window>

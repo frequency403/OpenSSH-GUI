@@ -3,13 +3,80 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:credentials="clr-namespace:OpenSSH_GUI.Core.Interfaces.Credentials;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
         Width="400"
         Height="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
         Title="ApplicationSettingsWindow">
-    <Button Command="{Binding Submit}" CommandParameter="true">
-        Close
-    </Button>
+    <Grid x:Name="TheItemsGrid"
+          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
+          ColumnDefinitions="* *" RowDefinitions="* * * *">
+        <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5">
+            <Label Padding="5" Content="Application Settings" />
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
+                    VerticalAlignment="Bottom">
+            <Label Padding="5" Content="Max count of servers to save" />
+            <Separator Padding="5"/>
+            <TextBox Padding="5" Text="{Binding MaxServers, Mode=TwoWay}" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
+                    VerticalAlignment="Stretch">
+            <Separator Padding="5" />
+            <CheckBox Padding="5" IsChecked="{Binding ConvertPpkAutomatically, Mode=TwoWay}">
+                <Label Content="Convert ppk keys to openssh format automatically at start" />
+            </CheckBox>
+            <Separator Padding="5" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
+                    VerticalAlignment="Stretch">
+            <Label Padding="5" Content="Saved Servers" />
+            <Separator Padding="5" />
+            <ItemsControl Padding="5" ItemsSource="{Binding KnownServers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="0 0 0 1" BorderBrush="DimGray" CornerRadius="5" Padding="5">
+                            <Grid ColumnDefinitions="* * * *">
+                                <Label Grid.Column="0" HorizontalAlignment="Left" Grid.ColumnSpan="2" Content="{Binding Display}"/>
+                                <Label Grid.Column="2" Content="{Binding AuthType}"/>
+                                <Button Grid.Column="3"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).EditEntry}"
+                                        CommandParameter="{Binding}"
+                                        Background="LightBlue">
+                                    <avalonia:MaterialIcon Kind="EditCircleOutline" />
+                                </Button>
+                                <Button Grid.Column="3"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).RemoveServer}"
+                                        CommandParameter="{Binding Hostname}"
+                                        Background="OrangeRed">
+                                    <avalonia:MaterialIcon Kind="CloseCircleOutline" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+
+        <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                Command="{Binding Submit}" CommandParameter="false" Background="Red">
+            <ToolTip.Tip>
+                <Label Content="Cancel and close" />
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="Cancel" />
+        </Button>
+        <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                Command="{Binding Submit}" CommandParameter="true" Background="Green">
+            <ToolTip.Tip>
+                <Label Content="Save changes and close" />
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="FloppyDisk" />
+        </Button>
+    </Grid>
 </Window>

@@ -6,11 +6,15 @@
 
 #endregion
 
+using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Lib.Misc;
+
 namespace OpenSSH_GUI.Core.Interfaces.Settings;
 
 public interface IApplicationSettings
 {
+    DirectoryCrawler Crawler { get; }
     ISettingsFile Settings { get; }
-    bool AddKnownServerToFile(string host, string username);
-    Task<bool> AddKnownServerToFileAsync(string host, string username);
+    bool AddKnownServerToFile(IConnectionCredentials credentials);
+    Task<bool> AddKnownServerToFileAsync(IConnectionCredentials credentials);
 }

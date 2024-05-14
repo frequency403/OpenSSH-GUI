@@ -7,6 +7,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -16,10 +17,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using OpenSSH_GUI.Assets;
+using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib;
+using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
@@ -47,14 +51,69 @@ public class ConnectToServerViewModel : ViewModelBase
 
     private bool _uploadButtonEnabled;
     private string _userName = "";
+    private bool firstCredentialSet = true;
 
+    private bool TestConnectionInternal(IConnectionCredentials credentials)
+    {
+        try
+        {
+            ServerConnection = new ServerConnection(credentials);
+            if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            StatusButtonToolTip = exception.Message;
+            return false;
+        }
+    }
+    
+    private async Task TestQuickConnection(IConnectionCredentials? credentials)
+    {
+        if (firstCredentialSet) return;
+        TryingToConnect = true;
+        if (TestConnectionInternal(credentials))
+        {
+            StatusButtonText = "Status: success";
+            StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
+            StatusButtonBackground = Brushes.Green;
+        }
+        else
+        {
+            StatusButtonText = "Status: failed!";
+            StatusButtonBackground = Brushes.Red;
+        }
+
+        TryingToConnect = false;
+
+        if (ServerConnection.IsConnected)
+        {
+            UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
+            return;
+        }
+
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
+            ButtonEnum.Ok, Icon.Error);
+        await messageBox.ShowAsync();
+    }
+
+    public bool QuickConnectAvailable => ConnectionCredentials.Any();
+    
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, IApplicationSettings settings) :
         base(logger)
     {
         Settings = settings;
+        ConnectionCredentials = Settings.Settings.LastUsedServers;
+        SelectedConnection = ConnectionCredentials.FirstOrDefault();
+        firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
         {
+            if (QuickConnect)
+            {
+                TestQuickConnection(SelectedConnection).Wait();
+                return e;
+            }
             var task = Task.Run(() =>
             {
                 try
@@ -117,11 +176,39 @@ public class ConnectToServerViewModel : ViewModelBase
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
         {
             await App.ServiceProvider.GetRequiredService<IApplicationSettings>()
-                .AddKnownServerToFileAsync(Hostname, Username);
+                .AddKnownServerToFileAsync(ServerConnection.ConnectionCredentials);
             return this;
         });
     }
 
+    private IEnumerable<IConnectionCredentials> _connectionCredentials;
+
+    public IEnumerable<IConnectionCredentials> ConnectionCredentials
+    {
+        get => _connectionCredentials;
+        set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
+    }
+
+    private IConnectionCredentials? _selectedConnection;
+
+    public IConnectionCredentials? SelectedConnection
+    {
+        get => _selectedConnection;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedConnection, value);
+            TestQuickConnection(value).Wait();
+        }
+    }
+    
+    private bool _quickConnect = false;
+
+    public bool QuickConnect
+    {
+        get => _quickConnect;
+        set => this.RaiseAndSetIfChanged(ref _quickConnect, value);
+    }
+    
     public IApplicationSettings Settings { get; }
 
     public IServerConnection ServerConnection

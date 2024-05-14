@@ -6,10 +6,10 @@
 
 #endregion
 
-using System;
 using Avalonia.ReactiveUI;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
+using System;
 
 namespace OpenSSH_GUI.Views;
 
@@ -18,6 +18,19 @@ public partial class ApplicationSettingsWindow : ReactiveWindow<ApplicationSetti
     public ApplicationSettingsWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.Submit.Subscribe(Close)));
+        this.WhenActivated(d =>
+        {
+            d(ViewModel!.Submit.Subscribe(Close));
+            d(ViewModel!.ShowEditEntry.RegisterHandler(async interaction =>
+            {
+                var dialog = new EditSavedServerEntry
+                {
+                    DataContext = interaction.Input,
+                    Title = $"Edit {interaction.Input.CredentialsToEdit.Display}"
+                };
+                interaction.SetOutput(await dialog.ShowDialog<EditSavedServerEntryViewModel>(this));
+            }));
+        });
+        
     }
 }

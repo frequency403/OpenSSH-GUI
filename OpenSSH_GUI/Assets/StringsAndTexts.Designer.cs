@@ -7,7 +7,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace OpenSSH_GUI {
+namespace OpenSSH_GUI.Assets {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -35,7 +38,7 @@ namespace OpenSSH_GUI {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OpenSSH_GUI.StringsAndTexts", typeof(StringsAndTexts).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OpenSSH_GUI.Assets.StringsAndTexts", typeof(StringsAndTexts).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -426,7 +429,7 @@ namespace OpenSSH_GUI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not open or read keyfile!.
+        ///   Looks up a localized string similar to Error exporting keyfile!.
         /// </summary>
         public static string MainWindowViewModelExportKeyErrorMessage {
             get {

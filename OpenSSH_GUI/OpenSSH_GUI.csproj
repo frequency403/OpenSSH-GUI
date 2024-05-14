@@ -20,9 +20,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
-    </ItemGroup>
-    <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.1.999"/>
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.1.999"/>
         <PackageReference Include="Avalonia.Desktop" Version="11.1.999"/>
@@ -42,21 +39,14 @@
         <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj"/>
     </ItemGroup>
 
-
     <ItemGroup>
-        <EmbeddedResource Update="Assets\StringsAndTexts.resx">
-            <Generator>PublicResXFileCodeGenerator</Generator>
-            <CustomToolNamespace>OpenSSHA_GUI</CustomToolNamespace>
-        </EmbeddedResource>
+        <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
-
-
     <ItemGroup>
-        <Compile Update="Assets\StringsAndTexts.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>StringsAndTexts.resx</DependentUpon>
-        </Compile>
+      <EmbeddedResource Update="Assets\StringsAndTexts.resx">
+        <Generator>PublicResXFileCodeGenerator</Generator>
+        <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 
     <PropertyGroup> <!-- OSX Settings -->

@@ -12,9 +12,10 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
-using OpenSSH_GUI.Core.Models;
+using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
@@ -40,13 +41,8 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
         get => _selectedKey;
         set
         {
-            var valueFingerprint = value.Fingerprint;
-
-
-            AddButtonEnabled =
-                AuthorizedKeysFileRemote.AuthorizedKeys.Count(e =>
-                    string.Equals(e.Fingerprint, value.Fingerprint, StringComparison.OrdinalIgnoreCase)) == 0;
             this.RaiseAndSetIfChanged(ref _selectedKey, value);
+            UpdateAddButton();
         }
     }
 
@@ -71,13 +67,20 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
     public ReactiveCommand<string, EditAuthorizedKeysViewModel> Submit { get; private set; }
     public ReactiveCommand<ISshKey, ISshKey?> AddKey { get; private set; }
 
+    private void UpdateAddButton()
+    {
+        if (SelectedKey is null) return;
+        AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key => string.Equals(key.Fingerprint, SelectedKey.ExportAuthorizedKey().Fingerprint));
+    }
+    
     public void SetConnectionAndKeys(ref IServerConnection serverConnection,
         ref ObservableCollection<ISshKey?> keys)
     {
         _serverConnection = serverConnection;
+        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
         _publicKeys = keys;
         _selectedKey = PublicKeys.FirstOrDefault();
-        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
+        UpdateAddButton();
         Submit = ReactiveCommand.Create<string, EditAuthorizedKeysViewModel>(e =>
         {
             if (!bool.Parse(e)) return this;
@@ -88,9 +91,7 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
         AddKey = ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async e =>
         {
             await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
-            var keyExport = e.ExportAuthorizedKeyEntry();
-            AddButtonEnabled =
-                AuthorizedKeysFileRemote.AuthorizedKeys.All(key => key.Fingerprint != keyExport.Split(' ')[1]);
+            UpdateAddButton();
             return e;
         });
     }

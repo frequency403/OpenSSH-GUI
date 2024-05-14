@@ -7,7 +7,8 @@
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Assets"
+        xmlns:authorizedKeys="clr-namespace:OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.EditAuthorizedKeysWindow"
         x:DataType="viewModels:EditAuthorizedKeysViewModel"
@@ -22,7 +23,7 @@
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
     </Window.Resources>
     <Window.DataTemplates>
-        <DataTemplate DataType="misc:IAuthorizedKey">
+        <DataTemplate DataType="authorizedKeys:IAuthorizedKey">
             <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="5">
                 <Grid ColumnDefinitions="* 3* 2* *">
                     <TextBlock Grid.Column="0"

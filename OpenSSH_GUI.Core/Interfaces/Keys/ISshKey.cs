@@ -7,6 +7,7 @@
 #endregion
 
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using Renci.SshNet;
 using SshNet.Keygen;
 
@@ -31,6 +32,7 @@ public interface ISshKey
     public string? ExportTextOfKey();
     public Task ExportToDiskAsync(SshKeyFormat format = SshKeyFormat.OpenSSH);
     public string ExportAuthorizedKeyEntry();
+    public IAuthorizedKey ExportAuthorizedKey();
     public void ExportToDisk(SshKeyFormat format = SshKeyFormat.OpenSSH);
     public IPrivateKeySource GetRenciKeyType();
     public void DeleteKey();

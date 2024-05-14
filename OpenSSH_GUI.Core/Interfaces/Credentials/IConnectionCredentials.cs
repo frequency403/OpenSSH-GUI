@@ -6,14 +6,24 @@
 
 #endregion
 
+using System.Text.Json.Serialization;
+using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 
+// [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor)]
+// [JsonDerivedType(typeof(IPasswordConnectionCredentials), nameof(PasswordConnectionCredentials))]
+// [JsonDerivedType(typeof(IKeyConnectionCredentials), nameof(KeyConnectionCredentials))]
+// [JsonDerivedType(typeof(IMultiKeyConnectionCredentials), nameof(MultiKeyConnectionCredentials))]
 public interface IConnectionCredentials
 {
-    string Hostname { get; init; }
+    string Hostname { get; set; }
     int Port { get; }
-    string Username { get; init; }
+    string Username { get; set; }
+    [JsonIgnore]
+    string Display { get; }
+    AuthType AuthType { get; }
     ConnectionInfo GetConnectionInfo();
 }

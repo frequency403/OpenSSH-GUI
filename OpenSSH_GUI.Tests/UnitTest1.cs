@@ -6,6 +6,9 @@
 
 #endregion
 
+using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Lib.Credentials;
+
 namespace OpenSSHA_Tests;
 
 public class Tests
@@ -18,5 +21,10 @@ public class Tests
     [Test]
     public void Test1()
     {
+        var cc = new PasswordConnectionCredentials("123", "123", "thisisaPassword");
+        var ccc = cc;
+        cc.EncryptPassword();
+        cc.DecryptPassword();
+        Assert.That(ccc.Password == cc.Password);
     }
 }

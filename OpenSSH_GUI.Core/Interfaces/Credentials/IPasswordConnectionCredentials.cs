@@ -10,5 +10,6 @@ namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 
 public interface IPasswordConnectionCredentials : IConnectionCredentials
 {
-    string Password { get; init; }
+    string Password { get; set; }
+    bool EncryptedPassword { get; set; }
 }

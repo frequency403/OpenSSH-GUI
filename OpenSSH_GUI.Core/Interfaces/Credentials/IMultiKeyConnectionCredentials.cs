@@ -6,11 +6,13 @@
 
 #endregion
 
+using System.Text.Json.Serialization;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 
 namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 
 public interface IMultiKeyConnectionCredentials : IConnectionCredentials
 {
-    IEnumerable<ISshKey> Keys { get; init; }
+    [JsonIgnore]
+    IEnumerable<ISshKey>? Keys { get; set; }
 }

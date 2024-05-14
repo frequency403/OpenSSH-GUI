@@ -44,7 +44,7 @@ public static class SshConfigFilesExtension
 
     public static string GetPathOfFile(this SshConfigFiles files, bool resolve = true, PlatformID? platform = null)
     {
-        return Path.Combine(files switch
+        var path = Path.Combine(files switch
         {
             SshConfigFiles.Authorized_Keys or
                 SshConfigFiles.Known_Hosts or
@@ -52,5 +52,7 @@ public static class SshConfigFilesExtension
             SshConfigFiles.Sshd_Config => GetRootSshPath(resolve, platform),
             _ => throw new ArgumentException("Invalid value for \"files\"")
         }, Enum.GetName(files)!.ToLower());
+        path = platform is PlatformID.Unix ? path.Replace('\\', '/') : path.Replace('/', '\\');
+        return path;
     }
 }

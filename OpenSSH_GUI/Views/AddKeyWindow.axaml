@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:assets="clr-namespace:OpenSSH_GUI.Assets"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
@@ -12,7 +12,7 @@
         x:Class="OpenSSH_GUI.Views.AddKeyWindow"
         x:DataType="viewModels:AddKeyWindowViewModel"
         Icon="/Assets/appicon.ico"
-        Title="{x:Static openSshGui:StringsAndTexts.AddKeyWindowTitle}"
+        Title="{x:Static assets:StringsAndTexts.AddKeyWindowTitle}"
         CanResize="False"
         ShowInTaskbar="True"
         ShowActivated="True"
@@ -28,14 +28,14 @@
     <Grid ColumnDefinitions="* *" RowDefinitions="* * * * *">
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
                     VerticalAlignment="Top" Margin="20">
-            <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
                    Target="KeyFileNameTextBox" />
             <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
             <TextBlock x:Name="KeyFileNameValidation" Foreground="Red" FontSize="12" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
-            <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
                    Target="BitSizeComboBox" />
             <Label Content="is default!" IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}" />
             <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
@@ -44,13 +44,13 @@
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Bottom"
                     HorizontalAlignment="Stretch" Margin="20 0 20 10">
-            <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
                    Target="PasswordTextBox" />
             <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
                     HorizontalAlignment="Center">
-            <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}"
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}"
                    Target="KeyTypesComboBox" />
             <ComboBox Name="KeyTypesComboBox"
                       ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}"
@@ -58,7 +58,7 @@
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
-            <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
                    Target="CommentTextBox" />
             <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
@@ -72,7 +72,7 @@
                 Command="{Binding AddKey}" CommandParameter="true"
                 IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
             <ToolTip.Tip>
-                <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
+                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
@@ -80,7 +80,7 @@
         <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
                 Command="{Binding AddKey}" CommandParameter="false">
             <ToolTip.Tip>
-                <Label Content="{x:Static openSshGui:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
+                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="Cancel" />
         </Button>

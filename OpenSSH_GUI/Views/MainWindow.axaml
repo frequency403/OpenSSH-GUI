@@ -5,7 +5,7 @@
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Assets"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.MainWindow"
