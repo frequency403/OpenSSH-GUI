@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="OpenSSH_GUI/Views/AddKeyWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/ExportWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/MainWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

@@ -6,7 +6,7 @@
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Assets"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:authorizedKeys="clr-namespace:OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.EditAuthorizedKeysWindow"
@@ -81,14 +81,14 @@
                     HorizontalContentAlignment="Stretch">
             <TabItem Header="Local" Margin="10">
                 <ToolTip.Tip>
-                    <Label Content="File content from local machine" />
+                    <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentLocal}" />
                 </ToolTip.Tip>
                 <ItemsControl ItemsSource="{Binding AuthorizedKeysFileLocal.AuthorizedKeys}" />
             </TabItem>
             <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnection.IsConnected}">
                 <ToolTip.Tip>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="File content from" />
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentFrom}" />
                         <Label Content="{Binding ServerConnection.ConnectionString}" />
                     </StackPanel>
                 </ToolTip.Tip>
@@ -112,7 +112,7 @@
                             Background="YellowGreen">
                         <ToolTip.Tip>
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Add key to authorized_keys file of" />
+                                <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysAddKeyToFileOf}" />
                                 <Label Content="{Binding ServerConnection.ConnectionString}" />
                             </StackPanel>
                         </ToolTip.Tip>
@@ -125,7 +125,7 @@
                 Command="{Binding Submit}"
                 CommandParameter="false" Background="Red">
             <ToolTip.Tip>
-                <Label Content="Cancel and close" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.CancelAndClose}" />
             </ToolTip.Tip>
             <materialIcons:MaterialIcon Kind="Cancel" />
         </Button>
@@ -133,7 +133,7 @@
                 Command="{Binding Submit}"
                 CommandParameter="true" Background="Green">
             <ToolTip.Tip>
-                <Label Content="Save changes and close" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.SaveAndClose}" />
             </ToolTip.Tip>
             <materialIcons:MaterialIcon Kind="FloppyDisk" />
         </Button>

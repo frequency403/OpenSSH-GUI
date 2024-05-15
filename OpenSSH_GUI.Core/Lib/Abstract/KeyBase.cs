@@ -57,6 +57,10 @@ public abstract class KeyBase : IKeyBase
 
     public void DeleteKey()
     {
+        if (Format is SshKeyFormat.OpenSSH && Path.GetExtension(AbsoluteFilePath).Contains("pub"))
+        {
+            File.Delete(Path.ChangeExtension(AbsoluteFilePath, null));
+        }
         File.Delete(AbsoluteFilePath);
     }
 
@@ -95,10 +99,11 @@ public abstract class KeyBase : IKeyBase
     public void ExportToDisk(SshKeyFormat format, out ISshKey? key)
     {
         key = null;
-        var privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, null));
+        var privateFilePath = "";
         switch (format)
         {
             case SshKeyFormat.OpenSSH:
+                privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, null));
                 var publicFilePath = Path.ChangeExtension(privateFilePath, ".pub");
                 using (var privateWriter = new StreamWriter(privateFilePath, false))
                 {
@@ -115,7 +120,7 @@ public abstract class KeyBase : IKeyBase
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
             default:
-                privateFilePath = Path.ChangeExtension(privateFilePath, ".ppk");
+                privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, ".ppk"));
                 using (var privateWriter = new StreamWriter(privateFilePath, false))
                 {
                     privateWriter.WriteAsync(ExportPuttyPpkKey());

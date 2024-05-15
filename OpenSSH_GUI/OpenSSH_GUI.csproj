@@ -33,8 +33,7 @@
         <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1"/>
         <PackageReference Include="ReactiveUI.Validation" Version="4.0.9"/>
     </ItemGroup>
-
-
+    
     <ItemGroup>
         <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj"/>
     </ItemGroup>
@@ -42,11 +41,20 @@
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
+
     <ItemGroup>
-        <EmbeddedResource Update="Assets\StringsAndTexts.resx">
-            <Generator>PublicResXFileCodeGenerator</Generator>
-            <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
+      <EmbeddedResource Update="StringsAndTexts.resx">
+        <Generator>PublicResXFileCodeGenerator</Generator>
+        <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="StringsAndTexts.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>StringsAndTexts.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <PropertyGroup> <!-- OSX Settings -->

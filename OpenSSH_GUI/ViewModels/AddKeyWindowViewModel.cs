@@ -48,7 +48,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,
             name => !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
-            "Filename does already exist!"
+            StringsAndTexts.AddKeyWindowFilenameError
         );
         AddKey = ReactiveCommand.Create<string, AddKeyWindowViewModel?>(b =>
         {

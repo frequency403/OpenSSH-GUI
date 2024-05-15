@@ -68,8 +68,8 @@ public class ApplicationSettingsViewModel(
             {
                 if (e is IMultiKeyConnectionCredentials)
                 {
-                    var box = MessageBoxManager.GetMessageBoxStandard("Multi-key cannot be edited",
-                        "You cannot edit a multi-key");
+                    var box = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.ApplicationSettingsEditErrorBoxTitle,
+                        StringsAndTexts.ApplicationSettingsEditErrorBoxText);
                     await box.ShowAsync();
                     return null;
                 }

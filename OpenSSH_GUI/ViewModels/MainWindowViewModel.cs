@@ -19,7 +19,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSH_GUI.Assets;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Interfaces.Settings;
@@ -68,8 +67,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> NotImplementedMessage => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
-        var msgBox = MessageBoxManager.GetMessageBoxStandard("Not Implemented yet",
-            "This function is not implemented yet, but planned!", ButtonEnum.Ok, Icon.Info);
+        var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.NotImplementedBoxTitle,
+            StringsAndTexts.NotImplementedBoxText, ButtonEnum.Ok, Icon.Info);
         await msgBox.ShowAsync();
         return e;
     });
@@ -102,7 +101,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> DisconnectServer => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
-        var messageBoxText = "Disconnected successfully!";
+        var messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextSuccess;
         var messageBoxIcon = Icon.Success;
         if (ServerConnection.IsConnected)
         {
@@ -114,11 +113,11 @@ public class MainWindowViewModel : ViewModelBase
         }
         else
         {
-            messageBoxText = "Nothing to disconnect from!";
+            messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextNone;
             messageBoxIcon = Icon.Error;
         }
 
-        var msgBox = MessageBoxManager.GetMessageBoxStandard("Disconnect from Server", messageBoxText,
+        var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.MainWindowDisconnectBoxTitle, messageBoxText,
             ButtonEnum.Ok, messageBoxIcon);
         await msgBox.ShowAsync();
         return e;
@@ -233,9 +232,8 @@ public class MainWindowViewModel : ViewModelBase
         ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async u =>
         {
             var box = MessageBoxManager.GetMessageBoxStandard(
-                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename,
-                    u is ISshPublicKey up ? up.PrivateKey.Filename : "nothing else"),
-                StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
+                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename),
+                u is ISshPublicKey ? StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair : StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
             var res = await box.ShowAsync();
             if (res != ButtonResult.Yes) return null;
             u.DeleteKey();
@@ -247,11 +245,14 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<ISshKey, ISshKey?> ConvertKey => ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(
         async key =>
         {
-            var box = MessageBoxManager.GetMessageBoxStandard("Convert key",
-                "This will convert your key to the other Format (OpenSSH -> PuTTY) or (PuTTY -> OpenSSH).\nDo you want to delete the old file?",
+            var currentFormat = Enum.GetName(key.Format);
+            var oppositeFormat = Enum.GetName(key.Format is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH);
+            
+            var box = MessageBoxManager.GetMessageBoxStandard(string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat),
+                string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxText, currentFormat, oppositeFormat),
                 ButtonEnum.YesNoAbort, Icon.Warning);
-            var errorBox = MessageBoxManager.GetMessageBoxStandard("Error converting key",
-                "There was an error converting the keyfile. See the log for details.", ButtonEnum.Ok, Icon.Error);
+            var errorBox = MessageBoxManager.GetMessageBoxStandard(string.Format(StringsAndTexts.ErrorAction, string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat)),
+                StringsAndTexts.MainWindowConvertKeyMessageBoxErrorText, ButtonEnum.Ok, Icon.Error);
             var oldIndex = SshKeys.IndexOf(key);
 
 

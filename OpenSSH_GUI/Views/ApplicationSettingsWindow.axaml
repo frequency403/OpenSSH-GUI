@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
         Width="400"
         Height="450"
@@ -14,11 +15,11 @@
           HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
           ColumnDefinitions="* *" RowDefinitions="* * * *">
         <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5">
-            <Label Padding="5" Content="Application Settings" />
+            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsDescription}" />
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
                     VerticalAlignment="Bottom">
-            <Label Padding="5" Content="Max count of servers to save" />
+            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsMaxServers}" />
             <Separator Padding="5" />
             <TextBox Padding="5" Text="{Binding MaxServers, Mode=TwoWay}" />
         </StackPanel>
@@ -26,13 +27,13 @@
                     VerticalAlignment="Stretch">
             <Separator Padding="5" />
             <CheckBox Padding="5" IsChecked="{Binding ConvertPpkAutomatically, Mode=TwoWay}">
-                <Label Content="Convert ppk keys to openssh format automatically at start" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsAutoConvertText}" />
             </CheckBox>
             <Separator Padding="5" />
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
                     VerticalAlignment="Stretch">
-            <Label Padding="5" Content="Saved Servers" />
+            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsSavedServers}" />
             <Separator Padding="5" />
             <ItemsControl Padding="5" ItemsSource="{Binding KnownServers}">
                 <ItemsControl.ItemTemplate>
@@ -67,14 +68,14 @@
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                 Command="{Binding Submit}" CommandParameter="false" Background="Red">
             <ToolTip.Tip>
-                <Label Content="Cancel and close" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.CancelAndClose}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="Cancel" />
         </Button>
         <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                 Command="{Binding Submit}" CommandParameter="true" Background="Green">
             <ToolTip.Tip>
-                <Label Content="Save changes and close" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.SaveAndClose}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="FloppyDisk" />
         </Button>

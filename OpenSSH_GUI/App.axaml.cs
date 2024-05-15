@@ -7,6 +7,7 @@
 #endregion
 
 using System;
+using System.Globalization;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -32,6 +33,7 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        StringsAndTexts.Culture = new CultureInfo("de");
         ServiceProvider = BuildServiceCollection().BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = new MainWindow

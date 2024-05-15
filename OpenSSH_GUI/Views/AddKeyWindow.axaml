@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:assets="clr-namespace:OpenSSH_GUI.Assets"
+        xmlns:assets="clr-namespace:OpenSSH_GUI"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
@@ -37,7 +37,7 @@
                     HorizontalAlignment="Center">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
                    Target="BitSizeComboBox" />
-            <Label Content="is default!" IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}" />
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowDefault}" IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}" />
             <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
                       SelectedItem="{Binding SelectedKeyType.CurrentBitSize}"
                       IsVisible="{Binding !SelectedKeyType.HasDefaultBitSize}" />
@@ -64,7 +64,7 @@
         </StackPanel>
         <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
-            <Label Content="KeyFormat" />
+            <Label Content="{x:Static assets:StringsAndTexts.KeyFormatDescription}" />
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
                       SelectedItem="{Binding KeyFormat}" />
         </StackPanel>

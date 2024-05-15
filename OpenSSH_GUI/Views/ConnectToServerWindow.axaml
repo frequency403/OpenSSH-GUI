@@ -6,6 +6,7 @@
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="600"
         Height="200"
@@ -57,22 +58,22 @@
     </Design.DataContext>
     <Grid RowDefinitions="* * * *" ColumnDefinitions="* * *" Margin="5">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold"
-                   Text="Connect to Server" HorizontalAlignment="Center" />
+                   Text="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}" HorizontalAlignment="Center" />
         <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom"
                   IsChecked="{Binding QuickConnect}"
                   IsVisible="{Binding QuickConnectAvailable}">
-            <Label Content="Quick connect" />
+            <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowQuickConnect}" />
         </CheckBox>
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left"
                     IsVisible="{Binding !QuickConnect}"
                     VerticalAlignment="Center">
             <CheckBox VerticalAlignment="Top" HorizontalAlignment="Center"
                       IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
-                <Label Content="Use public key" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUsePubKey}" />
             </CheckBox>
             <CheckBox VerticalAlignment="Bottom" HorizontalAlignment="Center"
                       IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}">
-                <Label Content="Use all keys" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUseAllKeys}" />
             </CheckBox>
         </StackPanel>
         <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
@@ -116,7 +117,7 @@
         <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5"
                 Command="{Binding TestConnection}" IsEnabled="{Binding !ServerConnection.IsConnected}">
             <ToolTip.Tip>
-                <Label Content="Test connection" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowTestConnection}" />
             </ToolTip.Tip>
             <StackPanel Orientation="Horizontal">
                 <avalonia:MaterialIcon Kind="LanConnect" />
@@ -141,7 +142,7 @@
                     Command="{Binding ResetCommand}"
                     IsVisible="{Binding ServerConnection.IsConnected}">
                 <ToolTip.Tip>
-                    <Label Content="Reset values" />
+                    <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowResetValues}" />
                 </ToolTip.Tip>
                 <avalonia:MaterialIcon Kind="Replay" />
             </Button>
@@ -151,7 +152,7 @@
                 Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}"
                 Command="{Binding SubmitConnection}">
             <ToolTip.Tip>
-                <Label Content="Accept connection" />
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowAcceptConnection}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="Check" />
         </Button>

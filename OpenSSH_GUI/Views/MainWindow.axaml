@@ -5,7 +5,7 @@
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Assets"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.MainWindow"
@@ -83,7 +83,7 @@
                                             <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                                                            Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center" />
                                             <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
-                                                   Content="Key Format/Type:"
+                                                   Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyFormatType}"
                                                    FontWeight="Bold" />
                                             <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
                                                            Text="{Binding Format}" VerticalAlignment="Center" />
@@ -147,7 +147,7 @@
                                                 Background="DarkCyan">
                                             <ToolTip.Tip>
                                                 <Label
-                                                    Content="Convert to Opposite Format" />
+                                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
                                             </ToolTip.Tip>
                                             <materialIcons:MaterialIcon Kind="SwapVerticalCircleOutline" />
                                         </Button>
@@ -191,7 +191,7 @@
                 <ToolTip.Tip>
                     <StackPanel>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
-                        <Label Content="Connect to a server to edit the remote file!" Foreground="OrangeRed"
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}" Foreground="OrangeRed"
                                IsVisible="{Binding !ServerConnection.IsConnected}" />
                     </StackPanel>
                 </ToolTip.Tip>
@@ -209,8 +209,8 @@
                     Command="{Binding OpenEditAuthorizedKeysWindow}">
                 <ToolTip.Tip>
                     <StackPanel>
-                        <Label Content="Edit Authorized Keys" />
-                        <Label Content="Connect to a server to edit the remote file!" Foreground="OrangeRed"
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}" />
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}" Foreground="OrangeRed"
                                IsVisible="{Binding !ServerConnection.IsConnected}" />
                     </StackPanel>
                 </ToolTip.Tip>
@@ -235,15 +235,15 @@
                                   IsVisible="{Binding ServerConnection.IsConnected}">
                                 <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
                                        Content="{Binding ServerConnection.ConnectionString}" FontWeight="Bold" />
-                                <Label Grid.Row="1" Grid.Column="0" Content="ServerOS:" />
+                                <Label Grid.Row="1" Grid.Column="0" Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipServerOs}" />
                                 <Label Grid.Row="1" Grid.Column="1"
                                        Content="{Binding ServerConnection.ServerOs, Converter={StaticResource PlatformIdConverter}}"
                                        FontWeight="Bold" />
-                                <Label Grid.Row="2" Grid.Column="0" Content="Connected on:" />
+                                <Label Grid.Row="2" Grid.Column="0" Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipConnectedOn}" />
                                 <Label Grid.Row="2" Grid.Column="1" Content="{Binding ServerConnection.ConnectionTime}" />
                             </Grid>
                             <Label
-                                Content="Currently disconnected. Right click to open connection menu to establish a connection"
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipDisconnected}"
                                 IsVisible="{Binding !ServerConnection.IsConnected}" />
                         </StackPanel>
 
@@ -251,13 +251,13 @@
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
-                            <MenuItem Header="Connect" IsEnabled="{Binding !ServerConnection.IsConnected}"
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuConnect}" IsEnabled="{Binding !ServerConnection.IsConnected}"
                                       Command="{Binding OpenConnectToServerWindow}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanConnect" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Disconnect" IsEnabled="{Binding ServerConnection.IsConnected}"
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuDisconnect}" IsEnabled="{Binding ServerConnection.IsConnected}"
                                       Command="{Binding DisconnectServer}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanDisconnect" />
@@ -295,34 +295,34 @@
                 <Border Grid.Column="2" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
-                        <Label Content="Right click for options" />
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickOptions}" />
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
-                            <MenuItem Header="Application Settings" Command="{Binding OpenAppSettings}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuAppSettings}" Command="{Binding OpenAppSettings}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Local user ssh config" Command="{Binding NotImplementedMessage}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuLocalUserSshConfig}" Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="AccountCogOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Machine sshd_config" Command="{Binding NotImplementedMessage}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuMachineSshdConfig}" Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="BookCogOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator />
-                            <MenuItem Header="Remote user ssh config"
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteUserSshConfig}"
                                       IsEnabled="{Binding ServerConnection.IsConnected}"
                                       Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ServerNetworkOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Remote machine sshd_config"
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteMachineSshdConfig}"
                                       IsEnabled="{Binding ServerConnection.IsConnected}"
                                       Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
@@ -339,22 +339,22 @@
                 <Border Grid.Column="3" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
-                        <Label Content="Right click for help" />
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickHelp}" />
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
-                            <MenuItem Header="Website/Manual" CommandParameter="0" Command="{Binding OpenBrowser}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuWebsite}" CommandParameter="0" Command="{Binding OpenBrowser}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="Web" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator />
-                            <MenuItem Header="Ask a question" CommandParameter="1" Command="{Binding OpenBrowser}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuQuestion}" CommandParameter="1" Command="{Binding OpenBrowser}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="LightbulbQuestionOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="About" CommandParameter="2" Command="{Binding OpenBrowser}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuAbout}" CommandParameter="2" Command="{Binding OpenBrowser}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="Help" />
                                 </MenuItem.Icon>

@@ -12,7 +12,7 @@ using OpenSSH_GUI.Core.Interfaces.Credentials;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
-public static class IPasswordConnectionCredentialsExtension
+public static class PasswordConnectionCredentialsExtension
 {
     private static readonly RandomNumberGenerator _generator = RandomNumberGenerator.Create();
 

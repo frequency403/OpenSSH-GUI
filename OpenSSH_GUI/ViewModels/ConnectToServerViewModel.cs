@@ -17,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSH_GUI.Assets;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
@@ -48,9 +47,9 @@ public class ConnectToServerViewModel : ViewModelBase
 
     private IBrush _statusButtonBackground = Brushes.Gray;
 
-    private string _statusButtonText = "Status: Unknown";
+    private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUnknown);
 
-    private string _statusButtonToolTip = "Status not yet tested";
+    private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUntested);
 
     private bool _tryingToConnect;
 
@@ -78,7 +77,7 @@ public class ConnectToServerViewModel : ViewModelBase
             {
                 try
                 {
-                    if (!ValidData) throw new ArgumentException("Missing hostname/ip, username or password!");
+                    if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
                     ServerConnection = AuthWithPublicKey
                         ? AuthWithAllKeys
                             ? new ServerConnection(Hostname, Username, PublicKeys)
@@ -97,13 +96,13 @@ public class ConnectToServerViewModel : ViewModelBase
             TryingToConnect = true;
             if (await task)
             {
-                StatusButtonText = "Status: success";
-                StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
+                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusSuccess);
+                StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
                 StatusButtonBackground = Brushes.Green;
             }
             else
             {
-                StatusButtonText = "Status: failed!";
+                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusFailed);
                 StatusButtonBackground = Brushes.Red;
             }
 
@@ -126,8 +125,8 @@ public class ConnectToServerViewModel : ViewModelBase
             Hostname = "";
             Username = "";
             Password = "";
-            StatusButtonText = "Status: unknown";
-            StatusButtonToolTip = "Status not yet tested!";
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUnknown);
+            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUntested);
             StatusButtonBackground = Brushes.Gray;
             ServerConnection = new ServerConnection("123", "123", "123");
             UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
@@ -284,13 +283,13 @@ public class ConnectToServerViewModel : ViewModelBase
         TryingToConnect = true;
         if (TestConnectionInternal(credentials))
         {
-            StatusButtonText = "Status: success";
-            StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusSuccess);
+            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
             StatusButtonBackground = Brushes.Green;
         }
         else
         {
-            StatusButtonText = "Status: failed!";
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusFailed);
             StatusButtonBackground = Brushes.Red;
         }
 

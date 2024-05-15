@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Assets"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Interfaces.KnownHosts;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d"
         x:Class="OpenSSH_GUI.Views.EditKnownHostsWindow"
@@ -57,9 +57,9 @@
                     <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="DimGray"
                             BorderThickness="0 0 0 1" Margin="0 5">
                         <Grid ColumnDefinitions="* * *">
-                            <TextBlock Grid.Column="0" Text="KeyType" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="1" Text="Fingerprint" HorizontalAlignment="Center" />
-                            <TextBlock Grid.Column="2" Text="Mark for deletion" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="0" Text="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" HorizontalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" HorizontalAlignment="Center" />
                         </Grid>
                     </Border>
                     <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}"
