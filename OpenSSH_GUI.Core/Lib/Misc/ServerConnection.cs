@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:32
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:28
 
 #endregion
 
@@ -24,24 +24,25 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 
 public class ServerConnection : ReactiveObject, IServerConnection
 {
-    public IConnectionCredentials ConnectionCredentials { get; }
     private DateTime _connectionTime = DateTime.Now;
     private bool _isConnected;
     private SshClient _sshClient;
 
-   public ServerConnection(IConnectionCredentials? credentials = null)
-   {
-       credentials ??= new PasswordConnectionCredentials("123", "123", "123");
+    public ServerConnection(IConnectionCredentials? credentials = null)
+    {
+        credentials ??= new PasswordConnectionCredentials("123", "123", "123");
         ConnectionCredentials = credentials;
         _sshClient = new SshClient(credentials.GetConnectionInfo()) { KeepAliveInterval = TimeSpan.FromSeconds(10) };
         ConnectionTime = DateTime.Now;
     }
 
-    public ServerConnection(string hostname, string user, string password) : this(new PasswordConnectionCredentials(hostname, user, password))
+    public ServerConnection(string hostname, string user, string password) : this(
+        new PasswordConnectionCredentials(hostname, user, password))
     {
     }
 
-    public ServerConnection(string hostname, string user, ISshKey key) : this(new KeyConnectionCredentials(hostname, user, key))
+    public ServerConnection(string hostname, string user, ISshKey key) : this(
+        new KeyConnectionCredentials(hostname, user, key))
     {
     }
 
@@ -58,8 +59,8 @@ public class ServerConnection : ReactiveObject, IServerConnection
 
     private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
     private string CreateEmptyFileCommand => ServerOs == PlatformID.Win32NT ? "echo. >" : "touch";
+    public IConnectionCredentials ConnectionCredentials { get; }
 
-    
 
     public DateTime ConnectionTime
     {

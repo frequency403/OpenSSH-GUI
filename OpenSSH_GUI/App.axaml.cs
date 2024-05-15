@@ -1,8 +1,8 @@
 #region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:33
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:35
 
 #endregion
 
@@ -13,8 +13,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.Interfaces.Settings;
-using OpenSSH_GUI.Core.Lib;
-using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
@@ -64,7 +62,7 @@ public class App : Application
         collection.AddTransient<AddKeyWindowViewModel>();
         collection.AddTransient<ApplicationSettingsViewModel>();
         collection.AddTransient<EditSavedServerEntryViewModel>();
-        
+
         // return ServiceCollection
         return collection;
     }

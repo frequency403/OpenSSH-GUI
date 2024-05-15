@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 08.05.2024 - 22:05:30
-// Last edit: 14.05.2024 - 03:05:20
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:30
 
 #endregion
 
@@ -15,10 +15,11 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
 
-public class KeyConnectionCredentials(string hostname, string username, ISshKey? key) : ConnectionCredentials(hostname, username, AuthType.Key), IKeyConnectionCredentials
+public class KeyConnectionCredentials(string hostname, string username, ISshKey? key)
+    : ConnectionCredentials(hostname, username, AuthType.Key), IKeyConnectionCredentials
 {
-    [JsonIgnore]
-    public ISshKey? Key { get; set; } = key;
+    [JsonIgnore] public ISshKey? Key { get; set; } = key;
+
     public string KeyFilePath { get; } = key?.AbsoluteFilePath ?? "";
 
     public void RenewKey()

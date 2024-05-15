@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:36
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:41
 
 #endregion
 
@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using DynamicData;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
@@ -26,19 +25,20 @@ public class ApplicationSettingsViewModel(
     ILogger<ApplicationSettingsViewModel> logger,
     IApplicationSettings applicationSettings) : ViewModelBase(logger)
 {
-    public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
+    private bool _convertPpkAutomatically = applicationSettings.Settings.ConvertPpkAutomatically;
+
+    private IEnumerable<IConnectionCredentials> _knownServers = applicationSettings.Settings.LastUsedServers;
+
+    private int _maxServers = applicationSettings.Settings.MaxSavedServers;
 
     public ObservableCollection<ISshKey> Keys = [];
-    
-    private int _maxServers = applicationSettings.Settings.MaxSavedServers;
+    public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
 
     public int MaxServers
     {
         get => _maxServers;
         set => this.RaiseAndSetIfChanged(ref _maxServers, value);
     }
-    
-    private IEnumerable<IConnectionCredentials> _knownServers = applicationSettings.Settings.LastUsedServers;
 
     public IEnumerable<IConnectionCredentials> KnownServers
     {
@@ -46,45 +46,46 @@ public class ApplicationSettingsViewModel(
         set => this.RaiseAndSetIfChanged(ref _knownServers, value);
     }
 
-    private bool _convertPpkAutomatically = applicationSettings.Settings.ConvertPpkAutomatically;
-
     public bool ConvertPpkAutomatically
     {
         get => _convertPpkAutomatically;
         set => this.RaiseAndSetIfChanged(ref _convertPpkAutomatically, value);
     }
-    
+
     public ReactiveCommand<string, ApplicationSettingsViewModel?> RemoveServer =>
-    ReactiveCommand.Create<string, ApplicationSettingsViewModel?>(input =>
-    {
-        var copy = KnownServers.ToList();
-        copy.Remove(KnownServers.ToList().Find(e => string.Equals(e.Hostname, input, StringComparison.OrdinalIgnoreCase)));
-        KnownServers = copy;
-        return this;
-    });
-    
-    public ReactiveCommand<IConnectionCredentials, IConnectionCredentials?> EditEntry => ReactiveCommand.CreateFromTask<IConnectionCredentials, IConnectionCredentials?>(
-        async e =>
+        ReactiveCommand.Create<string, ApplicationSettingsViewModel?>(input =>
         {
-            if (e is IMultiKeyConnectionCredentials)
-            {
-                var box = MessageBoxManager.GetMessageBoxStandard("Multi-key cannot be edited",
-                    "You cannot edit a multi-key");
-                await box.ShowAsync();
-                return null;
-            }
-            var service = App.ServiceProvider.GetRequiredService<EditSavedServerEntryViewModel>();
-            service.SetValues(ref Keys, e);
-            var result = await ShowEditEntry.Handle(service);
-            if (result is null) return e;
-            var list = KnownServers.ToList();
-            var index = list.IndexOf(e);
-            list.RemoveAt(index);
-            list.Insert(index, result.CredentialsToEdit);
-            KnownServers = list;
-            return result.CredentialsToEdit;
+            var copy = KnownServers.ToList();
+            copy.Remove(KnownServers.ToList()
+                .Find(e => string.Equals(e.Hostname, input, StringComparison.OrdinalIgnoreCase)));
+            KnownServers = copy;
+            return this;
         });
-    
+
+    public ReactiveCommand<IConnectionCredentials, IConnectionCredentials?> EditEntry =>
+        ReactiveCommand.CreateFromTask<IConnectionCredentials, IConnectionCredentials?>(
+            async e =>
+            {
+                if (e is IMultiKeyConnectionCredentials)
+                {
+                    var box = MessageBoxManager.GetMessageBoxStandard("Multi-key cannot be edited",
+                        "You cannot edit a multi-key");
+                    await box.ShowAsync();
+                    return null;
+                }
+
+                var service = App.ServiceProvider.GetRequiredService<EditSavedServerEntryViewModel>();
+                service.SetValues(ref Keys, e);
+                var result = await ShowEditEntry.Handle(service);
+                if (result is null) return e;
+                var list = KnownServers.ToList();
+                var index = list.IndexOf(e);
+                list.RemoveAt(index);
+                list.Insert(index, result.CredentialsToEdit);
+                KnownServers = list;
+                return result.CredentialsToEdit;
+            });
+
     public ReactiveCommand<string, ApplicationSettingsViewModel> Submit =>
         ReactiveCommand.Create<string, ApplicationSettingsViewModel>(e =>
         {

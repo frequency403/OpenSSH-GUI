@@ -43,10 +43,10 @@
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Update="Assets\StringsAndTexts.resx">
-        <Generator>PublicResXFileCodeGenerator</Generator>
-        <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
+        <EmbeddedResource Update="Assets\StringsAndTexts.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
     </ItemGroup>
 
     <PropertyGroup> <!-- OSX Settings -->

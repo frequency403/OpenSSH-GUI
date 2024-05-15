@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 08.05.2024 - 22:05:30
-// Last edit: 14.05.2024 - 03:05:31
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:27
 
 #endregion
 
@@ -11,6 +11,7 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib.Keys;
+using SshNet.Keygen;
 using PpkKey = OpenSSH_GUI.Core.Lib.Keys.PpkKey;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
@@ -18,8 +19,6 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 public class DirectoryCrawler(ILogger logger, ISettingsFile settings)
 {
     private IEnumerable<ISshKey> Cache = [];
-    
-    public IEnumerable<ISshKey> Refresh() => GetAllKeys(true);
 
     public ISettingsFile SettingsFile
     {
@@ -31,14 +30,16 @@ public class DirectoryCrawler(ILogger logger, ISettingsFile settings)
         }
     }
 
+    public IEnumerable<ISshKey> Refresh()
+    {
+        return GetAllKeys(true);
+    }
+
     public IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)
     {
         if (!loadFromDisk && Cache.Any())
         {
-            foreach (var key in Cache)
-            {
-                yield return key;
-            }
+            foreach (var key in Cache) yield return key;
             yield break;
         }
 
@@ -47,21 +48,20 @@ public class DirectoryCrawler(ILogger logger, ISettingsFile settings)
                      .EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", SearchOption.TopDirectoryOnly))
         {
             ISshKey? key = null;
-            var message = "";
             try
             {
                 var extension = Path.GetExtension(filePath);
 
                 if (extension.EndsWith(".pub")) key = new SshPublicKey(filePath);
                 if (extension.EndsWith(".ppk"))
-                    key = SettingsFile.ConvertPpkAutomatically
-                        ? new PpkKey(filePath).ConvertToOpenSshKey(out message)
-                        : new PpkKey(filePath);
-                if (!string.IsNullOrWhiteSpace(message)) throw new InvalidOperationException(message);
+                {
+                    key = new PpkKey(filePath);
+                    if (SettingsFile.ConvertPpkAutomatically) key = key.Convert(SshKeyFormat.OpenSSH, true, logger);
+                }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error while reading public key from {path}", filePath);
+                logger.LogError(ex, "Error while reading key from {path}", filePath);
             }
 
             if (key is null) continue;

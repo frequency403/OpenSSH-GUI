@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:40
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:31
 
 #endregion
 
@@ -14,10 +14,10 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
 
-public class MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys) : ConnectionCredentials(hostname, username, AuthType.MultiKey), IMultiKeyConnectionCredentials
+public class MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys)
+    : ConnectionCredentials(hostname, username, AuthType.MultiKey), IMultiKeyConnectionCredentials
 {
-    [JsonIgnore]
-    public IEnumerable<ISshKey>? Keys { get; set; } = keys;
+    [JsonIgnore] public IEnumerable<ISshKey>? Keys { get; set; } = keys;
 
     public override ConnectionInfo GetConnectionInfo()
     {

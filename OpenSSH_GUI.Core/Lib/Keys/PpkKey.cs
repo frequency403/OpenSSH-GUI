@@ -1,27 +1,20 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:31
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:26
 
 #endregion
 
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
-using Renci.SshNet;
+using OpenSSH_GUI.Core.Lib.Abstract;
 using SshNet.Keygen;
-using SshNet.Keygen.Extensions;
-using SshNet.PuttyKeyFile;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
-public partial record PpkKey : IPpkKey
+public partial class PpkKey : KeyBase, IPpkKey
 {
     private const string EncryptionLineStart = "Encryption:";
     private const string PrivateKeyLineStart = "Private-Lines:";
@@ -29,14 +22,11 @@ public partial record PpkKey : IPpkKey
     private const string DefinitionLineStart = "PuTTY-User-Key-File-";
     private const string CommentLineStart = "Comment:";
     private const string MacLineStart = "Private-MAC:";
-    private readonly IPrivateKeySource _keySource;
 
-    public PpkKey(string absoluteFilePath)
+    public PpkKey(string absoluteFilePath) : base(absoluteFilePath)
     {
         if (!File.Exists(absoluteFilePath)) return;
-        AbsoluteFilePath = absoluteFilePath;
         Filename = Path.GetFileNameWithoutExtension(AbsoluteFilePath);
-        _keySource = new PuttyKeyFile(AbsoluteFilePath);
         var lines = File.ReadAllLines(AbsoluteFilePath);
 
         Format = int.TryParse(
@@ -63,186 +53,22 @@ public partial record PpkKey : IPpkKey
         PublicKeyString = ExtractLines(lines, PublicKeyLineStart);
         PrivateMAC = MacRegex().Replace(lines.FirstOrDefault(e => e.StartsWith(MacLineStart)) ?? "", "")
             .Replace(MacLineStart, "").Trim();
-        Fingerprint = PrivateMAC;
     }
 
-    public SshKeyFormat Format { get; }
-
-    public string AbsoluteFilePath { get; private set; }
     public string KeyTypeString { get; }
     public string Filename { get; }
     public ISshKeyType KeyType { get; }
-    public string Fingerprint { get; }
-
-    public string ExportOpenSshPublicKey()
-    {
-        return _keySource.ToOpenSshPublicFormat();
-    }
-
-    public string ExportOpenSshPrivateKey()
-    {
-        return _keySource.ToOpenSshFormat();
-    }
-
-    public string ExportPuttyPublicKey()
-    {
-        return _keySource.ToPuttyPublicFormat();
-    }
-
-    public string ExportPuttyPpkKey()
-    {
-        return _keySource.ToPuttyFormat();
-    }
-
-    public string ExportTextOfKey()
-    {
-        return ExportPuttyPpkKey();
-    }
-
-    public async Task ExportToDiskAsync(SshKeyFormat format)
-    {
-        var privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, null));
-        var publicFilePath = Path.ChangeExtension(privateFilePath, ".pub");
-
-        await using var privateWriter = new StreamWriter(privateFilePath, false);
-        await using var publicWriter = new StreamWriter(publicFilePath, false);
-
-        switch (format)
-        {
-            case SshKeyFormat.OpenSSH:
-                await privateWriter.WriteAsync(ExportOpenSshPrivateKey());
-                await publicWriter.WriteAsync(ExportOpenSshPublicKey());
-                break;
-            case SshKeyFormat.PuTTYv2:
-            case SshKeyFormat.PuTTYv3:
-            default:
-                break;
-        }
-    }
-
-    private string GetUniqueFilePath(string originalFilePath)
-    {
-        if (File.Exists(originalFilePath))
-        {
-            originalFilePath = Path.Combine(
-                Path.GetDirectoryName(originalFilePath),
-                $"{Path.GetFileNameWithoutExtension(originalFilePath)}_{DateTime.Now:yy_MM_dd_HH_mm}");
-        }
-        return originalFilePath;
-    }
-
-
     public bool IsPublicKey { get; } = true;
-
-    public string ExportAuthorizedKeyEntry()
-    {
-        return ExportOpenSshPublicKey();
-    }
-
-    public IAuthorizedKey ExportAuthorizedKey()
-    {
-        return new AuthorizedKey(ExportAuthorizedKeyEntry());
-    }
-
-    public void ExportToDisk(SshKeyFormat format)
-    {
-        ExportToDiskAsync(format).Wait();
-    }
-
-    public Task<string> ExportKeyAsync(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH)
-    {
-        return Task.FromResult(publicKey
-            ? format switch
-            {
-                SshKeyFormat.OpenSSH => _keySource.ToOpenSshPublicFormat(),
-                SshKeyFormat.PuTTYv2 or SshKeyFormat.PuTTYv3 => _keySource.ToPuttyPublicFormat(),
-                _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
-            }
-            : format switch
-            {
-                SshKeyFormat.OpenSSH => _keySource.ToOpenSshFormat(),
-                SshKeyFormat.PuTTYv2 or SshKeyFormat.PuTTYv3 => _keySource.ToPuttyFormat(format),
-                _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
-            });
-    }
-
-    public string ExportKey(bool publicKey = true, SshKeyFormat format = SshKeyFormat.OpenSSH)
-    {
-        return ExportKeyAsync(publicKey, format).Result;
-    }
-
     public EncryptionType EncryptionType { get; }
-
     public string Comment { get; }
-
     public string PublicKeyString { get; }
-
     public string PrivateKeyString { get; }
-
     public string PrivateMAC { get; }
-
     public bool IsPuttyKey => Format is not SshKeyFormat.OpenSSH;
 
-    public bool MoveFileToSubFolder([NotNullWhen(false)] out Exception? error)
+    public override string ExportTextOfKey()
     {
-        error = null;
-        try
-        {
-            var directory = Directory.GetParent(AbsoluteFilePath)!.CreateSubdirectory("PPK");
-            var newFileDestination = Path.Combine(directory.FullName, Path.GetFileName(AbsoluteFilePath));
-            File.Move(AbsoluteFilePath, newFileDestination);
-            AbsoluteFilePath = newFileDestination;
-            return true;
-        }
-        catch (Exception e)
-        {
-            error = e;
-            return false;
-        }
-    }
-
-    public ISshPublicKey? ConvertToOpenSshKey(out string errorMessage, bool temp = false, bool move = true)
-    {
-        errorMessage = "";
-        try
-        {
-            ExportToDisk(SshKeyFormat.OpenSSH);
-            var oldPath = AbsoluteFilePath;
-            if (!move) return new SshPublicKey(Path.ChangeExtension(oldPath, ".pub"));
-            if (MoveFileToSubFolder(out var ex)) return new SshPublicKey(Path.ChangeExtension(oldPath, ".pub"));
-            errorMessage = ex.Message;
-            return null;
-        }
-        catch (Exception e)
-        {
-            errorMessage = e.Message;
-            return null;
-        }
-    }
-
-    public IPrivateKeySource GetRenciKeyType()
-    {
-        return _keySource;
-    }
-
-    public void DeleteKey()
-    {
-        File.Delete(AbsoluteFilePath);
-    }
-
-    public ISshKey? Convert(SshKeyFormat format)
-    {
-        if (format.Equals(Format)) return this;
-        return ConvertToOpenSshKey(out _, move: false);
-    }
-
-    public ISshKey? Convert(SshKeyFormat format, ILogger logger)
-    {
-        if (format.Equals(Format)) return this;
-        var convertResult = ConvertToOpenSshKey(out var errorMessage, move: false);
-        if (string.IsNullOrWhiteSpace(errorMessage)) return convertResult;
-        logger.LogError("Error converting the key -> {0}", errorMessage);
-        return null;
+        return ExportPuttyPpkKey();
     }
 
     private string ExtractLines(string[] lines, string marker)

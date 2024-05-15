@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:25
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:44
 
 #endregion
 
@@ -22,7 +22,6 @@ using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Interfaces.Settings;
-using OpenSSH_GUI.Core.Lib;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 
@@ -33,10 +32,16 @@ public class ConnectToServerViewModel : ViewModelBase
     private bool _authWithAllKeys;
     private bool _authWithPublicKey;
 
+    private IEnumerable<IConnectionCredentials> _connectionCredentials;
+
     private string _hostName = "";
 
     private bool _keyComboBoxEnabled;
     private string _password = "";
+
+    private bool _quickConnect;
+
+    private IConnectionCredentials? _selectedConnection;
 
     private ISshKey? _selectedPublicKey;
     private IServerConnection _serverConnection = new ServerConnection("123", "123", "123");
@@ -51,54 +56,8 @@ public class ConnectToServerViewModel : ViewModelBase
 
     private bool _uploadButtonEnabled;
     private string _userName = "";
-    private bool firstCredentialSet = true;
+    private readonly bool firstCredentialSet = true;
 
-    private bool TestConnectionInternal(IConnectionCredentials credentials)
-    {
-        try
-        {
-            ServerConnection = new ServerConnection(credentials);
-            if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
-            return true;
-        }
-        catch (Exception exception)
-        {
-            StatusButtonToolTip = exception.Message;
-            return false;
-        }
-    }
-    
-    private async Task TestQuickConnection(IConnectionCredentials? credentials)
-    {
-        if (firstCredentialSet) return;
-        TryingToConnect = true;
-        if (TestConnectionInternal(credentials))
-        {
-            StatusButtonText = "Status: success";
-            StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
-            StatusButtonBackground = Brushes.Green;
-        }
-        else
-        {
-            StatusButtonText = "Status: failed!";
-            StatusButtonBackground = Brushes.Red;
-        }
-
-        TryingToConnect = false;
-
-        if (ServerConnection.IsConnected)
-        {
-            UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
-            return;
-        }
-
-        var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
-            ButtonEnum.Ok, Icon.Error);
-        await messageBox.ShowAsync();
-    }
-
-    public bool QuickConnectAvailable => ConnectionCredentials.Any();
-    
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, IApplicationSettings settings) :
         base(logger)
     {
@@ -114,6 +73,7 @@ public class ConnectToServerViewModel : ViewModelBase
                 TestQuickConnection(SelectedConnection).Wait();
                 return e;
             }
+
             var task = Task.Run(() =>
             {
                 try
@@ -181,15 +141,13 @@ public class ConnectToServerViewModel : ViewModelBase
         });
     }
 
-    private IEnumerable<IConnectionCredentials> _connectionCredentials;
+    public bool QuickConnectAvailable => ConnectionCredentials.Any();
 
     public IEnumerable<IConnectionCredentials> ConnectionCredentials
     {
         get => _connectionCredentials;
         set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
     }
-
-    private IConnectionCredentials? _selectedConnection;
 
     public IConnectionCredentials? SelectedConnection
     {
@@ -200,15 +158,13 @@ public class ConnectToServerViewModel : ViewModelBase
             TestQuickConnection(value).Wait();
         }
     }
-    
-    private bool _quickConnect = false;
 
     public bool QuickConnect
     {
         get => _quickConnect;
         set => this.RaiseAndSetIfChanged(ref _quickConnect, value);
     }
-    
+
     public IApplicationSettings Settings { get; }
 
     public IServerConnection ServerConnection
@@ -306,6 +262,50 @@ public class ConnectToServerViewModel : ViewModelBase
     public ReactiveCommand<Unit, ConnectToServerViewModel> SubmitConnection { get; }
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+
+    private bool TestConnectionInternal(IConnectionCredentials credentials)
+    {
+        try
+        {
+            ServerConnection = new ServerConnection(credentials);
+            if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            StatusButtonToolTip = exception.Message;
+            return false;
+        }
+    }
+
+    private async Task TestQuickConnection(IConnectionCredentials? credentials)
+    {
+        if (firstCredentialSet) return;
+        TryingToConnect = true;
+        if (TestConnectionInternal(credentials))
+        {
+            StatusButtonText = "Status: success";
+            StatusButtonToolTip = $"Connected to ssh://{Username}@{Hostname}";
+            StatusButtonBackground = Brushes.Green;
+        }
+        else
+        {
+            StatusButtonText = "Status: failed!";
+            StatusButtonBackground = Brushes.Red;
+        }
+
+        TryingToConnect = false;
+
+        if (ServerConnection.IsConnected)
+        {
+            UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
+            return;
+        }
+
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
+            ButtonEnum.Ok, Icon.Error);
+        await messageBox.ShowAsync();
+    }
 
     public void UpdateComboBoxState()
     {

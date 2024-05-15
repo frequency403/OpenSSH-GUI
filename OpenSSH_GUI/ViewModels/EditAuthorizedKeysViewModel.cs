@@ -1,12 +1,11 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:24
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:43
 
 #endregion
 
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -70,9 +69,10 @@ public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> lo
     private void UpdateAddButton()
     {
         if (SelectedKey is null) return;
-        AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key => string.Equals(key.Fingerprint, SelectedKey.ExportAuthorizedKey().Fingerprint));
+        AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key =>
+            string.Equals(key.Fingerprint, SelectedKey.ExportAuthorizedKey().Fingerprint));
     }
-    
+
     public void SetConnectionAndKeys(ref IServerConnection serverConnection,
         ref ObservableCollection<ISshKey?> keys)
     {

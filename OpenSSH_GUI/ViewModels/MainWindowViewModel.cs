@@ -1,8 +1,8 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:26
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:46
 
 #endregion
 
@@ -23,7 +23,6 @@ using OpenSSH_GUI.Assets;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Interfaces.Settings;
-using OpenSSH_GUI.Core.Lib;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using SshNet.Keygen;
@@ -55,7 +54,8 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(ILogger<MainWindowViewModel> logger) : base(logger)
     {
-        _sshKeys = new ObservableCollection<ISshKey?>(App.ServiceProvider.GetRequiredService<IApplicationSettings>().Crawler.GetAllKeys());
+        _sshKeys = new ObservableCollection<ISshKey?>(App.ServiceProvider.GetRequiredService<IApplicationSettings>()
+            .Crawler.GetAllKeys());
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }

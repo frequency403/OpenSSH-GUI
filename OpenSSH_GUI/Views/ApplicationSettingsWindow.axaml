@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        xmlns:credentials="clr-namespace:OpenSSH_GUI.Core.Interfaces.Credentials;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
         Width="400"
         Height="450"
@@ -20,7 +19,7 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
                     VerticalAlignment="Bottom">
             <Label Padding="5" Content="Max count of servers to save" />
-            <Separator Padding="5"/>
+            <Separator Padding="5" />
             <TextBox Padding="5" Text="{Binding MaxServers, Mode=TwoWay}" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
@@ -40,8 +39,9 @@
                     <DataTemplate>
                         <Border BorderThickness="0 0 0 1" BorderBrush="DimGray" CornerRadius="5" Padding="5">
                             <Grid ColumnDefinitions="* * * *">
-                                <Label Grid.Column="0" HorizontalAlignment="Left" Grid.ColumnSpan="2" Content="{Binding Display}"/>
-                                <Label Grid.Column="2" Content="{Binding AuthType}"/>
+                                <Label Grid.Column="0" HorizontalAlignment="Left" Grid.ColumnSpan="2"
+                                       Content="{Binding Display}" />
+                                <Label Grid.Column="2" Content="{Binding AuthType}" />
                                 <Button Grid.Column="3"
                                         HorizontalAlignment="Left"
                                         Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).EditEntry}"

@@ -34,11 +34,13 @@
         </DataTemplate>
     </Window.DataTemplates>
     <Grid RowDefinitions="* *" ColumnDefinitions="* * *" Margin="5">
-        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding CredentialsToEdit.Hostname}" Watermark="Hostname" Margin="5 10"
-                 Height="25" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding CredentialsToEdit.Hostname}" Watermark="Hostname"
+                 Margin="5 10"
+                 Height="25" VerticalAlignment="Bottom" />
 
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CredentialsToEdit.Username}" Watermark="Username" Margin="5 10"
-                 Height="25" VerticalAlignment="Bottom"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CredentialsToEdit.Username}" Watermark="Username"
+                 Margin="5 10"
+                 Height="25" VerticalAlignment="Bottom" />
 
         <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Password}" Watermark="Password"
                  Margin="5 10" Height="25" IsEnabled="{Binding IsPasswordKey}"
@@ -49,19 +51,20 @@
                   ItemsSource="{Binding Keys}"
                   SelectedItem="{Binding SelectedKey}"
                   VerticalAlignment="Bottom" />
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal" HorizontalAlignment="Stretch">
-            <Button Command="{Binding Close}" 
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal"
+                    HorizontalAlignment="Stretch">
+            <Button Command="{Binding Close}"
                     CommandParameter="false"
                     Foreground="Firebrick">
-                <avalonia:MaterialIcon Kind="CloseCircle"/>
+                <avalonia:MaterialIcon Kind="CloseCircle" />
             </Button>
-            <Button Command="{Binding Close}" 
+            <Button Command="{Binding Close}"
                     CommandParameter="true"
                     Foreground="LawnGreen">
-                <avalonia:MaterialIcon Kind="FloppyDisk"/>
+                <avalonia:MaterialIcon Kind="FloppyDisk" />
             </Button>
         </StackPanel>
-        
+
     </Grid>
-    
+
 </Window>

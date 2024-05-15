@@ -1,15 +1,15 @@
 ﻿#region CopyrightNotice
 
 // File Created by: Oliver Schantz
-// Created: 14.05.2024 - 00:05:30
-// Last edit: 14.05.2024 - 03:05:30
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:37
 
 #endregion
 
+using System;
 using Avalonia.ReactiveUI;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
-using System;
 
 namespace OpenSSH_GUI.Views;
 
@@ -31,6 +31,5 @@ public partial class ApplicationSettingsWindow : ReactiveWindow<ApplicationSetti
                 interaction.SetOutput(await dialog.ShowDialog<EditSavedServerEntryViewModel>(this));
             }));
         });
-        
     }
 }

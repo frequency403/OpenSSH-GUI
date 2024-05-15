@@ -61,9 +61,10 @@
         <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom"
                   IsChecked="{Binding QuickConnect}"
                   IsVisible="{Binding QuickConnectAvailable}">
-            <Label Content="Quick connect"/>
+            <Label Content="Quick connect" />
         </CheckBox>
-        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left" IsVisible="{Binding !QuickConnect}"
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left"
+                    IsVisible="{Binding !QuickConnect}"
                     VerticalAlignment="Center">
             <CheckBox VerticalAlignment="Top" HorizontalAlignment="Center"
                       IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
@@ -74,37 +75,37 @@
                 <Label Content="Use all keys" />
             </CheckBox>
         </StackPanel>
-        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" 
+        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                  IsVisible="{Binding QuickConnect}" 
+                  IsVisible="{Binding QuickConnect}"
                   ItemsSource="{Binding ConnectionCredentials}"
                   SelectedItem="{Binding SelectedConnection}"
                   IsEnabled="{Binding !TryingToConnect}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Spacing="3">
-                        <Label Content="{Binding Display}"/>
+                        <Label Content="{Binding Display}" />
                         <Separator />
-                        <Label Content="{Binding AuthType}"/>
+                        <Label Content="{Binding AuthType}" />
                     </StackPanel>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
         <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
-                         Height="25"
-                         IsVisible="{Binding !QuickConnect}"
-                         IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+                 Height="25"
+                 IsVisible="{Binding !QuickConnect}"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
 
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
-                         Height="25"
-                         IsVisible="{Binding !QuickConnect}"
-                         IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom"/>
+                 Height="25"
+                 IsVisible="{Binding !QuickConnect}"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
 
         <StackPanel Grid.Row="1" Grid.Column="2" IsVisible="{Binding !QuickConnect}">
-            <TextBox  Text="{Binding Password}" Watermark="Password" PasswordChar="*"
-                      Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}"
-                      IsVisible="{Binding !AuthWithPublicKey}" VerticalAlignment="Bottom" />
+            <TextBox Text="{Binding Password}" Watermark="Password" PasswordChar="*"
+                     Margin="5 10" Height="25" IsEnabled="{Binding !ServerConnection.IsConnected}"
+                     IsVisible="{Binding !AuthWithPublicKey}" VerticalAlignment="Bottom" />
             <ComboBox Margin="5 10" Height="25"
                       IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
