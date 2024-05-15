@@ -13,7 +13,9 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using OpenSSH_GUI.Core.Converter.Json;
 using OpenSSH_GUI.Core.Interfaces.Settings;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
@@ -33,13 +35,13 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        StringsAndTexts.Culture = new CultureInfo("de");
         ServiceProvider = BuildServiceCollection().BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = new MainWindow
             {
                 DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>()
             };
+        ServiceProvider.GetRequiredService<IApplicationSettings>().Init();
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -56,6 +58,9 @@ public class App : Application
 
         collection.AddLogging(e => e.AddSerilog(serilog, true));
         collection.AddSingleton<IApplicationSettings, ApplicationSettings>();
+        collection.AddSingleton<ISettingsFile, SettingsFile>();
+        collection.AddSingleton<DirectoryCrawler>();
+        collection.AddTransient<ConnectionCredentialsConverter>();
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<ExportWindowViewModel>();
         collection.AddTransient<EditKnownHostsViewModel>();

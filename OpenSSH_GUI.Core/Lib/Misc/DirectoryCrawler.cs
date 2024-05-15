@@ -11,39 +11,30 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Settings;
 using SshNet.Keygen;
 using PpkKey = OpenSSH_GUI.Core.Lib.Keys.PpkKey;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
-public class DirectoryCrawler(ILogger logger, ISettingsFile settings)
+public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, ISettingsFile settingsFile)
 {
-    private IEnumerable<ISshKey> Cache = [];
-
-    public ISettingsFile SettingsFile
-    {
-        get => settings;
-        set
-        {
-            settings = value;
-            Refresh();
-        }
-    }
+    private IEnumerable<ISshKey> _cache = [];
 
     public IEnumerable<ISshKey> Refresh()
     {
         return GetAllKeys(true);
     }
-
+    
     public IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)
     {
-        if (!loadFromDisk && Cache.Any())
+        if (!loadFromDisk && _cache.Any())
         {
-            foreach (var key in Cache) yield return key;
+            foreach (var key in _cache) yield return key;
             yield break;
         }
 
-        if (Cache.Any()) Cache = [];
+        if (_cache.Any()) _cache = [];
         foreach (var filePath in Directory
                      .EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", SearchOption.TopDirectoryOnly))
         {
@@ -56,7 +47,7 @@ public class DirectoryCrawler(ILogger logger, ISettingsFile settings)
                 if (extension.EndsWith(".ppk"))
                 {
                     key = new PpkKey(filePath);
-                    if (SettingsFile.ConvertPpkAutomatically) key = key.Convert(SshKeyFormat.OpenSSH, true, logger);
+                    if (settingsFile.ConvertPpkAutomatically) key = key.Convert(SshKeyFormat.OpenSSH, true, logger);
                 }
             }
             catch (Exception ex)
@@ -65,7 +56,7 @@ public class DirectoryCrawler(ILogger logger, ISettingsFile settings)
             }
 
             if (key is null) continue;
-            Cache = Cache.Append(key);
+            _cache = _cache.Append(key);
             yield return key;
         }
     }

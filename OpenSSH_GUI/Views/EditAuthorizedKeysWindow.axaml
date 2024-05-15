@@ -11,7 +11,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.EditAuthorizedKeysWindow"
         x:DataType="viewModels:EditAuthorizedKeysViewModel"
-        Title="EditAuthorizedKeysWindow"
+        Title="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}"
         Width="800"
         Height="600"
         Icon="/Assets/appicon.ico"

@@ -13,8 +13,9 @@ namespace OpenSSH_GUI.Core.Interfaces.Settings;
 
 public interface IApplicationSettings
 {
-    DirectoryCrawler Crawler { get; }
-    ISettingsFile Settings { get; }
+    void Init();
     bool AddKnownServerToFile(IConnectionCredentials credentials);
     Task<bool> AddKnownServerToFileAsync(IConnectionCredentials credentials);
+    Task WriteCurrentSettingsToFileAsync();
+    void WriteCurrentSettingsToFile();
 }

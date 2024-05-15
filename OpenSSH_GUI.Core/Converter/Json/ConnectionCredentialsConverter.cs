@@ -27,7 +27,7 @@ public class ConnectionCredentialsConverter(DirectoryCrawler crawler) : JsonConv
         if (jsonObject.TryGetProperty("key_file_path", out var path))
         {
             var obj = JsonSerializer.Deserialize<KeyConnectionCredentials>(jsonObject.GetRawText(), options);
-            var found = crawler.GetAllKeys().First(e => string.Equals(e.AbsoluteFilePath, path.GetString()));
+            var found = crawler.GetAllKeys().FirstOrDefault(e => string.Equals(e.AbsoluteFilePath, path.GetString()));
             if (found is null)
                 obj.RenewKey();
             else

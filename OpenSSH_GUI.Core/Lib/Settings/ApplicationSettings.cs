@@ -18,22 +18,22 @@ using OpenSSH_GUI.Core.Lib.Misc;
 
 namespace OpenSSH_GUI.Core.Lib.Settings;
 
-public class ApplicationSettings : IApplicationSettings
+public class ApplicationSettings(
+    ILogger<IApplicationSettings> logger,
+    ISettingsFile settingsFile,
+    DirectoryCrawler crawler,
+    ConnectionCredentialsConverter converter) : IApplicationSettings, IDisposable, IAsyncDisposable
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        WriteIndented = true
+        WriteIndented = true,
+        Converters = { converter }
     };
 
-    private readonly ILogger _logger;
-
-    public ApplicationSettings(ILogger<IApplicationSettings> logger)
+    public void Init()
     {
-        Crawler = new DirectoryCrawler(logger, Settings);
-        _jsonSerializerOptions.Converters.Add(new ConnectionCredentialsConverter(Crawler));
-        _logger = logger;
         try
         {
             if (!Directory.Exists(SettingsFileBasePath)) Directory.CreateDirectory(SettingsFileBasePath);
@@ -43,19 +43,23 @@ public class ApplicationSettings : IApplicationSettings
             if (deserialized is null || !string.Equals(deserialized.Version, CurrentVersion))
                 WriteCurrentSettingsToFile();
             else
-                Settings = deserialized;
+                settingsFile.ChangeSettings(deserialized);
             DecryptAllPasswords();
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error while initializing application settings! Continuing with default settings");
         }
-
-        Crawler.SettingsFile = Settings;
+        settingsFile.SettingsChanged += (sender, args) =>
+        {
+            WriteCurrentSettingsToFile();
+            return args;
+        };
+        crawler.Refresh();
     }
 
     private string CurrentVersion { get; } =
-        $"v{FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly()!.Location).FileVersion}";
+        $"v{(Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()).GetName().Version.ToString(3)}";
 
     private static string SettingsFileName => AppDomain.CurrentDomain.FriendlyName + ".json";
 
@@ -64,11 +68,8 @@ public class ApplicationSettings : IApplicationSettings
             AppDomain.CurrentDomain.FriendlyName);
 
     private string SettingsFilePath => Path.Combine(SettingsFileBasePath, SettingsFileName);
-    private bool FileOverflowCheck => Settings.LastUsedServers.Count() > Settings.MaxSavedServers;
-    public DirectoryCrawler Crawler { get; }
-
-    public ISettingsFile Settings { get; } = new SettingsFile();
-
+    private bool FileOverflowCheck => settingsFile.LastUsedServers.Count() > settingsFile.MaxSavedServers;
+    
     public bool AddKnownServerToFile(IConnectionCredentials credentials)
     {
         return AddKnownServerToFileAsync(credentials).Result;
@@ -79,16 +80,16 @@ public class ApplicationSettings : IApplicationSettings
         try
         {
             ShrinkKnownServers();
-
-            var found = Settings.LastUsedServers.FirstOrDefault(e => string.Equals(e.Hostname, credentials.Hostname));
-            if (found is not null && string.Equals(found.Username, credentials.Username) &&
-                found.AuthType.Equals(credentials.AuthType)) return false;
-            Settings.LastUsedServers = Settings.LastUsedServers.Append(credentials);
+            var found = settingsFile.LastUsedServers.Where(e =>
+                string.Equals(e.Hostname, credentials.Hostname) && string.Equals(e.Username, credentials.Username));
+            if (found.Any(e => e.AuthType.Equals(credentials.AuthType))) return false;
+            
+            settingsFile.LastUsedServers.Add(credentials);
             await WriteCurrentSettingsToFileAsync();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error adding known server to file");
+            logger.LogError(e, "Error adding known server to file");
             return false;
         }
 
@@ -97,59 +98,66 @@ public class ApplicationSettings : IApplicationSettings
 
     private void EncryptAllPasswords()
     {
-        Settings.LastUsedServers = Settings.LastUsedServers.Select(e =>
+        foreach (var server in settingsFile.LastUsedServers)
         {
-            if (e is IPasswordConnectionCredentials { EncryptedPassword: false } pwcc) pwcc.EncryptPassword();
-            return e;
-        }).ToList();
+            if (server is IPasswordConnectionCredentials { EncryptedPassword: false } pwcc) pwcc.EncryptPassword();
+        }
     }
 
     private void DecryptAllPasswords()
     {
-        Settings.LastUsedServers = Settings.LastUsedServers.Select(e =>
+        foreach (var server in settingsFile.LastUsedServers)
         {
-            if (e is IPasswordConnectionCredentials { EncryptedPassword: true } pwcc) pwcc.DecryptPassword();
-            return e;
-        }).ToList();
+            if (server is IPasswordConnectionCredentials { EncryptedPassword: true } pwcc) pwcc.DecryptPassword();
+        }
     }
 
-    private void WriteCurrentSettingsToFile()
+    public void WriteCurrentSettingsToFile()
     {
         WriteCurrentSettingsToFileAsync().Wait();
     }
 
-    private async Task WriteCurrentSettingsToFileAsync()
+    public async Task WriteCurrentSettingsToFileAsync()
     {
         try
         {
             EncryptAllPasswords();
-            var serialized = JsonSerializer.Serialize(Settings, _jsonSerializerOptions);
+            var serialized = JsonSerializer.Serialize(settingsFile, _jsonSerializerOptions);
             await File.WriteAllTextAsync(SettingsFilePath, serialized);
             DecryptAllPasswords();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while writing to settings file!");
+            logger.LogError(e, "Error while writing to settings file!");
         }
     }
-
 
     private bool ShrinkKnownServers()
     {
         try
         {
             if (!FileOverflowCheck) return false;
-            var baseValue = Settings.LastUsedServers.Count() - Settings.MaxSavedServers;
+            var baseValue = settingsFile.LastUsedServers.Count - settingsFile.MaxSavedServers;
             for (var i = 0; i < baseValue; i++)
-                Settings.LastUsedServers = Settings.LastUsedServers.Where(e => e != Settings.LastUsedServers.First());
+                settingsFile.LastUsedServers.RemoveAt(i);
             WriteCurrentSettingsToFile();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error shrinking known servers");
+            logger.LogError(e, "Error shrinking known servers");
             return false;
         }
 
         return true;
+    }
+
+    public void Dispose()
+    {
+        WriteCurrentSettingsToFile();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await WriteCurrentSettingsToFileAsync();
     }
 }

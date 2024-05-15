@@ -228,7 +228,7 @@
         <value>Konvertiere {0}-Schlüssel zu {1}-Schlüssel</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxText" xml:space="preserve">
-        <value>Hiermit wird ihr {0}-Schlüssel zu einem {1}-Schlüssel.\nMöchten Sie den alten Schlüssel löschen?</value>
+        <value>Hiermit wird ihr {0}-Schlüssel zu einem {1}-Schlüssel. Möchten Sie den alten Schlüssel löschen?</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxErrorText" xml:space="preserve">
         <value>Es trat ein problem beim Konvertieren auf. Konsultieren Sie die Log-Datei für mehr Informationen</value>

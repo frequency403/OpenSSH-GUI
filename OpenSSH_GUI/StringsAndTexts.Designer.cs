@@ -573,7 +573,7 @@ namespace OpenSSH_GUI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This will convert your {0]-key to a {1}-key.\nDo you want to delete the old file?.
+        ///   Looks up a localized string similar to This will convert your {0]-key to a {1}-key. Do you want to delete the old file?.
         /// </summary>
         public static string MainWindowConvertKeyMessageBoxText {
             get {

@@ -57,11 +57,11 @@ public class ConnectToServerViewModel : ViewModelBase
     private string _userName = "";
     private readonly bool firstCredentialSet = true;
 
-    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, IApplicationSettings settings) :
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, ISettingsFile settings) :
         base(logger)
     {
         Settings = settings;
-        ConnectionCredentials = Settings.Settings.LastUsedServers;
+        ConnectionCredentials = Settings.LastUsedServers;
         SelectedConnection = ConnectionCredentials.FirstOrDefault();
         firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
@@ -164,7 +164,7 @@ public class ConnectToServerViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _quickConnect, value);
     }
 
-    public IApplicationSettings Settings { get; }
+    public ISettingsFile Settings { get; }
 
     public IServerConnection ServerConnection
     {

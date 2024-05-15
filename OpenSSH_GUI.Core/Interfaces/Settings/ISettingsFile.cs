@@ -7,13 +7,16 @@
 #endregion
 
 using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Lib.Settings;
 
 namespace OpenSSH_GUI.Core.Interfaces.Settings;
 
 public interface ISettingsFile
 {
+    event SettingsFile.SettingsChangedEventHandler SettingsChanged;
     string Version { get; set; }
     bool ConvertPpkAutomatically { get; set; }
     int MaxSavedServers { get; set; }
-    IEnumerable<IConnectionCredentials> LastUsedServers { get; set; }
+    List<IConnectionCredentials> LastUsedServers { get; set; }
+    void ChangeSettings(ISettingsFile settingsFile);
 }

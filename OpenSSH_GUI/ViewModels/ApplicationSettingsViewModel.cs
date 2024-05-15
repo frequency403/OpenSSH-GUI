@@ -6,30 +6,32 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using DynamicData;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Settings;
+using OpenSSH_GUI.Core.Lib.Settings;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
 public class ApplicationSettingsViewModel(
     ILogger<ApplicationSettingsViewModel> logger,
+    ISettingsFile settingsFile,
     IApplicationSettings applicationSettings) : ViewModelBase(logger)
 {
-    private bool _convertPpkAutomatically = applicationSettings.Settings.ConvertPpkAutomatically;
+    private bool _convertPpkAutomatically = settingsFile.ConvertPpkAutomatically;
 
-    private IEnumerable<IConnectionCredentials> _knownServers = applicationSettings.Settings.LastUsedServers;
+    private List<IConnectionCredentials> _knownServers = settingsFile.LastUsedServers;
 
-    private int _maxServers = applicationSettings.Settings.MaxSavedServers;
+    private int _maxServers = settingsFile.MaxSavedServers;
 
     public ObservableCollection<ISshKey> Keys = [];
     public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
@@ -40,7 +42,7 @@ public class ApplicationSettingsViewModel(
         set => this.RaiseAndSetIfChanged(ref _maxServers, value);
     }
 
-    public IEnumerable<IConnectionCredentials> KnownServers
+    public List<IConnectionCredentials> KnownServers
     {
         get => _knownServers;
         set => this.RaiseAndSetIfChanged(ref _knownServers, value);
@@ -52,12 +54,12 @@ public class ApplicationSettingsViewModel(
         set => this.RaiseAndSetIfChanged(ref _convertPpkAutomatically, value);
     }
 
-    public ReactiveCommand<string, ApplicationSettingsViewModel?> RemoveServer =>
-        ReactiveCommand.Create<string, ApplicationSettingsViewModel?>(input =>
+    public ReactiveCommand<IConnectionCredentials, ApplicationSettingsViewModel?> RemoveServer =>
+        ReactiveCommand.Create<IConnectionCredentials, ApplicationSettingsViewModel?>(input =>
         {
+            var index = KnownServers.IndexOf(input);
             var copy = KnownServers.ToList();
-            copy.Remove(KnownServers.ToList()
-                .Find(e => string.Equals(e.Hostname, input, StringComparison.OrdinalIgnoreCase)));
+            copy.RemoveAt(index);
             KnownServers = copy;
             return this;
         });
@@ -91,9 +93,13 @@ public class ApplicationSettingsViewModel(
         {
             if (!bool.TryParse(e, out var realResult)) return this;
             if (!realResult) return this;
-            applicationSettings.Settings.MaxSavedServers = MaxServers;
-            applicationSettings.Settings.LastUsedServers = KnownServers;
-            applicationSettings.Settings.ConvertPpkAutomatically = ConvertPpkAutomatically;
+            settingsFile.ChangeSettings(new SettingsFile
+            {
+                Version = settingsFile.Version,
+                ConvertPpkAutomatically = ConvertPpkAutomatically,
+                MaxSavedServers = MaxServers,
+                LastUsedServers = KnownServers
+            });
             return this;
         });
 

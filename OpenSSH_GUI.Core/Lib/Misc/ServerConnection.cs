@@ -37,17 +37,17 @@ public class ServerConnection : ReactiveObject, IServerConnection
     }
 
     public ServerConnection(string hostname, string user, string password) : this(
-        new PasswordConnectionCredentials(hostname, user, password))
+        new PasswordConnectionCredentials(hostname.Trim(), user.Trim(), password.Trim()))
     {
     }
 
     public ServerConnection(string hostname, string user, ISshKey key) : this(
-        new KeyConnectionCredentials(hostname, user, key))
+        new KeyConnectionCredentials(hostname.Trim(), user.Trim(), key))
     {
     }
 
     public ServerConnection(string hostname, string user, IEnumerable<ISshKey> keys) : this(
-        new MultiKeyConnectionCredentials(hostname, user, keys))
+        new MultiKeyConnectionCredentials(hostname.Trim(), user.Trim(), keys))
     {
     }
 

@@ -20,7 +20,7 @@ public class KeyConnectionCredentials(string hostname, string username, ISshKey?
 {
     [JsonIgnore] public ISshKey? Key { get; set; } = key;
 
-    public string KeyFilePath { get; } = key?.AbsoluteFilePath ?? "";
+    public string KeyFilePath => Key?.AbsoluteFilePath ?? "";
 
     public void RenewKey()
     {
@@ -28,8 +28,8 @@ public class KeyConnectionCredentials(string hostname, string username, ISshKey?
         {
             var x when x.Contains("pub") => new SshPublicKey(KeyFilePath),
             var x when x.Contains("ppk") => new PpkKey(KeyFilePath),
-            var x when string.IsNullOrWhiteSpace(x) => new SshPrivateKey(KeyFilePath),
-            _ => Key
+            var x when string.IsNullOrWhiteSpace(x) => Key,
+            _ => new SshPrivateKey(KeyFilePath)
         };
     }
 

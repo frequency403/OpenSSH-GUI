@@ -235,7 +235,7 @@
         <value>Converting {0}-key to {1} key</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxText" xml:space="preserve">
-        <value>This will convert your {0]-key to a {1}-key.\nDo you want to delete the old file?</value>
+        <value>This will convert your {0]-key to a {1}-key. Do you want to delete the old file?</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxErrorText" xml:space="preserve">
         <value>There was an error converting the keyfile. See the log for details.</value>

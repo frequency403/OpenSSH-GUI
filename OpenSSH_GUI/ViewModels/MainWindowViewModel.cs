@@ -51,10 +51,9 @@ public class MainWindowViewModel : ViewModelBase
 
     private ObservableCollection<ISshKey?> _sshKeys;
 
-    public MainWindowViewModel(ILogger<MainWindowViewModel> logger) : base(logger)
+    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler crawler) : base(logger)
     {
-        _sshKeys = new ObservableCollection<ISshKey?>(App.ServiceProvider.GetRequiredService<IApplicationSettings>()
-            .Crawler.GetAllKeys());
+        _sshKeys = new ObservableCollection<ISshKey?>(crawler.GetAllKeys());
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }

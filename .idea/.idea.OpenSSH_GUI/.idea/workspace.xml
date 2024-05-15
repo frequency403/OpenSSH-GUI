@@ -8,19 +8,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.Designer.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.de.resx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.resx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/Event/SettingsChangedEventArgs.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/avalonia.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/avalonia.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IPasswordConnectionCredentialsExtension.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IPasswordConnectionCredentialsExtension.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/StringExtensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/StringExtensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/IApplicationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/IApplicationSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/ISettingsFile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/ISettingsFile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Credentials/KeyConnectionCredentials.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Credentials/KeyConnectionCredentials.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/ServerConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/ServerConnection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/SettingsFile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/SettingsFile.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Assets/StringsAndTexts.Designer.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Assets/StringsAndTexts.resx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/AddKeyWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/AddKeyWindowViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.de.resx" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.de.resx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.resx" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/StringsAndTexts.resx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ConnectToServerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ConnectToServerViewModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" afterDir="false" />
@@ -28,9 +30,6 @@
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/MainWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/MainWindow.axaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,8 +55,34 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/6974e46035b24b33b87386527978e40ff8a00/5c/88817da4/AppBuilder.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/1ca7369ea0d7ba873b2ba554a0709bea49d769d49f474c7b68a592f1304dfbf2/CurrentThreadScheduler.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/1ecab6ba5e8f446c75c7ea0819f7bfd191afa76aa953f354eb50d25014ac/IdentitySink.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/20885d5d627d4da82a4a22d7c55abb3d50afdd1ab121738514d59792dc9993/Select.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/33e99156c78170a16e621ce52c48fd4f244cdd5fd71b29cf5478c3ecfab57a6/ConnectableObservable.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/3b23f6a5cd36c3550b6bcf5e8bfa5c91c70186bce919c8d6e8e1c7c0a03c1/TailRecursiveSink.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/3d2f19452f9866870d3213cc665f078522038d0cc1335cc75c85425da9a3ff9/Producer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/41696f2b23f05137daf429ba312334054367ed588ec105d14757e381593c4d/RefCount.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/45f248f1e33771dcbf8a989a716042bdbeb221352b3bc6df57ec5a7c283c59c2/Catch.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/4e1a59b3b8785c21216996958da5e242dc353efd145a21ca3bcf61755db9f/TakeUntil.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/5028320658ac437c327e7d57cfe06dfc5a791c618d8c2bb0545639ff987b/Sink.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/6b227eb303238834af2c3fb122a7e882e9349736231bacc21e165f6c9a98d45/ObservableBase.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/6dcf2e864e33bc34f34a413c8621e24ed1dae343926f9988d5af72c30dcd0/AsObservable.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/72832e242b1b5b2b5f2cfe23f68fbfedefd417121b74c7b4f76b514a1c40/Observable.Extensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/7cd2b62f072ca5b3d2f42f76a5dd52a4b5f34996c7e08db6e2afbbb2a3d49a/ReactiveCommand.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/9eedaf6ff7615849708be8bf87394de4af2f359deaf4e3a9398582e82ea1980/QueryLanguage.Creation.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/be43dcc4ee5fbf3b61a0a8f0662cff32fe47ccee6ca9d3a3711a25044fb2db8/Return.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/d13b66a02b91624f48b9db6ffa6ce5780a7e1716cabd1b66eec11025d191/Scheduler.Simple.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/e221cc8f688c75a9bc3f0b838afc95fcd51f443803803b72c9e6614aacf384/RxApp.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/f08a5537e313cde9e3b95cab95859f116415eb179ab71a7ceb6697f5c497662/SelectMany.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/f82a89c927ad7a36110f53b24f7c45149e998be01213b1be18e35b589a17/Concat.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/fbda8033324cb1701eeca69fb5f37e9b708aa2415158361cb3e14a151279a96/Finally.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/1381d5ebd2ab1f292848d5b19b80cf71ac332508/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/List.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection.Abstractions/src/ServiceProviderServiceExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteChain.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteFactory.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9f4b1f5d664afdfc80e1508ab7ed099dff210fbd/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/JsonConverterOfT.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://R:/OpenSSH_GUI/OpenSSH_GUI/Views/AddKeyWindow.axaml" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -73,6 +98,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     ".NET Project.OpenSSH_GUI.executor": "Debug",
+    "Publish to folder.Publish OpenSSH_GUI to folder.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "development",
     "ignore.virus.scanning.warn.message": "true",
@@ -82,6 +108,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.keymap",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -92,11 +119,17 @@
     ]
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected=".NET Project.OpenSSH_GUI">
+    <configuration name="Publish OpenSSH_GUI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
+      <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" runtime="win-x64" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/win-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341" />
+      <method v="2">
+        <option name="CleanSolution" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="OpenSSH_GUI" type="DotNetProject" factoryName=".NET Project">
-      <option name="EXE_PATH" value="" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/OpenSSH_GUI/bin/Debug/net8.0/win-x64/OpenSSH_GUI.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/OpenSSH_GUI/bin/Debug/net8.0/win-x64" />
       <option name="PASS_PARENT_ENVS" value="1" />
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
       <option name="USE_MONO" value="0" />
@@ -106,11 +139,15 @@
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
       <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
       <option name="PROJECT_KIND" value="DotNetCore" />
-      <option name="PROJECT_TFM" value="" />
+      <option name="PROJECT_TFM" value="net8.0" />
       <method v="2">
         <option name="Build" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue=".NET Project.OpenSSH_GUI" />
+      <item itemvalue="Publish to folder.Publish OpenSSH_GUI to folder" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -163,5 +200,24 @@
     <MESSAGE value="cleanup?" />
     <MESSAGE value="Blocks when writing to a file." />
     <option name="LAST_COMMIT_MESSAGE" value="" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs</url>
+          <line>82</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Settings\ApplicationSettings.cs" containingFunctionPresentation="Method 'AddKnownServerToFileAsync'">
+            <startOffsets>
+              <option value="2917" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2938" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

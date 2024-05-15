@@ -10,7 +10,7 @@
         Height="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
-        Title="ApplicationSettingsWindow">
+        Title="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsDescription}">
     <Grid x:Name="TheItemsGrid"
           HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
           ColumnDefinitions="* *" RowDefinitions="* * * *">
@@ -53,7 +53,7 @@
                                 <Button Grid.Column="3"
                                         HorizontalAlignment="Right"
                                         Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).RemoveServer}"
-                                        CommandParameter="{Binding Hostname}"
+                                        CommandParameter="{Binding}"
                                         Background="OrangeRed">
                                     <avalonia:MaterialIcon Kind="CloseCircleOutline" />
                                 </Button>
