@@ -18,9 +18,6 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
-    <Window.Resources>
-        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
-    </Window.Resources>
     <Window.DataTemplates>
         <DataTemplate DataType="authorizedKeys:IAuthorizedKey">
             <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="5">
@@ -43,21 +40,6 @@
                     </ToggleButton>
                 </Grid>
             </Border>
-        </DataTemplate>
-        <DataTemplate DataType="keys:ISshKey">
-            <Grid ColumnDefinitions="* * *">
-                <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal" Margin="5">
-                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
-                        <materialIcons:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
-                    </Border>
-                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
-                        <materialIcons:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
-                    </Border>
-                    <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
-                </StackPanel>
-                <Separator Grid.Column="1" />
-                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
-            </Grid>
         </DataTemplate>
     </Window.DataTemplates>
     <Window.Styles>
@@ -101,6 +83,7 @@
                               ItemsSource="{Binding PublicKeys}"
                               SelectedItem="{Binding SelectedKey}"
                               IsVisible="{Binding KeyAddPossible}"
+                              ItemTemplate="{StaticResource SshKeyComboBoxStyle}"
                               Margin="5" />
                     <Button Grid.Row="1" Grid.Column="1"
                             HorizontalAlignment="Stretch"

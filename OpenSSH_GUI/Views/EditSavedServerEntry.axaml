@@ -13,26 +13,6 @@
         Height="200"
         CanResize="False"
         Title="EditSavedServerEntry">
-    <Window.Resources>
-        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
-    </Window.Resources>
-    <Window.DataTemplates>
-        <DataTemplate DataType="keys:ISshKey">
-            <Grid ColumnDefinitions="* * *">
-                <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal" Margin="5">
-                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
-                        <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
-                    </Border>
-                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
-                        <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
-                    </Border>
-                    <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
-                </StackPanel>
-                <Separator Grid.Column="1" />
-                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
-            </Grid>
-        </DataTemplate>
-    </Window.DataTemplates>
     <Grid RowDefinitions="* *" ColumnDefinitions="* * *" Margin="5">
         <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding CredentialsToEdit.Hostname}" Watermark="Hostname"
                  Margin="5 10"
@@ -50,6 +30,7 @@
                   IsVisible="{Binding !IsPasswordKey}"
                   ItemsSource="{Binding Keys}"
                   SelectedItem="{Binding SelectedKey}"
+                  ItemTemplate="{StaticResource SshKeyComboBoxStyle}"
                   VerticalAlignment="Bottom" />
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal"
                     HorizontalAlignment="Stretch">

@@ -1,0 +1,158 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
+                    xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+                    xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+                    xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+                    xmlns:converters="clr-namespace:OpenSSH_GUI.Converters">
+    <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
+    <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="keys:ISshKey">
+        <Grid ColumnDefinitions="* * *" HorizontalAlignment="Stretch">
+            <Grid ColumnDefinitions="* 3*" Grid.Column="0"
+                  VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Left">
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}">
+                        <avalonia:MaterialIcon Kind="Password" Foreground="Yellow" />
+                    </Border>
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}">
+                        <avalonia:MaterialIcon Kind="LockOpen" Foreground="Green" />
+                    </Border>
+                </StackPanel>
+                <Border Grid.Column="0"
+                        BorderBrush="Transparent"
+                        Padding="2"
+                        IsVisible="{Binding !HasPassword}"
+                        IsEnabled="False"
+                        HorizontalAlignment="Left">
+                    <avalonia:MaterialIcon Kind="LockOpen" Foreground="DimGray" />
+                </Border>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left">
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
+                        <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
+                    </Border>
+                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
+                        <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                    </Border>
+                    <TextBlock
+                        Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                        HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+            <Separator Grid.Column="1" />
+            <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:ISshKey">
+        <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="5" BorderBrush="DimGray"
+                Margin="0 0 0 5">
+            <Grid ColumnDefinitions="* 3* * *">
+                <ToolTip.Tip>
+                    <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
+                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
+                               Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
+                               FontWeight="Bold" />
+                        <TextPresenter Grid.ColumnSpan="2" Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding Filename}" VerticalAlignment="Center" />
+                        <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"
+                               Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
+                               FontWeight="Bold" />
+                        <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                       Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center" />
+                        <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
+                               Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyFormatType}"
+                               FontWeight="Bold" />
+                        <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                       Text="{Binding Format}" VerticalAlignment="Center" />
+                    </Grid>
+                </ToolTip.Tip>
+                <Grid ColumnDefinitions="* 3*" Grid.Row="0" Grid.Column="0"
+                      VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Center">
+                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}">
+                            <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" />
+                        </Border>
+                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}">
+                            <avalonia:MaterialIcon Kind="ShieldLockOpenOutline" Foreground="Green" />
+                        </Border>
+                    </StackPanel>
+                    <Border Grid.Column="0"
+                            BorderBrush="Transparent"
+                            Padding="2"
+                            IsVisible="{Binding !HasPassword}"
+                            IsEnabled="False"
+                            HorizontalAlignment="Center">
+                        <avalonia:MaterialIcon Kind="LockOffOutline" Foreground="DimGray" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left">
+                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
+                            <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
+                        </Border>
+                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
+                            <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                        </Border>
+                        <TextBlock
+                            Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                            HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+                <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
+                           HorizontalAlignment="Center" IsVisible="{Binding !NeedPassword}" />
+                <Button Grid.Column="1" HorizontalAlignment="Stretch" Background="YellowGreen" Foreground="IndianRed"
+                        HorizontalContentAlignment="Center" IsVisible="{Binding NeedPassword}"
+                        Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePassword}"
+                        CommandParameter="{Binding .}">
+                    Provide Password
+                </Button>
+                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"
+                           HorizontalAlignment="Center" IsEnabled="{Binding !NeedPassword}" />
+                <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center"
+                      IsEnabled="{Binding !NeedPassword}">
+                    <Button Grid.Column="0" HorizontalAlignment="Center"
+                            Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
+                            CommandParameter="{Binding .}">
+                        <ToolTip.Tip>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
+                        </ToolTip.Tip>
+                        <StackPanel Orientation="Horizontal">
+                            <avalonia:MaterialIcon Kind="Publish" />
+                            <avalonia:MaterialIcon Kind="KeyOutline" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" HorizontalAlignment="Center"
+                            Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPrivate}"
+                            CommandParameter="{Binding .}">
+                        <ToolTip.Tip>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
+                        </ToolTip.Tip>
+                        <StackPanel Orientation="Horizontal">
+                            <avalonia:MaterialIcon Kind="Publish"></avalonia:MaterialIcon>
+                            <avalonia:MaterialIcon Kind="ShieldKeyOutline" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2" HorizontalAlignment="Center"
+                            Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).DeleteKey}"
+                            CommandParameter="{Binding .}"
+                            Background="DarkRed">
+                        <ToolTip.Tip>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="DeleteOutline" />
+                    </Button>
+                    <Button Grid.Column="3" HorizontalAlignment="Center"
+                            Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ConvertKey}"
+                            CommandParameter="{Binding .}"
+                            Background="DarkCyan">
+                        <ToolTip.Tip>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

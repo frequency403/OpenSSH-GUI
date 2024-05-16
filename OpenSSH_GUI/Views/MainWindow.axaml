@@ -18,7 +18,9 @@
     <Window.Resources>
         <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
         <converters:PlatformIdConverter x:Key="PlatformIdConverter" />
+        
     </Window.Resources>
+    
     <Grid RowDefinitions="* 7* *" ColumnDefinitions="* * *" Margin="20 5" HorizontalAlignment="Stretch">
 
         <!-- Key List -->
@@ -64,110 +66,8 @@
                 <ItemsControl ItemsSource="{Binding SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
-                              Name="TheItemsGrid">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="keys:ISshKey">
-                            <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="5" BorderBrush="DimGray"
-                                    Margin="0 0 0 5">
-                                    <Grid ColumnDefinitions="* 3* * *">
-                                    <ToolTip.Tip>
-                                        <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
-                                            <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
-                                                   Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridRowDetailsFilenameText}"
-                                                   FontWeight="Bold" />
-                                            <TextPresenter Grid.ColumnSpan="2" Grid.Row="0" Grid.Column="1"
-                                                           Text="{Binding Filename}" VerticalAlignment="Center" />
-                                            <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"
-                                                   Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridRowDetailsAbsolutePathText}"
-                                                   FontWeight="Bold" />
-                                            <TextPresenter Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-                                                           Text="{Binding AbsoluteFilePath}" VerticalAlignment="Center" />
-                                            <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left"
-                                                   Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyFormatType}"
-                                                   FontWeight="Bold" />
-                                            <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                                           Text="{Binding Format}" VerticalAlignment="Center" />
-                                        </Grid>
-                                    </ToolTip.Tip>
-                                    <StackPanel Orientation="Horizontal" Spacing="5" Grid.Row="0" Grid.Column="0"
-                                                VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <StackPanel IsVisible="{Binding HasPassword}">
-                                            <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}">
-                                                <materialIcons:MaterialIcon Kind="Password" Foreground="Yellow" />
-                                            </Border>
-                                            <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}">
-                                                <materialIcons:MaterialIcon Kind="Password" Foreground="Green" />
-                                            </Border>
-                                        </StackPanel>
-                                        
-                                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
-                                            <materialIcons:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
-                                        </Border>
-                                        <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
-                                            <materialIcons:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
-                                        </Border>
-                                        <TextBlock
-                                            Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
-                                            HorizontalAlignment="Center"/>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
-                                               HorizontalAlignment="Center" IsVisible="{Binding !NeedPassword}" />
-                                    <Button Grid.Column="1" HorizontalAlignment="Stretch" Background="YellowGreen" Foreground="IndianRed" HorizontalContentAlignment="Center" IsVisible="{Binding NeedPassword}"
-                                            Command="{Binding Path=#TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).ProvidePassword}"
-                                            CommandParameter="{Binding .}">Provide Password</Button>
-                                    <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"
-                                               HorizontalAlignment="Center" IsEnabled="{Binding !NeedPassword}"/>
-                                    <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center" IsEnabled="{Binding !NeedPassword}">
-                                        <Button Grid.Column="0" HorizontalAlignment="Center"
-                                                Command="{Binding #TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
-                                                CommandParameter="{Binding .}">
-                                            <ToolTip.Tip>
-                                                <Label
-                                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
-                                            </ToolTip.Tip>
-                                            <StackPanel Orientation="Horizontal">
-                                                <materialIcons:MaterialIcon Kind="Publish" />
-                                                <materialIcons:MaterialIcon Kind="KeyOutline" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="1" HorizontalAlignment="Center"
-                                                Command="{Binding #TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPrivate}"
-                                                CommandParameter="{Binding .}">
-                                            <ToolTip.Tip>
-                                                <Label
-                                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
-                                            </ToolTip.Tip>
-                                            <StackPanel Orientation="Horizontal">
-                                                <materialIcons:MaterialIcon Kind="Publish" />
-                                                <materialIcons:MaterialIcon Kind="ShieldKeyOutline" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="2" HorizontalAlignment="Center"
-                                                Command="{Binding #TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).DeleteKey}"
-                                                CommandParameter="{Binding .}"
-                                                Background="DarkRed">
-                                            <ToolTip.Tip>
-                                                <Label
-                                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
-                                            </ToolTip.Tip>
-                                            <materialIcons:MaterialIcon Kind="DeleteOutline" />
-                                        </Button>
-                                        <Button Grid.Column="3" HorizontalAlignment="Center"
-                                                Command="{Binding #TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).ConvertKey}"
-                                                CommandParameter="{Binding .}"
-                                                Background="DarkCyan">
-                                            <ToolTip.Tip>
-                                                <Label
-                                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
-                                            </ToolTip.Tip>
-                                            <materialIcons:MaterialIcon Kind="SwapVerticalCircleOutline" />
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
+                              Name="TheItemsGrid"
+                              ItemTemplate="{DynamicResource SshKeyFullStyle}">
                 </ItemsControl>
 
             </ScrollViewer>

@@ -151,7 +151,7 @@ public abstract class KeyBase : IKeyBase
                     publicWriter.WriteAsync(ExportOpenSshPublicKey());
                 }
 
-                key = new SshPublicKey(publicFilePath);
+                key = new SshPublicKey(publicFilePath, Password);
                 break;
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
@@ -162,7 +162,7 @@ public abstract class KeyBase : IKeyBase
                     privateWriter.WriteAsync(ExportPuttyPpkKey());
                 }
 
-                key = new PpkKey(privateFilePath);
+                key = new PpkKey(privateFilePath, Password);
                 break;
         }
     }

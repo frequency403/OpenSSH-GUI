@@ -6,6 +6,8 @@
 
 #endregion
 
+using System.Security.Cryptography;
+using System.Text;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Credentials;
 
@@ -19,12 +21,12 @@ public class Tests
     }
 
     [Test]
-    public void Test1()
+    public async Task Test1()
     {
-        var cc = new PasswordConnectionCredentials("123", "123", "thisisaPassword");
-        var ccc = cc;
-        cc.EncryptPassword();
-        cc.DecryptPassword();
-        Assert.That(ccc.Password == cc.Password);
+        var content = await File.ReadAllTextAsync(@"C:\Users\frequ\AppData\Roaming\OpenSSH_GUI\OpenSSH_GUI.json");
+        var encrypted = content.Encrypt();
+
+        
+        Assert.That(string.Equals(content, encrypted.Decrypt()));
     }
 }

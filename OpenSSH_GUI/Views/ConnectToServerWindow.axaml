@@ -15,26 +15,6 @@
         x:Class="OpenSSH_GUI.Views.ConnectToServerWindow"
         x:DataType="viewModels:ConnectToServerViewModel"
         Title="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}">
-    <Window.Resources>
-        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
-    </Window.Resources>
-    <Window.DataTemplates>
-        <DataTemplate DataType="keys:ISshKey">
-            <Grid ColumnDefinitions="* * *">
-                <StackPanel Grid.Column="0" Spacing="3" Orientation="Horizontal" Margin="5">
-                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
-                        <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
-                    </Border>
-                    <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
-                        <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
-                    </Border>
-                    <TextBlock Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
-                </StackPanel>
-                <Separator Grid.Column="1" />
-                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
-            </Grid>
-        </DataTemplate>
-    </Window.DataTemplates>
     <Window.Styles>
         <Style Selector="TextBlock.Working">
             <Setter Property="Text" />
@@ -108,7 +88,8 @@
             <ComboBox MaxHeight="25" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
                       ItemsSource="{Binding PublicKeys}"
-                      SelectedItem="{Binding SelectedPublicKey}"/>
+                      SelectedItem="{Binding SelectedPublicKey}"
+                      ItemTemplate="{StaticResource SshKeyComboBoxStyle}"/>
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
                 Command="{Binding TestConnection}" IsEnabled="{Binding !ServerConnection.IsConnected}">

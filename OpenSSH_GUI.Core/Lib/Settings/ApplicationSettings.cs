@@ -38,45 +38,69 @@ public class ApplicationSettings(
     {
         try
         {
-            if (!Directory.Exists(SettingsFileBasePath)) Directory.CreateDirectory(SettingsFileBasePath);
-            if (!File.Exists(SettingsFilePath)) WriteCurrentSettingsToFile();
-            var deserialized =
-                JsonSerializer.Deserialize<SettingsFile>(File.ReadAllText(SettingsFilePath), _jsonSerializerOptions);
-            if (deserialized is null || !string.Equals(deserialized.Version, CurrentVersion))
-                WriteCurrentSettingsToFile();
-            else
-            {
-                var f = deserialized.LastUsedServers
-                    .Where(e => e.AuthType == AuthType.Key)
-                    .Select(f => f as IKeyConnectionCredentials)
-                    .Duplicates(g => g.Hostname)
-                    .Duplicates(h => h.Username).ToArray();
-                if (f.Length != 0)
-                {
-                    foreach (var item in f)
-                    {
-                        deserialized.LastUsedServers.Remove(item);
-                    }
-
-                    var converted = f.ToMultiKeyConnectionCredentials();
-                    deserialized.LastUsedServers.Add(converted);
-                    crawler.UpdateKeys(converted);
-                }
-                settingsFile.ChangeSettings(deserialized);
-            }
-            
+            CreateSettingsDirectory();
+            var settings = GetDeserializedSettings();
+            UpdateServerCredentials(settings);
+            AttachEventHandlers();
             DecryptAllPasswords();
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error while initializing application settings! Continuing with default settings");
         }
+
+        crawler.Refresh();
+    }
+
+    private void CreateSettingsDirectory()
+    {
+        if (!Directory.Exists(SettingsFileBasePath))
+            Directory.CreateDirectory(SettingsFileBasePath);
+    }
+
+    private SettingsFile GetDeserializedSettings()
+    {
+        if (!File.Exists(SettingsFilePath))
+            WriteCurrentSettingsToFile();
+
+        return JsonSerializer.Deserialize<SettingsFile>(File.ReadAllText(SettingsFilePath), _jsonSerializerOptions);
+    }
+
+    private void UpdateServerCredentials(SettingsFile settings)
+    {
+        if (settings is null || !string.Equals(settings.Version, CurrentVersion))
+        {
+            WriteCurrentSettingsToFile();
+            return;
+        }
+
+        var duplicates = settings.LastUsedServers
+            .Where(e => e.AuthType == AuthType.Key)
+            .Select(f => f as IKeyConnectionCredentials)
+            .Duplicates(g => g.Hostname)
+            .Duplicates(h => h.Username)
+            .ToArray();
+
+        if (duplicates.Length > 0)
+        {
+            foreach (var item in duplicates)
+                settings.LastUsedServers.Remove(item);
+
+            var converted = duplicates.ToMultiKeyConnectionCredentials();
+            settings.LastUsedServers.Add(converted);
+            crawler.UpdateKeys(converted);
+        }
+
+        settingsFile.ChangeSettings(settings);
+    }
+
+    private void AttachEventHandlers()
+    {
         settingsFile.SettingsChanged += (sender, args) =>
         {
             WriteCurrentSettingsToFile();
             return args;
         };
-        crawler.Refresh();
     }
 
     private string CurrentVersion { get; } =
