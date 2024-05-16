@@ -57,11 +57,14 @@ public class ApplicationSettings(
                     {
                         deserialized.LastUsedServers.Remove(item);
                     }
-                    deserialized.LastUsedServers.Add(f.ToMultiKeyConnectionCredentials());
+
+                    var converted = f.ToMultiKeyConnectionCredentials();
+                    deserialized.LastUsedServers.Add(converted);
+                    crawler.UpdateKeys(converted);
                 }
                 settingsFile.ChangeSettings(deserialized);
             }
-                
+            
             DecryptAllPasswords();
         }
         catch (Exception e)
