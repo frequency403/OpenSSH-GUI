@@ -11,12 +11,45 @@ using OpenSSH_GUI.Core.Lib.Settings;
 
 namespace OpenSSH_GUI.Core.Interfaces.Settings;
 
+/// <summary>
+/// Represents a settings file for the application.
+/// </summary>
 public interface ISettingsFile
 {
+    /// <summary>
+    /// Represents a settings file that can be used to store and retrieve application settings.
+    /// </summary>
     event SettingsFile.SettingsChangedEventHandler SettingsChanged;
+
+    /// <summary>
+    /// Represents the version of the settings file.
+    /// </summary>
     string Version { get; set; }
+
+    /// <summary>
+    /// Gets or sets a flag indicating whether to automatically convert PPK keys.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if PPK keys should be automatically converted; otherwise, <c>false</c>.
+    /// </value>
     bool ConvertPpkAutomatically { get; set; }
+
+    /// <summary>
+    /// Represents the maximum number of saved servers in the settings file.
+    /// </summary>
+    /// <value>
+    /// The maximum number of saved servers.
+    /// </value>
     int MaxSavedServers { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of last used servers.
+    /// </summary>
     List<IConnectionCredentials> LastUsedServers { get; set; }
+
+    /// <summary>
+    /// Change the settings with values from another settings file instance.
+    /// </summary>
+    /// <param name="settingsFile">The other settings file instance.</param>
     void ChangeSettings(ISettingsFile settingsFile);
 }

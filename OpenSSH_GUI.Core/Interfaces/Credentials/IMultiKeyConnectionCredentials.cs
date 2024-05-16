@@ -11,9 +11,21 @@ using OpenSSH_GUI.Core.Interfaces.Keys;
 
 namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 
+/// <summary>
+/// Represents the interface for multi-key connection credentials.
+/// </summary>
 public interface IMultiKeyConnectionCredentials : IConnectionCredentials
 {
+    /// <summary>
+    /// Represents the credentials for a multi-key connection.
+    /// </summary>
     [JsonIgnore] IEnumerable<ISshKey>? Keys { get; set; }
+
+    /// Represents the passwords for a multi-key connection.
     Dictionary<string, string?>? Passwords { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the passwords are encrypted.
+    /// </summary>
     bool PasswordsEncrypted { get; set; }
 }

@@ -4,7 +4,13 @@
 
 namespace OpenSSH_GUI.Core.Lib.Settings.Event;
 
+/// <summary>
+/// Represents the event arguments for the SettingsChanged event.
+/// </summary>
 public class SettingsChangedEventArgs
 {
+    /// <summary>
+    /// Represents the caller of a settings change event.
+    /// </summary>
     public string Caller { get; init; }
 }

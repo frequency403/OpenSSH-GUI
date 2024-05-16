@@ -15,8 +15,14 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
+/// <summary>
+/// Represents an SSH key.
+/// </summary>
 public abstract partial class SshKey : KeyBase, ISshKey
 {
+    /// <summary>
+    /// Represents a SSH key.
+    /// </summary>
     protected SshKey(string absoluteFilePath, string? password = null) : base(absoluteFilePath, password)
     {
         if (!File.Exists(AbsoluteFilePath)) throw new FileNotFoundException($"No such file: {AbsoluteFilePath}");
@@ -40,20 +46,55 @@ public abstract partial class SshKey : KeyBase, ISshKey
         Format = SshKeyFormat.OpenSSH;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the key is a public key.
+    /// </summary>
+    /// <value><c>true</c> if the key is a public key; otherwise, <c>false</c>.</value>
     public bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
+
+    /// <summary>
+    /// Gets the type of the key as a string.
+    /// </summary>
+    /// <value>The type of the key as a string.</value>
     public string KeyTypeString => IsPublicKey ? "public" : "private";
+
+    /// <summary>
+    /// Gets the comment associated with the SSH key.
+    /// </summary>
+    /// <value>The comment.</value>
     public string Comment { get; }
+
+    /// <summary>
+    /// Represents the type of an SSH key.
+    /// </summary>
     public ISshKeyType KeyType { get; } = new SshKeyType(Enums.KeyType.RSA);
+
+    /// <summary>
+    /// Gets a value indicating whether the key is a Putty key.
+    /// </summary>
     public bool IsPuttyKey => Format is not SshKeyFormat.OpenSSH;
 
+    /// <summary>
+    /// Exports the text representation of the SSH key.
+    /// </summary>
+    /// <returns>The text representation of the SSH key.</returns>
     public override string ExportTextOfKey()
     {
         return this is ISshPublicKey ? ExportOpenSshPublicKey() : ExportOpenSshPrivateKey();
     }
 
+    /// <summary>
+    /// Extracts the text enclosed in parentheses from a given string.
+    /// </summary>
+    /// <returns>A regular expression pattern that matches text enclosed in parentheses.</returns>
     [GeneratedRegex(@"\(([^)]*)\)")]
     private static partial Regex BracesRegex();
 
+    /// <summary>
+    /// Reads the contents of an SSH file.
+    /// </summary>
+    /// <param name="filePath">The absolute file path of the SSH file to read.</param>
+    /// <returns>The contents of the SSH file.</returns>
     private string ReadSshFile(ref string filePath)
     {
         using var readerProcess = new Process();

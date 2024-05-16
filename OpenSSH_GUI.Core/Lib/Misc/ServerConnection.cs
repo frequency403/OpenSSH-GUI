@@ -92,7 +92,7 @@ public class ServerConnection : ReactiveObject, IServerConnection
         {
             try
             {
-                using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetRenciKeyType());
+                using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetSshNetKeyType());
                 connection.Connect();
                 if (connection.IsConnected)
                 {

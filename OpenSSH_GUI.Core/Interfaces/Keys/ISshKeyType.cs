@@ -10,11 +10,33 @@ using OpenSSH_GUI.Core.Enums;
 
 namespace OpenSSH_GUI.Core.Interfaces.Keys;
 
+/// <summary>
+/// Represents an SSH key type.
+/// </summary>
 public interface ISshKeyType
 {
+    /// <summary>
+    /// Interface for SSH key types.
+    /// </summary>
     KeyType BaseType { get; }
+
+    /// <summary>
+    /// Represents an SSH key type.
+    /// </summary>
     string KeyTypeText { get; }
+
+    /// <summary>
+    /// Specifies whether the SSH key type has a default bit size.
+    /// </summary>
     bool HasDefaultBitSize { get; }
+
+    /// <summary>
+    /// Gets or sets the current bit size of the SSH key type.
+    /// </summary>
     int CurrentBitSize { get; set; }
+
+    /// <summary>
+    /// Represents a property that provides possible bit sizes for SSH key types.
+    /// </summary>
     IEnumerable<int> PossibleBitSizes { get; }
 }

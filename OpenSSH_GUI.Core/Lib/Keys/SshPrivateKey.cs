@@ -10,6 +10,9 @@ using OpenSSH_GUI.Core.Interfaces.Keys;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
+/// <summary>
+/// Represents an SSH private key.
+/// </summary>
 public class SshPrivateKey(string absoluteFilePath, string? password = null) : SshKey(absoluteFilePath, password), ISshPrivateKey
 {
 }

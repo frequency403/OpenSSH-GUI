@@ -23,17 +23,17 @@ public interface IKeyBase
     string Fingerprint { get; }
     string Filename { get; }
     SshKeyFormat Format { get; }
-    string ExportOpenSshPublicKey();
-    string ExportOpenSshPrivateKey();
-    string ExportPuttyPublicKey();
-    string ExportPuttyPpkKey();
-    string ExportTextOfKey();
+    string? ExportOpenSshPublicKey();
+    string? ExportOpenSshPrivateKey();
+    string? ExportPuttyPublicKey();
+    string? ExportPuttyPpkKey();
+    string? ExportTextOfKey();
     Task ExportToDiskAsync(SshKeyFormat format);
-    string ExportAuthorizedKeyEntry();
+    string? ExportAuthorizedKeyEntry();
     IAuthorizedKey ExportAuthorizedKey();
     void ExportToDisk(SshKeyFormat format);
     void ExportToDisk(SshKeyFormat format, out ISshKey? key);
-    IPrivateKeySource GetRenciKeyType();
+    IPrivateKeySource? GetSshNetKeyType();
     void DeleteKey();
     ISshKey? Convert(SshKeyFormat format);
     ISshKey? Convert(SshKeyFormat format, ILogger logger);

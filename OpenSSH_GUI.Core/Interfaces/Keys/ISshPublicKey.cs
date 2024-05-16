@@ -8,7 +8,13 @@
 
 namespace OpenSSH_GUI.Core.Interfaces.Keys;
 
+/// <summary>
+/// Represents a SSH public key.
+/// </summary>
 public interface ISshPublicKey : ISshKey
 {
+    /// <summary>
+    /// Represents the private key associated with an SSH public key.
+    /// </summary>
     ISshKey PrivateKey { get; }
 }
