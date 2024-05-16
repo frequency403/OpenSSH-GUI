@@ -132,7 +132,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                 KeyFormat = KeyFormat,
                 KeyLength = SelectedKeyType.CurrentBitSize,
                 Encryption = !string.IsNullOrWhiteSpace(Password)
-                    ? new SshKeyEncryptionAes256(Password)
+                    ? new SshKeyEncryptionAes256(Password, KeyFormat is not SshKeyFormat.OpenSSH ? new PuttyV3Encryption() : null)
                     : new SshKeyEncryptionNone()
             };
             await using var privateStream = new MemoryStream();
@@ -159,7 +159,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
                         await publicStreamWriter.WriteAsync(k.ToOpenSshPublicFormat());
                     }
 
-                    return new SshPublicKey(fullFilePath + ".pub");
+                    return new SshPublicKey(fullFilePath + ".pub", Password is "" ? null : Password);
             }
         }
         catch (Exception e)

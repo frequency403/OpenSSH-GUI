@@ -9,19 +9,26 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.Controls;
+using DynamicData;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
+using MsBox.Avalonia.Models;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Interfaces.Settings;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using SshNet.Keygen;
@@ -282,6 +289,57 @@ public class MainWindowViewModel : ViewModelBase
             vm.GetKeys(ref _sshKeys);
             var result = await ShowAppSettings.Handle(vm);
             return result ?? result;
+        });
+    
+    public ReactiveCommand<ISshKey, ISshKey?> ProvidePassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(
+        async key =>
+        {
+            var trys = 0;
+
+            while (key.NeedPassword && trys < 3)
+            {
+                var passwordDialog = MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams
+                {
+                    ContentTitle = "Input password",
+                    ContentHeader = $"Provide password for key: {Path.GetFileName(key.AbsoluteFilePath)}",
+                    InputParams = new InputParams
+                    {
+                        Label = "Password:",
+                        Multiline = false
+                    },
+                    Icon = Icon.Question,
+                    ButtonDefinitions = [
+                        new ButtonDefinition{IsCancel = true, IsDefault = false, Name = "Abort"},
+                        new ButtonDefinition{IsCancel = false, IsDefault = true, Name = "Submit"}
+                    ]
+                });
+                var result = await passwordDialog.ShowAsync();
+                if (result != "Submit") return null;
+                var sshKey = key.SetPassword(passwordDialog.InputValue);
+
+                if (sshKey.NeedPassword)
+                {
+                    var msgBox = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams
+                    {
+                        ContentTitle = "Password incorrect",
+                        ContentMessage = $"You provided a wrong password. This is try {trys+1} of 3. Click \"Ok\" to try again.",
+                        Icon = Icon.Warning,
+                        ButtonDefinitions = ButtonEnum.OkAbort,
+                        EnterDefaultButton = ClickEnum.Ok,
+                        EscDefaultButton = ClickEnum.Abort
+                    });
+                    var res = await msgBox.ShowAsync();
+                    if (res is ButtonResult.Abort) return null;
+                    trys++;
+                    continue;
+                }
+                
+                var index = SshKeys.IndexOf(key);
+                SshKeys.RemoveAt(index);
+                SshKeys.Insert(index, sshKey);
+                break;
+            }
+            return key;
         });
 
     public IServerConnection ServerConnection

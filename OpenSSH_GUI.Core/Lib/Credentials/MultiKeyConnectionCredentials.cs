@@ -14,11 +14,18 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
 
-public class MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys)
-    : ConnectionCredentials(hostname, username, AuthType.MultiKey), IMultiKeyConnectionCredentials
+public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyConnectionCredentials
 {
-    [JsonIgnore] public IEnumerable<ISshKey>? Keys { get; set; } = keys;
+    public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys) : base(hostname, username, AuthType.MultiKey)
+    {
+        Keys = keys;
+        Passwords = Keys?.Select(e => new KeyValuePair<string, string?>(e.AbsoluteFilePath, e.Password)).ToDictionary();
+    }
+    
+    [JsonIgnore] public IEnumerable<ISshKey>? Keys { get; set; }
 
+    public Dictionary<string, string?>? Passwords { get; set; }
+    public bool PasswordsEncrypted { get; set; }
     public override ConnectionInfo GetConnectionInfo()
     {
         return new PrivateKeyConnectionInfo(Hostname, Port, Username, Keys.Select(e => e.GetRenciKeyType()).ToArray());

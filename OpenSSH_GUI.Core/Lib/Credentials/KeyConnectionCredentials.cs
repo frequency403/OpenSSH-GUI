@@ -15,21 +15,29 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
 
-public class KeyConnectionCredentials(string hostname, string username, ISshKey? key)
-    : ConnectionCredentials(hostname, username, AuthType.Key), IKeyConnectionCredentials
+public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCredentials
 {
-    [JsonIgnore] public ISshKey? Key { get; set; } = key;
+    public KeyConnectionCredentials(string hostname, string username, ISshKey? key) : base(hostname, username, AuthType.Key)
+    {
+        Key = key;
+        KeyPassword = Key?.Password;
+    }
+    
+    [JsonIgnore] public ISshKey? Key { get; set; }
 
     public string KeyFilePath => Key?.AbsoluteFilePath ?? "";
-
-    public void RenewKey()
+    public string? KeyPassword { get; set; }
+    public bool PasswordEncrypted { get; set; }
+    
+    public void RenewKey(string? password = null)
     {
+        KeyPassword = password;
         Key = Path.GetExtension(KeyFilePath) switch
         {
-            var x when x.Contains("pub") => new SshPublicKey(KeyFilePath),
-            var x when x.Contains("ppk") => new PpkKey(KeyFilePath),
+            var x when x.Contains("pub") => new SshPublicKey(KeyFilePath, KeyPassword),
+            var x when x.Contains("ppk") => new PpkKey(KeyFilePath, KeyPassword),
             var x when string.IsNullOrWhiteSpace(x) => Key,
-            _ => new SshPrivateKey(KeyFilePath)
+            _ => new SshPrivateKey(KeyFilePath, KeyPassword)
         };
     }
 

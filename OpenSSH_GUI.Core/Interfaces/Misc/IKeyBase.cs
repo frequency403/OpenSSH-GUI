@@ -16,8 +16,12 @@ namespace OpenSSH_GUI.Core.Interfaces.Misc;
 
 public interface IKeyBase
 {
+    bool HasPassword { get; }
+    bool NeedPassword { get; }
+    string? Password { get; set; }
     string AbsoluteFilePath { get; }
     string Fingerprint { get; }
+    string Filename { get; }
     SshKeyFormat Format { get; }
     string ExportOpenSshPublicKey();
     string ExportOpenSshPrivateKey();
@@ -34,4 +38,5 @@ public interface IKeyBase
     ISshKey? Convert(SshKeyFormat format);
     ISshKey? Convert(SshKeyFormat format, ILogger logger);
     ISshKey? Convert(SshKeyFormat format, bool move, ILogger logger);
+    ISshKey SetPassword(string password);
 }

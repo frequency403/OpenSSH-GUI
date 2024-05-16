@@ -14,4 +14,6 @@ namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 public interface IMultiKeyConnectionCredentials : IConnectionCredentials
 {
     [JsonIgnore] IEnumerable<ISshKey>? Keys { get; set; }
+    Dictionary<string, string?>? Passwords { get; set; }
+    bool PasswordsEncrypted { get; set; }
 }

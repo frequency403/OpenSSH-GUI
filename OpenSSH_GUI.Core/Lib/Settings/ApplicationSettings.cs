@@ -9,8 +9,10 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
+using DynamicData.Kernel;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Converter.Json;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Settings;
@@ -43,7 +45,23 @@ public class ApplicationSettings(
             if (deserialized is null || !string.Equals(deserialized.Version, CurrentVersion))
                 WriteCurrentSettingsToFile();
             else
+            {
+                var f = deserialized.LastUsedServers
+                    .Where(e => e.AuthType == AuthType.Key)
+                    .Select(f => f as IKeyConnectionCredentials)
+                    .Duplicates(g => g.Hostname)
+                    .Duplicates(h => h.Username).ToArray();
+                if (f.Length != 0)
+                {
+                    foreach (var item in f)
+                    {
+                        deserialized.LastUsedServers.Remove(item);
+                    }
+                    deserialized.LastUsedServers.Add(f.ToMultiKeyConnectionCredentials());
+                }
                 settingsFile.ChangeSettings(deserialized);
+            }
+                
             DecryptAllPasswords();
         }
         catch (Exception e)
@@ -83,8 +101,15 @@ public class ApplicationSettings(
             var found = settingsFile.LastUsedServers.Where(e =>
                 string.Equals(e.Hostname, credentials.Hostname) && string.Equals(e.Username, credentials.Username));
             if (found.Any(e => e.AuthType.Equals(credentials.AuthType))) return false;
-            
-            settingsFile.LastUsedServers.Add(credentials);
+            if (credentials is IMultiKeyConnectionCredentials multiKeyConnectionCredentials)
+            {
+                settingsFile.LastUsedServers.AddRange(multiKeyConnectionCredentials.ToKeyConnectionCredentials());
+                crawler.UpdateKeys(multiKeyConnectionCredentials);
+            }
+            else
+            {
+                settingsFile.LastUsedServers.Add(credentials);
+            }
             await WriteCurrentSettingsToFileAsync();
         }
         catch (Exception e)
@@ -100,7 +125,7 @@ public class ApplicationSettings(
     {
         foreach (var server in settingsFile.LastUsedServers)
         {
-            if (server is IPasswordConnectionCredentials { EncryptedPassword: false } pwcc) pwcc.EncryptPassword();
+            server.EncryptPassword();
         }
     }
 
@@ -108,7 +133,7 @@ public class ApplicationSettings(
     {
         foreach (var server in settingsFile.LastUsedServers)
         {
-            if (server is IPasswordConnectionCredentials { EncryptedPassword: true } pwcc) pwcc.DecryptPassword();
+           server.DecryptPassword();
         }
     }
 

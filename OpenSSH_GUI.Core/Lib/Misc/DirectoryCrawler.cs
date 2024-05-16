@@ -6,8 +6,10 @@
 
 #endregion
 
+using DynamicData;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib.Keys;
@@ -24,6 +26,29 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, ISettingsFile se
     public IEnumerable<ISshKey> Refresh()
     {
         return GetAllKeys(true);
+    }
+
+    public void UpdateKey(ISshKey sshKey)
+    {
+        var cacheList = _cache.ToList();
+        var cachedKey = cacheList.FirstOrDefault(e => e.AbsoluteFilePath == sshKey.AbsoluteFilePath);
+        if (cachedKey is null)
+        {
+            cacheList.Add(sshKey);
+            _cache = cacheList;
+            return;
+        }
+        var index = cacheList.IndexOf(cachedKey);
+        cacheList.RemoveAt(index);
+        cacheList.Insert(index, sshKey);
+        _cache = cacheList;
+    }
+    public void UpdateKeys(IMultiKeyConnectionCredentials multiKeyConnectionCredentials)
+    {
+        foreach (var key in multiKeyConnectionCredentials.Keys)
+        {
+            UpdateKey(key);
+        }
     }
     
     public IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)

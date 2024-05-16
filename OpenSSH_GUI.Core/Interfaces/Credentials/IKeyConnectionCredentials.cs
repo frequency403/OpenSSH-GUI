@@ -16,6 +16,7 @@ public interface IKeyConnectionCredentials : IConnectionCredentials
     [JsonIgnore] ISshKey? Key { get; set; }
 
     string KeyFilePath { get; }
-
-    void RenewKey();
+    string? KeyPassword { get; set; }
+    bool PasswordEncrypted { get; set; }
+    void RenewKey(string? password = null);
 }

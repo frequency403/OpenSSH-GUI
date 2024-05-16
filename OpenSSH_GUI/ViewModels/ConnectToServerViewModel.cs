@@ -313,7 +313,7 @@ public class ConnectToServerViewModel : ViewModelBase
 
     public void SetKeys(ref ObservableCollection<ISshKey?> currentKeys)
     {
-        PublicKeys = currentKeys;
+        PublicKeys = new ObservableCollection<ISshKey>(currentKeys.Where(e => e is not null && ((e.HasPassword && !e.NeedPassword) || (!e.HasPassword && !e.NeedPassword))));
         _selectedPublicKey = PublicKeys.FirstOrDefault();
     }
 }

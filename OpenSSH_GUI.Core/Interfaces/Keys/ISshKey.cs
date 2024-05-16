@@ -13,7 +13,6 @@ namespace OpenSSH_GUI.Core.Interfaces.Keys;
 public interface ISshKey : IKeyBase
 {
     string KeyTypeString { get; }
-    string Filename { get; }
     string Comment { get; }
     bool IsPublicKey { get; }
     bool IsPuttyKey { get; }

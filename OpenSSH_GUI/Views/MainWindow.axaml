@@ -7,6 +7,7 @@
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        xmlns:views="clr-namespace:OpenSSH_GUI.Views"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -60,7 +61,6 @@
             <!-- Items  -->
 
             <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-
                 <ItemsControl ItemsSource="{Binding SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
@@ -69,7 +69,7 @@
                         <DataTemplate DataType="keys:ISshKey">
                             <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="5" BorderBrush="DimGray"
                                     Margin="0 0 0 5">
-                                <Grid ColumnDefinitions="* 3* * *">
+                                    <Grid ColumnDefinitions="* 3* * *">
                                     <ToolTip.Tip>
                                         <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
                                             <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"
@@ -91,6 +91,15 @@
                                     </ToolTip.Tip>
                                     <StackPanel Orientation="Horizontal" Spacing="5" Grid.Row="0" Grid.Column="0"
                                                 VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <StackPanel IsVisible="{Binding HasPassword}">
+                                            <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}">
+                                                <materialIcons:MaterialIcon Kind="Password" Foreground="Yellow" />
+                                            </Border>
+                                            <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}">
+                                                <materialIcons:MaterialIcon Kind="Password" Foreground="Green" />
+                                            </Border>
+                                        </StackPanel>
+                                        
                                         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
                                             <materialIcons:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
                                         </Border>
@@ -99,14 +108,17 @@
                                         </Border>
                                         <TextBlock
                                             Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
-                                            HorizontalAlignment="Center" />
+                                            HorizontalAlignment="Center"/>
                                     </StackPanel>
 
                                     <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
-                                               HorizontalAlignment="Center" />
+                                               HorizontalAlignment="Center" IsVisible="{Binding !NeedPassword}" />
+                                    <Button Grid.Column="1" HorizontalAlignment="Stretch" Background="YellowGreen" Foreground="IndianRed" HorizontalContentAlignment="Center" IsVisible="{Binding NeedPassword}"
+                                            Command="{Binding Path=#TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).ProvidePassword}"
+                                            CommandParameter="{Binding .}">Provide Password</Button>
                                     <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"
-                                               HorizontalAlignment="Center" />
-                                    <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center">
+                                               HorizontalAlignment="Center" IsEnabled="{Binding !NeedPassword}"/>
+                                    <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center" IsEnabled="{Binding !NeedPassword}">
                                         <Button Grid.Column="0" HorizontalAlignment="Center"
                                                 Command="{Binding #TheItemsGrid.((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
                                                 CommandParameter="{Binding .}">
@@ -152,7 +164,6 @@
                                             <materialIcons:MaterialIcon Kind="SwapVerticalCircleOutline" />
                                         </Button>
                                     </Grid>
-
                                 </Grid>
                             </Border>
                         </DataTemplate>

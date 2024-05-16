@@ -24,21 +24,16 @@ public class ConnectionCredentialsConverter(DirectoryCrawler crawler) : JsonConv
         if (jsonObject.TryGetProperty("password", out _))
             return JsonSerializer.Deserialize<PasswordConnectionCredentials>(jsonObject.GetRawText(), options);
 
-        if (jsonObject.TryGetProperty("key_file_path", out var path))
-        {
-            var obj = JsonSerializer.Deserialize<KeyConnectionCredentials>(jsonObject.GetRawText(), options);
-            var found = crawler.GetAllKeys().FirstOrDefault(e => string.Equals(e.AbsoluteFilePath, path.GetString()));
-            if (found is null)
-                obj.RenewKey();
-            else
-                obj.Key = found;
+        if (!jsonObject.TryGetProperty("key_file_path", out var path))
+            return JsonSerializer.Deserialize<MultiKeyConnectionCredentials>(jsonObject.GetRawText(), options);
+        var obj = JsonSerializer.Deserialize<KeyConnectionCredentials>(jsonObject.GetRawText(), options);
+        var found = crawler.GetAllKeys().FirstOrDefault(e => string.Equals(e.AbsoluteFilePath, path.GetString()));
+        if (found is null)
+            obj.RenewKey();
+        else
+            obj.Key = found;
 
-            return obj;
-        }
-
-        var multi = JsonSerializer.Deserialize<MultiKeyConnectionCredentials>(jsonObject.GetRawText(), options);
-        multi.Keys = crawler.GetAllKeys();
-        return multi;
+        return obj;
     }
 
     public override void Write(Utf8JsonWriter writer, IConnectionCredentials value, JsonSerializerOptions options)

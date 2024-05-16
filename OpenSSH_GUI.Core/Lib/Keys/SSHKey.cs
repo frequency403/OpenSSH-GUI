@@ -17,15 +17,14 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 
 public abstract partial class SshKey : KeyBase, ISshKey
 {
-    protected SshKey(string absoluteFilePath) : base(absoluteFilePath)
+    protected SshKey(string absoluteFilePath, string? password = null) : base(absoluteFilePath, password)
     {
         if (!File.Exists(AbsoluteFilePath)) throw new FileNotFoundException($"No such file: {AbsoluteFilePath}");
-        Filename = Path.GetFileName(AbsoluteFilePath);
         var outputOfProcess = ReadSshFile(ref absoluteFilePath).Split(' ').ToList();
         var intToParse = outputOfProcess.First();
         outputOfProcess.RemoveRange(0, 2);
         var keyTypeText = BracesRegex().Replace(outputOfProcess.Last().Trim(), "$1");
-        outputOfProcess.RemoveAt(outputOfProcess.Count - 1);
+        outputOfProcess.Remove(outputOfProcess.Last());
 
         Comment = string.Join(" ", outputOfProcess);
 
@@ -43,7 +42,6 @@ public abstract partial class SshKey : KeyBase, ISshKey
 
     public bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
     public string KeyTypeString => IsPublicKey ? "public" : "private";
-    public string Filename { get; }
     public string Comment { get; }
     public ISshKeyType KeyType { get; } = new SshKeyType(Enums.KeyType.RSA);
     public bool IsPuttyKey => Format is not SshKeyFormat.OpenSSH;

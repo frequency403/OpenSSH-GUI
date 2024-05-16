@@ -23,10 +23,8 @@ public partial class PpkKey : KeyBase, IPpkKey
     private const string CommentLineStart = "Comment:";
     private const string MacLineStart = "Private-MAC:";
 
-    public PpkKey(string absoluteFilePath) : base(absoluteFilePath)
+    public PpkKey(string absoluteFilePath, string? password = null) : base(absoluteFilePath, password)
     {
-        if (!File.Exists(absoluteFilePath)) return;
-        Filename = Path.GetFileNameWithoutExtension(AbsoluteFilePath);
         var lines = File.ReadAllLines(AbsoluteFilePath);
 
         Format = int.TryParse(
@@ -56,9 +54,8 @@ public partial class PpkKey : KeyBase, IPpkKey
     }
 
     public string KeyTypeString { get; }
-    public string Filename { get; }
     public ISshKeyType KeyType { get; }
-    public bool IsPublicKey { get; } = true;
+    public bool IsPublicKey => true;
     public EncryptionType EncryptionType { get; }
     public string Comment { get; }
     public string PublicKeyString { get; }
