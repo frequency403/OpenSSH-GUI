@@ -21,12 +21,11 @@ public class OpenSshGuiDbContext : DbContext
     /// <summary>
     /// Provides JSON serialization options for the <see cref="JsonSerializer"/> instance.
     /// </summary>
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    private JsonSerializerOptions _jsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        WriteIndented = true,
-        Converters = { new ConnectionCredentialsConverter() }
+        WriteIndented = true
     };
     
     private readonly byte[] _encyptionKey = Convert.FromBase64String("Jk7JqD9mAafdvTvhNESHkXBFdy7phfyDR0FsnyGw2nY=");
@@ -48,6 +47,7 @@ public class OpenSshGuiDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        _jsonSerializerOptions.Converters.Add(new ConnectionCredentialsConverter());
         modelBuilder.UseEncryption(_provider);
         modelBuilder.Entity<SettingsFile>()
             .HasMany<ConnectionCredentials>()

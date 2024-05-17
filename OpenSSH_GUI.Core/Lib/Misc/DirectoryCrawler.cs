@@ -124,22 +124,11 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
         {
             return _cache;
         }
-        
-        var oldKeys = context.KeyDtos.ToList();
-
-        foreach (var oldKey in oldKeys)
+        context.RemoveRange(context.KeyDtos.ToList());
+        if (!loadFromDisk && !_cache.Any()) loadFromDisk = true;
+        if (loadFromDisk || !_cache.Any())
         {
-            context.KeyDtos.Remove(oldKey);
-        }
-
-        if (oldKeys.Any())
-        {
-            context.SaveChanges();
-        }
-
-        if (loadFromDisk || oldKeys.Any() || !_cache.Any())
-        {
-            var keys = GetFromDisk();
+            var keys = GetFromDisk().ToArray();
             foreach (var key in keys)
             {
                 var found = context.KeyDtos.Find(key.AbsoluteFilePath);
@@ -158,11 +147,9 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
                     found = keyDto;
                 }
             }
-
+            _cache = keys;
             context.SaveChanges();
         }
-
-        _cache = context.KeyDtos.Select(e => e.ToKey()).ToList();
         return _cache;
     }
 }

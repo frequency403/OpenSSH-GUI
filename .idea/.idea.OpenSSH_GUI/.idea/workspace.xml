@@ -8,30 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/DTO/SshKeyDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Misc/IKeyBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Misc/IKeyBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Misc/IServerConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Misc/IServerConnection.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/IApplicationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/IApplicationSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/ISettingsFile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Interfaces/Settings/ISettingsFile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Credentials/ConnectionCredentials.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Credentials/ConnectionCredentials.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/Event/SettingsChangedEventArgs.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/SettingsFile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/SettingsFile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ConnectToServerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ConnectToServerViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditSavedServerEntryViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditSavedServerEntryViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +39,7 @@
 }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/6f8268e05cd84d109d0782421a2b61aa31000/58/065d2609/SshKeyFormat.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/8ce5fbb4db0147b8b26d3aab12045e5d3c00/86/8e608214/PuttyKeyFile.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cdfdf789176240d1830d4a03357141dc26a828/10/5d184bf9/IDesignTimeDbContextFactory`1.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/1ca7369ea0d7ba873b2ba554a0709bea49d769d49f474c7b68a592f1304dfbf2/CurrentThreadScheduler.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/SourcesCache/7b3b6985aad11c5d633d75b545f5f5f4fc7e50918ad1cb9f6b615682f5bfb76d/SingleQueryingEnumerable.cs" root0="SKIP_HIGHLIGHTING" />
@@ -80,34 +62,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.OpenSSH_GUI.executor": "Debug",
-    "73246cd7-706d-442f-93d2-b067f06d41d3.executor": "Debug",
-    "Publish to folder.Publish OpenSSH_GUI to folder.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "development",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.OpenSSH_GUI.executor&quot;: &quot;Debug&quot;,
+    &quot;73246cd7-706d-442f-93d2-b067f06d41d3.executor&quot;: &quot;Debug&quot;,
+    &quot;Publish to folder.Publish OpenSSH_GUI to folder.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "sqlite"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;sqlite&quot;
     ],
-    "rider.external.source.directories": [
-      "C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache",
-      "C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache",
-      "C:\\Users\\frequ\\AppData\\Local\\Symbols\\src"
+    &quot;rider.external.source.directories&quot;: [
+      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache&quot;,
+      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache&quot;,
+      &quot;C:\\Users\\frequ\\AppData\\Local\\Symbols\\src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Project.OpenSSH_GUI">
     <configuration name="Publish OpenSSH_GUI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
       <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" runtime="win-x64" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/win-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341" />
@@ -151,7 +133,8 @@
       <workItem from="1715839390034" duration="22246000" />
       <workItem from="1715891038978" duration="7917000" />
       <workItem from="1715901218495" duration="417000" />
-      <workItem from="1715925688574" duration="14515000" />
+      <workItem from="1715925688574" duration="14717000" />
+      <workItem from="1715943252176" duration="2823000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -193,7 +176,15 @@
       <option name="project" value="LOCAL" />
       <updated>1715899034636</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Remove SettingsChangedEventArgs and add initial database migrations">
+      <option name="closed" value="true" />
+      <created>1715940848254</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1715940848254</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,29 +210,12 @@
     <MESSAGE value="Minor progress" />
     <MESSAGE value="Implemented Password-functionality" />
     <MESSAGE value="Refactor code for better settings initialization and SSH key management&#10;&#10;The refactoring includes improved application settings initialization and management of SSH keys. ServerConnection class specifically modified to manage multi key connections. Additionally, unit tests have been adjusted to reflect these changes. Other notable changes are a refactor of the application settings initialization, a new ISshKey multi key connection handler, and modifications to resource handlers for better organization." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor code for better settings initialization and SSH key management&#10;&#10;The refactoring includes improved application settings initialization and management of SSH keys. ServerConnection class specifically modified to manage multi key connections. Additionally, unit tests have been adjusted to reflect these changes. Other notable changes are a refactor of the application settings initialization, a new ISshKey multi key connection handler, and modifications to resource handlers for better organization." />
+    <MESSAGE value="Remove SettingsChangedEventArgs and add initial database migrations" />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove SettingsChangedEventArgs and add initial database migrations" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs</url>
-          <line>22</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Extensions\IConnectionCredentialsExtension.cs" containingFunctionPresentation="Method 'EncryptPassword'" />
-          <option name="timeStamp" value="21" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs</url>
-          <line>48</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Extensions\IConnectionCredentialsExtension.cs" containingFunctionPresentation="Method 'DecryptPassword'" />
-          <option name="timeStamp" value="23" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs</url>
-          <line>97</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Extensions\IConnectionCredentialsExtension.cs" containingFunctionPresentation="Method 'ToMultiKeyConnectionCredentials'" />
-          <option name="timeStamp" value="27" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI.Tests/UnitTest1.cs</url>
           <line>25</line>
@@ -276,28 +250,47 @@
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/Database/ContextFactory.cs</url>
           <line>19</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\Database\ContextFactory.cs" containingFunctionPresentation="Method 'CreateDbContext'">
-            <startOffsets>
-              <option value="570" />
-            </startOffsets>
-            <endOffsets>
-              <option value="721" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\Database\ContextFactory.cs" containingFunctionPresentation="Method 'CreateDbContext'" />
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs</url>
-          <line>25</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Converter\Json\ConnectionCredentialsConverter.cs" containingFunctionPresentation="Method 'Read'">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs</url>
+          <line>268</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="">
             <startOffsets>
-              <option value="841" />
+              <option value="10969" />
             </startOffsets>
             <endOffsets>
-              <option value="906" />
+              <option value="10987" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="42" />
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs</url>
+          <line>281</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="">
+            <startOffsets>
+              <option value="11511" />
+            </startOffsets>
+            <endOffsets>
+              <option value="11827" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs</url>
+          <line>40</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Abstract\KeyBase.cs" containingFunctionPresentation="Constructor 'KeyBase'">
+            <startOffsets>
+              <option value="1146" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1166" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="45" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

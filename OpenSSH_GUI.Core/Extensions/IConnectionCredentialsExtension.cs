@@ -5,9 +5,6 @@
 // Last edit: 15.05.2024 - 01:05:24
 
 #endregion
-
-using System.Security.Cryptography;
-using System.Text;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Credentials;
 
@@ -15,9 +12,6 @@ namespace OpenSSH_GUI.Core.Extensions;
 
 public static class ConnectionCredentialsExtensions
 {
-    
-    
-    
     public static void EncryptPassword(this IConnectionCredentials credentials)
     {
         switch (credentials)
