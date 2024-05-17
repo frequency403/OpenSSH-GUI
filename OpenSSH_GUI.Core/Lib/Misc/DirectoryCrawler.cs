@@ -7,7 +7,10 @@
 #endregion
 
 using DynamicData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -22,19 +25,16 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// <summary>
 /// Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, ISettingsFile settingsFile)
+public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbContext context)
 {
     /// <summary>
     /// Represents a collection of SSH keys used by the DirectoryCrawler class.
     /// </summary>
-    private IEnumerable<ISshKey> _cache = [];
+    private IEnumerable<ISshKey> _cache = context.KeyDtos.Select(e => e.ToKey());
 
     /// <summary>
     /// Refreshes the list of SSH keys by retrieving them from the cache or loading them from disk if specified.
     /// </summary>
-    /// <param name="loadFromDisk">A boolean value that indicates whether to load the keys from disk or not.
-    /// If set to false, the method will check if the keys are already cached and return them.
-    /// If set to true, the method will reload the keys from disk and update the cache.</param>
     /// <returns>An IEnumerable of ISshKey objects representing the SSH keys.</returns>
     public IEnumerable<ISshKey> Refresh()
     {
@@ -86,20 +86,8 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, ISettingsFile se
         }
     }
 
-    /// <summary>
-    /// Retrieves all SSH keys from disk or cache.
-    /// </summary>
-    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
-    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
-    public IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)
+    private IEnumerable<ISshKey> GetFromDisk()
     {
-        if (!loadFromDisk && _cache.Any())
-        {
-            foreach (var key in _cache) yield return key;
-            yield break;
-        }
-
-        if (_cache.Any()) _cache = [];
         foreach (var filePath in Directory
                      .EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", SearchOption.TopDirectoryOnly))
         {
@@ -112,7 +100,7 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, ISettingsFile se
                 if (extension.EndsWith(".ppk"))
                 {
                     key = new PpkKey(filePath);
-                    if (settingsFile.ConvertPpkAutomatically) key = key.Convert(SshKeyFormat.OpenSSH, true, logger);
+                    if (context.Settings.AsNoTracking().First().ConvertPpkAutomatically) key = key.Convert(SshKeyFormat.OpenSSH, true, logger);
                 }
             }
             catch (Exception ex)
@@ -121,8 +109,60 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, ISettingsFile se
             }
 
             if (key is null) continue;
-            _cache = _cache.Append(key);
             yield return key;
         }
+    }
+    
+    /// <summary>
+    /// Retrieves all SSH keys from disk or cache.
+    /// </summary>
+    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
+    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
+    public IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)
+    {
+        if (!loadFromDisk && _cache.Any())
+        {
+            return _cache;
+        }
+        
+        var oldKeys = context.KeyDtos.ToList();
+
+        foreach (var oldKey in oldKeys)
+        {
+            context.KeyDtos.Remove(oldKey);
+        }
+
+        if (oldKeys.Any())
+        {
+            context.SaveChanges();
+        }
+
+        if (loadFromDisk || oldKeys.Any() || !_cache.Any())
+        {
+            var keys = GetFromDisk();
+            foreach (var key in keys)
+            {
+                var found = context.KeyDtos.Find(key.AbsoluteFilePath);
+                var keyDto = new SshKeyDto
+                {
+                    AbsolutePath = key.AbsoluteFilePath,
+                    Password = key.Password,
+                    Format = key.Format
+                };
+                if (found is null)
+                {
+                    context.KeyDtos.Add(keyDto);
+                }
+                else
+                {
+                    found = keyDto;
+                }
+            }
+
+            context.SaveChanges();
+        }
+
+        _cache = context.KeyDtos.Select(e => e.ToKey()).ToList();
+        return _cache;
     }
 }

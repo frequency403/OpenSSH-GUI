@@ -13,14 +13,17 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Interfaces.Settings;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 
@@ -57,11 +60,10 @@ public class ConnectToServerViewModel : ViewModelBase
     private string _userName = "";
     private readonly bool firstCredentialSet = true;
 
-    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, ISettingsFile settings) :
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, OpenSshGuiDbContext context) :
         base(logger)
     {
-        Settings = settings;
-        ConnectionCredentials = Settings.LastUsedServers;
+        ConnectionCredentials = context.Settings.First().LastUsedServers;
         SelectedConnection = ConnectionCredentials.FirstOrDefault();
         firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
@@ -135,7 +137,7 @@ public class ConnectToServerViewModel : ViewModelBase
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
         {
             await App.ServiceProvider.GetRequiredService<IApplicationSettings>()
-                .AddKnownServerToFileAsync(ServerConnection.ConnectionCredentials);
+                .AddKnownServerAsync(ServerConnection.ConnectionCredentials);
             return this;
         });
     }
@@ -163,8 +165,6 @@ public class ConnectToServerViewModel : ViewModelBase
         get => _quickConnect;
         set => this.RaiseAndSetIfChanged(ref _quickConnect, value);
     }
-
-    public ISettingsFile Settings { get; }
 
     public IServerConnection ServerConnection
     {

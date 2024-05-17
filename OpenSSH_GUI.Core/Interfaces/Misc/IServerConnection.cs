@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Interfaces.Misc;

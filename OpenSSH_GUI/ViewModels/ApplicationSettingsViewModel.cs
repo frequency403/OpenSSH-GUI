@@ -11,12 +11,15 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Settings;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Settings;
 using ReactiveUI;
 
@@ -24,14 +27,15 @@ namespace OpenSSH_GUI.ViewModels;
 
 public class ApplicationSettingsViewModel(
     ILogger<ApplicationSettingsViewModel> logger,
-    ISettingsFile settingsFile,
-    IApplicationSettings applicationSettings) : ViewModelBase(logger)
+    OpenSshGuiDbContext context) : ViewModelBase(logger)
 {
-    private bool _convertPpkAutomatically = settingsFile.ConvertPpkAutomatically;
+    private SettingsFile settingsFile = context.Settings.First();
+    
+    private bool _convertPpkAutomatically = context.Settings.First().ConvertPpkAutomatically;
 
-    private List<IConnectionCredentials> _knownServers = settingsFile.LastUsedServers;
+    private List<IConnectionCredentials> _knownServers = context.Settings.First().LastUsedServers;
 
-    private int _maxServers = settingsFile.MaxSavedServers;
+    private int _maxServers = context.Settings.First().MaxSavedServers;
 
     public ObservableCollection<ISshKey> Keys = [];
     public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
@@ -93,13 +97,15 @@ public class ApplicationSettingsViewModel(
         {
             if (!bool.TryParse(e, out var realResult)) return this;
             if (!realResult) return this;
-            settingsFile.ChangeSettings(new SettingsFile
+            var file = context.Settings.Update(settingsFile).Entity;
+            file = new SettingsFile
             {
                 Version = settingsFile.Version,
                 ConvertPpkAutomatically = ConvertPpkAutomatically,
                 MaxSavedServers = MaxServers,
                 LastUsedServers = KnownServers
-            });
+            };
+            context.SaveChanges();
             return this;
         });
 

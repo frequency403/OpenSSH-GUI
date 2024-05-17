@@ -6,6 +6,7 @@
 
 #endregion
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
@@ -16,9 +17,12 @@ namespace OpenSSH_GUI.Core.Lib.Credentials;
 /// <summary>
 /// Represents the base class for connection credentials.
 /// </summary>
-public abstract class ConnectionCredentials(string hostname, string username, AuthType authType)
+public class ConnectionCredentials(string hostname, string username, AuthType authType)
     : IConnectionCredentials
 {
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
     /// <summary>
     /// Represents the hostname of a server.
     /// This property is used in classes related to connection credentials and server settings.
@@ -41,7 +45,7 @@ public abstract class ConnectionCredentials(string hostname, string username, Au
     /// <returns>
     /// The <see cref="ConnectionInfo"/> object representing the SSH connection information.
     /// </returns>
-    public abstract ConnectionInfo GetConnectionInfo();
+    public virtual ConnectionInfo GetConnectionInfo() => new (Hostname, Username);
 
     /// <summary>
     /// Gets the display string for the connection credentials.
@@ -51,7 +55,7 @@ public abstract class ConnectionCredentials(string hostname, string username, Au
     /// <summary>
     /// Represents the authentication type for a connection.
     /// </summary>
-    public AuthType AuthType { get; } = authType;
+    public AuthType AuthType { get; set; } = authType;
 
     /// <summary>
     /// Returns a string representation of the ConnectionCredentials object.

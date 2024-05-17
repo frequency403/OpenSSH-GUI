@@ -9,11 +9,14 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.Converter.Json;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
@@ -36,6 +39,14 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         ServiceProvider = BuildServiceCollection().BuildServiceProvider();
+        using (var scope = ServiceProvider.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<OpenSshGuiDbContext>();
+            db.Database.Migrate();
+
+            if (!db.Settings.Any()) db.Settings.Add(new SettingsFile());
+            db.SaveChanges();
+        }
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = new MainWindow
             {
@@ -48,8 +59,9 @@ public class App : Application
     private ServiceCollection BuildServiceCollection()
     {
         var collection = new ServiceCollection();
-        var logFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            AppDomain.CurrentDomain.FriendlyName, "logs", $"{AppDomain.CurrentDomain.FriendlyName}.log");
+        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            AppDomain.CurrentDomain.FriendlyName);
+        var logFilePath = Path.Combine(appDataPath, "logs", $"{AppDomain.CurrentDomain.FriendlyName}.log");
         var serilog = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .WriteTo.File(logFilePath, LogEventLevel.Debug, rollingInterval: RollingInterval.Day)
@@ -57,10 +69,9 @@ public class App : Application
         // AddServices
 
         collection.AddLogging(e => e.AddSerilog(serilog, true));
+        collection.AddDbContext<OpenSshGuiDbContext>();
         collection.AddSingleton<IApplicationSettings, ApplicationSettings>();
-        collection.AddSingleton<ISettingsFile, SettingsFile>();
         collection.AddSingleton<DirectoryCrawler>();
-        collection.AddTransient<ConnectionCredentialsConverter>();
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<ExportWindowViewModel>();
         collection.AddTransient<EditKnownHostsViewModel>();
@@ -69,6 +80,7 @@ public class App : Application
         collection.AddTransient<AddKeyWindowViewModel>();
         collection.AddTransient<ApplicationSettingsViewModel>();
         collection.AddTransient<EditSavedServerEntryViewModel>();
+        
 
         // return ServiceCollection
         return collection;

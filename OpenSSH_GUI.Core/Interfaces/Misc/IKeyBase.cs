@@ -7,6 +7,7 @@
 #endregion
 
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using Renci.SshNet;
@@ -39,4 +40,5 @@ public interface IKeyBase
     ISshKey? Convert(SshKeyFormat format, ILogger logger);
     ISshKey? Convert(SshKeyFormat format, bool move, ILogger logger);
     ISshKey SetPassword(string password);
+    SshKeyDto ToDto();
 }

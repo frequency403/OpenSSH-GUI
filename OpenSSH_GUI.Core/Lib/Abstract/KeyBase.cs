@@ -9,6 +9,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -171,6 +172,13 @@ public abstract class KeyBase : IKeyBase
             _ => new SshPrivateKey(Path.ChangeExtension(AbsoluteFilePath, null), password)
         };
     }
+
+    public SshKeyDto ToDto() => new()
+    {
+        AbsolutePath = AbsoluteFilePath,
+        Format = Format,
+        Password = Password
+    };
 
     /// <summary>
     /// Deletes the key file associated with the specified key.

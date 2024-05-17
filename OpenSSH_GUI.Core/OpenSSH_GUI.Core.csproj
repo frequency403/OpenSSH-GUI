@@ -11,6 +11,12 @@
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.1.999"/>
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.999"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.5" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-preview.3.24172.9"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0-preview.3.24172.9"/>
         <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0"/>
@@ -19,6 +25,11 @@
         <PackageReference Include="SSH.NET" Version="2024.0.0"/>
         <PackageReference Include="SshNet.Keygen" Version="2024.0.0.2-beta"/>
         <PackageReference Include="SshNet.PuttyKeyFile" Version="2024.0.0.2-beta"/>
+        <PackageReference Include="V6.EntityFrameworkCore.DataEncryption" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Database\Migrations\" />
     </ItemGroup>
 
 </Project>

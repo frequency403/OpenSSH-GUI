@@ -11,6 +11,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;

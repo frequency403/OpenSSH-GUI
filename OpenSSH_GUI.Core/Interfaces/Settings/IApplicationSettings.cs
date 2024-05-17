@@ -7,6 +7,7 @@
 #endregion
 
 using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 
 namespace OpenSSH_GUI.Core.Interfaces.Settings;
@@ -25,23 +26,12 @@ public interface IApplicationSettings
     /// </summary>
     /// <param name="credentials">The connection credentials of the server to add.</param>
     /// <returns>True if the server was added successfully, false otherwise.</returns>
-    bool AddKnownServerToFile(IConnectionCredentials credentials);
+    bool AddKnownServer(IConnectionCredentials credentials);
 
     /// <summary>
     /// Adds a known server to the settings file asynchronously.
     /// </summary>
     /// <param name="credentials">The connection credentials for the server.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains a boolean indicating whether the server was added successfully or not.</returns>
-    Task<bool> AddKnownServerToFileAsync(IConnectionCredentials credentials);
-
-    /// <summary>
-    /// Writes the current settings to a file asynchronously.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. It returns void when completed.</returns>
-    Task WriteCurrentSettingsToFileAsync();
-
-    /// <summary>
-    /// Writes the current application settings to a file.
-    /// </summary>
-    void WriteCurrentSettingsToFile();
+    Task<bool> AddKnownServerAsync(IConnectionCredentials credentials);
 }

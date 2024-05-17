@@ -10,12 +10,15 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using DynamicData.Kernel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Converter.Json;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Settings;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 
 namespace OpenSSH_GUI.Core.Lib.Settings;
@@ -25,21 +28,10 @@ namespace OpenSSH_GUI.Core.Lib.Settings;
 /// </summary>
 public class ApplicationSettings(
     ILogger<IApplicationSettings> logger,
-    ISettingsFile settingsFile,
     DirectoryCrawler crawler,
-    ConnectionCredentialsConverter converter) : IApplicationSettings, IDisposable, IAsyncDisposable
+    OpenSshGuiDbContext dbContext) : IApplicationSettings
 {
-    /// <summary>
-    /// Provides JSON serialization options for the <see cref="JsonSerializer"/> instance.
-    /// </summary>
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-        WriteIndented = true,
-        Converters = { converter }
-    };
-
+    private readonly SettingsFile _settingsFile = dbContext.Settings.AsNoTracking().First();
     /// <summary>
     /// Initializes the application settings.
     /// </summary>
@@ -47,11 +39,8 @@ public class ApplicationSettings(
     {
         try
         {
-            CreateSettingsDirectory();
-            var settings = GetDeserializedSettings();
-            UpdateServerCredentials(settings);
-            AttachEventHandlers();
             DecryptAllPasswords();
+            UpdateServerCredentials();
         }
         catch (Exception e)
         {
@@ -60,43 +49,15 @@ public class ApplicationSettings(
 
         crawler.Refresh();
     }
-
-    /// <summary>
-    /// Creates the settings directory if it does not exist.
-    /// </summary>
-    private void CreateSettingsDirectory()
-    {
-        if (!Directory.Exists(SettingsFileBasePath))
-            Directory.CreateDirectory(SettingsFileBasePath);
-    }
-
-    /// <summary>
-    /// Retrieves the deserialized settings from the settings file.
-    /// </summary>
-    /// <returns>The deserialized settings.</returns>
-    private SettingsFile GetDeserializedSettings()
-    {
-        if (!File.Exists(SettingsFilePath))
-            WriteCurrentSettingsToFile();
-
-        return JsonSerializer.Deserialize<SettingsFile>(File.ReadAllText(SettingsFilePath), _jsonSerializerOptions);
-    }
-
+    
     /// <summary>
     /// Updates the server credentials in the settings file.
     /// </summary>
-    /// <param name="settings">The settings file.</param>
-    private void UpdateServerCredentials(SettingsFile settings)
+    private void UpdateServerCredentials()
     {
-        if (settings is null || !string.Equals(settings.Version, CurrentVersion))
-        {
-            WriteCurrentSettingsToFile();
-            return;
-        }
-
-        var duplicates = settings.LastUsedServers
-            .Where(e => e.AuthType == AuthType.Key)
-            .Select(f => f as IKeyConnectionCredentials)
+        var settings = dbContext.Settings.Update(_settingsFile).Entity;
+        var duplicates = settings.LastUsedServers.Where(e => e.AuthType == AuthType.Key)
+            .Select(f => f as KeyConnectionCredentials)
             .Duplicates(g => g.Hostname)
             .Duplicates(h => h.Username)
             .ToArray();
@@ -110,71 +71,17 @@ public class ApplicationSettings(
             settings.LastUsedServers.Add(converted);
             crawler.UpdateKeys(converted);
         }
-
-        settingsFile.ChangeSettings(settings);
+        dbContext.SaveChanges();
     }
-
-    /// <summary>
-    /// Attaches event handlers to the SettingsChanged event of the settings file.
-    /// </summary>
-    private void AttachEventHandlers()
-    {
-        settingsFile.SettingsChanged += (sender, args) =>
-        {
-            WriteCurrentSettingsToFile();
-            return args;
-        };
-    }
-
-    /// <summary>
-    /// Gets the current version of the application.
-    /// </summary>
-    /// <remarks>
-    /// The version is determined from the entry assembly or the executing assembly.
-    /// </remarks>
-    private string CurrentVersion { get; } =
-        $"v{(Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()).GetName().Version.ToString(3)}";
-
-    /// <summary>
-    /// Gets the filename of the settings file.
-    /// </summary>
-    private static string SettingsFileName => AppDomain.CurrentDomain.FriendlyName + ".json";
-
-    /// <summary>
-    /// Represents the base path for the settings file.
-    /// </summary>
-    private string SettingsFileBasePath =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            AppDomain.CurrentDomain.FriendlyName);
-
-    /// <summary>
-    /// Gets the file path of the settings file.
-    /// </summary>
-    private string SettingsFilePath => Path.Combine(SettingsFileBasePath, SettingsFileName);
-
-    /// <summary>
-    /// Specifies whether the file containing the last used servers in the application has overflowed its capacity.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The <see cref="FileOverflowCheck"/> property checks whether the number of last used servers in the settings file
-    /// exceeds the maximum number of saved servers. If it does, the property returns <c>true</c>; otherwise, it returns <c>false</c>.
-    /// </para>
-    /// <para>
-    /// This property is used in the <see cref="ShrinkKnownServers"/> method to remove the excess last used servers and write the updated
-    /// settings to the file.
-    /// </para>
-    /// </remarks>
-    private bool FileOverflowCheck => settingsFile.LastUsedServers.Count() > settingsFile.MaxSavedServers;
-
+    
     /// <summary>
     /// Adds a known server to the settings file.
     /// </summary>
     /// <param name="credentials">The connection credentials of the server to add.</param>
     /// <returns>True if the server was added successfully, false otherwise.</returns>
-    public bool AddKnownServerToFile(IConnectionCredentials credentials)
+    public bool AddKnownServer(IConnectionCredentials credentials)
     {
-        return AddKnownServerToFileAsync(credentials).Result;
+        return AddKnownServerAsync(credentials).Result;
     }
 
     /// <summary>
@@ -182,28 +89,30 @@ public class ApplicationSettings(
     /// </summary>
     /// <param name="credentials">The connection credentials for the server.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains a boolean indicating whether the server was added successfully or not.</returns>
-    public async Task<bool> AddKnownServerToFileAsync(IConnectionCredentials credentials)
+    public async Task<bool> AddKnownServerAsync(IConnectionCredentials credentials)
     {
         try
         {
             ShrinkKnownServers();
-            var found = settingsFile.LastUsedServers.Where(e =>
+            var settings = dbContext.Settings.Update(_settingsFile).Entity;
+            var found = settings.LastUsedServers.Where(e =>
                 string.Equals(e.Hostname, credentials.Hostname) && string.Equals(e.Username, credentials.Username));
             if (found.Any(e => e.AuthType.Equals(credentials.AuthType))) return false;
-            if (credentials is IMultiKeyConnectionCredentials multiKeyConnectionCredentials)
+            if (credentials is MultiKeyConnectionCredentials multiKeyConnectionCredentials)
             {
-                settingsFile.LastUsedServers.AddRange(multiKeyConnectionCredentials.ToKeyConnectionCredentials());
+                settings.LastUsedServers.AddRange(multiKeyConnectionCredentials.ToKeyConnectionCredentials());
                 crawler.UpdateKeys(multiKeyConnectionCredentials);
             }
             else
             {
-                settingsFile.LastUsedServers.Add(credentials);
+                settings.LastUsedServers.Add(credentials);
             }
-            await WriteCurrentSettingsToFileAsync();
+            EncryptAllPasswords();
+            await dbContext.SaveChangesAsync();
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error adding known server to file");
+            logger.LogError(e, "Error adding known server to database");
             return false;
         }
 
@@ -215,10 +124,12 @@ public class ApplicationSettings(
     /// </summary>
     private void EncryptAllPasswords()
     {
-        foreach (var server in settingsFile.LastUsedServers)
+        var settings = dbContext.Settings.Update(_settingsFile).Entity;
+        foreach (var server in settings.LastUsedServers)
         {
             server.EncryptPassword();
         }
+        dbContext.SaveChanges();
     }
 
     /// <summary>
@@ -226,39 +137,15 @@ public class ApplicationSettings(
     /// </summary>
     private void DecryptAllPasswords()
     {
-        foreach (var server in settingsFile.LastUsedServers)
+        var settings = dbContext.Settings.Update(_settingsFile).Entity;
+        foreach (var server in settings.LastUsedServers)
         {
            server.DecryptPassword();
         }
-    }
 
-    /// <summary>
-    /// Writes the current application settings to a file.
-    /// </summary>
-    public void WriteCurrentSettingsToFile()
-    {
-        WriteCurrentSettingsToFileAsync().Wait();
+        dbContext.SaveChanges();
     }
-
-    /// <summary>
-    /// Writes the current settings to a file asynchronously.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation. It returns void when completed.</returns>
-    public async Task WriteCurrentSettingsToFileAsync()
-    {
-        try
-        {
-            EncryptAllPasswords();
-            var serialized = JsonSerializer.Serialize(settingsFile, _jsonSerializerOptions);
-            await File.WriteAllTextAsync(SettingsFilePath, serialized);
-            DecryptAllPasswords();
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error while writing to settings file!");
-        }
-    }
-
+    
     /// <summary>
     /// Shrinks the list of known servers if it exceeds the maximum allowed number.
     /// </summary>
@@ -267,11 +154,12 @@ public class ApplicationSettings(
     {
         try
         {
-            if (!FileOverflowCheck) return false;
-            var baseValue = settingsFile.LastUsedServers.Count - settingsFile.MaxSavedServers;
+            var settings = dbContext.Settings.Update(_settingsFile).Entity;
+            if (settings.LastUsedServers.Count <= settings.MaxSavedServers) return false;
+            var baseValue = settings.LastUsedServers.Count - settings.MaxSavedServers;
             for (var i = 0; i < baseValue; i++)
-                settingsFile.LastUsedServers.RemoveAt(i);
-            WriteCurrentSettingsToFile();
+                settings.LastUsedServers.RemoveAt(i);
+            dbContext.SaveChanges();
         }
         catch (Exception e)
         {
@@ -280,22 +168,5 @@ public class ApplicationSettings(
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Releases the resources used by the ApplicationSettings object.
-    /// </summary>
-    public void Dispose()
-    {
-        WriteCurrentSettingsToFile();
-    }
-
-    /// <summary>
-    /// Asynchronously disposes the object and writes the current settings to a file.
-    /// </summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async ValueTask DisposeAsync()
-    {
-        await WriteCurrentSettingsToFileAsync();
     }
 }

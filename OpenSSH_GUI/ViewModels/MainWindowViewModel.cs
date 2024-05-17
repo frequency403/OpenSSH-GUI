@@ -26,6 +26,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -60,9 +61,28 @@ public class MainWindowViewModel : ViewModelBase
     private IServerConnection _serverConnection;
 
     private ObservableCollection<ISshKey?> _sshKeys;
+    private OpenSshGuiDbContext _context;
 
-    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler crawler) : base(logger)
+    private async Task UpdateKeyInDatabase(ISshKey key)
     {
+        var found = await _context.KeyDtos.FindAsync(key.AbsoluteFilePath);
+        if (found is null)
+        {
+            _context.KeyDtos.Add(key.ToDto());
+        }
+        else
+        {
+            var keyDto = key.ToDto();
+            found.AbsolutePath = keyDto.AbsolutePath;
+            found.Format = keyDto.Format;
+            found.Password = keyDto.Password;
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler crawler, OpenSshGuiDbContext context) : base(logger)
+    {
+        _context = context;
         _sshKeys = new ObservableCollection<ISshKey?>(crawler.GetAllKeys());
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
@@ -247,7 +267,8 @@ public class MainWindowViewModel : ViewModelBase
             if (res != ButtonResult.Yes) return null;
             u.DeleteKey();
             SshKeys.Remove(u);
-            var settings = App.ServiceProvider.GetRequiredService<ISettingsFile>();
+            _context.KeyDtos.Remove(u.ToDto());
+            await _context.SaveChangesAsync();
             EvaluateAppropriateIcon();
             return u;
         });
@@ -278,6 +299,7 @@ public class MainWindowViewModel : ViewModelBase
                 return key;
             }
 
+            await UpdateKeyInDatabase(key);
             SshKeys.Remove(key);
             SshKeys.Insert(oldIndex, formatted);
 
@@ -337,6 +359,8 @@ public class MainWindowViewModel : ViewModelBase
                     trys++;
                     continue;
                 }
+
+                await UpdateKeyInDatabase(key);
                 
                 var index = SshKeys.IndexOf(key);
                 SshKeys.RemoveAt(index);

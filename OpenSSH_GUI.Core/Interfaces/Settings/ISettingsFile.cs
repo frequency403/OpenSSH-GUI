@@ -7,6 +7,7 @@
 #endregion
 
 using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Settings;
 
 namespace OpenSSH_GUI.Core.Interfaces.Settings;
@@ -16,11 +17,6 @@ namespace OpenSSH_GUI.Core.Interfaces.Settings;
 /// </summary>
 public interface ISettingsFile
 {
-    /// <summary>
-    /// Represents a settings file that can be used to store and retrieve application settings.
-    /// </summary>
-    event SettingsFile.SettingsChangedEventHandler SettingsChanged;
-
     /// <summary>
     /// Represents the version of the settings file.
     /// </summary>
@@ -46,10 +42,4 @@ public interface ISettingsFile
     /// Gets or sets the list of last used servers.
     /// </summary>
     List<IConnectionCredentials> LastUsedServers { get; set; }
-
-    /// <summary>
-    /// Change the settings with values from another settings file instance.
-    /// </summary>
-    /// <param name="settingsFile">The other settings file instance.</param>
-    void ChangeSettings(ISettingsFile settingsFile);
 }

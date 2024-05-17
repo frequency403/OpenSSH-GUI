@@ -79,14 +79,14 @@ public static class ConnectionCredentialsExtensions
         }
     }
 
-    public static IEnumerable<IKeyConnectionCredentials> ToKeyConnectionCredentials(
+    public static IEnumerable<KeyConnectionCredentials> ToKeyConnectionCredentials(
         this IMultiKeyConnectionCredentials multiKeyConnectionCredentials)
     {
         return multiKeyConnectionCredentials.Keys.Select(key => new KeyConnectionCredentials(multiKeyConnectionCredentials.Hostname, multiKeyConnectionCredentials.Username,
             key));
     }
 
-    public static IMultiKeyConnectionCredentials ToMultiKeyConnectionCredentials(
+    public static MultiKeyConnectionCredentials ToMultiKeyConnectionCredentials(
         this IEnumerable<IKeyConnectionCredentials> keyConnectionCredentials)
     {
         keyConnectionCredentials = keyConnectionCredentials.ToArray();
