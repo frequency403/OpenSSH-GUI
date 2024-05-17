@@ -30,7 +30,7 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
     /// <summary>
     /// Represents a collection of SSH keys used by the DirectoryCrawler class.
     /// </summary>
-    private IEnumerable<ISshKey> _cache = context.KeyDtos.Select(e => e.ToKey());
+    private IEnumerable<ISshKey> _cache = [];
 
     /// <summary>
     /// Refreshes the list of SSH keys by retrieving them from the cache or loading them from disk if specified.
@@ -125,6 +125,7 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
             return _cache;
         }
         context.RemoveRange(context.KeyDtos.ToList());
+        context.SaveChanges();
         if (!loadFromDisk && !_cache.Any()) loadFromDisk = true;
         if (loadFromDisk || !_cache.Any())
         {

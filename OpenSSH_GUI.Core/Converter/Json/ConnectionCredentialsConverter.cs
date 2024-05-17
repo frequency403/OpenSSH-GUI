@@ -8,7 +8,6 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
@@ -19,10 +18,10 @@ namespace OpenSSH_GUI.Core.Converter.Json;
 
 public class ConnectionCredentialsConverter : JsonConverter<IConnectionCredentials>
 {
+    private DirectoryCrawler crawler = new (NullLogger<DirectoryCrawler>.Instance, new OpenSshGuiDbContext());
     public override IConnectionCredentials Read(ref Utf8JsonReader reader, Type typeToConvert,
         JsonSerializerOptions options)
     {
-        var crawler = new DirectoryCrawler(NullLogger<DirectoryCrawler>.Instance, new OpenSshGuiDbContext());
         var jsonObject = JsonDocument.ParseValue(ref reader).RootElement;
 
         if (jsonObject.TryGetProperty("password", out _))

@@ -8,11 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/IConnectionCredentialsExtension.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Converter/Json/ConnectionCredentialsConverter.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Settings/ApplicationSettings.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +134,8 @@
       <workItem from="1715891038978" duration="7917000" />
       <workItem from="1715901218495" duration="417000" />
       <workItem from="1715925688574" duration="14717000" />
-      <workItem from="1715943252176" duration="2823000" />
+      <workItem from="1715943252176" duration="2988000" />
+      <workItem from="1715950922946" duration="2053000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -184,7 +185,15 @@
       <option name="project" value="LOCAL" />
       <updated>1715940848254</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Refactor OpenSshGuiDbContext and update indexing and metadata&#10;&#10;This commit updates .idea/workspace.xml, streamlines the creation of the JsonSerializerOptions object in OpenSshGuiDbContext.cs, and also modifies DirectoryCrawler.cs to simplify dataset management. Furthermore, metadata in other files such as properties.xml and dataSources.xml are also updated for better readability and performance.">
+      <option name="closed" value="true" />
+      <created>1715946475786</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1715946475786</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -211,7 +220,8 @@
     <MESSAGE value="Implemented Password-functionality" />
     <MESSAGE value="Refactor code for better settings initialization and SSH key management&#10;&#10;The refactoring includes improved application settings initialization and management of SSH keys. ServerConnection class specifically modified to manage multi key connections. Additionally, unit tests have been adjusted to reflect these changes. Other notable changes are a refactor of the application settings initialization, a new ISshKey multi key connection handler, and modifications to resource handlers for better organization." />
     <MESSAGE value="Remove SettingsChangedEventArgs and add initial database migrations" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove SettingsChangedEventArgs and add initial database migrations" />
+    <MESSAGE value="Refactor OpenSshGuiDbContext and update indexing and metadata&#10;&#10;This commit updates .idea/workspace.xml, streamlines the creation of the JsonSerializerOptions object in OpenSshGuiDbContext.cs, and also modifies DirectoryCrawler.cs to simplify dataset management. Furthermore, metadata in other files such as properties.xml and dataSources.xml are also updated for better readability and performance." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor OpenSshGuiDbContext and update indexing and metadata&#10;&#10;This commit updates .idea/workspace.xml, streamlines the creation of the JsonSerializerOptions object in OpenSshGuiDbContext.cs, and also modifies DirectoryCrawler.cs to simplify dataset management. Furthermore, metadata in other files such as properties.xml and dataSources.xml are also updated for better readability and performance." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -255,19 +265,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs</url>
-          <line>268</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="">
-            <startOffsets>
-              <option value="10969" />
-            </startOffsets>
-            <endOffsets>
-              <option value="10987" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="43" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs</url>
           <line>281</line>
           <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="">
             <startOffsets>
@@ -280,6 +277,19 @@
           <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs</url>
+          <line>262</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="">
+            <startOffsets>
+              <option value="10490" />
+            </startOffsets>
+            <endOffsets>
+              <option value="10830" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs</url>
           <line>40</line>
           <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Abstract\KeyBase.cs" containingFunctionPresentation="Constructor 'KeyBase'">
@@ -290,7 +300,59 @@
               <option value="1166" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="45" />
+          <option name="timeStamp" value="47" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs</url>
+          <line>122</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetAllKeys'">
+            <startOffsets>
+              <option value="4423" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4457" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs</url>
+          <line>132</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetAllKeys'">
+            <startOffsets>
+              <option value="4769" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4794" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs</url>
+          <line>134</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetAllKeys'">
+            <startOffsets>
+              <option value="4825" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4880" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs</url>
+          <line>126</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetAllKeys'">
+            <startOffsets>
+              <option value="4513" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4559" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="52" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
