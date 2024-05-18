@@ -15,6 +15,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib.Misc;
@@ -23,6 +24,7 @@ using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog;
 using Serilog.Events;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace OpenSSH_GUI;
 
@@ -42,17 +44,23 @@ public class App : Application
         {
             var db = scope.ServiceProvider.GetRequiredService<OpenSshGuiDbContext>();
             db.Database.Migrate();
-
-            if (!db.Settings.Any()) db.Settings.Add(new SettingsFile());
+            
+            if (!db.Settings.Any()) db.Settings.Add(new Settings());
             db.SaveChanges();
         }
+        InitAndOrPrepareServices();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = new MainWindow
             {
                 DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>()
             };
-        ServiceProvider.GetRequiredService<IApplicationSettings>().Init();
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void InitAndOrPrepareServices()
+    {
+        DirectoryCrawler.ProvideContext(ServiceProvider.GetRequiredService<ILogger<App>>());
+        ServiceProvider.GetRequiredService<IApplicationSettings>().Init();
     }
 
     private ServiceCollection BuildServiceCollection()
@@ -70,7 +78,6 @@ public class App : Application
         collection.AddLogging(e => e.AddSerilog(serilog, true));
         collection.AddDbContext<OpenSshGuiDbContext>();
         collection.AddSingleton<IApplicationSettings, ApplicationSettings>();
-        collection.AddSingleton<DirectoryCrawler>();
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<ExportWindowViewModel>();
         collection.AddTransient<EditKnownHostsViewModel>();

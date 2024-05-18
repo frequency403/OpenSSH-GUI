@@ -15,11 +15,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia.Controls;
-using DynamicData;
 using Material.Icons;
 using Material.Icons.Avalonia;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
@@ -27,12 +25,8 @@ using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
-using OpenSSH_GUI.Core.Interfaces.Settings;
-using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using SshNet.Keygen;
@@ -65,7 +59,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task UpdateKeyInDatabase(ISshKey key)
     {
-        var found = await _context.KeyDtos.FindAsync(key.AbsoluteFilePath);
+        var found = await _context.KeyDtos.Where(e => e.AbsolutePath == key.AbsoluteFilePath).FirstOrDefaultAsync();
         if (found is null)
         {
             _context.KeyDtos.Add(key.ToDto());
@@ -80,10 +74,10 @@ public class MainWindowViewModel : ViewModelBase
         await _context.SaveChangesAsync();
     }
 
-    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler crawler, OpenSshGuiDbContext context) : base(logger)
+    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, OpenSshGuiDbContext context) : base(logger)
     {
         _context = context;
-        _sshKeys = new ObservableCollection<ISshKey?>(crawler.GetAllKeys());
+        _sshKeys = new ObservableCollection<ISshKey?>(DirectoryCrawler.GetAllKeys());
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }
@@ -360,7 +354,7 @@ public class MainWindowViewModel : ViewModelBase
                     continue;
                 }
 
-                await UpdateKeyInDatabase(key);
+                await UpdateKeyInDatabase(sshKey);
                 
                 var index = SshKeys.IndexOf(key);
                 SshKeys.RemoveAt(index);

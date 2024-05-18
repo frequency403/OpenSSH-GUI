@@ -17,6 +17,8 @@ using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
@@ -117,50 +119,15 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
     {
         try
         {
-            if (!_createKey) return null;
-            var fullFilePath = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), KeyName);
-            var sshKeyGenerateInfo = new SshKeyGenerateInfo
-            {
-                KeyType = SelectedKeyType.BaseType switch
-                {
-                    KeyType.RSA => SshKeyType.RSA,
-                    KeyType.ECDSA => SshKeyType.ECDSA,
-                    KeyType.ED25519 => SshKeyType.ED25519,
-                    _ => throw new ArgumentOutOfRangeException()
-                },
-                Comment = Comment,
-                KeyFormat = KeyFormat,
-                KeyLength = SelectedKeyType.CurrentBitSize,
-                Encryption = !string.IsNullOrWhiteSpace(Password)
-                    ? new SshKeyEncryptionAes256(Password, KeyFormat is not SshKeyFormat.OpenSSH ? new PuttyV3Encryption() : null)
-                    : new SshKeyEncryptionNone()
-            };
-            await using var privateStream = new MemoryStream();
-            var k = SshKey.Generate(privateStream, sshKeyGenerateInfo);
-            switch (KeyFormat)
-            {
-                case SshKeyFormat.PuTTYv2:
-                case SshKeyFormat.PuTTYv3:
-                    await using (var privateStreamWriter = new StreamWriter(File.Create(fullFilePath + ".ppk")))
-                    {
-                        await privateStreamWriter.WriteAsync(k.ToPuttyFormat());
-                    }
-
-                    return new PpkKey(fullFilePath + ".ppk");
-                case SshKeyFormat.OpenSSH:
-                default:
-                    await using (var privateStreamWriter = new StreamWriter(File.Create(fullFilePath)))
-                    {
-                        await privateStreamWriter.WriteAsync(k.ToOpenSshFormat());
-                    }
-
-                    await using (var publicStreamWriter = new StreamWriter(File.Create(fullFilePath + ".pub")))
-                    {
-                        await publicStreamWriter.WriteAsync(k.ToOpenSshPublicFormat());
-                    }
-
-                    return new SshPublicKey(fullFilePath + ".pub", Password is "" ? null : Password);
-            }
+            return await KeyFactory.GenerateNewAsync(new SshKeyGenerateParams(
+                SelectedKeyType.BaseType,
+                KeyFormat,
+                string.IsNullOrWhiteSpace(KeyName) ? null : KeyName,
+                null,
+                string.IsNullOrWhiteSpace(Password) ? null : Password,
+                string.IsNullOrWhiteSpace(Comment) ? null : Comment,
+                SelectedKeyType.CurrentBitSize
+            ));
         }
         catch (Exception e)
         {

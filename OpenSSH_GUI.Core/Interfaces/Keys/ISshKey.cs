@@ -15,6 +15,7 @@ namespace OpenSSH_GUI.Core.Interfaces.Keys;
 /// </summary>
 public interface ISshKey : IKeyBase
 {
+    int Id { get; set; }
     /// <summary>
     /// Gets the type of the SSH key as a string.
     /// </summary>

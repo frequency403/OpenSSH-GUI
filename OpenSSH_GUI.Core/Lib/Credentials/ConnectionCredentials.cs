@@ -20,7 +20,6 @@ namespace OpenSSH_GUI.Core.Lib.Credentials;
 public class ConnectionCredentials(string hostname, string username, AuthType authType)
     : IConnectionCredentials
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     /// <summary>

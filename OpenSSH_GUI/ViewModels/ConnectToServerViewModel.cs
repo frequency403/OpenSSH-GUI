@@ -63,7 +63,7 @@ public class ConnectToServerViewModel : ViewModelBase
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, OpenSshGuiDbContext context) :
         base(logger)
     {
-        ConnectionCredentials = context.Settings.First().LastUsedServers;
+        ConnectionCredentials = context.ConnectionCredentialsDtos.Select(e => e.ToCredentials());
         SelectedConnection = ConnectionCredentials.FirstOrDefault();
         firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;

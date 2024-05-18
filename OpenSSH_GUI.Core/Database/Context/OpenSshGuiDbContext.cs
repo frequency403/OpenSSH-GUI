@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.DataEncryption;
 using Microsoft.EntityFrameworkCore.DataEncryption.Providers;
 using OpenSSH_GUI.Core.Converter.Json;
 using OpenSSH_GUI.Core.Database.DTO;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
@@ -33,15 +34,16 @@ public class OpenSshGuiDbContext : DbContext
     private IEncryptionProvider _provider => new AesProvider(_encyptionKey, _encyptionIV);
     
     
-    public virtual DbSet<SettingsFile> Settings { get; set; }
+    public virtual DbSet<Settings> Settings { get; set; }
     public virtual DbSet<SshKeyDto> KeyDtos { get; set; }
+    public virtual DbSet<ConnectionCredentialsDto> ConnectionCredentialsDtos { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName);
         var dbFilePath = Path.Combine(appDataPath, $"{AppDomain.CurrentDomain.FriendlyName}.db");
-        optionsBuilder.UseSqlite($"DataSource={dbFilePath}");
+        optionsBuilder.UseSqlite($"DataSource={dbFilePath}").UseLazyLoadingProxies();
         base.OnConfiguring(optionsBuilder);
     }
 
@@ -49,12 +51,16 @@ public class OpenSshGuiDbContext : DbContext
     {
         _jsonSerializerOptions.Converters.Add(new ConnectionCredentialsConverter());
         modelBuilder.UseEncryption(_provider);
-        modelBuilder.Entity<SettingsFile>()
-            .HasMany<ConnectionCredentials>()
-            .WithOne();
-        modelBuilder.Entity<SettingsFile>()
-            .Property(e => e.LastUsedServers)
-            .HasConversion<string?>(f => JsonSerializer.Serialize(f, _jsonSerializerOptions),
-                e => JsonSerializer.Deserialize<List<IConnectionCredentials>>(e, _jsonSerializerOptions)).IsEncrypted();
+
+        modelBuilder.Entity<Settings>().HasKey(e => e.Id);
+        modelBuilder.Entity<Settings>()
+            .HasIndex(e => e.Version).IsUnique();
+
+        modelBuilder.Entity<SshKeyDto>().HasKey(e => e.Id);
+        modelBuilder.Entity<SshKeyDto>()
+            .HasIndex(e => e.AbsolutePath).IsUnique();
+        modelBuilder.Entity<SshKeyDto>()
+            .HasMany<ConnectionCredentialsDto>(e => e.ConnectionCredentialsDto)
+            .WithMany(e => e.KeyDtos);
     }
 }

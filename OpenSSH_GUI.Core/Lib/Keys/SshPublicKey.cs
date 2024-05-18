@@ -7,6 +7,7 @@
 #endregion
 
 using OpenSSH_GUI.Core.Interfaces.Keys;
+using OpenSSH_GUI.Core.Lib.Static;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
@@ -18,5 +19,5 @@ public class SshPublicKey(string absoluteFilePath, string? password = null) : Ss
     /// <summary>
     /// Represents a private key.
     /// </summary>
-    public ISshKey PrivateKey { get; } = new SshPrivateKey(Path.ChangeExtension(absoluteFilePath, null), password);
+    public ISshKey PrivateKey { get; } = KeyFactory.FromPath(Path.ChangeExtension(absoluteFilePath, null), password);
 }

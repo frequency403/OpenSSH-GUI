@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Settings;
@@ -29,11 +30,11 @@ public class ApplicationSettingsViewModel(
     ILogger<ApplicationSettingsViewModel> logger,
     OpenSshGuiDbContext context) : ViewModelBase(logger)
 {
-    private SettingsFile settingsFile = context.Settings.First();
+    private Settings _settings = context.Settings.First();
     
     private bool _convertPpkAutomatically = context.Settings.First().ConvertPpkAutomatically;
 
-    private List<IConnectionCredentials> _knownServers = context.Settings.First().LastUsedServers;
+    private List<IConnectionCredentials> _knownServers = context.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
 
     private int _maxServers = context.Settings.First().MaxSavedServers;
 
@@ -97,14 +98,17 @@ public class ApplicationSettingsViewModel(
         {
             if (!bool.TryParse(e, out var realResult)) return this;
             if (!realResult) return this;
-            var file = context.Settings.Update(settingsFile).Entity;
-            file = new SettingsFile
+            var file = context.Settings.Update(_settings).Entity;
+            file = new Settings
             {
-                Version = settingsFile.Version,
+                Version = _settings.Version,
                 ConvertPpkAutomatically = ConvertPpkAutomatically,
                 MaxSavedServers = MaxServers,
-                LastUsedServers = KnownServers
             };
+            foreach (var dto in context.ConnectionCredentialsDtos)
+            {
+                var dtoID = dto.Id;
+            }
             context.SaveChanges();
             return this;
         });

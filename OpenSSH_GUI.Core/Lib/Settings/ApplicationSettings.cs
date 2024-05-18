@@ -13,6 +13,7 @@ using DynamicData.Kernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
@@ -27,10 +28,9 @@ namespace OpenSSH_GUI.Core.Lib.Settings;
 /// </summary>
 public class ApplicationSettings(
     ILogger<IApplicationSettings> logger,
-    DirectoryCrawler crawler,
     OpenSshGuiDbContext dbContext) : IApplicationSettings
 {
-    private readonly SettingsFile _settingsFile = dbContext.Settings.AsNoTracking().First();
+    private Settings settings;
     /// <summary>
     /// Initializes the application settings.
     /// </summary>
@@ -38,43 +38,35 @@ public class ApplicationSettings(
     {
         try
         {
-            DecryptAllPasswords();
-            UpdateServerCredentials();
+            logger.LogInformation("Searching for duplicates in the database.....");
+            settings = dbContext.Settings.First();
+            var deleteCount = dbContext.ConnectionCredentialsDtos
+                .Where(e => e.AuthType == AuthType.Key)
+                .GroupBy(f => new
+                {
+                    ((KeyConnectionCredentials)f.ToCredentials()).Hostname,
+                    ((KeyConnectionCredentials)f.ToCredentials()).Username
+                })
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key).ExecuteDelete();
+            if (deleteCount > 0)
+            {
+                logger.LogInformation("Deleted {delCount} duplicates from the database", deleteCount);
+            }
+            else
+            {
+                logger.LogInformation("No duplicates were found in the database");
+            }
+            dbContext.SaveChanges();
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error while initializing application settings! Continuing with default settings");
         }
-
-        crawler.Refresh();
     }
     
     /// <summary>
-    /// Updates the server credentials in the settings file.
-    /// </summary>
-    private void UpdateServerCredentials()
-    {
-        var settings = dbContext.Settings.Update(_settingsFile).Entity;
-        var duplicates = settings.LastUsedServers.Where(e => e.AuthType == AuthType.Key)
-            .Select(f => f as KeyConnectionCredentials)
-            .Duplicates(g => g.Hostname)
-            .Duplicates(h => h.Username)
-            .ToArray();
-
-        if (duplicates.Length > 0)
-        {
-            foreach (var item in duplicates)
-                settings.LastUsedServers.Remove(item);
-
-            var converted = duplicates.ToMultiKeyConnectionCredentials();
-            settings.LastUsedServers.Add(converted);
-            crawler.UpdateKeys(converted);
-        }
-        dbContext.SaveChanges();
-    }
-    
-    /// <summary>
-    /// Adds a known server to the settings file.
+    /// Adds a known server
     /// </summary>
     /// <param name="credentials">The connection credentials of the server to add.</param>
     /// <returns>True if the server was added successfully, false otherwise.</returns>
@@ -83,8 +75,16 @@ public class ApplicationSettings(
         return AddKnownServerAsync(credentials).Result;
     }
 
+    private bool HasDuplicateEntry(IConnectionCredentials credentials)
+    {
+        return dbContext.ConnectionCredentialsDtos
+            .Any(e => e.Hostname == credentials.Hostname &&
+                      e.Username == credentials.Username &&
+                      e.AuthType == credentials.AuthType);
+    }
+    
     /// <summary>
-    /// Adds a known server to the settings file asynchronously.
+    /// Adds a known server to settings
     /// </summary>
     /// <param name="credentials">The connection credentials for the server.</param>
     /// <returns>A task representing the asynchronous operation. The task result contains a boolean indicating whether the server was added successfully or not.</returns>
@@ -93,20 +93,9 @@ public class ApplicationSettings(
         try
         {
             ShrinkKnownServers();
-            var settings = dbContext.Settings.Update(_settingsFile).Entity;
-            var found = settings.LastUsedServers.Where(e =>
-                string.Equals(e.Hostname, credentials.Hostname) && string.Equals(e.Username, credentials.Username));
-            if (found.Any(e => e.AuthType.Equals(credentials.AuthType))) return false;
-            if (credentials is MultiKeyConnectionCredentials multiKeyConnectionCredentials)
-            {
-                settings.LastUsedServers.AddRange(multiKeyConnectionCredentials.ToKeyConnectionCredentials());
-                crawler.UpdateKeys(multiKeyConnectionCredentials);
-            }
-            else
-            {
-                settings.LastUsedServers.Add(credentials);
-            }
-            EncryptAllPasswords();
+            if (HasDuplicateEntry(credentials)) return false;
+            dbContext.ConnectionCredentialsDtos.Add(credentials.ToDto());
+            //@TODO !Headache with EF!
             await dbContext.SaveChangesAsync();
         }
         catch (Exception e)
@@ -117,33 +106,7 @@ public class ApplicationSettings(
 
         return true;
     }
-
-    /// <summary>
-    /// Encrypts the passwords of all the servers in the settings file.
-    /// </summary>
-    private void EncryptAllPasswords()
-    {
-        var settings = dbContext.Settings.Update(_settingsFile).Entity;
-        foreach (var server in settings.LastUsedServers)
-        {
-            server.EncryptPassword();
-        }
-        dbContext.SaveChanges();
-    }
-
-    /// <summary>
-    /// Decrypts the passwords of all servers in the settings file.
-    /// </summary>
-    private void DecryptAllPasswords()
-    {
-        var settings = dbContext.Settings.Update(_settingsFile).Entity;
-        foreach (var server in settings.LastUsedServers)
-        {
-           server.DecryptPassword();
-        }
-
-        dbContext.SaveChanges();
-    }
+    
     
     /// <summary>
     /// Shrinks the list of known servers if it exceeds the maximum allowed number.
@@ -153,11 +116,9 @@ public class ApplicationSettings(
     {
         try
         {
-            var settings = dbContext.Settings.Update(_settingsFile).Entity;
-            if (settings.LastUsedServers.Count <= settings.MaxSavedServers) return false;
-            var baseValue = settings.LastUsedServers.Count - settings.MaxSavedServers;
-            for (var i = 0; i < baseValue; i++)
-                settings.LastUsedServers.RemoveAt(i);
+            if (dbContext.ConnectionCredentialsDtos.Count() <= settings.MaxSavedServers) return false;
+            var baseValue = dbContext.ConnectionCredentialsDtos.Count() - settings.MaxSavedServers;
+            dbContext.ConnectionCredentialsDtos.OrderByDescending(e => e.Id).Take(baseValue).ExecuteDelete();
             dbContext.SaveChanges();
         }
         catch (Exception e)

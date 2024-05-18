@@ -3,9 +3,8 @@
 // Last edit: 17.05.2024 - 08:05:19
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Static;
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Database.DTO;
@@ -13,6 +12,8 @@ namespace OpenSSH_GUI.Core.Database.DTO;
 public class SshKeyDto
 {
     [Key]
+    public int Id { get; set; }
+    
     public string AbsolutePath { get; set; }
     
     public SshKeyFormat Format { get; set; }
@@ -20,14 +21,13 @@ public class SshKeyDto
     [Encrypted]
     public string? Password { get; set; }
     
+    public virtual IEnumerable<ConnectionCredentialsDto> ConnectionCredentialsDto { get; set; }
 
-    public ISshKey ToKey()
+    public ISshKey? ToKey()
     {
-        return AbsolutePath switch
-        {
-            var x when x.EndsWith("pub") => new SshPublicKey(AbsolutePath, Password),
-            var x when x.EndsWith("ppk") => new PpkKey(AbsolutePath, Password),
-            _ => new SshPrivateKey(AbsolutePath, Password)
-        };
+        var gen = KeyFactory.FromPath(AbsolutePath, Password);
+        if (gen is null) return gen;
+        gen.Id = Id;
+        return gen;
     }
 }

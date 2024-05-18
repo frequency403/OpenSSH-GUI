@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 
@@ -18,7 +19,6 @@ namespace OpenSSH_GUI.Core.Converter.Json;
 
 public class ConnectionCredentialsConverter : JsonConverter<IConnectionCredentials>
 {
-    private DirectoryCrawler crawler = new (NullLogger<DirectoryCrawler>.Instance, new OpenSshGuiDbContext());
     public override IConnectionCredentials Read(ref Utf8JsonReader reader, Type typeToConvert,
         JsonSerializerOptions options)
     {
@@ -30,7 +30,7 @@ public class ConnectionCredentialsConverter : JsonConverter<IConnectionCredentia
         if (!jsonObject.TryGetProperty("key_file_path", out var path))
             return JsonSerializer.Deserialize<MultiKeyConnectionCredentials>(jsonObject.GetRawText(), options);
         var obj = JsonSerializer.Deserialize<KeyConnectionCredentials>(jsonObject.GetRawText(), options);
-        var found = crawler.GetAllKeys().FirstOrDefault(e => string.Equals(e.AbsoluteFilePath, path.GetString()));
+        var found = DirectoryCrawler.GetAllKeys().FirstOrDefault(e => string.Equals(e.AbsoluteFilePath, path.GetString()));
         if (found is null)
             obj.RenewKey();
         else

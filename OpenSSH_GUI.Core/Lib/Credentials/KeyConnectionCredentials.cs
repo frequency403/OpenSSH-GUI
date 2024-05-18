@@ -11,6 +11,7 @@ using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Static;
 using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
@@ -59,13 +60,7 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     public void RenewKey(string? password = null)
     {
         KeyPassword = password;
-        Key = Path.GetExtension(KeyFilePath) switch
-        {
-            var x when x.Contains("pub") => new SshPublicKey(KeyFilePath, KeyPassword),
-            var x when x.Contains("ppk") => new PpkKey(KeyFilePath, KeyPassword),
-            var x when string.IsNullOrWhiteSpace(x) => Key,
-            _ => new SshPrivateKey(KeyFilePath, KeyPassword)
-        };
+        Key = KeyFactory.FromPath(KeyFilePath, KeyPassword);
     }
 
     /// <summary>

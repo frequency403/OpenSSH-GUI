@@ -17,6 +17,7 @@ namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 /// </summary>
 public interface IConnectionCredentials
 {
+    int Id { get; set; }
     /// <summary>
     /// Represents the host name for a connection.
     /// </summary>

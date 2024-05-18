@@ -9,6 +9,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
@@ -16,6 +17,7 @@ using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Static;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using SshNet.Keygen;
@@ -30,7 +32,7 @@ namespace OpenSSH_GUI.Core.Lib.Abstract;
 public abstract class KeyBase : IKeyBase
 {
     private IPrivateKeySource? _keySource;
-
+    public int Id { get; set; }
     /// <summary>
     /// Base class for SSH keys.
     /// </summary>
@@ -162,23 +164,20 @@ public abstract class KeyBase : IKeyBase
     /// </summary>
     /// <param name="password">The password to set.</param>
     /// <returns>The SSH key with the updated password.</returns>
-    public ISshKey SetPassword(string password)
-    {
-        Password = password;
-        return Path.GetExtension(AbsoluteFilePath) switch
-        {
-            var x when x.Contains("ppk") => new PpkKey(AbsoluteFilePath, password),
-            var x when x.Contains("pub") => new SshPublicKey(AbsoluteFilePath, password),
-            _ => new SshPrivateKey(Path.ChangeExtension(AbsoluteFilePath, null), password)
-        };
-    }
+    public ISshKey SetPassword(string password) => KeyFactory.FromPath(AbsoluteFilePath, password);
 
-    public SshKeyDto ToDto() => new()
+    public SshKeyDto ToDto()
     {
-        AbsolutePath = AbsoluteFilePath,
-        Format = Format,
-        Password = Password
-    };
+        using var dbContext = new OpenSshGuiDbContext();
+        var found = dbContext.KeyDtos.Find(Id);
+        return found ?? new SshKeyDto
+        {
+            Id = Id,
+            AbsolutePath = AbsoluteFilePath,
+            Format = Format,
+            Password = Password
+        };
+    } 
 
     /// <summary>
     /// Deletes the key file associated with the specified key.
@@ -223,7 +222,7 @@ public abstract class KeyBase : IKeyBase
     public void ExportToDisk(SshKeyFormat format, out ISshKey? key)
     {
         key = null;
-        var privateFilePath = "";
+        string privateFilePath;
         switch (format)
         {
             case SshKeyFormat.OpenSSH:
@@ -239,7 +238,7 @@ public abstract class KeyBase : IKeyBase
                     publicWriter.WriteAsync(ExportOpenSshPublicKey());
                 }
 
-                key = new SshPublicKey(publicFilePath, Password);
+                key = KeyFactory.FromPath(publicFilePath, Password);
                 break;
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
@@ -250,7 +249,7 @@ public abstract class KeyBase : IKeyBase
                     privateWriter.WriteAsync(ExportPuttyPpkKey());
                 }
 
-                key = new PpkKey(privateFilePath, Password);
+                key = KeyFactory.FromPath(privateFilePath, Password);
                 break;
         }
     }
