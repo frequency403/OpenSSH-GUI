@@ -326,4 +326,25 @@
     <data name="KeysShowPasswordOf" xml:space="preserve">
         <value>Passwort für {0} anzeigen</value>
     </data>
+    <data name="MainWindowViewModelProvidePasswordPromptHeading" xml:space="preserve">
+        <value>Passwort eingeben:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
+        <value>Passwürt für {0} Schlüsseldatei bereitstellen</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPasswordLabel" xml:space="preserve">
+        <value>Passwort:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
+        <value>Falsches Passwort!</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorContent" xml:space="preserve">
+        <value>Sie haben ein falsches passwort eingegeben. Dies ist Versuch {0} von {1} möglichen Versuchen. Möchten sie es erneut versuchen?</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonAbort" xml:space="preserve">
+        <value>Abbrechen</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonSubmit" xml:space="preserve">
+        <value>Speichern</value>
+    </data>
 </root>

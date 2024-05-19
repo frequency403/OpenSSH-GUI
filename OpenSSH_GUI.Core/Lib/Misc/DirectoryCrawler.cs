@@ -23,11 +23,20 @@ public static class DirectoryCrawler
 {
     private static ILogger _logger;
 
+    /// <summary>
+    /// Provides the logger context for the DirectoryCrawler class.
+    /// </summary>
+    /// <param name="logger">The logger instance to be used by the DirectoryCrawler class.</param>
     public static void ProvideContext(ILogger logger)
     {
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves SSH keys from disk.
+    /// </summary>
+    /// <param name="convert">Optional. Indicates whether to automatically convert PuTTY keys to OpenSSH format. Default is false.</param>
+    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
     private static IEnumerable<ISshKey> GetFromDisk(bool convert)
     {
         foreach (var filePath in Directory
@@ -50,6 +59,12 @@ public static class DirectoryCrawler
         }
     }
 
+    /// <summary>
+    /// Retrieves all SSH keys from disk or cache asynchronously, using a yield return method to lazily load the keys.
+    /// </summary>
+    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
+    /// <param name="purgePasswords">Optional. Indicates whether to purge passwords from cache. Default is false.</param>
+    /// <returns>An asynchronous enumerable collection of ISshKey representing the SSH keys.</returns>
     public static async IAsyncEnumerable<ISshKey> GetAllKeysYield(bool loadFromDisk = false, bool purgePasswords = false)
     {
         await using var dbContext = new OpenSshGuiDbContext();
@@ -107,5 +122,6 @@ public static class DirectoryCrawler
     /// </summary>
     /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
     /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
-    public static IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false) => GetAllKeysYield(loadFromDisk).ToBlockingEnumerable();
+    public static IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false) =>
+        GetAllKeysYield(loadFromDisk).ToBlockingEnumerable();
 }

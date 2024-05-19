@@ -978,6 +978,69 @@ namespace OpenSSH_GUI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Abort.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordButtonAbort {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordButtonAbort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submit.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordButtonSubmit {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordButtonSubmit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You provided a wrong password. Try {0} of {1}. Do you want to try again?.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordErrorContent {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordErrorContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password incorrect!.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordErrorHeading {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordErrorHeading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password:.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordPasswordLabel {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordPasswordLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provide password for key {0}.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordPromptBodyHeading {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordPromptBodyHeading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the password:.
+        /// </summary>
+        public static string MainWindowViewModelProvidePasswordPromptHeading {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelProvidePasswordPromptHeading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This function is not implemented yet, but planned!.
         /// </summary>
         public static string NotImplementedBoxText {

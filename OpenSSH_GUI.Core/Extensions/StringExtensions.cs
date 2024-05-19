@@ -17,32 +17,6 @@ namespace OpenSSH_GUI.Core.Extensions;
 /// </summary>
 public static partial class StringExtensions
 {
-    private static readonly RandomNumberGenerator _generator = RandomNumberGenerator.Create();
-
-    public static string? Encrypt(string? input)
-    {
-        if (input is null) return input;
-        var prependBytes = new byte[3];
-        var appendBytes = new byte[3];
-        _generator.GetNonZeroBytes(prependBytes);
-        _generator.GetNonZeroBytes(appendBytes);
-        var bytes = prependBytes.ToList();
-        bytes.AddRange(Encoding.UTF8.GetBytes(input));
-        bytes.AddRange(appendBytes);
-        bytes.Reverse();
-        return Convert.ToBase64String(bytes.ToArray());
-    }
-
-    public static string? Decrypt(string? input)
-    {
-        if (input is null) return input;
-        var rearrangedBytes = Convert.FromBase64String(input).Reverse().ToList();
-        rearrangedBytes.RemoveRange(0, 3);
-        rearrangedBytes.RemoveRange(rearrangedBytes.Count - 3, 3);
-        return Encoding.UTF8.GetString(rearrangedBytes.ToArray());
-    }
-    
-    
     [GeneratedRegex("\\.")]
     private static partial Regex EcapeRegex();
 

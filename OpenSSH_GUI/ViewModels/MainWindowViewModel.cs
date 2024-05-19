@@ -15,6 +15,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.EntityFrameworkCore;
@@ -167,45 +168,30 @@ public class MainWindowViewModel : ViewModelBase
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
 
-    public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPublic =>
-        ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>
+    private async Task<ExportWindowViewModel?> ShowExportWindowWithText(ISshKey key, bool @public)
+    {
+        var keyExport = @public ? key.ExportOpenSshPublicKey() : key.ExportOpenSshPrivateKey();
+        if (keyExport is null)
         {
-            var keyExport = key is not IPpkKey ? key.ExportTextOfKey() : key.ExportOpenSshPublicKey();
-            if (keyExport is null)
-            {
-                var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
-                    StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
-                    ButtonEnum.Ok, Icon.Error);
-                await alert.ShowAsync();
-                return null;
-            }
+            var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
+                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
+                ButtonEnum.Ok, Icon.Error);
+            await alert.ShowAsync();
+            return null;
+        }
 
-            var exportViewModel = App.ServiceProvider.GetRequiredService<ExportWindowViewModel>();
-            exportViewModel.Export = keyExport;
-            exportViewModel.WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
-                key.KeyTypeString, key.Fingerprint);
-            return await ShowExportWindow.Handle(exportViewModel);
-        });
+        var exportViewModel = App.ServiceProvider.GetRequiredService<ExportWindowViewModel>();
+        exportViewModel.Export = keyExport;
+        exportViewModel.WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
+            Enum.GetName(key.KeyType.BaseType), key.Filename);
+        return await ShowExportWindow.Handle(exportViewModel);
+    }
+
+    public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPublic =>
+        ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key => await ShowExportWindowWithText(key, true));
 
     public ReactiveCommand<ISshKey, ExportWindowViewModel?> OpenExportKeyWindowPrivate =>
-        ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>
-        {
-            var keyExport = key is not IPpkKey ? key.ExportTextOfKey() : key.ExportOpenSshPrivateKey();
-            if (keyExport is null)
-            {
-                var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
-                    StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
-                    ButtonEnum.Ok, Icon.Error);
-                await alert.ShowAsync();
-                return null;
-            }
-
-            var exportViewModel = App.ServiceProvider.GetRequiredService<ExportWindowViewModel>();
-            exportViewModel.Export = keyExport;
-            exportViewModel.WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
-                key.KeyTypeString, key.Fingerprint);
-            return await ShowExportWindow.Handle(exportViewModel);
-        });
+        ReactiveCommand.CreateFromTask<ISshKey, ExportWindowViewModel?>(async key =>await ShowExportWindowWithText(key, false));
 
     public ReactiveCommand<Unit, EditAuthorizedKeysViewModel?> OpenEditAuthorizedKeysWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditAuthorizedKeysViewModel?>(
@@ -264,7 +250,7 @@ public class MainWindowViewModel : ViewModelBase
             if (res != ButtonResult.Yes) return null;
             u.DeleteKey();
             SshKeys.Remove(u);
-            _context.KeyDtos.Remove(u.ToDto());
+            _context.KeyDtos.Remove(await _context.KeyDtos.FirstAsync(e => e.AbsolutePath == u.AbsoluteFilePath));
             await _context.SaveChangesAsync();
             EvaluateAppropriateIcon();
             return u;
@@ -350,28 +336,29 @@ public class MainWindowViewModel : ViewModelBase
             {
                 var passwordDialog = MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams
                 {
-                    ContentTitle = "Input password",
-                    ContentHeader = $"Provide password for key: {Path.GetFileName(key.AbsoluteFilePath)}",
+                    ContentTitle = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
+                    ContentHeader = string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading, Path.GetFileName(key.AbsoluteFilePath)),
+                    // ContentHeader = $"Provide password for key: {Path.GetFileName(key.AbsoluteFilePath)}",
                     InputParams = new InputParams
                     {
-                        Label = "Password:",
+                        Label = StringsAndTexts.MainWindowViewModelProvidePasswordPasswordLabel,
                         Multiline = false
                     },
                     Icon = Icon.Question,
                     ButtonDefinitions = [
-                        new ButtonDefinition{IsCancel = true, IsDefault = false, Name = "Abort"},
-                        new ButtonDefinition{IsCancel = false, IsDefault = true, Name = "Submit"}
+                        new ButtonDefinition{IsCancel = true, IsDefault = false, Name = StringsAndTexts.MainWindowViewModelProvidePasswordButtonAbort},
+                        new ButtonDefinition{IsCancel = false, IsDefault = true, Name = StringsAndTexts.MainWindowViewModelProvidePasswordButtonSubmit}
                     ]
                 });
                 var result = await passwordDialog.ShowAsync();
-                if (result != "Submit") return null;
+                if (result != StringsAndTexts.MainWindowViewModelProvidePasswordButtonSubmit) return null;
                 var sshKey = await KeyFactory.ProvidePasswordForKeyAsnyc(key, passwordDialog.InputValue);
                 if (sshKey.NeedPassword)
                 {
                     var msgBox = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams
                     {
-                        ContentTitle = "Password incorrect",
-                        ContentMessage = $"You provided a wrong password. This is try {trys+1} of 3. Click \"Ok\" to try again.",
+                        ContentTitle = StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
+                        ContentMessage = string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent, trys+1, 3),
                         Icon = Icon.Warning,
                         ButtonDefinitions = ButtonEnum.OkAbort,
                         EnterDefaultButton = ClickEnum.Ok,

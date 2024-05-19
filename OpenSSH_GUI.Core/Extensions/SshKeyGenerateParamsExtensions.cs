@@ -9,8 +9,16 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
+/// <summary>
+/// Extensions for the <see cref="SshKeyGenerateParams"/> class.
+/// </summary>
 public static class SshKeyGenerateParamsExtensions
 {
+    /// <summary>
+    /// Converts the given <see cref="SshKeyGenerateParams"/> object to an <see cref="SshKeyGenerateInfo"/> object.
+    /// </summary>
+    /// <param name="params">The <see cref="SshKeyGenerateParams"/> object to convert.</param>
+    /// <returns>An <see cref="SshKeyGenerateInfo"/> object.</returns>
     public static SshKeyGenerateInfo ToInfo(this SshKeyGenerateParams @params) =>
         new()
         {

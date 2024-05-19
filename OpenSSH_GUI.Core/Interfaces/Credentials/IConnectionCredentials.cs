@@ -17,6 +17,12 @@ namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 /// </summary>
 public interface IConnectionCredentials
 {
+    /// <summary>
+    /// Represents the unique identifier for a connection credential.
+    /// </summary>
+    /// <remarks>
+    /// The ID is used to uniquely identify a connection credential in the system.
+    /// </remarks>
     int Id { get; set; }
     /// <summary>
     /// Represents the host name for a connection.

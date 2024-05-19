@@ -23,10 +23,5 @@ public class Tests
     [Test]
     public async Task Test1()
     {
-        var content = await File.ReadAllTextAsync(@"C:\Users\frequ\AppData\Roaming\OpenSSH_GUI\OpenSSH_GUI.json");
-        var encrypted = content.Encrypt();
-
-        
-        Assert.That(string.Equals(content, encrypted.Decrypt()));
     }
 }

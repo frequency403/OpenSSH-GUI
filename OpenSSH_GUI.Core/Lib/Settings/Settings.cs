@@ -21,6 +21,9 @@ namespace OpenSSH_GUI.Core.Lib.Settings;
 /// </summary>
 public record Settings
 {
+    /// <summary>
+    /// The unique identifier of the settings. </summary>
+    /// /
     [Key]
     public int Id { get; set; }
     /// <summary>

@@ -5,31 +5,69 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.DataEncryption;
 using Microsoft.EntityFrameworkCore.DataEncryption.Providers;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Lib.Settings;
+using Serilog.Extensions.Logging;
 
 namespace OpenSSH_GUI.Core.Database.Context;
 
+/// <summary>
+/// Represents the database context for the OpenSSH GUI application.
+/// </summary>
 public class OpenSshGuiDbContext : DbContext
 {
+    /// <summary>
+    /// Represents the encryption key used for data encryption in the OpenSshGuiDbContext class.
+    /// </summary>
     private readonly byte[] _encyptionKey = Convert.FromBase64String("Jk7JqD9mAafdvTvhNESHkXBFdy7phfyDR0FsnyGw2nY=");
+
+    /// <summary>
+    /// Represents the initialization vector (IV) used for data encryption in the OpenSshGuiDbContext class.
+    /// </summary>
     private readonly byte[] _encyptionIV = Convert.FromBase64String("lWXnTKuRPnieE8nzpyl1Gg==");
+
+    /// <summary>
+    /// Represents an encryption provider used by the OpenSshGuiDbContext.
+    /// </summary>
     private IEncryptionProvider _provider => new AesProvider(_encyptionKey, _encyptionIV);
-    
-    
+
+
+    /// <summary>
+    /// Represents a settings file for the application.
+    /// </summary>
     public virtual DbSet<Settings> Settings { get; set; }
+
+    /// <summary>
+    /// Represents a SSH key data transfer object (DTO).
+    /// </summary>
     public virtual DbSet<SshKeyDto> KeyDtos { get; set; }
+
+    /// <summary>
+    /// Represents a data transfer object (DTO) for connection credentials.
+    /// </summary>
     public virtual DbSet<ConnectionCredentialsDto> ConnectionCredentialsDtos { get; set; }
 
+    /// <summary>
+    /// Configures the database connection for the OpenSshGuiDbContext.
+    /// </summary>
+    /// <param name="optionsBuilder">The options builder used to configure the database connection.</param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName);
         var dbFilePath = Path.Combine(appDataPath, $"{AppDomain.CurrentDomain.FriendlyName}.db");
-        optionsBuilder.UseSqlite($"DataSource={dbFilePath}").UseLazyLoadingProxies();
+        optionsBuilder.UseSqlite($"DataSource={dbFilePath}")
+            .UseLazyLoadingProxies();
         base.OnConfiguring(optionsBuilder);
     }
 
+    /// <summary>
+    /// This method is called when the model for a derived context has been initialized, but before
+    /// the model has been locked down and used to initialize the context. It allows further
+    /// modification of the model before it is locked down.
+    /// </summary>
+    /// <param name="modelBuilder">The builder that defines the model for the context.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseEncryption(_provider);

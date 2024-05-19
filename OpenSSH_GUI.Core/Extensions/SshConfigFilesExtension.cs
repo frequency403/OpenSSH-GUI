@@ -10,13 +10,37 @@ using OpenSSH_GUI.Core.Enums;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
+/// <summary>
+/// Provides extension methods for handling SSH configuration files.
+/// </summary>
 public static class SshConfigFilesExtension
 {
+    /// <summary>
+    /// Represents the path for SSH with variable on Linux.
+    /// </summary>
     private const string SshPathWithVariableLinux = "%HOME%/.ssh";
+
+    /// <summary>
+    /// Represents the SSH path with a variable for Windows operating system.
+    /// </summary>
     private const string SshPathWithVariableWindows = "%USERPROFILE%\\.ssh";
+
+    /// <summary>
+    /// Represents the root SSH path for Linux.
+    /// </summary>
     private const string SshRootPathLinux = "/etc/ssh";
+
+    /// <summary>
+    /// The SSH root path on Windows.
+    /// </summary>
     private const string SshRootPathWin = "%PROGRAMDATA%\\ssh";
 
+    /// <summary>
+    /// Retrieves the root SSH path based on the platform.
+    /// </summary>
+    /// <param name="resolve">Indicates whether to resolve environment variables in the path. Defaults to true.</param>
+    /// <param name="platformId">The platform ID. Defaults to the current operating system platform.</param>
+    /// <returns>The root SSH path.</returns>
     public static string GetRootSshPath(bool resolve = true, PlatformID? platformId = null)
     {
         var path = (platformId ?? Environment.OSVersion.Platform) switch
@@ -29,6 +53,11 @@ public static class SshConfigFilesExtension
         return resolve ? Environment.ExpandEnvironmentVariables(path) : path;
     }
 
+    /// Gets the base path to the SSH directory.
+    /// @param resolve Boolean value indicating whether to resolve environment variables in the path. Default is true.
+    /// @param platformId (optional) The platform ID. Default is the platform of the current environment.
+    /// @returns The base path to the SSH directory.
+    /// /
     public static string GetBaseSshPath(bool resolve = true, PlatformID? platformId = null)
     {
         var path = (platformId ?? Environment.OSVersion.Platform) switch
@@ -42,6 +71,13 @@ public static class SshConfigFilesExtension
         return resolve ? Environment.ExpandEnvironmentVariables(path) : path;
     }
 
+    /// <summary>
+    /// Retrieves the file path corresponding to the specified <see cref="SshConfigFiles"/> enum value.
+    /// </summary>
+    /// <param name="files">The <see cref="SshConfigFiles"/> enum value representing the SSH config file.</param>
+    /// <param name="resolve">A boolean value indicating whether to resolve the file path using <see cref="GetBaseSshPath"/> or <see cref="GetRootSshPath"/>.</param>
+    /// <param name="platform">The target platform identifier to determine the file path format.</param>
+    /// <returns>The file path as a <see cref="string"/>.</returns>
     public static string GetPathOfFile(this SshConfigFiles files, bool resolve = true, PlatformID? platform = null)
     {
         var path = Path.Combine(files switch

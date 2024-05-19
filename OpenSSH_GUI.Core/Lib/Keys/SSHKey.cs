@@ -34,19 +34,6 @@ public abstract partial class SshKey : KeyBase, ISshKey
         Comment = string.Join(" ", outputOfProcess);
         Format = SshKeyFormat.OpenSSH;
     }
-
-    /// <summary>
-    /// Gets a value indicating whether the key is a public key.
-    /// </summary>
-    /// <value><c>true</c> if the key is a public key; otherwise, <c>false</c>.</value>
-    public bool IsPublicKey => AbsoluteFilePath.EndsWith(".pub");
-
-    /// <summary>
-    /// Gets the type of the key as a string.
-    /// </summary>
-    /// <value>The type of the key as a string.</value>
-    public string KeyTypeString => IsPublicKey ? "public" : "private";
-
     /// <summary>
     /// Gets the comment associated with the SSH key.
     /// </summary>

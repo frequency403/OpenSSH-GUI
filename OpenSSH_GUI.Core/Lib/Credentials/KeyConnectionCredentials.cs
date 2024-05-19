@@ -26,8 +26,7 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     /// </summary>
     public KeyConnectionCredentials(string hostname, string username, ISshKey? key) : base(hostname, username, AuthType.Key)
     {
-        Key = key;
-        KeyPassword = Key?.Password;
+        Key = key; 
     }
 
     /// <summary>
@@ -35,23 +34,7 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     /// </summary>
     [JsonIgnore] public ISshKey? Key { get; set; }
 
-    /// <summary>
-    /// Gets the file path of the key used for SSH connection authentication.
-    /// </summary>
-    public string KeyFilePath => Key?.AbsoluteFilePath ?? "";
 
-    /// <summary>
-    /// Gets or sets the password for the SSH key.
-    /// </summary>
-    /// <remarks>
-    /// The password is used to unlock the private key when connecting via SSH. It is optional and can be null or empty.
-    /// </remarks>
-    public string? KeyPassword { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the password is encrypted.
-    /// </summary>
-    public bool PasswordEncrypted { get; set; }
 
     /// <summary>
     /// Renews the SSH key used for authentication.
@@ -59,7 +42,6 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     /// <param name="password">The password for the key file (optional).</param>
     public void RenewKey(string? password = null)
     {
-        KeyPassword = password;
         Key = KeyFactory.FromDtoId(Key.Id);
     }
 

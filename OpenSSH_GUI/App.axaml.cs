@@ -24,7 +24,6 @@ using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog;
 using Serilog.Events;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace OpenSSH_GUI;
 

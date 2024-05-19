@@ -32,7 +32,14 @@ namespace OpenSSH_GUI.Core.Lib.Abstract;
 /// </summary>
 public abstract class KeyBase : IKeyBase
 {
+    /// <summary>
+    /// Represents the source of a private key for SSH.
+    /// </summary>
     private IPrivateKeySource? _keySource;
+
+    /// <summary>
+    /// Represents the identifier of a SSH key.
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -68,6 +75,9 @@ public abstract class KeyBase : IKeyBase
         Fingerprint = _keySource.FingerprintHash();
     }
 
+    /// <summary>
+    /// Represents the type of SSH key.
+    /// </summary>
     public ISshKeyType KeyType { get; }
     
     /// <summary>

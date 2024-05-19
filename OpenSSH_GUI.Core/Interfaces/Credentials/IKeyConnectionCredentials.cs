@@ -20,22 +20,7 @@ public interface IKeyConnectionCredentials : IConnectionCredentials
     /// Represents a connection credential that includes an SSH key.
     /// </summary>
     [JsonIgnore] ISshKey? Key { get; set; }
-
-    /// <summary>
-    /// Gets the file path of the SSH key associated with the connection credentials.
-    /// </summary>
-    string KeyFilePath { get; }
-
-    /// <summary>
-    /// The password for the SSH key.
-    /// </summary>
-    string? KeyPassword { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the password is encrypted.
-    /// </summary>
-    bool PasswordEncrypted { get; set; }
-
+    
     /// <summary>
     /// Renews the SSH key used for authentication.
     /// </summary>

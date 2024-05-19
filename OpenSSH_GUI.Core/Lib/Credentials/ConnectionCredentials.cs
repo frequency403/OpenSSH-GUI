@@ -20,6 +20,10 @@ namespace OpenSSH_GUI.Core.Lib.Credentials;
 public class ConnectionCredentials(string hostname, string username, AuthType authType)
     : IConnectionCredentials
 {
+    /// <summary>
+    /// Represents the unique identifier for a connection credentials object.
+    /// This property is used in classes related to connection credentials and server settings.
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>

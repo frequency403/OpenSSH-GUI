@@ -23,22 +23,13 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys) : base(hostname, username, AuthType.MultiKey)
     {
         Keys = keys;
-        Passwords = Keys?.Select(e => new KeyValuePair<string, string?>(e.AbsoluteFilePath, e.Password)).ToDictionary();
     }
 
     /// <summary>
     /// Represents the credentials for a multi-key SSH connection.
     /// </summary>
     [JsonIgnore] public IEnumerable<ISshKey>? Keys { get; set; }
-
-    /// <summary>
-    /// Gets or sets the passwords for multi-key connection credentials.
-    /// </summary>
-    /// <remarks>
-    /// The passwords are stored as a dictionary where the key is the absolute file path of the SSH key and the value is the password associated with the key.
-    /// </remarks>
-    public Dictionary<string, string?>? Passwords { get; set; }
-    public bool PasswordsEncrypted { get; set; }
+    
 
     /// <summary>
     /// Retrieves the connection information for establishing an SSH connection.

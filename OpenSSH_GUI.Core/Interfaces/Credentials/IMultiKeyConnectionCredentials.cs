@@ -20,12 +20,4 @@ public interface IMultiKeyConnectionCredentials : IConnectionCredentials
     /// Represents the credentials for a multi-key connection.
     /// </summary>
     [JsonIgnore] IEnumerable<ISshKey>? Keys { get; set; }
-
-    /// Represents the passwords for a multi-key connection.
-    Dictionary<string, string?>? Passwords { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the passwords are encrypted.
-    /// </summary>
-    bool PasswordsEncrypted { get; set; }
 }

@@ -12,14 +12,26 @@ using OpenSSH_GUI.Core.Lib.Keys;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
+/// <summary>
+/// Provides extension methods for working with key types.
+/// </summary>
 public static class KeyTypeExtension
 {
+    /// <summary>
+    /// Retrieves available SSH key types.
+    /// </summary>
+    /// <returns>The collection of available SSH key types.</returns>
     public static IEnumerable<ISshKeyType> GetAvailableKeyTypes()
     {
         return Enum.GetValues<KeyType>().Select(keyType => new SshKeyType(keyType)).ToList();
     }
 
 
+    /// <summary>
+    /// Retrieves the possible bit values for a given key type.
+    /// </summary>
+    /// <param name="type">The key type.</param>
+    /// <returns>An enumerable of possible bit values.</returns>
     public static IEnumerable<int> GetBitValues(this KeyType type)
     {
         return type switch

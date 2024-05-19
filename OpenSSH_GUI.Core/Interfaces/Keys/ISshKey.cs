@@ -15,22 +15,15 @@ namespace OpenSSH_GUI.Core.Interfaces.Keys;
 /// </summary>
 public interface ISshKey : IKeyBase
 {
-    int Id { get; set; }
     /// <summary>
-    /// Gets the type of the SSH key as a string.
+    /// Represents the unique identifier for an SSH key.
     /// </summary>
-    string KeyTypeString { get; }
+    int Id { get; set; }
 
     /// <summary>
     /// Represents a comment associated with an SSH key.
     /// </summary>
     string Comment { get; }
-
-    /// <summary>
-    /// Gets a boolean value indicating whether the key is a public key.
-    /// </summary>
-    /// <value><c>true</c> if the key is a public key; otherwise, <c>false</c>.</value>
-    bool IsPublicKey { get; }
 
     /// <summary>
     /// Gets a value indicating whether the SSH key is a Putty key.

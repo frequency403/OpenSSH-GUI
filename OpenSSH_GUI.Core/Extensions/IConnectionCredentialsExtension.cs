@@ -12,8 +12,16 @@ using OpenSSH_GUI.Core.Interfaces.Credentials;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
+/// <summary>
+/// Extension class for connection credentials.
+/// </summary>
 public static class ConnectionCredentialsExtensions
 {
+    /// <summary>
+    /// Saves the given connection credentials DTO in the database.
+    /// </summary>
+    /// <param name="cc">The connection credentials.</param>
+    /// <returns>A task representing the asynchronous operation. The task result is the saved connection credentials DTO.</returns>
     public static async Task<ConnectionCredentialsDto?> SaveDtoInDatabase(this IConnectionCredentials cc)
     {
             await using var dbContext = new OpenSshGuiDbContext();

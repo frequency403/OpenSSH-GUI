@@ -333,4 +333,25 @@
     <data name="KeysShowPasswordOf" xml:space="preserve">
         <value>Show password of {0}</value>
     </data>
+    <data name="MainWindowViewModelProvidePasswordPromptHeading" xml:space="preserve">
+        <value>Enter the password:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
+        <value>Provide password for key {0}</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPasswordLabel" xml:space="preserve">
+        <value>Password:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
+        <value>Password incorrect!</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorContent" xml:space="preserve">
+        <value>You provided a wrong password. Try {0} of {1}. Do you want to try again?</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonAbort" xml:space="preserve">
+        <value>Abort</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonSubmit" xml:space="preserve">
+        <value>Submit</value>
+    </data>
 </root>

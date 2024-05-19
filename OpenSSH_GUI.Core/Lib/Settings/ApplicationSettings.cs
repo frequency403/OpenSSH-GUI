@@ -40,6 +40,11 @@ public class ApplicationSettings(
         return AddKnownServerAsync(credentials).Result;
     }
 
+    /// <summary>
+    /// Checks if there is a duplicate entry for the given connection credentials.
+    /// </summary>
+    /// <param name="credentials">The connection credentials to check for duplicates.</param>
+    /// <returns>True if there is a duplicate entry for the given connection credentials, false otherwise.</returns>
     private bool HasDuplicateEntry(IConnectionCredentials credentials)
     {
         return dbContext.ConnectionCredentialsDtos
