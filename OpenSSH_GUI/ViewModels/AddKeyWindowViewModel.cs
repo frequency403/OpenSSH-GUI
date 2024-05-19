@@ -52,9 +52,9 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
             name => !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
-        AddKey = ReactiveCommand.Create<string, AddKeyWindowViewModel?>(b =>
+        AddKey = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
         {
-            _createKey = bool.Parse(b);
+            _createKey = b;
             if (!_createKey) return null;
             return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
                 ? this
@@ -70,7 +70,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         private init => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
     }
 
-    public ReactiveCommand<string, AddKeyWindowViewModel?> AddKey { get; }
+    public ReactiveCommand<bool, AddKeyWindowViewModel?> AddKey { get; }
 
     public ISshKeyType SelectedKeyType
     {

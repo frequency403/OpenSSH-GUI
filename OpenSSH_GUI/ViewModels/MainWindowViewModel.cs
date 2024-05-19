@@ -20,6 +20,7 @@ using Material.Icons.Avalonia;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
@@ -28,6 +29,7 @@ using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 using SshNet.Keygen;
 
@@ -52,6 +54,7 @@ public class MainWindowViewModel : ViewModelBase
         Height = 20
     };
 
+    public bool KeyContextMenuEnabled { get; } = true;
     private IServerConnection _serverConnection;
 
     private ObservableCollection<ISshKey?> _sshKeys;
@@ -96,9 +99,9 @@ public class MainWindowViewModel : ViewModelBase
         return e;
     });
 
-    public ReactiveCommand<string, Unit?> OpenBrowser => ReactiveCommand.Create<string, Unit?>(e =>
+    public ReactiveCommand<int, Unit?> OpenBrowser => ReactiveCommand.Create<int, Unit?>(e =>
     {
-        var url = int.Parse(e) switch
+        var url = e switch
         {
             1 => "https://github.com/frequency403/OpenSSH-GUI/issues",
             2 => "https://github.com/frequency403/OpenSSH-GUI#authors",
@@ -272,36 +275,63 @@ public class MainWindowViewModel : ViewModelBase
         {
             var currentFormat = Enum.GetName(key.Format);
             var oppositeFormat = Enum.GetName(key.Format is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH);
+
+            var title = string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat,
+                oppositeFormat);
+            var text = string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxText, title);
             
-            var box = MessageBoxManager.GetMessageBoxStandard(string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat),
-                string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxText, currentFormat, oppositeFormat),
-                ButtonEnum.YesNoAbort, Icon.Warning);
+            var box = MessageBoxManager.GetMessageBoxStandard(title, text, ButtonEnum.YesNoAbort, Icon.Warning);
             var errorBox = MessageBoxManager.GetMessageBoxStandard(string.Format(StringsAndTexts.ErrorAction, string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat)),
                 StringsAndTexts.MainWindowConvertKeyMessageBoxErrorText, ButtonEnum.Ok, Icon.Error);
             var oldIndex = SshKeys.IndexOf(key);
-
-
             var result = await box.ShowAsync();
             if (result is ButtonResult.Abort or ButtonResult.None) return key;
 
-            var formatted = key is IPpkKey ppk
-                ? ppk.Convert(SshKeyFormat.OpenSSH, _logger)
-                : key.Convert(SshKeyFormat.PuTTYv3, _logger);
+            var formatted = await KeyFactory.ConvertToOppositeFormatAsync(key);
             if (formatted is null)
             {
                 await errorBox.ShowAsync();
                 return key;
             }
-
-            await UpdateKeyInDatabase(key);
+            
             SshKeys.Remove(key);
             SshKeys.Insert(oldIndex, formatted);
-
             if (result == ButtonResult.Yes) key.DeleteKey();
-
             return key;
         });
-
+    
+    public ReactiveCommand<bool,bool> ReloadKeys => ReactiveCommand.CreateFromTask<bool,bool>(async input =>
+    {
+        SshKeys.Clear();
+        await foreach (var key in DirectoryCrawler.GetAllKeysYield(true, input))
+        {
+            SshKeys.Add(key);
+        }
+        return input;
+    });
+    
+    public ReactiveCommand<ISshKey, ISshKey> ShowPassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey>(async key =>
+    {
+        var exportView = new ExportWindowViewModel(NullLogger<ExportWindowViewModel>.Instance)
+        {
+            Export = key.Password,
+            WindowTitle = string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath)
+        };
+        await ShowExportWindow.Handle(exportView);
+        return key;
+    });
+    public ReactiveCommand<ISshKey, ISshKey> ForgetPassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey>(async key =>
+    {
+        var dto = await _context.KeyDtos.FirstAsync(e => e.AbsolutePath == key.AbsoluteFilePath);
+        dto.Password = "";
+        await _context.SaveChangesAsync();
+        var index = SshKeys.IndexOf(key);
+        var keyInList = KeyFactory.FromDtoId(dto.Id);
+        SshKeys.RemoveAt(index);
+        SshKeys.Insert(index, keyInList);
+        return keyInList;
+    });
+    
     public ReactiveCommand<Unit, ApplicationSettingsViewModel?> OpenAppSettings =>
         ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel?>(async u =>
         {
@@ -335,8 +365,7 @@ public class MainWindowViewModel : ViewModelBase
                 });
                 var result = await passwordDialog.ShowAsync();
                 if (result != "Submit") return null;
-                var sshKey = key.SetPassword(passwordDialog.InputValue);
-
+                var sshKey = await KeyFactory.ProvidePasswordForKeyAsnyc(key, passwordDialog.InputValue);
                 if (sshKey.NeedPassword)
                 {
                     var msgBox = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams

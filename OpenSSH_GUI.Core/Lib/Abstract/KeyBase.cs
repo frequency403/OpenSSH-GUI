@@ -6,23 +6,24 @@
 
 #endregion
 
+using System.Linq.Expressions;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
-using OpenSSH_GUI.Core.Lib.Keys;
-using OpenSSH_GUI.Core.Lib.Static;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
 using SshNet.PuttyKeyFile;
+using SshKeyType = OpenSSH_GUI.Core.Lib.Keys.SshKeyType;
 
 namespace OpenSSH_GUI.Core.Lib.Abstract;
 
@@ -33,6 +34,7 @@ public abstract class KeyBase : IKeyBase
 {
     private IPrivateKeySource? _keySource;
     public int Id { get; set; }
+
     /// <summary>
     /// Base class for SSH keys.
     /// </summary>
@@ -61,10 +63,13 @@ public abstract class KeyBase : IKeyBase
         {
             return;
         }
-        var name = _keySource.HostKeyAlgorithms.FirstOrDefault()?.Name;
+
+        KeyType = new SshKeyType(_keySource.HostKeyAlgorithms.FirstOrDefault()?.Name);
         Fingerprint = _keySource.FingerprintHash();
     }
 
+    public ISshKeyType KeyType { get; }
+    
     /// <summary>
     /// Gets a value indicating whether the key requires a password.
     /// </summary>
@@ -76,10 +81,10 @@ public abstract class KeyBase : IKeyBase
     /// <summary>
     /// Represents the success status of a password for accessing the private key file.
     /// </summary>
-    private bool PasswordSuccess { get; }
+    public bool PasswordSuccess { get; set; }
 
     /// <summary>
-    /// Represents a key that can be used for SSH authentication.
+    /// Indicates that the key is passwort protected or not
     /// </summary>
     public bool HasPassword => Password is not null;
 
@@ -158,14 +163,7 @@ public abstract class KeyBase : IKeyBase
     /// </summary>
     /// <returns>The SSH.NET key type of the key.</returns>
     public IPrivateKeySource? GetSshNetKeyType() => _keySource;
-
-    /// <summary>
-    /// Sets the password for the SSH key.
-    /// </summary>
-    /// <param name="password">The password to set.</param>
-    /// <returns>The SSH key with the updated password.</returns>
-    public ISshKey SetPassword(string password) => KeyFactory.FromPath(AbsoluteFilePath, password);
-
+    
     public SshKeyDto ToDto()
     {
         using var dbContext = new OpenSshGuiDbContext();
@@ -177,7 +175,7 @@ public abstract class KeyBase : IKeyBase
             Format = Format,
             Password = Password
         };
-    } 
+    }
 
     /// <summary>
     /// Deletes the key file associated with the specified key.
@@ -189,128 +187,15 @@ public abstract class KeyBase : IKeyBase
     /// <param name="key">The key for which to delete the associated files.</param>
     public void DeleteKey()
     {
-        if (Format is SshKeyFormat.OpenSSH && Path.GetExtension(AbsoluteFilePath).Contains("pub"))
+        switch (this)
         {
-            File.Delete(Path.ChangeExtension(AbsoluteFilePath, null));
-        }
-        File.Delete(AbsoluteFilePath);
-    }
-
-    /// <summary>
-    /// Asynchronously exports the key to disk in the specified format.
-    /// </summary>
-    /// <param name="format">The format in which to export the key.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    /// <remarks>
-    /// This method exports the key to disk in the specified format. The exported key file
-    /// will be saved in the same directory as the original key file with the specified format
-    /// as the file extension.
-    /// </remarks>
-    public Task ExportToDiskAsync(SshKeyFormat format) => new(() => ExportToDisk(format));
-
-    /// <summary>
-    /// Exports the SSH key to the disk in the specified format.
-    /// </summary>
-    /// <param name="format">The format in which to export the key (OpenSSH or PuTTYv2).</param>
-    public void ExportToDisk(SshKeyFormat format) => ExportToDisk(format, out _);
-
-    /// <summary>
-    /// Exports the SSH key to disk in the specified format.
-    /// </summary>
-    /// <param name="format">The format to export the key in.</param>
-    /// <param name="key">When the method returns, contains the exported SSH key. This parameter is passed uninitialized.</param>
-    public void ExportToDisk(SshKeyFormat format, out ISshKey? key)
-    {
-        key = null;
-        string privateFilePath;
-        switch (format)
-        {
-            case SshKeyFormat.OpenSSH:
-                privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, null));
-                var publicFilePath = Path.ChangeExtension(privateFilePath, ".pub");
-                using (var privateWriter = new StreamWriter(privateFilePath, false))
-                {
-                    privateWriter.WriteAsync(ExportOpenSshPrivateKey());
-                }
-
-                using (var publicWriter = new StreamWriter(publicFilePath, false))
-                {
-                    publicWriter.WriteAsync(ExportOpenSshPublicKey());
-                }
-
-                key = KeyFactory.FromPath(publicFilePath, Password);
+            case ISshPublicKey pub:
+                File.Delete(AbsoluteFilePath);
+                pub.PrivateKey.DeleteKey();
                 break;
-            case SshKeyFormat.PuTTYv2:
-            case SshKeyFormat.PuTTYv3:
             default:
-                privateFilePath = GetUniqueFilePath(Path.ChangeExtension(AbsoluteFilePath, ".ppk"));
-                using (var privateWriter = new StreamWriter(privateFilePath, false))
-                {
-                    privateWriter.WriteAsync(ExportPuttyPpkKey());
-                }
-
-                key = KeyFactory.FromPath(privateFilePath, Password);
+                File.Delete(AbsoluteFilePath);
                 break;
         }
-    }
-
-    /// <summary>
-    /// Converts the SSH key to the specified format.
-    /// </summary>
-    /// <param name="format">The format to convert the key to.</param>
-    /// <returns>The converted SSH key, or null if the key is already in the specified format.</returns>
-    public ISshKey? Convert(SshKeyFormat format) => Convert(format, false, NullLogger.Instance);
-
-    /// <summary>
-    /// Converts the SSH key to the specified format.
-    /// </summary>
-    /// <param name="format">The format to convert the SSH key to.</param>
-    /// <param name="logger">The logger to use for logging.</param>
-    /// <returns>The converted SSH key.</returns>
-    public ISshKey? Convert(SshKeyFormat format, ILogger logger) => Convert(format, false, logger);
-
-    /// <summary>
-    /// Converts the SSH key to the specified format.
-    /// </summary>
-    /// <param name="format">The format to convert the SSH key to.</param>
-    /// <param name="move">Indicates whether to move the file after conversion.</param>
-    /// <param name="logger">The logger to write any errors or messages.</param>
-    /// <returns>
-    /// The converted SSH key if successful, otherwise null.
-    /// </returns>
-    public ISshKey? Convert(SshKeyFormat format, bool move, ILogger logger)
-    {
-        if (format.Equals(Format)) return null;
-        ExportToDisk(format, out var key);
-        if (this is IPpkKey && move)
-            try
-            {
-                var directory = Directory.GetParent(AbsoluteFilePath)!.CreateSubdirectory("PPK");
-                var newFileDestination = Path.Combine(directory.FullName, Path.GetFileName(AbsoluteFilePath));
-                File.Move(AbsoluteFilePath, newFileDestination);
-                AbsoluteFilePath = newFileDestination;
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error moving the file");
-            }
-
-        if (key is null) logger.LogError("Error converting the key");
-        return key;
-    }
-
-    /// <summary>
-    /// Generates a unique file path based on the original file path
-    /// </summary>
-    /// <param name="originalFilePath">The original file path</param>
-    /// <returns>The unique file path</returns>
-    private static string GetUniqueFilePath(string originalFilePath)
-    {
-        if (File.Exists(originalFilePath))
-            originalFilePath = Path.Combine(
-                Path.GetDirectoryName(originalFilePath),
-                $"{Path.GetFileNameWithoutExtension(originalFilePath)}_{DateTime.Now:yy_MM_dd_HH_mm}");
-
-        return originalFilePath;
     }
 }

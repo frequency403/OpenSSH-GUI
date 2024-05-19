@@ -30,6 +30,19 @@ public class SshKeyType : ISshKeyType
         CurrentBitSize = HasDefaultBitSize ? 0 : PossibleBitSizes.Max();
     }
 
+    public SshKeyType(string keyDefinition)
+    {
+        KeyTypeText = keyDefinition;
+        BaseType = Enum.Parse<KeyType>(
+            (KeyTypeText.StartsWith("ecdsa") 
+                ? KeyTypeText.Split('-')[0] 
+                : KeyTypeText.Split('-')[1]).ToUpper());
+        var possibleBitSizes = BaseType.GetBitValues().ToList();
+        PossibleBitSizes = possibleBitSizes;
+        HasDefaultBitSize = !PossibleBitSizes.Any();
+        CurrentBitSize = HasDefaultBitSize ? 0 : PossibleBitSizes.Max();
+    }
+
     /// <summary>
     /// A class representing the base type of a SSH key.
     /// </summary>

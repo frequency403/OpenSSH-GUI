@@ -232,10 +232,10 @@
         <value>Error {0}</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxTitle" xml:space="preserve">
-        <value>Converting {0}-key to {1} key</value>
+        <value>{0}-key to a {1}-key</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxText" xml:space="preserve">
-        <value>This will convert your {0]-key to a {1}-key. Do you want to delete the old file?</value>
+        <value>This will convert your {0}. Do you want to delete the old file?</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxErrorText" xml:space="preserve">
         <value>There was an error converting the keyfile. See the log for details.</value>
@@ -317,5 +317,20 @@
     </data>
     <data name="MainWindowHelpMenuAbout" xml:space="preserve">
         <value>About</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDisk" xml:space="preserve">
+        <value>Reload keys from disk</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords" xml:space="preserve">
+        <value>Reload keys and forget passwords</value>
+    </data>
+    <data name="KeysShowPassword" xml:space="preserve">
+        <value>Show password</value>
+    </data>
+    <data name="KeysForgetPassword" xml:space="preserve">
+        <value>Forget password</value>
+    </data>
+    <data name="KeysShowPasswordOf" xml:space="preserve">
+        <value>Show password of {0}</value>
     </data>
 </root>

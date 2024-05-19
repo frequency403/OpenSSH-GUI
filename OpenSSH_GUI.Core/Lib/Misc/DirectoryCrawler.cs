@@ -6,21 +6,13 @@
 
 #endregion
 
-using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Interfaces.Settings;
-using OpenSSH_GUI.Core.Lib.Abstract;
-using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.Core.Lib.Static;
-using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
@@ -46,7 +38,7 @@ public static class DirectoryCrawler
             try
             {
                 key = KeyFactory.FromPath(filePath);
-                if (key is IPpkKey && convert) key = key.Convert(SshKeyFormat.OpenSSH, true, _logger);
+                if (key is IPpkKey && convert) key = KeyFactory.ConvertToOppositeFormat(key, true);
             }
             catch (Exception ex)
             {
@@ -58,56 +50,62 @@ public static class DirectoryCrawler
         }
     }
 
-    private static SemaphoreSlim _semaphoreSlim = new(1, 1);
-
-    /// <summary>
-    /// Retrieves all SSH keys from disk or cache.
-    /// </summary>
-    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
-    /// <param name="purgeDtos">Optional. Indicates whether to purge the DTO's from the database. Default is false.</param>
-    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
-    public static IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)
+    public static async IAsyncEnumerable<ISshKey> GetAllKeysYield(bool loadFromDisk = false, bool purgePasswords = false)
     {
-        ISshKey[] keys = [];
-        try
+        await using var dbContext = new OpenSshGuiDbContext();
+        var cacheHasElements = await dbContext.KeyDtos.AnyAsync();
+        switch (loadFromDisk)
         {
-            _semaphoreSlim.Wait();
-            var dbContext = new OpenSshGuiDbContext();
-            var cacheHasElements = dbContext.KeyDtos.Any();
-
-            switch (loadFromDisk)
-            {
-                case false when cacheHasElements:
-                    return dbContext.KeyDtos.Select(e => e.ToKey());
-                case false when !cacheHasElements:
-                    loadFromDisk = true;
-                    break;
-            }
-
-            if (loadFromDisk || !cacheHasElements)
-            {
-                keys = GetFromDisk(dbContext.Settings.First().ConvertPpkAutomatically).ToArray();
-                foreach (var key in keys)
+            case false when cacheHasElements:
+                foreach (var keyFromCache in dbContext.KeyDtos.Select(e => e.ToKey()))
                 {
-                    var found = dbContext.KeyDtos.FirstOrDefault(e =>
-                        e.AbsolutePath == key.AbsoluteFilePath);
-                    if (found is not null) continue;
-                    dbContext.KeyDtos.Add(new SshKeyDto
+                    yield return keyFromCache;
+                }
+                yield break;
+            case false when !cacheHasElements:
+                loadFromDisk = true;
+                break;
+        }
+
+        if (!loadFromDisk && cacheHasElements) yield break;
+        {
+            foreach (var key in GetFromDisk((await dbContext.Settings.FirstAsync()).ConvertPpkAutomatically))
+            {
+                var found = await dbContext.KeyDtos.FirstOrDefaultAsync(e =>
+                    e.AbsolutePath == key.AbsoluteFilePath);
+                if (found is null)
+                {
+                    await dbContext.KeyDtos.AddAsync(new SshKeyDto
                     {
                         AbsolutePath = key.AbsoluteFilePath,
                         Password = key.Password,
                         Format = key.Format
                     });
                 }
-
-                dbContext.SaveChanges();
+                else
+                {
+                    found.AbsolutePath = key.AbsoluteFilePath;
+                    found.Format = key.Format;
+                    if (found.Password is not null)
+                    {
+                        key.Password = found.Password;
+                    }
+                    if (purgePasswords)
+                    {
+                        key.Password = key.HasPassword ? "" : null;
+                        found.Password = key.HasPassword? "" : null;
+                    }
+                }
+                await dbContext.SaveChangesAsync();
+                yield return key;
             }
         }
-        finally
-        {
-            _semaphoreSlim.Release();
-        }
-
-        return keys;
     }
+
+    /// <summary>
+    /// Retrieves all SSH keys from disk or cache.
+    /// </summary>
+    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
+    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
+    public static IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false) => GetAllKeysYield(loadFromDisk).ToBlockingEnumerable();
 }

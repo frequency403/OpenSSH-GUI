@@ -30,41 +30,6 @@ public class ApplicationSettings(
     ILogger<IApplicationSettings> logger,
     OpenSshGuiDbContext dbContext) : IApplicationSettings
 {
-    private Settings settings;
-    /// <summary>
-    /// Initializes the application settings.
-    /// </summary>
-    public void Init()
-    {
-        try
-        {
-            logger.LogInformation("Searching for duplicates in the database.....");
-            settings = dbContext.Settings.First();
-            var deleteCount = dbContext.ConnectionCredentialsDtos
-                .Where(e => e.AuthType == AuthType.Key)
-                .GroupBy(f => new
-                {
-                    ((KeyConnectionCredentials)f.ToCredentials()).Hostname,
-                    ((KeyConnectionCredentials)f.ToCredentials()).Username
-                })
-                .Where(group => group.Count() > 1)
-                .Select(group => group.Key).ExecuteDelete();
-            if (deleteCount > 0)
-            {
-                logger.LogInformation("Deleted {delCount} duplicates from the database", deleteCount);
-            }
-            else
-            {
-                logger.LogInformation("No duplicates were found in the database");
-            }
-            dbContext.SaveChanges();
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Error while initializing application settings! Continuing with default settings");
-        }
-    }
-    
     /// <summary>
     /// Adds a known server
     /// </summary>
@@ -92,11 +57,9 @@ public class ApplicationSettings(
     {
         try
         {
-            ShrinkKnownServers();
             if (HasDuplicateEntry(credentials)) return false;
-            dbContext.ConnectionCredentialsDtos.Add(credentials.ToDto());
-            //@TODO !Headache with EF!
-            await dbContext.SaveChangesAsync();
+            await credentials.SaveDtoInDatabase();
+            ShrinkKnownServers();
         }
         catch (Exception e)
         {
@@ -114,11 +77,12 @@ public class ApplicationSettings(
     /// <returns>True if the list was successfully shrunk, false otherwise.</returns>
     private bool ShrinkKnownServers()
     {
+        var settings = dbContext.Settings.First();
         try
         {
             if (dbContext.ConnectionCredentialsDtos.Count() <= settings.MaxSavedServers) return false;
             var baseValue = dbContext.ConnectionCredentialsDtos.Count() - settings.MaxSavedServers;
-            dbContext.ConnectionCredentialsDtos.OrderByDescending(e => e.Id).Take(baseValue).ExecuteDelete();
+            dbContext.ConnectionCredentialsDtos.OrderBy(e => e.Id).Take(baseValue).ExecuteDelete();
             dbContext.SaveChanges();
         }
         catch (Exception e)

@@ -510,6 +510,33 @@ namespace OpenSSH_GUI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Forget password.
+        /// </summary>
+        public static string KeysForgetPassword {
+            get {
+                return ResourceManager.GetString("KeysForgetPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show password.
+        /// </summary>
+        public static string KeysShowPassword {
+            get {
+                return ResourceManager.GetString("KeysShowPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show password of {0}.
+        /// </summary>
+        public static string KeysShowPasswordOf {
+            get {
+                return ResourceManager.GetString("KeysShowPasswordOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add SSH key.
         /// </summary>
         public static string MainWindowAddKeyToolTip {
@@ -573,7 +600,7 @@ namespace OpenSSH_GUI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This will convert your {0]-key to a {1}-key. Do you want to delete the old file?.
+        ///   Looks up a localized string similar to This will convert your {0}. Do you want to delete the old file?.
         /// </summary>
         public static string MainWindowConvertKeyMessageBoxText {
             get {
@@ -582,7 +609,7 @@ namespace OpenSSH_GUI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converting {0}-key to {1} key.
+        ///   Looks up a localized string similar to {0}-key to a {1}-key.
         /// </summary>
         public static string MainWindowConvertKeyMessageBoxTitle {
             get {
@@ -848,6 +875,24 @@ namespace OpenSSH_GUI {
         public static string MainWindowSettingsMenuMachineSshdConfig {
             get {
                 return ResourceManager.GetString("MainWindowSettingsMenuMachineSshdConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reload keys from disk.
+        /// </summary>
+        public static string MainWindowSettingsMenuReloadKeysFromDisk {
+            get {
+                return ResourceManager.GetString("MainWindowSettingsMenuReloadKeysFromDisk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reload keys and forget passwords.
+        /// </summary>
+        public static string MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords {
+            get {
+                return ResourceManager.GetString("MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords", resourceCulture);
             }
         }
         

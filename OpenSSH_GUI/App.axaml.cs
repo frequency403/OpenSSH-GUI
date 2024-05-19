@@ -60,7 +60,6 @@ public class App : Application
     private void InitAndOrPrepareServices()
     {
         DirectoryCrawler.ProvideContext(ServiceProvider.GetRequiredService<ILogger<App>>());
-        ServiceProvider.GetRequiredService<IApplicationSettings>().Init();
     }
 
     private ServiceCollection BuildServiceCollection()

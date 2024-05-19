@@ -6,6 +6,7 @@
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Interfaces.KnownHosts;assembly=OpenSSH_GUI.Core"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
         x:Class="OpenSSH_GUI.Views.EditKnownHostsWindow"
         x:DataType="viewModels:EditKnownHostsViewModel"
@@ -121,14 +122,20 @@
         </TabControl>
         <Grid Grid.Row="1" HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="* *">
             <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Background="Red" Margin="5 0"
-                    Command="{Binding ProcessData}" CommandParameter="false">
+                    Command="{Binding ProcessData}">
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
                 <ToolTip.Tip>
                     <Label Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}" />
                 </ToolTip.Tip>
                 <avalonia:MaterialIcon Kind="Cancel" />
             </Button>
             <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="Green" Margin="5 0"
-                    Command="{Binding ProcessData}" CommandParameter="true">
+                    Command="{Binding ProcessData}">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
                 <ToolTip.Tip>
                     <Label Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}" />
                 </ToolTip.Tip>

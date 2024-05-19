@@ -6,6 +6,7 @@
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.EditSavedServerEntry"
         x:DataType="viewModels:EditSavedServerEntryViewModel"
@@ -35,13 +36,17 @@
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal"
                     HorizontalAlignment="Stretch">
             <Button Command="{Binding Close}"
-                    CommandParameter="false"
                     Foreground="Firebrick">
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
                 <avalonia:MaterialIcon Kind="CloseCircle" />
             </Button>
             <Button Command="{Binding Close}"
-                    CommandParameter="true"
                     Foreground="LawnGreen">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
                 <avalonia:MaterialIcon Kind="FloppyDisk" />
             </Button>
         </StackPanel>

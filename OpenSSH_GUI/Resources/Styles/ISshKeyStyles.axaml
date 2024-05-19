@@ -10,74 +10,107 @@
         <Grid ColumnDefinitions="* 3*"
               VerticalAlignment="Center" HorizontalAlignment="Stretch">
             <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Left">
-                <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}">
+                <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding NeedPassword}">
                     <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" />
                 </Border>
-                <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}">
+                <Border Padding="5" BorderThickness="1" BorderBrush="Transparent" CornerRadius="25"
+                        IsVisible="{Binding !NeedPassword}" Classes="WithContextMenu">
+                    <Border.Styles>
+                        <Style Selector="Border.WithContextMenu:pointerover">
+                            <Setter Property="BorderBrush" Value="LightGreen" />
+                        </Style>
+                    </Border.Styles>
+                    <Border.ContextMenu>
+                        <ContextMenu
+                            IsEnabled="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).KeyContextMenuEnabled, FallbackValue={Binding !HasPassword}}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysShowPassword}"
+                                      Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPassword}"
+                                      CommandParameter="{Binding .}">
+                                <MenuItem.Icon>
+                                    <avalonia:MaterialIcon Kind="KeyArrowRight" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysForgetPassword}"
+                                      Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ForgetPassword}"
+                                      CommandParameter="{Binding .}">
+                                <MenuItem.Icon>
+                                    <avalonia:MaterialIcon Kind="KeyRemove" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Border.ContextMenu>
                     <avalonia:MaterialIcon Kind="ShieldLockOpenOutline" Foreground="Green" />
                 </Border>
             </StackPanel>
-            <Border Grid.Column="0"
+            <Border Padding="5" Grid.Column="0"
                     BorderBrush="Transparent"
-                    Padding="2"
                     IsVisible="{Binding !HasPassword}"
                     IsEnabled="False"
                     HorizontalAlignment="Left">
                 <avalonia:MaterialIcon Kind="LockOffOutline" Foreground="DimGray" />
             </Border>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left">
-                <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}">
+                <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding IsPuttyKey}">
                     <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
                 </Border>
-                <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}">
+                <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding !IsPuttyKey}">
                     <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
                 </Border>
-                <TextBlock
-                    Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
-                    HorizontalAlignment="Center" />
+                <TextBlock Padding="5"
+                           Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                           HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
     </DataTemplate>
     <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="keys:ISshKey">
-        <Grid ColumnDefinitions="* * *" HorizontalAlignment="Stretch">
-            <ContentPresenter Grid.Column="0" Content="{Binding .}" ContentTemplate="{StaticResource LocksAndType}" />
-            <!-- <Grid ColumnDefinitions="* 3*" Grid.Column="0" -->
-            <!--       VerticalAlignment="Center" HorizontalAlignment="Stretch"> -->
-            <!--     <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Left"> -->
-            <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}"> -->
-            <!--             <avalonia:MaterialIcon Kind="Password" Foreground="Yellow" /> -->
-            <!--         </Border> -->
-            <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}"> -->
-            <!--             <avalonia:MaterialIcon Kind="LockOpen" Foreground="Green" /> -->
-            <!--         </Border> -->
-            <!--     </StackPanel> -->
-            <!--     <Border Grid.Column="0" -->
-            <!--             BorderBrush="Transparent" -->
-            <!--             Padding="2" -->
-            <!--             IsVisible="{Binding !HasPassword}" -->
-            <!--             IsEnabled="False" -->
-            <!--             HorizontalAlignment="Left"> -->
-            <!--         <avalonia:MaterialIcon Kind="LockOpen" Foreground="DimGray" /> -->
-            <!--     </Border> -->
-            <!--     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left"> -->
-            <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}"> -->
-            <!--             <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" /> -->
-            <!--         </Border> -->
-            <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}"> -->
-            <!--             <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" /> -->
-            <!--         </Border> -->
-            <!--         <TextBlock -->
-            <!--             Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" -->
-            <!--             HorizontalAlignment="Center" /> -->
-            <!--     </StackPanel> -->
-            <!-- </Grid> -->
-            <Separator Grid.Column="1" />
-            <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5" />
-        </Grid>
+        <StackPanel Orientation="Horizontal" Spacing="15">
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="5">
+                <Panel Margin="0" IsVisible="{Binding HasPassword}">
+                    <Border BorderBrush="Transparent" IsVisible="{Binding NeedPassword}">
+                        <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" />
+                    </Border>
+                    <Border BorderBrush="Transparent" IsVisible="{Binding !NeedPassword}">
+                        <avalonia:MaterialIcon Kind="ShieldLockOpenOutline" Foreground="Green" />
+                    </Border>
+                </Panel>
+                <Border
+                    BorderBrush="Transparent"
+                    IsVisible="{Binding !HasPassword}"
+                    IsEnabled="False">
+                    <avalonia:MaterialIcon Kind="LockOffOutline" Foreground="DimGray" />
+                </Border>
+                <Border BorderBrush="Transparent" IsVisible="{Binding IsPuttyKey}">
+                    <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
+                </Border>
+                <Border BorderBrush="Transparent" IsVisible="{Binding !IsPuttyKey}">
+                    <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                </Border>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Left">
+                <StackPanel.Styles>
+                    <Style Selector="TextBlock.MiniText">
+                        <Setter Property="FontStyle" Value="Normal" />
+                        <Setter Property="FontWeight" Value="Light" />
+                        <Setter Property="FontSize" Value="10" />
+                    </Style>
+                </StackPanel.Styles>
+                <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText"
+                           Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
+                <Separator Margin="0" />
+                <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText" Text="{Binding Filename}" />
+            </StackPanel>
+        </StackPanel>
     </DataTemplate>
     <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:ISshKey">
-        <Border BorderThickness="0 0 0 1" CornerRadius="1" Padding="5" BorderBrush="DimGray"
-                Margin="0 0 0 5">
+        <Border BorderThickness="0 0 0 1" CornerRadius="5" Padding="5" BorderBrush="DimGray" Classes="MainDisplay">
+            <Border.Styles>
+                <Style Selector="Border.MainDisplay:pointerover">
+                    <Setter Property="RenderTransform" Value="scale(1.001)" />
+                    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+                    <Setter Property="Background" Value="#20adadad" />
+                </Style>
+            </Border.Styles>
             <Grid ColumnDefinitions="* 3* * *">
                 <ToolTip.Tip>
                     <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">
@@ -99,51 +132,23 @@
                     </Grid>
                 </ToolTip.Tip>
                 <ContentPresenter Grid.Column="0" Content="{Binding .}" ContentTemplate="{StaticResource LocksAndType}" />
-                <!-- <Grid ColumnDefinitions="* 3*" Grid.Row="0" Grid.Column="0" -->
-                <!--       VerticalAlignment="Center" HorizontalAlignment="Stretch"> -->
-                <!--     <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Center"> -->
-                <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding NeedPassword}"> -->
-                <!--             <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" /> -->
-                <!--         </Border> -->
-                <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !NeedPassword}"> -->
-                <!--             <avalonia:MaterialIcon Kind="ShieldLockOpenOutline" Foreground="Green" /> -->
-                <!--         </Border> -->
-                <!--     </StackPanel> -->
-                <!--     <Border Grid.Column="0" -->
-                <!--             BorderBrush="Transparent" -->
-                <!--             Padding="2" -->
-                <!--             IsVisible="{Binding !HasPassword}" -->
-                <!--             IsEnabled="False" -->
-                <!--             HorizontalAlignment="Center"> -->
-                <!--         <avalonia:MaterialIcon Kind="LockOffOutline" Foreground="DimGray" /> -->
-                <!--     </Border> -->
-                <!--     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left"> -->
-                <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding IsPuttyKey}"> -->
-                <!--             <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" /> -->
-                <!--         </Border> -->
-                <!--         <Border BorderBrush="Transparent" Padding="2" IsVisible="{Binding !IsPuttyKey}"> -->
-                <!--             <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" /> -->
-                <!--         </Border> -->
-                <!--         <TextBlock -->
-                <!--             Text="{Binding KeyType.BaseType, Converter={StaticResource SingleSshKeyTypeConverter}}" -->
-                <!--             HorizontalAlignment="Center" /> -->
-                <!--     </StackPanel> -->
-                <!-- </Grid> -->
-                <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
+                <TextBlock Padding="5" Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
                            HorizontalAlignment="Center" IsVisible="{Binding !NeedPassword}" />
-                <Button Grid.Column="1" HorizontalAlignment="Stretch" Background="YellowGreen" Foreground="IndianRed"
+                <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch" Background="YellowGreen"
+                        Foreground="IndianRed"
                         HorizontalContentAlignment="Center" IsVisible="{Binding NeedPassword}"
                         Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePassword}"
                         CommandParameter="{Binding .}">
                     Provide Password
                 </Button>
-                <TextBlock Grid.Column="2" Text="{Binding Comment}" Margin="5"
+                <TextBlock Padding="5" Grid.Column="2" Text="{Binding Comment}" Margin="5"
                            HorizontalAlignment="Center" IsEnabled="{Binding !NeedPassword}" />
                 <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center"
                       IsEnabled="{Binding !NeedPassword}">
-                    <Button Grid.Column="0" HorizontalAlignment="Center"
+                    <Button Padding="5" Grid.Column="0" HorizontalAlignment="Center"
                             Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
-                            CommandParameter="{Binding .}">
+                            CommandParameter="{Binding .}"
+                            Background="LightCoral">
                         <ToolTip.Tip>
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
@@ -153,9 +158,10 @@
                             <avalonia:MaterialIcon Kind="KeyOutline" />
                         </StackPanel>
                     </Button>
-                    <Button Grid.Column="1" HorizontalAlignment="Center"
+                    <Button Padding="5" Grid.Column="1" HorizontalAlignment="Center"
                             Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPrivate}"
-                            CommandParameter="{Binding .}">
+                            CommandParameter="{Binding .}"
+                            Background="DarkOrange">
                         <ToolTip.Tip>
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
@@ -165,7 +171,7 @@
                             <avalonia:MaterialIcon Kind="ShieldKeyOutline" />
                         </StackPanel>
                     </Button>
-                    <Button Grid.Column="2" HorizontalAlignment="Center"
+                    <Button Padding="5" Grid.Column="2" HorizontalAlignment="Center"
                             Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).DeleteKey}"
                             CommandParameter="{Binding .}"
                             Background="DarkRed">
@@ -175,7 +181,7 @@
                         </ToolTip.Tip>
                         <avalonia:MaterialIcon Kind="DeleteOutline" />
                     </Button>
-                    <Button Grid.Column="3" HorizontalAlignment="Center"
+                    <Button Padding="5" Grid.Column="3" HorizontalAlignment="Center"
                             Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ConvertKey}"
                             CommandParameter="{Binding .}"
                             Background="DarkCyan">

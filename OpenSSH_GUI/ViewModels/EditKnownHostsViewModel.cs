@@ -41,7 +41,7 @@ public class EditKnownHostsViewModel(ILogger<EditKnownHostsViewModel> logger) : 
         private set => this.RaiseAndSetIfChanged(ref _knownHostsLocal, value);
     }
 
-    public ReactiveCommand<string, EditKnownHostsViewModel> ProcessData { get; private set; }
+    public ReactiveCommand<bool, EditKnownHostsViewModel> ProcessData { get; private set; }
 
     public void SetServerConnection(ref IServerConnection connection)
     {
@@ -50,9 +50,9 @@ public class EditKnownHostsViewModel(ILogger<EditKnownHostsViewModel> logger) : 
         KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
         KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
-        ProcessData = ReactiveCommand.CreateFromTask<string, EditKnownHostsViewModel>(async e =>
+        ProcessData = ReactiveCommand.CreateFromTask<bool, EditKnownHostsViewModel>(async e =>
         {
-            if (!bool.Parse(e)) return this;
+            if (!e) return this;
             KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
             if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
             await KnownHostsFileLocal.UpdateFile();

@@ -93,23 +93,48 @@ public class ApplicationSettingsViewModel(
                 return result.CredentialsToEdit;
             });
 
-    public ReactiveCommand<string, ApplicationSettingsViewModel> Submit =>
-        ReactiveCommand.Create<string, ApplicationSettingsViewModel>(e =>
+    public ReactiveCommand<bool, ApplicationSettingsViewModel> Submit =>
+        ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel>(async e =>
         {
-            if (!bool.TryParse(e, out var realResult)) return this;
-            if (!realResult) return this;
+            if (!e) return this;
             var file = context.Settings.Update(_settings).Entity;
-            file = new Settings
-            {
-                Version = _settings.Version,
-                ConvertPpkAutomatically = ConvertPpkAutomatically,
-                MaxSavedServers = MaxServers,
-            };
+            file.ConvertPpkAutomatically = ConvertPpkAutomatically;
+            file.MaxSavedServers = MaxServers;
+
+            await context.ConnectionCredentialsDtos
+                .Where(a => 
+                    !KnownServers
+                        .Select(b => b.Id)
+                        .Contains(a.Id)
+                    )
+                .ExecuteDeleteAsync();
+            await context.SaveChangesAsync();
             foreach (var dto in context.ConnectionCredentialsDtos)
             {
-                var dtoID = dto.Id;
+                foreach (var cc in KnownServers.Where(cc => cc.Id == dto.Id))
+                {
+                    dto.Hostname = cc.Hostname;
+                    dto.Port = cc.Port;
+                    dto.Username = cc.Username;
+                    dto.AuthType = cc.AuthType;
+                    switch (cc)
+                    {
+                        case IPasswordConnectionCredentials pcc:
+                            dto.Password = pcc.Password;
+                            dto.PasswordEncrypted = pcc.EncryptedPassword;
+                            break;
+                        case IKeyConnectionCredentials kcc:
+                            dto.KeyDtos.Clear();
+                            dto.KeyDtos.Add(kcc.Key.ToDto());
+                            break;
+                        case IMultiKeyConnectionCredentials mcc:
+                            dto.KeyDtos.Clear();
+                            dto.KeyDtos.AddRange(mcc.Keys.Select(f => f.ToDto()));
+                            break;
+                    }
+                }
             }
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return this;
         });
 

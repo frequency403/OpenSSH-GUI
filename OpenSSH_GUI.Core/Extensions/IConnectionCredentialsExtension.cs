@@ -14,34 +14,39 @@ namespace OpenSSH_GUI.Core.Extensions;
 
 public static class ConnectionCredentialsExtensions
 {
-    public static ConnectionCredentialsDto ToDto(this IConnectionCredentials cc)
+    public static async Task<ConnectionCredentialsDto?> SaveDtoInDatabase(this IConnectionCredentials cc)
     {
-        ConnectionCredentialsDto baseDto = new()
-        {
-            Id = cc.Id,
-            Hostname = cc.Hostname,
-            Username = cc.Username,
-            AuthType = cc.AuthType,
-            KeyDtos = []
-        };
+            await using var dbContext = new OpenSshGuiDbContext();
+            ConnectionCredentialsDto baseDto = new()
+            {
+                Id = cc.Id,
+                Hostname = cc.Hostname,
+                Username = cc.Username,
+                AuthType = cc.AuthType,
+                KeyDtos = []
+            };
+            var entity = dbContext.ConnectionCredentialsDtos.Add(baseDto);
+            await dbContext.SaveChangesAsync();
+            baseDto = entity.Entity;
 
-        using var dbContext = new OpenSshGuiDbContext();
-        switch (cc)
-        {
-            case IPasswordConnectionCredentials pcc:
-                baseDto.Password = pcc.Password;
-                baseDto.PasswordEncrypted = pcc.EncryptedPassword;
-                break;
-            case IKeyConnectionCredentials kcc:
-                baseDto.KeyDtos.Add(dbContext.KeyDtos.First(e => e.AbsolutePath == kcc.Key.AbsoluteFilePath));
-                break;
-            case IMultiKeyConnectionCredentials mcc:
-                var dbKeys = dbContext.KeyDtos.Where(a =>
-                    mcc.Keys.Any(b => b.AbsoluteFilePath == a.AbsolutePath));
-                baseDto.KeyDtos.AddRange(dbKeys);
-                break;
-        }
+            switch (cc)
+            {
+                case IPasswordConnectionCredentials pcc:
+                    baseDto.Password = pcc.Password;
+                    baseDto.PasswordEncrypted = pcc.EncryptedPassword;
+                    break;
+                case IKeyConnectionCredentials kcc:
+                    baseDto.KeyDtos.Add(dbContext.KeyDtos.First(e => e.AbsolutePath == kcc.Key.AbsoluteFilePath));
+                    break;
+                case IMultiKeyConnectionCredentials mcc:
+                    var dbKeys = dbContext.KeyDtos.Where(a =>
+                        mcc.Keys.Any(b => b.AbsoluteFilePath == a.AbsolutePath));
+                    baseDto.KeyDtos.AddRange(dbKeys);
+                    break;
+            }
 
-        return baseDto;
+            await dbContext.SaveChangesAsync();
+            return await dbContext.ConnectionCredentialsDtos.FindAsync(baseDto.Id);
+        
     }
 }

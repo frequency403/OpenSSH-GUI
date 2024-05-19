@@ -17,11 +17,6 @@ namespace OpenSSH_GUI.Core.Interfaces.Settings;
 public interface IApplicationSettings
 {
     /// <summary>
-    /// Initializes the application settings.
-    /// </summary>
-    void Init();
-
-    /// <summary>
     /// Adds a known server to the settings file.
     /// </summary>
     /// <param name="credentials">The connection credentials of the server to add.</param>

@@ -39,9 +39,4 @@ public interface ISshKey : IKeyBase
     /// The SSH key is considered a Putty key if its format is not OpenSSH.
     /// </remarks>
     bool IsPuttyKey { get; }
-
-    /// <summary>
-    /// Represents an SSH key type.
-    /// </summary>
-    ISshKeyType KeyType { get; }
 }

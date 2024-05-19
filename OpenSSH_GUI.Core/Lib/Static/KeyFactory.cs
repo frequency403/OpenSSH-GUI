@@ -33,7 +33,9 @@ public static class KeyFactory
     {
         if (Path.HasExtension(@params.FileName)) throw new ArgumentException("The parameter \"FileName\" has an extension. Extensions are not allowed as they are determined by the KeyFormat value!", nameof(@params.FileName));
         await using var privateStream = new MemoryStream();
+        await using var dbContext = new OpenSshGuiDbContext();
         var generated = SshNet.Keygen.SshKey.Generate(privateStream, @params.ToInfo());
+        ISshKey key;
         switch (@params.KeyFormat)
         {
             case SshKeyFormat.PuTTYv2:
@@ -44,7 +46,8 @@ public static class KeyFactory
                     await privateStreamWriter.WriteAsync(generated.ToPuttyFormat());
                 }
 
-                return new PpkKey(puttyFileName, @params.Password);
+                key = new PpkKey(puttyFileName, @params.Password);
+                break;
             case SshKeyFormat.OpenSSH:
             default:
                 var pubPath = @params.KeyFormat.ChangeExtension(@params.FullFilePath);
@@ -58,15 +61,82 @@ public static class KeyFactory
                     await publicStreamWriter.WriteAsync(generated.ToOpenSshPublicFormat());
                 }
 
-                return new SshPublicKey(pubPath,@params.Password);
+                key = new SshPublicKey(pubPath,@params.Password);
+                break;
         }
+
+        var entity = dbContext.KeyDtos.Add(key.ToDto());
+        await dbContext.SaveChangesAsync();
+        key.Id = entity.Entity.Id;
+        return key;
     }
 
-    public static ISshKey? FromDtoId(int id)
+    public static ISshKey? ProvidePasswordForKey(ISshKey key, string password) =>
+        ProvidePasswordForKeyAsnyc(key, password).Result;
+
+    public static async Task<ISshKey?> ProvidePasswordForKeyAsnyc(ISshKey key, string password)
     {
-        var context = new OpenSshGuiDbContext();
-        var dto = context.KeyDtos.Include(k => k.ConnectionCredentialsDto).FirstOrDefault(k => k.Id == id);
+        await using var dbContext = new OpenSshGuiDbContext();
+        var keyDto = await dbContext.KeyDtos.FirstAsync(e => e.AbsolutePath == key.AbsoluteFilePath);
+        keyDto.Password = password;
+        await dbContext.SaveChangesAsync();
+        return await FromDtoIdAsync(keyDto.Id);
+    }
+    
+    public static ISshKey? FromDtoId(int id) => FromDtoIdAsync(id).Result;
+    public static async Task<ISshKey?> FromDtoIdAsync(int id)
+    {
+        await using var context = new OpenSshGuiDbContext();
+        var dto = await context.KeyDtos.IgnoreAutoIncludes().FirstOrDefaultAsync(k => k.Id == id);
         return dto?.ToKey();
+    }
+
+    public static ISshKey? ConvertToOppositeFormat(ISshKey key, bool move = false) => ConvertToOppositeFormatAsync(key, move).Result;
+    public static async Task<ISshKey?> ConvertToOppositeFormatAsync(ISshKey key, bool move = false)
+    {
+        await using var dbContext = new OpenSshGuiDbContext();
+        var dtoOfKey = await dbContext.KeyDtos.FirstAsync(e => e.AbsolutePath == key.AbsoluteFilePath);
+        dtoOfKey.Format = dtoOfKey.Format is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH;
+        await dbContext.SaveChangesAsync();
+        if (move)
+        {
+            var folderName = key.Format is not SshKeyFormat.OpenSSH ? "PPK" : "OPENSSH";
+            var target  = Path.Combine(Path.GetDirectoryName(key.AbsoluteFilePath), folderName, Path.GetFileName(key.AbsoluteFilePath));
+            File.Move(key.AbsoluteFilePath, target);
+            if (key is ISshPublicKey publicKey)
+            {
+                target = Path.Combine(Path.GetDirectoryName(publicKey.PrivateKey.AbsoluteFilePath), folderName, Path.GetFileName(publicKey.PrivateKey.AbsoluteFilePath));
+                File.Move(publicKey.PrivateKey.AbsoluteFilePath, target);
+            }
+        }
+        var privateFilePath = dtoOfKey.Format.ChangeExtension(key.AbsoluteFilePath, false);
+        switch (dtoOfKey.Format)
+        {
+            case SshKeyFormat.OpenSSH:
+                await using (var privateWriter = new StreamWriter(privateFilePath, false))
+                {
+                    await privateWriter.WriteAsync(key.ExportOpenSshPrivateKey());
+                }
+                var publicFilePath = dtoOfKey.Format.ChangeExtension(privateFilePath);
+                await using (var publicWriter = new StreamWriter(publicFilePath, false))
+                {
+                    await publicWriter.WriteAsync(key.ExportOpenSshPublicKey());
+                }
+                dtoOfKey.AbsolutePath = publicFilePath;
+                break;
+            case SshKeyFormat.PuTTYv2:
+            case SshKeyFormat.PuTTYv3:
+            default:
+                await using (var privateWriter = new StreamWriter(privateFilePath, false))
+                {
+                    await privateWriter.WriteAsync(key.ExportPuttyPpkKey());
+                }
+
+                dtoOfKey.AbsolutePath = privateFilePath;
+                break;
+        }
+        await dbContext.SaveChangesAsync();
+        return await FromDtoIdAsync(dtoOfKey.Id);
     }
     
     /// <summary>
@@ -103,6 +173,16 @@ public static class KeyFactory
 
     public static ISshKey? FromPath(string path, string? password = null, int dbId = 0)
     {
+        if (dbId == 0)
+        {
+            using var dbContext = new OpenSshGuiDbContext();
+            var keyDto = dbContext.KeyDtos.FirstOrDefault(e => e.AbsolutePath == path);
+            if (keyDto is not null)
+            {
+                dbId = keyDto.Id;
+            }
+        }
+        
         try
         {
             return Path.GetExtension(path) switch

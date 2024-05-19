@@ -38,10 +38,10 @@ public class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryViewModel
 
     public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
 
-    public ReactiveCommand<string, EditSavedServerEntryViewModel?> Close =>
-        ReactiveCommand.Create<string, EditSavedServerEntryViewModel?>(e =>
+    public ReactiveCommand<bool, EditSavedServerEntryViewModel?> Close =>
+        ReactiveCommand.Create<bool, EditSavedServerEntryViewModel?>(e =>
         {
-            if (!bool.Parse(e)) return null;
+            if (!e) return null;
             if (CredentialsToEdit is IPasswordConnectionCredentials pwcc) pwcc.Password = Password;
             if (CredentialsToEdit is IKeyConnectionCredentials kcc) kcc.Key = SelectedKey;
             return this;

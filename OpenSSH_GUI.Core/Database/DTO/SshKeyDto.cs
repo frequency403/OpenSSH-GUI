@@ -25,9 +25,6 @@ public class SshKeyDto
 
     public ISshKey? ToKey()
     {
-        var gen = KeyFactory.FromPath(AbsolutePath, Password);
-        if (gen is null) return gen;
-        gen.Id = Id;
-        return gen;
+        return KeyFactory.FromPath(AbsolutePath, Password, Id);
     }
 }

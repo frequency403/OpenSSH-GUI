@@ -225,10 +225,10 @@
         <value>Fehler {0}</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxTitle" xml:space="preserve">
-        <value>Konvertiere {0}-Schlüssel zu {1}-Schlüssel</value>
+        <value>{0}-Schlüssel zu einem {1}-Schlüssel</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxText" xml:space="preserve">
-        <value>Hiermit wird ihr {0}-Schlüssel zu einem {1}-Schlüssel. Möchten Sie den alten Schlüssel löschen?</value>
+        <value>Hiermit wird ihr {0}. Möchten Sie den alten Schlüssel löschen?</value>
     </data>
     <data name="MainWindowConvertKeyMessageBoxErrorText" xml:space="preserve">
         <value>Es trat ein problem beim Konvertieren auf. Konsultieren Sie die Log-Datei für mehr Informationen</value>
@@ -310,5 +310,20 @@
     </data>
     <data name="MainWindowHelpMenuWebsite" xml:space="preserve">
         <value>Website / Handbuch</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDisk" xml:space="preserve">
+        <value>Schlüssel neu von Festplatte laden</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords" xml:space="preserve">
+        <value>Schlüssel neu laden und Passwörter vergessen</value>
+    </data>
+    <data name="KeysShowPassword" xml:space="preserve">
+        <value>Passwort anzeigen</value>
+    </data>
+    <data name="KeysForgetPassword" xml:space="preserve">
+        <value>Passwort vergessen</value>
+    </data>
+    <data name="KeysShowPasswordOf" xml:space="preserve">
+        <value>Passwort für {0} anzeigen</value>
     </data>
 </root>

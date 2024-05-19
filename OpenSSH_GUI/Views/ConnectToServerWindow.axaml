@@ -3,12 +3,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
-        Width="600"
+        Width="650"
         Height="225"
         CanResize="False"
         Icon="/Assets/appicon.ico"
@@ -72,20 +70,24 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
-                 Height="25"
+                 Height="30"
+                 VerticalContentAlignment="Center"
                  IsVisible="{Binding !QuickConnect}"
                  IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
 
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
-                 Height="25"
+                 Height="30"
+                 VerticalContentAlignment="Center"
                  IsVisible="{Binding !QuickConnect}"
                  IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
 
-        <StackPanel Margin="5 10" Height="25" Grid.Row="2" Grid.Column="2" IsVisible="{Binding !QuickConnect}" VerticalAlignment="Top">
-            <TextBox Text="{Binding Password}" Watermark="Password" PasswordChar="*"
+        <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2" IsVisible="{Binding !QuickConnect}" VerticalAlignment="Top">
+            <TextBox Height="30"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding Password}" Watermark="Password" PasswordChar="*"
                      IsEnabled="{Binding !ServerConnection.IsConnected}"
                      IsVisible="{Binding !AuthWithPublicKey}"  />
-            <ComboBox MaxHeight="25" IsEnabled="{Binding KeyComboBoxEnabled}"
+            <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
                       ItemsSource="{Binding PublicKeys}"
                       SelectedItem="{Binding SelectedPublicKey}"

@@ -31,18 +31,7 @@ public abstract partial class SshKey : KeyBase, ISshKey
         outputOfProcess.RemoveRange(0, 2);
         var keyTypeText = BracesRegex().Replace(outputOfProcess.Last().Trim(), "$1");
         outputOfProcess.Remove(outputOfProcess.Last());
-
         Comment = string.Join(" ", outputOfProcess);
-
-        if (Enum.TryParse<KeyType>(keyTypeText, true, out var parsedEnum))
-        {
-            if (int.TryParse(intToParse, out _)) KeyType = new SshKeyType(parsedEnum);
-        }
-        else
-        {
-            throw new ArgumentException($"{keyTypeText} is not a valid enum member of {typeof(KeyType)}");
-        }
-
         Format = SshKeyFormat.OpenSSH;
     }
 
@@ -63,11 +52,7 @@ public abstract partial class SshKey : KeyBase, ISshKey
     /// </summary>
     /// <value>The comment.</value>
     public string Comment { get; }
-
-    /// <summary>
-    /// Represents the type of an SSH key.
-    /// </summary>
-    public ISshKeyType KeyType { get; } = new SshKeyType(Enums.KeyType.RSA);
+    
 
     /// <summary>
     /// Gets a value indicating whether the key is a Putty key.

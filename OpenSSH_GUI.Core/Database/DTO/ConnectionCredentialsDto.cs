@@ -38,7 +38,7 @@ public class ConnectionCredentialsDto
             AuthType.Key => new KeyConnectionCredentials(Hostname, Username, KeyDtos.First().ToKey()) {Id = this.Id},
             AuthType.Password => new PasswordConnectionCredentials(Hostname, Username, Password,
                 PasswordEncrypted) {Id = this.Id},
-            AuthType.MultiKey => new MultiKeyConnectionCredentials(Hostname, Username, KeyDtos.Select(e => e.ToKey()))
+            AuthType.MultiKey => new MultiKeyConnectionCredentials(Hostname, Username, KeyDtos.Select(e => e.ToKey())) {Id = this.Id}
         };
     }
 }

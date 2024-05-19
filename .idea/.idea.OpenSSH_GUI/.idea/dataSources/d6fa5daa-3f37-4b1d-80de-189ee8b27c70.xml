@@ -499,7 +499,7 @@
     </routine>
     <schema id="191" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2024-05-18.20:16:26</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2024-05-19.08:20:16</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="192" parent="16">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1697,87 +1697,79 @@ KeyDtosId</ColNames>
       <DasType>TEXT|0s</DasType>
       <Position>4</Position>
     </column>
-    <index id="581" parent="557" name="IX_KeyDtos_AbsolutePath">
-      <ColNames>AbsolutePath</ColNames>
-      <Unique>1</Unique>
-    </index>
-    <key id="582" parent="557" name="PK_KeyDtos">
+    <key id="581" parent="557" name="PK_KeyDtos">
       <ColNames>Id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="583" parent="558" name="Id">
+    <column id="582" parent="558" name="Id">
       <AutoIncrement>1</AutoIncrement>
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="584" parent="558" name="Version">
+    <column id="583" parent="558" name="Version">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <column id="585" parent="558" name="ConvertPpkAutomatically">
+    <column id="584" parent="558" name="ConvertPpkAutomatically">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
     </column>
-    <column id="586" parent="558" name="MaxSavedServers">
+    <column id="585" parent="558" name="MaxSavedServers">
       <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
     </column>
-    <index id="587" parent="558" name="IX_Settings_Version">
-      <ColNames>Version</ColNames>
-      <Unique>1</Unique>
-    </index>
-    <key id="588" parent="558" name="PK_Settings">
+    <key id="586" parent="558" name="PK_Settings">
       <ColNames>Id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="589" parent="559" name="MigrationId">
+    <column id="587" parent="559" name="MigrationId">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
     </column>
-    <column id="590" parent="559" name="ProductVersion">
+    <column id="588" parent="559" name="ProductVersion">
       <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
     </column>
-    <index id="591" parent="559" name="sqlite_autoindex___EFMigrationsHistory_1">
+    <index id="589" parent="559" name="sqlite_autoindex___EFMigrationsHistory_1">
       <ColNames>MigrationId</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="592" parent="559" name="PK___EFMigrationsHistory">
+    <key id="590" parent="559" name="PK___EFMigrationsHistory">
       <ColNames>MigrationId</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex___EFMigrationsHistory_1</UnderlyingIndexName>
     </key>
-    <column id="593" parent="560" name="type">
+    <column id="591" parent="560" name="type">
       <DasType>TEXT|0s</DasType>
       <Position>1</Position>
     </column>
-    <column id="594" parent="560" name="name">
+    <column id="592" parent="560" name="name">
       <DasType>TEXT|0s</DasType>
       <Position>2</Position>
     </column>
-    <column id="595" parent="560" name="tbl_name">
+    <column id="593" parent="560" name="tbl_name">
       <DasType>TEXT|0s</DasType>
       <Position>3</Position>
     </column>
-    <column id="596" parent="560" name="rootpage">
+    <column id="594" parent="560" name="rootpage">
       <DasType>INT|0s</DasType>
       <Position>4</Position>
     </column>
-    <column id="597" parent="560" name="sql">
+    <column id="595" parent="560" name="sql">
       <DasType>TEXT|0s</DasType>
       <Position>5</Position>
     </column>
-    <column id="598" parent="561" name="name">
+    <column id="596" parent="561" name="name">
       <Position>1</Position>
     </column>
-    <column id="599" parent="561" name="seq">
+    <column id="597" parent="561" name="seq">
       <Position>2</Position>
     </column>
   </database-model>

@@ -10,7 +10,7 @@ using OpenSSH_GUI.Core.Database.Context;
 namespace OpenSSH_GUI.Core.Database.Migrations
 {
     [DbContext(typeof(OpenSshGuiDbContext))]
-    [Migration("20240518192650_Initial")]
+    [Migration("20240519083633_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

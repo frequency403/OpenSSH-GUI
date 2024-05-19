@@ -5,6 +5,7 @@
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
         Width="400"
         Height="450"
@@ -66,14 +67,20 @@
 
 
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding Submit}" CommandParameter="false" Background="Red">
+                Command="{Binding Submit}" Background="Red">
+            <Button.CommandParameter>
+                <system:Boolean>False</system:Boolean>
+            </Button.CommandParameter>
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.CancelAndClose}" />
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="Cancel" />
         </Button>
         <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding Submit}" CommandParameter="true" Background="Green">
+                Command="{Binding Submit}" Background="Green">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.SaveAndClose}" />
             </ToolTip.Tip>

@@ -60,7 +60,7 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     public void RenewKey(string? password = null)
     {
         KeyPassword = password;
-        Key = KeyFactory.FromPath(KeyFilePath, KeyPassword);
+        Key = KeyFactory.FromDtoId(Key.Id);
     }
 
     /// <summary>

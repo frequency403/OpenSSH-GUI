@@ -68,7 +68,6 @@ public partial class PpkKey : KeyBase, IPpkKey
             : SshKeyFormat.OpenSSH;
         KeyTypeString = DefinitionRegexWithInteger()
             .Replace(lines.FirstOrDefault(e => e.StartsWith(DefinitionLineStart)), "");
-        KeyType = new SshKeyType(Enum.Parse<KeyType>(KeyTypeString.Replace("ssh-", "").ToUpper()));
         EncryptionType = Enum.TryParse<EncryptionType>(
             EncryptionRegex().Replace(lines.FirstOrDefault(e => e.StartsWith(EncryptionLineStart)), ""),
             out var parsedEncryptionType)
@@ -85,11 +84,6 @@ public partial class PpkKey : KeyBase, IPpkKey
     /// Represents a key with a string representation of its type.
     /// </summary>
     public string KeyTypeString { get; }
-
-    /// <summary>
-    /// Represents the type of a key.
-    /// </summary>
-    public ISshKeyType KeyType { get; }
 
     /// <summary>
     /// Represents a public key in the SSH key pair.

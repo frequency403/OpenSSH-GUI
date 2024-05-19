@@ -3,11 +3,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
-        xmlns:views="clr-namespace:OpenSSH_GUI.Views"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -16,7 +15,6 @@
         Icon="/Assets/appicon.ico"
         Title="{x:Static openSshGui:StringsAndTexts.MainWindowTitle}">
     <Window.Resources>
-        <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
         <converters:PlatformIdConverter x:Key="PlatformIdConverter" />
         
     </Window.Resources>
@@ -210,6 +208,25 @@
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords}" 
+                                      Command="{Binding ReloadKeys}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Boolean>True</sys:Boolean>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="Reload"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDisk}" 
+                                      Command="{Binding ReloadKeys}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Boolean>False</sys:Boolean>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="Reload"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator />
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuAppSettings}" Command="{Binding OpenAppSettings}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
@@ -254,18 +271,27 @@
                     </ToolTip.Tip>
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
-                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuWebsite}" CommandParameter="0" Command="{Binding OpenBrowser}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuWebsite}" Command="{Binding OpenBrowser}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Int32>0</sys:Int32>
+                                </MenuItem.CommandParameter>
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="Web" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator />
-                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuQuestion}" CommandParameter="1" Command="{Binding OpenBrowser}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuQuestion}" Command="{Binding OpenBrowser}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Int32>1</sys:Int32>
+                                </MenuItem.CommandParameter>
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="LightbulbQuestionOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuAbout}" CommandParameter="2" Command="{Binding OpenBrowser}">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuAbout}" Command="{Binding OpenBrowser}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Int32>2</sys:Int32>
+                                </MenuItem.CommandParameter>
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="Help" />
                                 </MenuItem.Icon>
