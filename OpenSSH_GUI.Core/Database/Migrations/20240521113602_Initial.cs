@@ -47,15 +47,12 @@ namespace OpenSSH_GUI.Core.Database.Migrations
                 name: "Settings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
                     Version = table.Column<string>(type: "TEXT", nullable: false),
-                    ConvertPpkAutomatically = table.Column<bool>(type: "INTEGER", nullable: false),
-                    MaxSavedServers = table.Column<int>(type: "INTEGER", nullable: false)
+                    ConvertPpkAutomatically = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Settings", x => x.Id);
+                    table.PrimaryKey("PK_Settings", x => x.Version);
                 });
 
             migrationBuilder.CreateTable(
@@ -91,12 +88,6 @@ namespace OpenSSH_GUI.Core.Database.Migrations
                 name: "IX_KeyDtos_AbsolutePath",
                 table: "KeyDtos",
                 column: "AbsolutePath",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Settings_Version",
-                table: "Settings",
-                column: "Version",
                 unique: true);
         }
 

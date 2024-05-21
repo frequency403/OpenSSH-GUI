@@ -13,17 +13,17 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Database.DTO;
+using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
-using OpenSSH_GUI.Core.Interfaces.Settings;
-using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 
@@ -136,8 +136,7 @@ public class ConnectToServerViewModel : ViewModelBase
         });
         SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
         {
-            await App.ServiceProvider.GetRequiredService<IApplicationSettings>()
-                .AddKnownServerAsync(ServerConnection.ConnectionCredentials);
+            ServerConnection.ConnectionCredentials.Id = (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase()??new ConnectionCredentialsDto()).Id;
             return this;
         });
     }
@@ -315,5 +314,13 @@ public class ConnectToServerViewModel : ViewModelBase
     {
         PublicKeys = new ObservableCollection<ISshKey>(currentKeys.Where(e => e is not null && ((e.HasPassword && !e.NeedPassword) || (!e.HasPassword && !e.NeedPassword))));
         _selectedPublicKey = PublicKeys.FirstOrDefault();
+        var context = new OpenSshGuiDbContext();
+        var publicKeysPaths = PublicKeys.Select(p => p.AbsoluteFilePath).ToList();
+        var filteredItems = context.ConnectionCredentialsDtos.Where(dto =>
+            dto.KeyDtos.All(key => !publicKeysPaths.Contains(key.AbsolutePath)) && dto.AuthType != AuthType.Password
+        ).Select(e => e.Id);
+        var l = context.ConnectionCredentialsDtos.Where(dto => !filteredItems.Any(e => dto.Id == e)).Select(e => e.ToCredentials());
+
+        ConnectionCredentials = l;
     }
 }

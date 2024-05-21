@@ -8,11 +8,12 @@
 
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.ReactiveUI;
 using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class ExportWindow : Window
+public partial class ExportWindow : ReactiveWindow<ExportWindowViewModel>
 {
     public ExportWindow()
     {

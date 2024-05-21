@@ -10,7 +10,7 @@ using OpenSSH_GUI.Core.Database.Context;
 namespace OpenSSH_GUI.Core.Database.Migrations
 {
     [DbContext(typeof(OpenSshGuiDbContext))]
-    [Migration("20240519083633_Initial")]
+    [Migration("20240521113602_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -95,24 +95,13 @@ namespace OpenSSH_GUI.Core.Database.Migrations
 
             modelBuilder.Entity("OpenSSH_GUI.Core.Lib.Settings.Settings", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Version")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("ConvertPpkAutomatically")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MaxSavedServers")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Version")
-                        .IsUnique();
+                    b.HasKey("Version");
 
                     b.ToTable("Settings");
                 });

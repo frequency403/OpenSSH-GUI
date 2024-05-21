@@ -6,6 +6,7 @@
 
 #endregion
 
+using Microsoft.EntityFrameworkCore;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
@@ -25,6 +26,33 @@ public static class ConnectionCredentialsExtensions
     public static async Task<ConnectionCredentialsDto?> SaveDtoInDatabase(this IConnectionCredentials cc)
     {
             await using var dbContext = new OpenSshGuiDbContext();
+
+            var foundMcc = cc is IMultiKeyConnectionCredentials
+                ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c =>
+                    c.Hostname == cc.Hostname &&
+                    c.Username == cc.Username &&
+                    c.AuthType == cc.AuthType)
+                : null;
+            var foundKcc = cc is IKeyConnectionCredentials ddkcc
+                ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c => c.Hostname == cc.Hostname &&
+                    c.Username == cc.Username &&
+                    c.AuthType == cc.AuthType &&
+                    c.KeyDtos.FirstOrDefault(e => e.AbsolutePath != ddkcc.Key.AbsoluteFilePath) == null)
+                : null;
+        
+            
+            var foundDuplicate = (cc is IMultiKeyConnectionCredentials 
+                ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c => 
+                    c.Hostname == cc.Hostname && 
+                    c.Username == cc.Username && 
+                    c.AuthType == cc.AuthType)
+                : null) ?? (cc is IKeyConnectionCredentials dkcc
+                ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c => c.Hostname == cc.Hostname && 
+                                                                            c.Username == cc.Username && 
+                                                                            c.AuthType == cc.AuthType &&
+                                                                            c.KeyDtos.FirstOrDefault(e => e.AbsolutePath != dkcc.Key.AbsoluteFilePath) == null)
+                : null);
+            if (foundDuplicate is not null) return null;
             ConnectionCredentialsDto baseDto = new()
             {
                 Id = cc.Id,
@@ -48,7 +76,7 @@ public static class ConnectionCredentialsExtensions
                     break;
                 case IMultiKeyConnectionCredentials mcc:
                     var dbKeys = dbContext.KeyDtos.Where(a =>
-                        mcc.Keys.Any(b => b.AbsoluteFilePath == a.AbsolutePath));
+                        mcc.Keys.Select(b => b.AbsoluteFilePath).Contains(a.AbsolutePath));
                     baseDto.KeyDtos.AddRange(dbKeys);
                     break;
             }
@@ -56,5 +84,12 @@ public static class ConnectionCredentialsExtensions
             await dbContext.SaveChangesAsync();
             return await dbContext.ConnectionCredentialsDtos.FindAsync(baseDto.Id);
         
+    }
+
+    public static async Task RemoveDtoFromDatabase(this IConnectionCredentials cc)
+    {
+        await using var dbContext = new OpenSshGuiDbContext();
+        await dbContext.ConnectionCredentialsDtos.Where(e => e.Id == cc.Id).ExecuteDeleteAsync();
+        await dbContext.SaveChangesAsync();
     }
 }

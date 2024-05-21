@@ -10,6 +10,7 @@ using System;
 using Avalonia.ReactiveUI;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
+using System.Reactive;
 
 namespace OpenSSH_GUI.Views;
 

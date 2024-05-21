@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Lib.Settings;
 using Serilog.Extensions.Logging;
+using SQLitePCL;
 
 namespace OpenSSH_GUI.Core.Database.Context;
 
@@ -56,7 +57,7 @@ public class OpenSshGuiDbContext : DbContext
     {
         var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName);
-        var dbFilePath = Path.Combine(appDataPath, $"{AppDomain.CurrentDomain.FriendlyName}.db");
+        var dbFilePath = Path.Combine(appDataPath, $"{AppDomain.CurrentDomain.FriendlyName}");
         optionsBuilder.UseSqlite($"DataSource={dbFilePath}")
             .UseLazyLoadingProxies();
         base.OnConfiguring(optionsBuilder);
@@ -71,10 +72,8 @@ public class OpenSshGuiDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseEncryption(_provider);
-
-        modelBuilder.Entity<Settings>().HasKey(e => e.Id);
-        modelBuilder.Entity<Settings>()
-            .HasIndex(e => e.Version).IsUnique();
+        
+        modelBuilder.Entity<Settings>().HasKey(e => e.Version);
 
         modelBuilder.Entity<SshKeyDto>().HasKey(e => e.Id);
         modelBuilder.Entity<SshKeyDto>()

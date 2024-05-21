@@ -8,6 +8,7 @@
 
 using System;
 using Avalonia.ReactiveUI;
+using DynamicData.Binding;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
 
@@ -20,16 +21,16 @@ public partial class ApplicationSettingsWindow : ReactiveWindow<ApplicationSetti
         InitializeComponent();
         this.WhenActivated(d =>
         {
+            // d(ViewModel!.ShowEditEntry.RegisterHandler(async interaction =>
+            // {
+            //     var dialog = new EditSavedServerEntry
+            //     {
+            //         DataContext = interaction.Input,
+            //         Title = $"Edit {interaction.Input.CredentialsToEdit.Display}"
+            //     };
+            //     interaction.SetOutput(await dialog.ShowDialog<EditSavedServerEntryViewModel>(this));
+            // }));
             d(ViewModel!.Submit.Subscribe(Close));
-            d(ViewModel!.ShowEditEntry.RegisterHandler(async interaction =>
-            {
-                var dialog = new EditSavedServerEntry
-                {
-                    DataContext = interaction.Input,
-                    Title = $"Edit {interaction.Input.CredentialsToEdit.Display}"
-                };
-                interaction.SetOutput(await dialog.ShowDialog<EditSavedServerEntryViewModel>(this));
-            }));
         });
     }
 }

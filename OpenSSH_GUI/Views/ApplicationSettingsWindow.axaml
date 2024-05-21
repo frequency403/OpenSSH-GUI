@@ -18,12 +18,6 @@
         <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5">
             <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsDescription}" />
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
-                    VerticalAlignment="Bottom">
-            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsMaxServers}" />
-            <Separator Padding="5" />
-            <TextBox Padding="5" Text="{Binding MaxServers, Mode=TwoWay}" />
-        </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
                     VerticalAlignment="Stretch">
             <Separator Padding="5" />
@@ -32,40 +26,6 @@
             </CheckBox>
             <Separator Padding="5" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
-                    VerticalAlignment="Stretch">
-            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsSavedServers}" />
-            <Separator Padding="5" />
-            <ItemsControl Padding="5" ItemsSource="{Binding KnownServers}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="0 0 0 1" BorderBrush="DimGray" CornerRadius="5" Padding="5">
-                            <Grid ColumnDefinitions="* * * *">
-                                <Label Grid.Column="0" HorizontalAlignment="Left" Grid.ColumnSpan="2"
-                                       Content="{Binding Display}" />
-                                <Label Grid.Column="2" Content="{Binding AuthType}" />
-                                <Button Grid.Column="3"
-                                        HorizontalAlignment="Left"
-                                        Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).EditEntry}"
-                                        CommandParameter="{Binding}"
-                                        Background="LightBlue">
-                                    <avalonia:MaterialIcon Kind="EditCircleOutline" />
-                                </Button>
-                                <Button Grid.Column="3"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).RemoveServer}"
-                                        CommandParameter="{Binding}"
-                                        Background="OrangeRed">
-                                    <avalonia:MaterialIcon Kind="CloseCircleOutline" />
-                                </Button>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-
-
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                 Command="{Binding Submit}" Background="Red">
             <Button.CommandParameter>

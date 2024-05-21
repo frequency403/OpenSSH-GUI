@@ -17,7 +17,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Interfaces.Settings;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.ViewModels;
@@ -75,12 +74,12 @@ public class App : Application
 
         collection.AddLogging(e => e.AddSerilog(serilog, true));
         collection.AddDbContext<OpenSshGuiDbContext>();
-        collection.AddSingleton<IApplicationSettings, ApplicationSettings>();
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<ExportWindowViewModel>();
         collection.AddTransient<EditKnownHostsViewModel>();
         collection.AddTransient<EditAuthorizedKeysViewModel>();
         collection.AddTransient<ConnectToServerViewModel>();
+        collection.AddTransient<ConnectionViewModel>();
         collection.AddTransient<AddKeyWindowViewModel>();
         collection.AddTransient<ApplicationSettingsViewModel>();
         collection.AddTransient<EditSavedServerEntryViewModel>();

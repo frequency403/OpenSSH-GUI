@@ -8,6 +8,7 @@
         <entry key="OpenSSH_GUI/Views/AddKeyWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/ConnectToServerWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Views/ConnectionWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/EditSavedServerEntry.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />

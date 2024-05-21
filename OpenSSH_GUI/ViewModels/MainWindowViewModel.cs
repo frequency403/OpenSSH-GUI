@@ -38,7 +38,7 @@ namespace OpenSSH_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> ShowAppSettings = new();
+    public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel> ShowAppSettings = new();
     public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
 
@@ -47,6 +47,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
+    public readonly Interaction<ConnectionViewModel, ConnectionViewModel?> ShowConnectionWindow = new();
 
     private MaterialIcon _itemsCount = new()
     {
@@ -158,6 +159,14 @@ public class MainWindowViewModel : ViewModelBase
             var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
             if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
             return windowResult;
+        });
+
+    public ReactiveCommand<Unit, ConnectionViewModel?> OpenConnectWindow =>
+        ReactiveCommand.CreateFromTask<Unit, ConnectionViewModel?>(async e =>
+        {
+            var connect = App.ServiceProvider.GetRequiredService<ConnectionViewModel>();
+            var res = await ShowConnectionWindow.Handle(connect);
+            return res;
         });
 
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
@@ -318,13 +327,12 @@ public class MainWindowViewModel : ViewModelBase
         return keyInList;
     });
     
-    public ReactiveCommand<Unit, ApplicationSettingsViewModel?> OpenAppSettings =>
-        ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel?>(async u =>
+    public ReactiveCommand<Unit, ApplicationSettingsViewModel> OpenAppSettings =>
+        ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel>(async u =>
         {
             var vm = App.ServiceProvider.GetRequiredService<ApplicationSettingsViewModel>();
-            vm.GetKeys(ref _sshKeys);
             var result = await ShowAppSettings.Handle(vm);
-            return result ?? result;
+            return result;
         });
     
     public ReactiveCommand<ISshKey, ISshKey?> ProvidePassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(

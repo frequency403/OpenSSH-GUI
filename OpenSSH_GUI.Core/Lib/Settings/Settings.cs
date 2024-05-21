@@ -22,11 +22,6 @@ namespace OpenSSH_GUI.Core.Lib.Settings;
 public record Settings
 {
     /// <summary>
-    /// The unique identifier of the settings. </summary>
-    /// /
-    [Key]
-    public int Id { get; set; }
-    /// <summary>
     /// The current version of the application.
     /// </summary>
     public string Version { get; set; } =
@@ -36,9 +31,4 @@ public record Settings
     /// Whether to convert ppk files automatically.
     /// </summary>
     public bool ConvertPpkAutomatically { get; set; } = false;
-    
-    /// <summary>
-    /// The maximum number of saved servers.
-    /// </summary>
-    public int MaxSavedServers { get; set; } = 5;
 }

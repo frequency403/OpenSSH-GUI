@@ -92,24 +92,13 @@ namespace OpenSSH_GUI.Core.Database.Migrations
 
             modelBuilder.Entity("OpenSSH_GUI.Core.Lib.Settings.Settings", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Version")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("ConvertPpkAutomatically")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MaxSavedServers")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Version")
-                        .IsUnique();
+                    b.HasKey("Version");
 
                     b.ToTable("Settings");
                 });

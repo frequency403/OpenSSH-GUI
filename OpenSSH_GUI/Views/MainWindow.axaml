@@ -172,6 +172,7 @@
                                     <materialIcons:MaterialIconExt Kind="LanDisconnect" />
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="Manage" Command="{Binding OpenConnectWindow}"></MenuItem>
                         </ContextMenu>
                     </Border.ContextMenu>
                     <StackPanel>

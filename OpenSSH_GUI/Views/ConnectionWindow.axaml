@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:wrapper="clr-namespace:OpenSSH_GUI.Resources.Wrapper"
+        xmlns:dto="clr-namespace:OpenSSH_GUI.Core.Database.DTO;assembly=OpenSSH_GUI.Core"
+        xmlns:credentials="clr-namespace:OpenSSH_GUI.Core.Interfaces.Credentials;assembly=OpenSSH_GUI.Core"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800"
+        Height="450"
+        x:Class="OpenSSH_GUI.Views.ConnectionWindow"
+        x:DataType="viewModels:ConnectionViewModel"
+        Title="ConnectionWindow">
+    <Grid ColumnDefinitions="* * *" RowDefinitions=" * * *">
+        <ItemsControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" ItemsSource="{Binding CredentialGroups}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="wrapper:CredentialGroup">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding Display}"/>
+                        </StackPanel>
+                        <Separator />
+                        <ItemsControl ItemsSource="{Binding Credentials}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander Header="{Binding Key}" HorizontalAlignment="Stretch">
+                                        <ItemsControl ItemsSource="{Binding Value}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel x:Name="Panel">
+                                                        <ItemsControl x:Name="CredentialsHolder" ItemsSource="{Binding Credentials}">
+                                                            <ItemsControl.DataTemplates>
+                                                                <DataTemplate DataType="credentials:IPasswordConnectionCredentials">
+                                                                    <StackPanel>
+                                                                        <Label Content="{Binding Password}"/>
+                                                                        <Button Command="{Binding Path=$parent[Window].((viewModels:ConnectionViewModel)DataContext).Remove}" CommandParameter="{Binding .}">Remove</Button>
+                                                                        <Button Command="{Binding $parent[Window].((viewModels:ConnectionViewModel)DataContext).Connect}" CommandParameter="{Binding }">Remove</Button>
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                                <DataTemplate DataType="credentials:IKeyConnectionCredentials">
+                                                                    <StackPanel>
+                                                                        <Label Content="{Binding Key.AbsoluteFilePath}"/>
+                                                                        <Label Content="{Binding Key.Format}"/>
+                                                                        <Button Command="{Binding Path=$parent[Window].((viewModels:ConnectionViewModel)DataContext).Remove}" CommandParameter="{Binding .}">Remove</Button>
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                                <DataTemplate DataType="credentials:IMultiKeyConnectionCredentials">
+                                                                    <StackPanel>
+                                                                        <ItemsControl ItemsSource="{Binding Keys}">
+                                                                            <ItemsControl.ItemTemplate>
+                                                                                <DataTemplate>
+                                                                                    <StackPanel>
+                                                                                        <Label Content="{Binding AbsoluteFilePath}"/>
+                                                                                        <Label Content="{Binding Format}"/>
+                                                                                        <Button Command="{Binding Path=$parent[Window].((viewModels:ConnectionViewModel)DataContext).Remove}" CommandParameter="{Binding .}">Remove</Button>
+                                                                                    </StackPanel>
+                                                                                </DataTemplate>
+                                                                            </ItemsControl.ItemTemplate>
+                                                                        </ItemsControl>
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                            </ItemsControl.DataTemplates>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Grid.Row="2" Grid.Column="2" Command="{Binding Submit}">Close</Button>
+    </Grid>
+</Window>

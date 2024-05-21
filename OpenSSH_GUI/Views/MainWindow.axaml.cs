@@ -6,8 +6,8 @@
 
 #endregion
 
-using Avalonia.Controls;
 using Avalonia.ReactiveUI;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
 
@@ -15,66 +15,29 @@ namespace OpenSSH_GUI.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
-    private const WindowStartupLocation DefaultWindowStartupLocation = WindowStartupLocation.CenterScreen;
-
     public MainWindow()
     {
         InitializeComponent();
-        this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(async interaction =>
-        {
-            var dialog = new AddKeyWindow
-            {
-                DataContext = interaction.Input,
-                WindowStartupLocation = DefaultWindowStartupLocation
-            };
-            interaction.SetOutput(await dialog.ShowDialog<AddKeyWindowViewModel>(this));
-        })));
-        this.WhenActivated(action => action(ViewModel!.ShowAppSettings.RegisterHandler(async interaction =>
-        {
-            var dialog = new ApplicationSettingsWindow
-            {
-                DataContext = interaction.Input,
-                WindowStartupLocation = DefaultWindowStartupLocation
-            };
-            interaction.SetOutput(await dialog.ShowDialog<ApplicationSettingsViewModel>(this));
-        })));
-        this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(async interaction =>
-        {
-            var dialog = new EditKnownHostsWindow
-            {
-                DataContext = interaction.Input,
-                WindowStartupLocation = DefaultWindowStartupLocation
-            };
-            interaction.SetOutput(await dialog.ShowDialog<EditKnownHostsViewModel>(this));
-        })));
-        this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(async interaction =>
-        {
-            var dialog = new ExportWindow
-            {
-                DataContext = interaction.Input,
-                WindowStartupLocation = DefaultWindowStartupLocation
-            };
-            interaction.SetOutput(await dialog.ShowDialog<ExportWindowViewModel>(this));
-        })));
+        this.WhenActivated(action => 
+            action(ViewModel!.ShowCreate.RegisterHandler(async interaction =>
+                await WindowInteraction.DialogMainWindow<AddKeyWindowViewModel, AddKeyWindow>(interaction, this))));
+        this.WhenActivated(action => 
+            action(ViewModel!.ShowAppSettings.RegisterHandler(async interaction =>
+                await WindowInteraction.DialogMainWindow<ApplicationSettingsViewModel, ApplicationSettingsWindow>(interaction, this))));
+        this.WhenActivated(action => 
+            action(ViewModel!.ShowEditKnownHosts.RegisterHandler(async interaction =>
+                await WindowInteraction.DialogMainWindow<EditKnownHostsViewModel, EditKnownHostsWindow>(interaction, this))));
+        this.WhenActivated(action => 
+            action(ViewModel!.ShowExportWindow.RegisterHandler(async interaction =>
+                await WindowInteraction.DialogMainWindow<ExportWindowViewModel, ExportWindow>(interaction, this))));
         this.WhenActivated(action =>
-            action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(async interaction =>
-            {
-                var dialog = new EditAuthorizedKeysWindow
-                {
-                    DataContext = interaction.Input,
-                    WindowStartupLocation = DefaultWindowStartupLocation
-                };
-                interaction.SetOutput(await dialog.ShowDialog<EditAuthorizedKeysViewModel>(this));
-            })));
+            action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(async interaction => 
+                await WindowInteraction.DialogMainWindow<EditAuthorizedKeysViewModel, EditAuthorizedKeysWindow>(interaction, this))));
         this.WhenActivated(action =>
             action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(async interaction =>
-            {
-                var dialog = new ConnectToServerWindow
-                {
-                    DataContext = interaction.Input,
-                    WindowStartupLocation = DefaultWindowStartupLocation
-                };
-                interaction.SetOutput(await dialog.ShowDialog<ConnectToServerViewModel>(this));
-            })));
+                await WindowInteraction.DialogMainWindow<ConnectToServerViewModel, ConnectToServerWindow>(interaction, this))));
+        this.WhenActivated(action =>
+            action(ViewModel!.ShowConnectionWindow.RegisterHandler(async interaction => 
+                await WindowInteraction.DialogMainWindow<ConnectionViewModel, ConnectionWindow>(interaction, this))));
     }
 }
