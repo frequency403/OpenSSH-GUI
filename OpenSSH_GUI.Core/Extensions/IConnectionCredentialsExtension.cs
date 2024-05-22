@@ -26,22 +26,8 @@ public static class ConnectionCredentialsExtensions
     public static async Task<ConnectionCredentialsDto?> SaveDtoInDatabase(this IConnectionCredentials cc)
     {
             await using var dbContext = new OpenSshGuiDbContext();
-
-            var foundMcc = cc is IMultiKeyConnectionCredentials
-                ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c =>
-                    c.Hostname == cc.Hostname &&
-                    c.Username == cc.Username &&
-                    c.AuthType == cc.AuthType)
-                : null;
-            var foundKcc = cc is IKeyConnectionCredentials ddkcc
-                ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c => c.Hostname == cc.Hostname &&
-                    c.Username == cc.Username &&
-                    c.AuthType == cc.AuthType &&
-                    c.KeyDtos.FirstOrDefault(e => e.AbsolutePath != ddkcc.Key.AbsoluteFilePath) == null)
-                : null;
-        
             
-            var foundDuplicate = (cc is IMultiKeyConnectionCredentials 
+            var foundDuplicate = (cc is IMultiKeyConnectionCredentials or IPasswordConnectionCredentials
                 ? await dbContext.ConnectionCredentialsDtos.FirstOrDefaultAsync(c => 
                     c.Hostname == cc.Hostname && 
                     c.Username == cc.Username && 

@@ -33,17 +33,17 @@ public class ApplicationSettingsViewModel(
     
     private bool _convertPpkAutomatically = context.Settings.First().ConvertPpkAutomatically;
 
-    // private List<IConnectionCredentials> _knownServers = context.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
-    //
-    // public ObservableCollection<ISshKey> Keys = [];
-    // public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
-    //
-    //
-    // public List<IConnectionCredentials> KnownServers
-    // {
-    //     get => _knownServers;
-    //     set => this.RaiseAndSetIfChanged(ref _knownServers, value);
-    // }
+    private List<IConnectionCredentials> _knownServers = context.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
+    
+    public ObservableCollection<ISshKey> Keys = [];
+    public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
+    
+    
+    public List<IConnectionCredentials> KnownServers
+    {
+        get => _knownServers;
+        set => this.RaiseAndSetIfChanged(ref _knownServers, value);
+    }
 
     public bool ConvertPpkAutomatically
     {
@@ -51,39 +51,39 @@ public class ApplicationSettingsViewModel(
         set => this.RaiseAndSetIfChanged(ref _convertPpkAutomatically, value);
     }
 
-    // public ReactiveCommand<IConnectionCredentials, ApplicationSettingsViewModel?> RemoveServer =>
-    //     ReactiveCommand.Create<IConnectionCredentials, ApplicationSettingsViewModel?>(input =>
-    //     {
-    //         var index = KnownServers.IndexOf(input);
-    //         var copy = KnownServers.ToList();
-    //         copy.RemoveAt(index);
-    //         KnownServers = copy;
-    //         return this;
-    //     });
+    public ReactiveCommand<IConnectionCredentials, ApplicationSettingsViewModel?> RemoveServer =>
+        ReactiveCommand.Create<IConnectionCredentials, ApplicationSettingsViewModel?>(input =>
+        {
+            var index = KnownServers.IndexOf(input);
+            var copy = KnownServers.ToList();
+            copy.RemoveAt(index);
+            KnownServers = copy;
+            return this;
+        });
 
-    // public ReactiveCommand<IConnectionCredentials, IConnectionCredentials?> EditEntry =>
-    //     ReactiveCommand.CreateFromTask<IConnectionCredentials, IConnectionCredentials?>(
-    //         async e =>
-    //         {
-    //             if (e is IMultiKeyConnectionCredentials)
-    //             {
-    //                 var box = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.ApplicationSettingsEditErrorBoxTitle,
-    //                     StringsAndTexts.ApplicationSettingsEditErrorBoxText);
-    //                 await box.ShowAsync();
-    //                 return null;
-    //             }
-    //
-    //             var service = App.ServiceProvider.GetRequiredService<EditSavedServerEntryViewModel>();
-    //             service.SetValues(ref Keys, e);
-    //             var result = await ShowEditEntry.Handle(service);
-    //             if (result is null) return e;
-    //             var list = KnownServers.ToList();
-    //             var index = list.IndexOf(e);
-    //             list.RemoveAt(index);
-    //             list.Insert(index, result.CredentialsToEdit);
-    //             KnownServers = list;
-    //             return result.CredentialsToEdit;
-    //         });
+    public ReactiveCommand<IConnectionCredentials, IConnectionCredentials?> EditEntry =>
+        ReactiveCommand.CreateFromTask<IConnectionCredentials, IConnectionCredentials?>(
+            async e =>
+            {
+                if (e is IMultiKeyConnectionCredentials)
+                {
+                    var box = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.ApplicationSettingsEditErrorBoxTitle,
+                        StringsAndTexts.ApplicationSettingsEditErrorBoxText);
+                    await box.ShowAsync();
+                    return null;
+                }
+    
+                var service = App.ServiceProvider.GetRequiredService<EditSavedServerEntryViewModel>();
+                service.SetValues(ref Keys, e);
+                var result = await ShowEditEntry.Handle(service);
+                if (result is null) return e;
+                var list = KnownServers.ToList();
+                var index = list.IndexOf(e);
+                list.RemoveAt(index);
+                list.Insert(index, result.CredentialsToEdit);
+                KnownServers = list;
+                return result.CredentialsToEdit;
+            });
 
     public ReactiveCommand<bool, ApplicationSettingsViewModel> Submit =>
         ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel>(async e =>
@@ -94,6 +94,8 @@ public class ApplicationSettingsViewModel(
             }
             var file = context.Settings.Update(_settings).Entity;
             file.ConvertPpkAutomatically = ConvertPpkAutomatically;
+            var knownServerIds = KnownServers.Select(s => s.Id).ToList();
+            await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
             await context.SaveChangesAsync();
             return this;
         });

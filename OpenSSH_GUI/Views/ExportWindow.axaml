@@ -19,7 +19,7 @@
     </Design.DataContext>
     <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
         <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3">
-            <TextPresenter Name="ExportedText"
+            <SelectableTextBlock Name="ExportedText"
                            Text="{Binding Export}" TextWrapping="Wrap" />
         </ScrollViewer>
         <Button Grid.Row="2" Grid.Column="1" Click="CopyToClipboard">

@@ -94,7 +94,9 @@
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}"/>
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
-                Command="{Binding TestConnection}" IsEnabled="{Binding !ServerConnection.IsConnected}">
+                Command="{Binding TestConnection}" 
+                IsEnabled="{Binding !ServerConnection.IsConnected}"
+                HotKey="Enter">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowTestConnection}" />
             </ToolTip.Tip>
@@ -129,7 +131,8 @@
         <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                 HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
                 Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}"
-                Command="{Binding SubmitConnection}">
+                Command="{Binding SubmitConnection}"
+                HotKey="Enter">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowAcceptConnection}" />
             </ToolTip.Tip>

@@ -79,7 +79,6 @@ public class App : Application
         collection.AddTransient<EditKnownHostsViewModel>();
         collection.AddTransient<EditAuthorizedKeysViewModel>();
         collection.AddTransient<ConnectToServerViewModel>();
-        collection.AddTransient<ConnectionViewModel>();
         collection.AddTransient<AddKeyWindowViewModel>();
         collection.AddTransient<ApplicationSettingsViewModel>();
         collection.AddTransient<EditSavedServerEntryViewModel>();

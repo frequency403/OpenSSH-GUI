@@ -16,6 +16,7 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Misc;
@@ -47,7 +49,6 @@ public class MainWindowViewModel : ViewModelBase
 
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
-    public readonly Interaction<ConnectionViewModel, ConnectionViewModel?> ShowConnectionWindow = new();
 
     private MaterialIcon _itemsCount = new()
     {
@@ -159,14 +160,6 @@ public class MainWindowViewModel : ViewModelBase
             var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
             if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
             return windowResult;
-        });
-
-    public ReactiveCommand<Unit, ConnectionViewModel?> OpenConnectWindow =>
-        ReactiveCommand.CreateFromTask<Unit, ConnectionViewModel?>(async e =>
-        {
-            var connect = App.ServiceProvider.GetRequiredService<ConnectionViewModel>();
-            var res = await ShowConnectionWindow.Handle(connect);
-            return res;
         });
 
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
@@ -423,4 +416,82 @@ public class MainWindowViewModel : ViewModelBase
             Height = 20
         };
     }
+
+    private bool? _keyTypeSort = null;
+    public bool? KeyTypeSort
+    {
+        get => _keyTypeSort;
+        set
+        {
+            KeyTypeSortDirectionIcon = EvaluateSortIconKind(value);
+            SshKeys = new ObservableCollection<ISshKey>(value switch
+            {
+                null => SshKeys.OrderBy(e => e.Id),
+                true => SshKeys.OrderBy(e => e.KeyType.BaseType),
+                false => SshKeys.OrderByDescending(e => e.KeyType.BaseType)
+            });
+            this.RaiseAndSetIfChanged(ref _keyTypeSort, value);
+        }
+    }
+
+    private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
+    public MaterialIconKind KeyTypeSortDirectionIcon
+    {
+        get => _keyTypeSortDirectionIcon;
+        set => this.RaiseAndSetIfChanged(ref _keyTypeSortDirectionIcon, value);
+    }
+    
+    private bool? _commentSort = null;
+    public bool? CommentSort
+    {
+        get => _commentSort;
+        set
+        {
+            CommentSortDirectionIcon=EvaluateSortIconKind(value);
+            SshKeys = new ObservableCollection<ISshKey>(value switch
+            {
+                null => SshKeys.OrderBy(e => e.Id),
+                true => SshKeys.OrderBy(e => e.Comment),
+                false => SshKeys.OrderByDescending(e => e.Comment)
+            });
+            this.RaiseAndSetIfChanged(ref _commentSort, value);
+        }
+    }
+    
+    private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
+    public MaterialIconKind CommentSortDirectionIcon
+    {
+        get => _commentSortDirectionIcon;
+        set => this.RaiseAndSetIfChanged(ref _commentSortDirectionIcon, value);
+    }
+    
+    private bool? _fingerPrintSort = null;
+    public bool? FingerPrintSort
+    {
+        get => _fingerPrintSort;
+        set
+        {
+            FingerPrintSortDirectionIcon = EvaluateSortIconKind(value);
+            SshKeys = new ObservableCollection<ISshKey>(value switch
+            {
+                null => SshKeys.OrderBy(e => e.Id),
+                true => SshKeys.OrderBy(e => e.Fingerprint),
+                false => SshKeys.OrderByDescending(e => e.Fingerprint)
+            });
+            this.RaiseAndSetIfChanged(ref _fingerPrintSort, value);
+        }
+    }
+    private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
+    public MaterialIconKind FingerPrintSortDirectionIcon
+    {
+        get => _fingerPrintSortDirectionIcon;
+        set => this.RaiseAndSetIfChanged(ref _fingerPrintSortDirectionIcon, value);
+    }
+
+    private MaterialIconKind EvaluateSortIconKind(bool? value) => value switch
+    {
+        null => MaterialIconKind.CircleOutline,
+        true =>  MaterialIconKind.ChevronUpCircleOutline,
+        false => MaterialIconKind.ChevronDownCircleOutline
+    };
 }

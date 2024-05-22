@@ -5,6 +5,7 @@
       <map>
         <entry key="OpenSSH_GUI/App.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Resources/Styles/ISshKeyStyles.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Resources/Styles/ManagedCredentialsStyle.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/AddKeyWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/ConnectToServerWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />

@@ -36,8 +36,5 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(action =>
             action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(async interaction =>
                 await WindowInteraction.DialogMainWindow<ConnectToServerViewModel, ConnectToServerWindow>(interaction, this))));
-        this.WhenActivated(action =>
-            action(ViewModel!.ShowConnectionWindow.RegisterHandler(async interaction => 
-                await WindowInteraction.DialogMainWindow<ConnectionViewModel, ConnectionWindow>(interaction, this))));
     }
 }

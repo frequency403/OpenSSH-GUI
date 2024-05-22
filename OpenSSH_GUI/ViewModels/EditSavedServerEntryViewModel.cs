@@ -53,7 +53,7 @@ public class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryViewModel
         CredentialsToEdit = credentials;
         if (CredentialsToEdit is IPasswordConnectionCredentials pwcc) Password = pwcc.Password;
         SelectedKey = CredentialsToEdit is IKeyConnectionCredentials kcc
-            ? Keys.First(e => string.Equals(kcc.Key.Fingerprint, e.Fingerprint))
-            : Keys.First();
+            ? Keys.FirstOrDefault(e => string.Equals(kcc.Key.Fingerprint, e.Fingerprint))
+            : Keys.FirstOrDefault();
     }
 }
