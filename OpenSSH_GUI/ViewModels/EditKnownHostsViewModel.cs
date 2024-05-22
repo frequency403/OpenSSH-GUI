@@ -8,6 +8,7 @@
 
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -18,7 +19,7 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditKnownHostsViewModel(ILogger<EditKnownHostsViewModel> logger) : ViewModelBase(logger)
+public class EditKnownHostsViewModel : ViewModelBase<EditKnownHostsViewModel>
 {
     private ObservableCollection<IKnownHost> _knownHostsLocal = [];
 
@@ -42,7 +43,7 @@ public class EditKnownHostsViewModel(ILogger<EditKnownHostsViewModel> logger) : 
     }
 
     public ReactiveCommand<bool, EditKnownHostsViewModel> ProcessData { get; private set; }
-
+    
     public void SetServerConnection(ref IServerConnection connection)
     {
         ServerConnection = connection;

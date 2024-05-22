@@ -9,6 +9,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Castle.Components.DictionaryAdapter.Xml;
 using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI;

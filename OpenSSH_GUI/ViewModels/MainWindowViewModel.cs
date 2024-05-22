@@ -38,7 +38,7 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 {
     public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel> ShowAppSettings = new();
     public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
@@ -61,14 +61,14 @@ public class MainWindowViewModel : ViewModelBase
     private IServerConnection _serverConnection;
 
     private ObservableCollection<ISshKey?> _sshKeys;
-    private OpenSshGuiDbContext _context;
 
     private async Task UpdateKeyInDatabase(ISshKey key)
     {
-        var found = await _context.KeyDtos.Where(e => e.AbsolutePath == key.AbsoluteFilePath).FirstOrDefaultAsync();
+        await using var context = new OpenSshGuiDbContext();
+        var found = await context.KeyDtos.Where(e => e.AbsolutePath == key.AbsoluteFilePath).FirstOrDefaultAsync();
         if (found is null)
         {
-            _context.KeyDtos.Add(key.ToDto());
+            context.KeyDtos.Add(key.ToDto());
         }
         else
         {
@@ -77,12 +77,11 @@ public class MainWindowViewModel : ViewModelBase
             found.Format = keyDto.Format;
             found.Password = keyDto.Password;
         }
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
-    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, OpenSshGuiDbContext context) : base(logger)
+    public MainWindowViewModel()
     {
-        _context = context;
         _sshKeys = new ObservableCollection<ISshKey?>(DirectoryCrawler.GetAllKeys());
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
@@ -155,8 +154,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow =>
         ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
         {
-            var connectToServer = App.ServiceProvider.GetRequiredService<ConnectToServerViewModel>();
-            connectToServer.SetKeys(ref _sshKeys);
+            var connectToServer = new ConnectToServerViewModel(ref _sshKeys);
             var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
             if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
             return windowResult;
@@ -165,7 +163,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
         {
-            var editKnownHosts = App.ServiceProvider.GetRequiredService<EditKnownHostsViewModel>();
+            var editKnownHosts = new EditKnownHostsViewModel();
             editKnownHosts.SetServerConnection(ref _serverConnection);
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
@@ -182,7 +180,7 @@ public class MainWindowViewModel : ViewModelBase
             return null;
         }
 
-        var exportViewModel = App.ServiceProvider.GetRequiredService<ExportWindowViewModel>();
+        var exportViewModel = new ExportWindowViewModel();
         exportViewModel.Export = keyExport;
         exportViewModel.WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
             Enum.GetName(key.KeyType.BaseType), key.Filename);
@@ -201,8 +199,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 try
                 {
-                    var editAuthorizedKeysViewModel =
-                        App.ServiceProvider.GetRequiredService<EditAuthorizedKeysViewModel>();
+                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel();
                     editAuthorizedKeysViewModel.SetConnectionAndKeys(ref _serverConnection, ref _sshKeys);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
@@ -218,7 +215,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
         ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async e =>
         {
-            var create = App.ServiceProvider.GetRequiredService<AddKeyWindowViewModel>();
+            var create = new AddKeyWindowViewModel();
             var result = await ShowCreate.Handle(create);
             if (result == null) return result;
             Exception? exception = null;
@@ -252,8 +249,9 @@ public class MainWindowViewModel : ViewModelBase
             if (res != ButtonResult.Yes) return null;
             u.DeleteKey();
             SshKeys.Remove(u);
-            _context.KeyDtos.Remove(await _context.KeyDtos.FirstAsync(e => e.AbsolutePath == u.AbsoluteFilePath));
-            await _context.SaveChangesAsync();
+            await using var context = new OpenSshGuiDbContext();
+            context.KeyDtos.Remove(await context.KeyDtos.FirstAsync(e => e.AbsolutePath == u.AbsoluteFilePath));
+            await context.SaveChangesAsync();
             EvaluateAppropriateIcon();
             return u;
         });
@@ -300,7 +298,7 @@ public class MainWindowViewModel : ViewModelBase
     
     public ReactiveCommand<ISshKey, ISshKey> ShowPassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey>(async key =>
     {
-        var exportView = new ExportWindowViewModel(NullLogger<ExportWindowViewModel>.Instance)
+        var exportView = new ExportWindowViewModel()
         {
             Export = key.Password,
             WindowTitle = string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath)
@@ -310,9 +308,10 @@ public class MainWindowViewModel : ViewModelBase
     });
     public ReactiveCommand<ISshKey, ISshKey> ForgetPassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey>(async key =>
     {
-        var dto = await _context.KeyDtos.FirstAsync(e => e.AbsolutePath == key.AbsoluteFilePath);
+        await using var context = new OpenSshGuiDbContext();
+        var dto = await context.KeyDtos.FirstAsync(e => e.AbsolutePath == key.AbsoluteFilePath);
         dto.Password = "";
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         var index = SshKeys.IndexOf(key);
         var keyInList = KeyFactory.FromDtoId(dto.Id);
         SshKeys.RemoveAt(index);
@@ -323,7 +322,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, ApplicationSettingsViewModel> OpenAppSettings =>
         ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel>(async u =>
         {
-            var vm = App.ServiceProvider.GetRequiredService<ApplicationSettingsViewModel>();
+            var vm = new ApplicationSettingsViewModel();
             var result = await ShowAppSettings.Handle(vm);
             return result;
         });
@@ -491,7 +490,7 @@ public class MainWindowViewModel : ViewModelBase
     private MaterialIconKind EvaluateSortIconKind(bool? value) => value switch
     {
         null => MaterialIconKind.CircleOutline,
-        true =>  MaterialIconKind.ChevronUpCircleOutline,
-        false => MaterialIconKind.ChevronDownCircleOutline
+        true =>  MaterialIconKind.ChevronDownCircleOutline,
+        false => MaterialIconKind.ChevronUpCircleOutline
     };
 }

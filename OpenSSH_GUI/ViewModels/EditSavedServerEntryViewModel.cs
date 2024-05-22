@@ -8,6 +8,7 @@
 
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -16,8 +17,8 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryViewModel> logger) : ViewModelBase(logger)
-{
+public class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServerEntryViewModel>
+{ //@TODO ValidateIncomingKeysForExistence
     private string _password = "";
 
     private ISshKey _selectedKey;

@@ -38,11 +38,9 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         ServiceProvider = BuildServiceCollection().BuildServiceProvider();
-        using (var scope = ServiceProvider.CreateScope())
+        using (var db = new OpenSshGuiDbContext())
         {
-            var db = scope.ServiceProvider.GetRequiredService<OpenSshGuiDbContext>();
             db.Database.Migrate();
-            
             if (!db.Settings.Any()) db.Settings.Add(new Settings());
             db.SaveChanges();
         }
@@ -50,7 +48,7 @@ public class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = new MainWindow
             {
-                DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>()
+                DataContext = new MainWindowViewModel()
             };
         base.OnFrameworkInitializationCompleted();
     }
@@ -73,16 +71,6 @@ public class App : Application
         // AddServices
 
         collection.AddLogging(e => e.AddSerilog(serilog, true));
-        collection.AddDbContext<OpenSshGuiDbContext>();
-        collection.AddTransient<MainWindowViewModel>();
-        collection.AddTransient<ExportWindowViewModel>();
-        collection.AddTransient<EditKnownHostsViewModel>();
-        collection.AddTransient<EditAuthorizedKeysViewModel>();
-        collection.AddTransient<ConnectToServerViewModel>();
-        collection.AddTransient<AddKeyWindowViewModel>();
-        collection.AddTransient<ApplicationSettingsViewModel>();
-        collection.AddTransient<EditSavedServerEntryViewModel>();
-        
 
         // return ServiceCollection
         return collection;

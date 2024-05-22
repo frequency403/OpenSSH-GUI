@@ -13,7 +13,7 @@ using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class ExportWindow : ReactiveWindow<ExportWindowViewModel>
+public partial class ExportWindow : WindowBase<ExportWindowViewModel>
 {
     public ExportWindow()
     {

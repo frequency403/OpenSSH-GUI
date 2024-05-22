@@ -2,11 +2,13 @@
 // Created: 18.05.2024 - 16:05:59
 // Last edit: 18.05.2024 - 16:05:59
 
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
+using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.Core.Lib.Static;
@@ -68,12 +70,23 @@ public class ConnectionCredentialsDto
     /// <returns>The converted IConnectionCredentials object.</returns>
     public IConnectionCredentials ToCredentials()
     {
+        var g = KeyDtos.Select(e => e.ToKey());
+        return ToCredentials(ref g);
+    }
+
+    public IConnectionCredentials ToCredentials(ref ObservableCollection<ISshKey> keys)
+    {
+        var g = keys.Select(e => e);
+        return ToCredentials(ref g);
+    }
+    public IConnectionCredentials ToCredentials(ref IEnumerable<ISshKey> keys)
+    {
         return AuthType switch
         {
             AuthType.Key => new KeyConnectionCredentials(Hostname, Username, KeyDtos.First().ToKey()) {Id = this.Id},
             AuthType.Password => new PasswordConnectionCredentials(Hostname, Username, Password,
                 PasswordEncrypted) {Id = this.Id},
-            AuthType.MultiKey => new MultiKeyConnectionCredentials(Hostname, Username, KeyDtos.Select(e => e.ToKey())) {Id = this.Id}
+            AuthType.MultiKey => new MultiKeyConnectionCredentials(Hostname, Username, keys.Where(e => KeyDtos.All(f => f.Id != e.Id))) {Id = this.Id}
         };
     }
 }

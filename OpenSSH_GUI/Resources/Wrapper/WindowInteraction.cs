@@ -13,18 +13,18 @@ namespace OpenSSH_GUI.Resources.Wrapper;
 
 public static class WindowInteraction
 {
-    public static async Task DialogMainWindow<T, TWindow>(IInteractionContext<T, T?> interaction, MainWindow windowOwner) 
-        where TWindow : ReactiveWindow<T>, new()
-        where T : ViewModelBase
+    public static async Task DialogMainWindow<TViewModel, TWindow>(IInteractionContext<TViewModel, TViewModel?> interaction, MainWindow windowOwner) 
+    where TViewModel : ViewModelBase<TViewModel>, new()
+        where TWindow : ReactiveWindow<TViewModel>, new()
     {
-        await DialogAnyWindow<T, TWindow, MainWindow, MainWindowViewModel>(interaction, windowOwner);
+        await DialogAnyWindow<TViewModel, TWindow, MainWindow, MainWindowViewModel>(interaction, windowOwner);
     }
 
     public static async Task DialogAnyWindow<T, TWindow, TWindowOwner, TWindowViewModel>(IInteractionContext<T, T?> interaction,
         TWindowOwner windowOwner)
-        where T : ViewModelBase
+        where T : ViewModelBase<T>, new()
         where TWindow : ReactiveWindow<T>, new()
-        where TWindowViewModel : ViewModelBase
+        where TWindowViewModel : ViewModelBase<TWindowViewModel>, new()
         where TWindowOwner : ReactiveWindow<TWindowViewModel>
     
     {

@@ -10,30 +10,34 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using DynamicData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Settings;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ApplicationSettingsViewModel(
-    ILogger<ApplicationSettingsViewModel> logger,
-    OpenSshGuiDbContext context) : ViewModelBase(logger)
+public class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
 {
-    private Settings _settings = context.Settings.First();
-    
-    private bool _convertPpkAutomatically = context.Settings.First().ConvertPpkAutomatically;
 
-    private List<IConnectionCredentials> _knownServers = context.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
+    public ApplicationSettingsViewModel()
+    {
+        using var dbContext = new OpenSshGuiDbContext();
+        _settings = dbContext.Settings.First();
+        _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
+        _knownServers = dbContext.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
+    }
+    
+    private Settings _settings;
+    
+    private bool _convertPpkAutomatically;
+
+    private List<IConnectionCredentials> _knownServers;
     
     public ObservableCollection<ISshKey> Keys = [];
     public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
@@ -73,7 +77,7 @@ public class ApplicationSettingsViewModel(
                     return null;
                 }
     
-                var service = App.ServiceProvider.GetRequiredService<EditSavedServerEntryViewModel>();
+                var service = new EditSavedServerEntryViewModel();
                 service.SetValues(ref Keys, e);
                 var result = await ShowEditEntry.Handle(service);
                 if (result is null) return e;
@@ -82,7 +86,7 @@ public class ApplicationSettingsViewModel(
                 list.RemoveAt(index);
                 list.Insert(index, result.CredentialsToEdit);
                 KnownServers = list;
-                return result.CredentialsToEdit;
+                return result.CredentialsToEdit; // @TODO DoesNotShowKeys
             });
 
     public ReactiveCommand<bool, ApplicationSettingsViewModel> Submit =>
@@ -92,11 +96,12 @@ public class ApplicationSettingsViewModel(
             {
                 return this;
             }
+            await using var context = new OpenSshGuiDbContext();
             var file = context.Settings.Update(_settings).Entity;
             file.ConvertPpkAutomatically = ConvertPpkAutomatically;
             var knownServerIds = KnownServers.Select(s => s.Id).ToList();
             await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
             await context.SaveChangesAsync();
-            return this;
+            return this; //@TODO Does not close.
         });
 }

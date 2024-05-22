@@ -6,11 +6,12 @@
 
 #endregion
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger) : ViewModelBase(logger)
+public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
 {
     public string WindowTitle { get; set; } = "";
     public string Export { get; set; } = "";

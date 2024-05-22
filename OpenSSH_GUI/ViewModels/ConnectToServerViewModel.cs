@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
@@ -29,12 +30,12 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ConnectToServerViewModel : ViewModelBase
+public class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
     private bool _authWithAllKeys;
     private bool _authWithPublicKey;
 
-    private IEnumerable<IConnectionCredentials> _connectionCredentials;
+    private List<IConnectionCredentials> _connectionCredentials;
 
     private string _hostName = "";
 
@@ -60,11 +61,107 @@ public class ConnectToServerViewModel : ViewModelBase
     private string _userName = "";
     private readonly bool firstCredentialSet = true;
 
-    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, OpenSshGuiDbContext context) :
-        base(logger)
+    public ConnectToServerViewModel()
     {
-        ConnectionCredentials = context.ConnectionCredentialsDtos.Select(e => e.ToCredentials());
-        SelectedConnection = ConnectionCredentials.FirstOrDefault();
+        using var context = new OpenSshGuiDbContext();
+        PublicKeys = new ObservableCollection<ISshKey>(context.KeyDtos.Select(e => e.ToKey()));
+        _selectedPublicKey = PublicKeys.FirstOrDefault();
+        var publicKeysPaths = PublicKeys.Select(p => p.AbsoluteFilePath).ToArray();
+        var credentials = context.ConnectionCredentialsDtos.AsEnumerable().Where(dto =>
+            dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key => publicKeysPaths.Contains(key.AbsolutePath))
+        ).Select(e => e.ToCredentials());
+        ConnectionCredentials = credentials.ToList();
+        firstCredentialSet = false;
+        UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
+        TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
+        {
+            if (QuickConnect)
+            {
+                TestQuickConnection(SelectedConnection).Wait();
+                return e;
+            }
+
+            var task = Task.Run(() =>
+            {
+                try
+                {
+                    if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
+                    ServerConnection = AuthWithPublicKey
+                        ? AuthWithAllKeys
+                            ? new ServerConnection(Hostname, Username, PublicKeys)
+                            : new ServerConnection(Hostname, Username, SelectedPublicKey)
+                        : new ServerConnection(Hostname, Username, Password);
+                    if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
+
+                    return true;
+                }
+                catch (Exception exception)
+                {
+                    StatusButtonToolTip = exception.Message;
+                    return false;
+                }
+            });
+            TryingToConnect = true;
+            if (await task)
+            {
+                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusSuccess);
+                StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
+                StatusButtonBackground = Brushes.Green;
+            }
+            else
+            {
+                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusFailed);
+                StatusButtonBackground = Brushes.Red;
+            }
+
+            TryingToConnect = false;
+
+            if (ServerConnection.IsConnected)
+            {
+                UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
+                return e;
+            }
+
+            var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
+                ButtonEnum.Ok, Icon.Error);
+            await messageBox.ShowAsync();
+
+            return e;
+        });
+        ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
+        {
+            Hostname = "";
+            Username = "";
+            Password = "";
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUnknown);
+            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUntested);
+            StatusButtonBackground = Brushes.Gray;
+            ServerConnection = new ServerConnection("123", "123", "123");
+            UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
+            return e;
+        });
+        SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
+        {
+            ServerConnection.ConnectionCredentials.Id = (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase()??new ConnectionCredentialsDto()).Id;
+            return this;
+        });
+    }
+    public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys)
+    {
+        // @TODO Opens too slow
+        using var context = new OpenSshGuiDbContext();
+        PublicKeys = new ObservableCollection<ISshKey>(keys.Where(e => e is not null && !e.NeedPassword));
+        _selectedPublicKey = PublicKeys.FirstOrDefault();
+        var publicKeysPaths = PublicKeys.Select(p => p.AbsoluteFilePath).ToArray();
+        var credentialDtos = context.ConnectionCredentialsDtos.AsEnumerable().Where(dto =>
+            dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key => publicKeysPaths.Contains(key.AbsolutePath))
+        );
+        var credentials = new List<IConnectionCredentials>();
+        foreach (var dto in credentialDtos)
+        {
+            credentials.Add(dto.ToCredentials(ref keys));
+        }
+        ConnectionCredentials = credentials.ToList();
         firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
@@ -143,7 +240,7 @@ public class ConnectToServerViewModel : ViewModelBase
 
     public bool QuickConnectAvailable => ConnectionCredentials.Any();
 
-    public IEnumerable<IConnectionCredentials> ConnectionCredentials
+    public List<IConnectionCredentials> ConnectionCredentials
     {
         get => _connectionCredentials;
         set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
@@ -207,7 +304,7 @@ public class ConnectToServerViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
     }
 
-    public ObservableCollection<ISshKey?> PublicKeys { get; private set; }
+    public ObservableCollection<ISshKey> PublicKeys { get; private set; }
 
     public string Hostname
     {
@@ -308,19 +405,5 @@ public class ConnectToServerViewModel : ViewModelBase
     public void UpdateComboBoxState()
     {
         KeyComboBoxEnabled = !ServerConnection.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
-    }
-
-    public void SetKeys(ref ObservableCollection<ISshKey?> currentKeys)
-    {
-        PublicKeys = new ObservableCollection<ISshKey>(currentKeys.Where(e => e is not null && ((e.HasPassword && !e.NeedPassword) || (!e.HasPassword && !e.NeedPassword))));
-        _selectedPublicKey = PublicKeys.FirstOrDefault();
-        var context = new OpenSshGuiDbContext();
-        var publicKeysPaths = PublicKeys.Select(p => p.AbsoluteFilePath).ToList();
-        var filteredItems = context.ConnectionCredentialsDtos.Where(dto =>
-            dto.KeyDtos.All(key => !publicKeysPaths.Contains(key.AbsolutePath)) && dto.AuthType != AuthType.Password
-        ).Select(e => e.Id);
-        var l = context.ConnectionCredentialsDtos.Where(dto => !filteredItems.Any(e => dto.Id == e)).Select(e => e.ToCredentials());
-
-        ConnectionCredentials = l;
     }
 }

@@ -14,7 +14,7 @@ using ReactiveUI.Validation.Extensions;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class AddKeyWindow : ReactiveWindow<AddKeyWindowViewModel>
+public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
 {
     public AddKeyWindow()
     {
@@ -23,7 +23,7 @@ public partial class AddKeyWindow : ReactiveWindow<AddKeyWindowViewModel>
         {
             this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(ViewModel, model => model.KeyName,
                 window => window.KeyFileNameValidation.Text);
-            d(ViewModel!.AddKey.Subscribe(Close));
+            // d(ViewModel!.AddKey.Subscribe(Close));
         });
     }
 }

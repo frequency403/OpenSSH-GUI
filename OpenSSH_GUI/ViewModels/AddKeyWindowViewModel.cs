@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -32,7 +33,7 @@ using SshKeyType = SshNet.Keygen.SshKeyType;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
+public class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
 {
     private readonly ValidationHelper _keyNameValidationHelper = new(new ValidationContext());
     private bool _createKey;
@@ -45,21 +46,21 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 
     private ObservableCollection<ISshKeyType> _sshKeyTypes;
 
-    public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger) : base(logger)
+    public AddKeyWindowViewModel()
     {
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,
             name => !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
-        AddKey = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
-        {
-            _createKey = b;
-            if (!_createKey) return null;
-            return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
-                ? this
-                : null;
-        });
+        // Submit = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
+        // {
+        //     _createKey = b;
+        //     if (!_createKey) return null;
+        //     return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
+        //         ? this
+        //         : null;
+        // });
         _sshKeyTypes = new ObservableCollection<ISshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
         _selectedKeyType = _sshKeyTypes.First();
     }
@@ -70,7 +71,14 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         private init => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
     }
 
-    public ReactiveCommand<bool, AddKeyWindowViewModel?> AddKey { get; }
+    public override ReactiveCommand<bool, AddKeyWindowViewModel?> Submit => ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
+    {
+        _createKey = b;
+        if (!_createKey) return null;
+        return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
+            ? this
+            : null;
+    });
 
     public ISshKeyType SelectedKeyType
     {
@@ -131,7 +139,7 @@ public class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error creating key");
+            Logger.LogError(e, "Error creating key");
             return null;
         }
     }

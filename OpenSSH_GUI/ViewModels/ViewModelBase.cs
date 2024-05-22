@@ -6,12 +6,19 @@
 
 #endregion
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ViewModelBase(ILogger logger) : ReactiveObject
+public class ViewModelBase<T>() : ViewModelBase(App.ServiceProvider.GetRequiredService<ILogger<T>>()) where T : new()
 {
-    protected ILogger _logger = logger;
+    public virtual ReactiveCommand<bool, T?> Submit { get; } =
+        ReactiveCommand.Create<bool, T?>(e => new T());
+}
+public class ViewModelBase(ILogger? logger = null) : ReactiveObject
+{
+    protected ILogger Logger => logger ?? NullLogger.Instance;
 }
