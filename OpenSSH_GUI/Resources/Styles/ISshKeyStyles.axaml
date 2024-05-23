@@ -108,7 +108,6 @@
                 <Border.Styles>
                     <Style Selector="Border.MainDisplay:pointerover">
                         <Setter Property="RenderTransform" Value="scale(1.001)" />
-                        <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
                         <Setter Property="Background" Value="#20adadad" />
                     </Style>
                 </Border.Styles>

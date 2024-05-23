@@ -24,7 +24,6 @@ namespace OpenSSH_GUI.ViewModels;
 
 public class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
 {
-
     public ApplicationSettingsViewModel()
     {
         using var dbContext = new OpenSshGuiDbContext();
@@ -89,8 +88,8 @@ public class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsVie
                 return result.CredentialsToEdit; // @TODO DoesNotShowKeys
             });
 
-    public ReactiveCommand<bool, ApplicationSettingsViewModel> Submit =>
-        ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel>(async e =>
+    public ReactiveCommand<bool, ApplicationSettingsViewModel?> Submit =>
+        ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel?>(async e =>
         {
             if (!e)
             {

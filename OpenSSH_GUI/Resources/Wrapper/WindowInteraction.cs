@@ -2,6 +2,7 @@
 // Created: 21.05.2024 - 11:05:46
 // Last edit: 21.05.2024 - 11:05:47
 
+using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
@@ -30,9 +31,10 @@ public static class WindowInteraction
     {
         var dialog = new TWindow
         {
-            DataContext = interaction.Input,
+            ViewModel = interaction.Input,
             WindowStartupLocation = WindowStartupLocation.CenterScreen
         };
-        interaction.SetOutput(await dialog.ShowDialog<T>(windowOwner));
+        var result = await dialog.ShowDialog<T?>(windowOwner);
+        interaction.SetOutput(result);
     }
 }

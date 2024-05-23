@@ -71,7 +71,7 @@ public class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IVali
         private init => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
     }
 
-    public override ReactiveCommand<bool, AddKeyWindowViewModel?> Submit => ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
+    public ReactiveCommand<bool, AddKeyWindowViewModel> Submit => ReactiveCommand.Create<bool, AddKeyWindowViewModel>(b =>
     {
         _createKey = b;
         if (!_createKey) return null;

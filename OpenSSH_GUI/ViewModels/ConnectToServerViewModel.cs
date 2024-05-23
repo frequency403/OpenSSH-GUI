@@ -140,11 +140,6 @@ public class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
             UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
             return e;
         });
-        SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
-        {
-            ServerConnection.ConnectionCredentials.Id = (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase()??new ConnectionCredentialsDto()).Id;
-            return this;
-        });
     }
     public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys)
     {
@@ -230,11 +225,6 @@ public class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
             ServerConnection = new ServerConnection("123", "123", "123");
             UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
             return e;
-        });
-        SubmitConnection = ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel>(async e =>
-        {
-            ServerConnection.ConnectionCredentials.Id = (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase()??new ConnectionCredentialsDto()).Id;
-            return this;
         });
     }
 
@@ -354,7 +344,12 @@ public class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
         set => this.RaiseAndSetIfChanged(ref _keyComboBoxEnabled, value);
     }
 
-    public ReactiveCommand<Unit, ConnectToServerViewModel> SubmitConnection { get; }
+    public /*override*/ ReactiveCommand<bool, ConnectToServerViewModel?> Submits => ReactiveCommand.CreateFromTask<bool, ConnectToServerViewModel?>(
+        async e =>
+        {
+            ServerConnection.ConnectionCredentials.Id = (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase()??new ConnectionCredentialsDto()).Id;
+            return this;
+        });
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
 

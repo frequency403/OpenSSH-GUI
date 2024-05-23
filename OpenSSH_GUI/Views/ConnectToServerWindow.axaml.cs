@@ -19,6 +19,6 @@ public partial class ConnectToServerWindow : ReactiveWindow<ConnectToServerViewM
     public ConnectToServerWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.SubmitConnection.Subscribe(Close)));
+        this.WhenActivated(d => d(ViewModel!.Submits.Subscribe(Close)));
     }
 }

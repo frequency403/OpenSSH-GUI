@@ -13,11 +13,8 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ViewModelBase<T>() : ViewModelBase(App.ServiceProvider.GetRequiredService<ILogger<T>>()) where T : new()
-{
-    public virtual ReactiveCommand<bool, T?> Submit { get; } =
-        ReactiveCommand.Create<bool, T?>(e => new T());
-}
+public class ViewModelBase<T>()
+    : ViewModelBase(App.ServiceProvider.GetRequiredService<ILogger<T>>()) where T : class, new();
 public class ViewModelBase(ILogger? logger = null) : ReactiveObject
 {
     protected ILogger Logger => logger ?? NullLogger.Instance;

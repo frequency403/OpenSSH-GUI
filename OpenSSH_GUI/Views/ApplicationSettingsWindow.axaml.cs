@@ -26,9 +26,10 @@ public partial class ApplicationSettingsWindow : ReactiveWindow<ApplicationSetti
                 var dialog = new EditSavedServerEntry
                 {
                     DataContext = interaction.Input,
-                    Title = $"Edit {interaction.Input.CredentialsToEdit.Display}"
+                    Title = interaction.Input.CredentialsToEdit.Display
                 };
-                interaction.SetOutput(await dialog.ShowDialog<EditSavedServerEntryViewModel>(this));
+                var result = await dialog.ShowDialog<EditSavedServerEntryViewModel>(this);
+                interaction.SetOutput(result);
             }));
             d(ViewModel!.Submit.Subscribe(Close));
         });

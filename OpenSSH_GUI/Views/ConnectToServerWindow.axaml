@@ -5,6 +5,7 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -131,8 +132,11 @@
         <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                 HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
                 Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}"
-                Command="{Binding SubmitConnection}"
+                Command="{Binding Submits}"
                 HotKey="Enter">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowAcceptConnection}" />
             </ToolTip.Tip>

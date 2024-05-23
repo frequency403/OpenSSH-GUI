@@ -40,7 +40,7 @@ namespace OpenSSH_GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 {
-    public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel> ShowAppSettings = new();
+    public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> ShowAppSettings = new();
     public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
     public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
 
