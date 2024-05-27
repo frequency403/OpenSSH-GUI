@@ -136,6 +136,5 @@ public partial class BottomButtons : UserControl
     public BottomButtons()
     {
         InitializeComponent();
-        DataContext = this;
     }
 }

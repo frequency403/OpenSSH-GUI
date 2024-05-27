@@ -7,39 +7,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Controls/BottomButtons.axaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Controls/BottomButtons.axaml.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Wrapper/WindowBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/avalonia.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/avalonia.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_19_05_2024_23_32_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_19_05_2024_23_32__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/AddKeyWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/AddKeyWindowViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ConnectToServerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ConnectToServerViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditAuthorizedKeysViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditAuthorizedKeysViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditKnownHostsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditKnownHostsViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditSavedServerEntryViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditSavedServerEntryViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ExportWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ExportWindowViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ViewModelBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ViewModelBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/AddKeyWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/AddKeyWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/AddKeyWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/AddKeyWindow.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ApplicationSettingsWindow.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditSavedServerEntry.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditSavedServerEntry.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditSavedServerEntry.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditSavedServerEntry.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml.cs" afterDir="false" />
+    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="Impl new - not yet working - control.">
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Controls/BottomButtons.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Controls/BottomButtons.axaml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,6 +90,7 @@
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection.Abstractions/src/ServiceProviderServiceExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteChain.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteFactory.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://R:/OpenSSH_GUI/OpenSSH_GUI/Views/AddKeyWindow.axaml" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -208,7 +178,7 @@
       <workItem from="1716357861819" duration="22347000" />
       <workItem from="1716444491578" duration="738000" />
       <workItem from="1716445258254" duration="10865000" />
-      <workItem from="1716790769280" duration="21006000" />
+      <workItem from="1716790769280" duration="21315000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -282,7 +252,15 @@
       <option name="project" value="LOCAL" />
       <updated>1716457157844</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Impl new - not yet working - control.">
+      <option name="closed" value="true" />
+      <created>1716813772377</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1716813772377</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -313,7 +291,8 @@
     <MESSAGE value="Remove Connection functionality and associated views and wrappers&#10;&#10;This update removes the Connection functionality along with the associated views and wrappers involving ConnectionWindow, CredentialGroup, and ManagedCredential due to changes in project requirements. Numerous file changes reflect these changes." />
     <MESSAGE value="Remove Connection functionality and update associated components&#10;&#10;This commit removes the Connection functionality. It also adjusts associated views, wrappers, and updates the .idea.workspace.xml file. Changes include updates filenames in AddKeyWindow.axaml, ExportWindow.axaml.cs, WindowBase.cs, and ApplicationSettingsViewModel.cs among others. Refactoring has been performed in the files for better functionality and readability." />
     <MESSAGE value="Removed 'WindowBase.cs' and updated 'workspace.xml'&#10;&#10;The 'WindowBase.cs' file has been removed from the project. Modifications are made to 'workspace.xml' to reflect other changes in the project structure. Various other affected files have been adjusted to accommodate the removal of 'WindowBase.cs'." />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed 'WindowBase.cs' and updated 'workspace.xml'&#10;&#10;The 'WindowBase.cs' file has been removed from the project. Modifications are made to 'workspace.xml' to reflect other changes in the project structure. Various other affected files have been adjusted to accommodate the removal of 'WindowBase.cs'." />
+    <MESSAGE value="Impl new - not yet working - control." />
+    <option name="LAST_COMMIT_MESSAGE" value="Impl new - not yet working - control." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
