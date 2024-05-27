@@ -64,7 +64,6 @@ public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewM
         new AuthorizedKeysFile(SshConfigFiles.Authorized_Keys.GetPathOfFile());
 
     public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
-    public ReactiveCommand<bool, EditAuthorizedKeysViewModel> Submit { get; private set; }
     public ReactiveCommand<ISshKey, ISshKey?> AddKey { get; private set; }
 
     private void UpdateAddButton()
@@ -82,7 +81,7 @@ public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewM
         _publicKeys = keys;
         _selectedKey = PublicKeys.FirstOrDefault();
         UpdateAddButton();
-        Submit = ReactiveCommand.Create<bool, EditAuthorizedKeysViewModel>(e =>
+        BooleanSubmit = ReactiveCommand.Create<bool, EditAuthorizedKeysViewModel?>(e =>
         {
             if (!e) return this;
             AuthorizedKeysFileLocal.PersistChangesInFile();

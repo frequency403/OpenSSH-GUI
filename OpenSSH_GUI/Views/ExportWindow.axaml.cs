@@ -9,19 +9,15 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class ExportWindow : ReactiveWindow<ExportWindowViewModel>
+public partial class ExportWindow : WindowBase<ExportWindowViewModel>
 {
     public ExportWindow()
     {
         InitializeComponent();
-    }
-
-    private async void CopyToClipboard(object? sender, RoutedEventArgs e)
-    {
-        await GetTopLevel(ExportedText)!.Clipboard!.SetTextAsync((DataContext as ExportWindowViewModel)!.Export);
     }
 }

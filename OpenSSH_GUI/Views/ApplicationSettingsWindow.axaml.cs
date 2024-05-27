@@ -9,12 +9,13 @@
 using System;
 using Avalonia.ReactiveUI;
 using DynamicData.Binding;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class ApplicationSettingsWindow : ReactiveWindow<ApplicationSettingsViewModel>
+public partial class ApplicationSettingsWindow : WindowBase<ApplicationSettingsViewModel>
 {
     public ApplicationSettingsWindow()
     {
@@ -31,7 +32,6 @@ public partial class ApplicationSettingsWindow : ReactiveWindow<ApplicationSetti
                 var result = await dialog.ShowDialog<EditSavedServerEntryViewModel>(this);
                 interaction.SetOutput(result);
             }));
-            d(ViewModel!.Submit.Subscribe(Close));
         });
     }
 }

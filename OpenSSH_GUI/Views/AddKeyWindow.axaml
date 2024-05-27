@@ -71,7 +71,7 @@
                       SelectedItem="{Binding KeyFormat}" />
         </StackPanel>
         <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding Submit}"
+                Command="{Binding BooleanSubmit}"
                 IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>
@@ -83,7 +83,7 @@
         </Button>
 
         <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding Submit}">
+                Command="{Binding BooleanSubmit}">
             <Button.CommandParameter>
                 <system:Boolean>False</system:Boolean>
             </Button.CommandParameter>

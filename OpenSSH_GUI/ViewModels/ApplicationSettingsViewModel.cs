@@ -11,8 +11,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
@@ -22,7 +20,7 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
+public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
 {
     public ApplicationSettingsViewModel()
     {
@@ -30,6 +28,21 @@ public class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsVie
         _settings = dbContext.Settings.First();
         _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
         _knownServers = dbContext.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
+        
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel?>(async e =>
+        {
+            if (!e)
+            {
+                return this;
+            }
+            await using var context = new OpenSshGuiDbContext();
+            var file = context.Settings.Update(_settings).Entity;
+            file.ConvertPpkAutomatically = ConvertPpkAutomatically;
+            var knownServerIds = KnownServers.Select(s => s.Id).ToList();
+            await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
+            await context.SaveChangesAsync();
+            return this; //@TODO Does not close.
+        });
     }
     
     private Settings _settings;
@@ -87,20 +100,4 @@ public class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsVie
                 KnownServers = list;
                 return result.CredentialsToEdit; // @TODO DoesNotShowKeys
             });
-
-    public ReactiveCommand<bool, ApplicationSettingsViewModel?> Submit =>
-        ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel?>(async e =>
-        {
-            if (!e)
-            {
-                return this;
-            }
-            await using var context = new OpenSshGuiDbContext();
-            var file = context.Settings.Update(_settings).Entity;
-            file.ConvertPpkAutomatically = ConvertPpkAutomatically;
-            var knownServerIds = KnownServers.Select(s => s.Id).ToList();
-            await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
-            await context.SaveChangesAsync();
-            return this; //@TODO Does not close.
-        });
 }

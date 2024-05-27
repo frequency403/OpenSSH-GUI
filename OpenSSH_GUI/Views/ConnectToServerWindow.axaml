@@ -6,6 +6,8 @@
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:credentials="clr-namespace:OpenSSH_GUI.Core.Interfaces.Credentials;assembly=OpenSSH_GUI.Core"
+        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -60,15 +62,39 @@
                   ItemsSource="{Binding ConnectionCredentials}"
                   SelectedItem="{Binding SelectedConnection}"
                   IsEnabled="{Binding !TryingToConnect}">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
+            <ComboBox.DataTemplates>
+                <DataTemplate DataType="credentials:IKeyConnectionCredentials">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <Label Content="{Binding Display}" />
+                        <Separator />
+                        <Label Content="{Binding AuthType}" />
+                        <Separator />
+                        <Label Content="{Binding Key.Filename}" />
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate DataType="credentials:IMultiKeyConnectionCredentials">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <Label Content="{Binding Display}" />
+                        <Separator />
+                        <Label Content="{Binding AuthType}" />
+                        <Separator />
+                        <ItemsControl ItemsSource="{Binding Keys}">
+                            <ItemsControl.DataTemplates>
+                                <DataTemplate DataType="keys:ISshKey">
+                                    <Label Content="{Binding Filename}" />
+                                </DataTemplate>
+                            </ItemsControl.DataTemplates>
+                        </ItemsControl>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate DataType="credentials:IPasswordConnectionCredentials">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <Label Content="{Binding Display}" />
                         <Separator />
                         <Label Content="{Binding AuthType}" />
                     </StackPanel>
                 </DataTemplate>
-            </ComboBox.ItemTemplate>
+            </ComboBox.DataTemplates>
         </ComboBox>
         <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
                  Height="30"
@@ -82,20 +108,21 @@
                  IsVisible="{Binding !QuickConnect}"
                  IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
 
-        <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2" IsVisible="{Binding !QuickConnect}" VerticalAlignment="Top">
+        <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2" IsVisible="{Binding !QuickConnect}"
+                    VerticalAlignment="Top">
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
                      Text="{Binding Password}" Watermark="Password" PasswordChar="*"
                      IsEnabled="{Binding !ServerConnection.IsConnected}"
-                     IsVisible="{Binding !AuthWithPublicKey}"  />
+                     IsVisible="{Binding !AuthWithPublicKey}" />
             <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
                       ItemsSource="{Binding PublicKeys}"
                       SelectedItem="{Binding SelectedPublicKey}"
-                      ItemTemplate="{StaticResource SshKeyComboBoxStyle}"/>
+                      ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
-                Command="{Binding TestConnection}" 
+                Command="{Binding TestConnection}"
                 IsEnabled="{Binding !ServerConnection.IsConnected}"
                 HotKey="Enter">
             <ToolTip.Tip>
@@ -132,7 +159,7 @@
         <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
                 HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
                 Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}"
-                Command="{Binding Submits}"
+                Command="{Binding BooleanSubmit}"
                 HotKey="Enter">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>

@@ -6,18 +6,15 @@
 
 #endregion
 
-using System;
-using Avalonia.ReactiveUI;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
-using ReactiveUI;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class EditKnownHostsWindow : ReactiveWindow<EditKnownHostsViewModel>
+public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsViewModel>
 {
     public EditKnownHostsWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.ProcessData.Subscribe(Close)));
     }
 }

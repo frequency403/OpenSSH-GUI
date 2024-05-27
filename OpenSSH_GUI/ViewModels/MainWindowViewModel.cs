@@ -154,7 +154,10 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow =>
         ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
         {
-            var connectToServer = new ConnectToServerViewModel(ref _sshKeys);
+            await using var context = new OpenSshGuiDbContext();
+            var connectToServer = new ConnectToServerViewModel(ref _sshKeys, (await context.ConnectionCredentialsDtos.Include(e => e.KeyDtos).ToListAsync()).Where(dto =>
+                dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key => _sshKeys.Select(p => p.AbsoluteFilePath).Contains(key.AbsolutePath))
+            ).Select(e => e.ToCredentials()).ToList());
             var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
             if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
             return windowResult;

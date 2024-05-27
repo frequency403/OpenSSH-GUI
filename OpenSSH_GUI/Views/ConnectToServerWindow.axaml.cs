@@ -11,14 +11,14 @@ using Avalonia.ReactiveUI;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
 using System.Reactive;
+using OpenSSH_GUI.Resources.Wrapper;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class ConnectToServerWindow : ReactiveWindow<ConnectToServerViewModel>
+public partial class ConnectToServerWindow : WindowBase<ConnectToServerViewModel>
 {
     public ConnectToServerWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.Submits.Subscribe(Close)));
     }
 }

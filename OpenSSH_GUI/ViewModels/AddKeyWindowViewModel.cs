@@ -33,7 +33,7 @@ using SshKeyType = SshNet.Keygen.SshKeyType;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
+public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
 {
     private readonly ValidationHelper _keyNameValidationHelper = new(new ValidationContext());
     private bool _createKey;
@@ -53,14 +53,14 @@ public class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IVali
             name => !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
-        // Submit = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
-        // {
-        //     _createKey = b;
-        //     if (!_createKey) return null;
-        //     return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
-        //         ? this
-        //         : null;
-        // });
+        BooleanSubmit = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
+        {
+            _createKey = b;
+            if (!_createKey) return null;
+            return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
+                ? this
+                : null;
+        });
         _sshKeyTypes = new ObservableCollection<ISshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
         _selectedKeyType = _sshKeyTypes.First();
     }
@@ -70,16 +70,7 @@ public class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IVali
         get => _keyNameValidationHelper;
         private init => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
     }
-
-    public ReactiveCommand<bool, AddKeyWindowViewModel> Submit => ReactiveCommand.Create<bool, AddKeyWindowViewModel>(b =>
-    {
-        _createKey = b;
-        if (!_createKey) return null;
-        return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
-            ? this
-            : null;
-    });
-
+    
     public ISshKeyType SelectedKeyType
     {
         get => _selectedKeyType;

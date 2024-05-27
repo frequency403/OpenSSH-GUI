@@ -6,15 +6,14 @@
 
 #endregion
 
-using System;
-using Avalonia.ReactiveUI;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Validation.Extensions;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class AddKeyWindow : ReactiveWindow<AddKeyWindowViewModel>
+public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
 {
     public AddKeyWindow()
     {
@@ -23,7 +22,7 @@ public partial class AddKeyWindow : ReactiveWindow<AddKeyWindowViewModel>
         {
             this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(ViewModel, model => model.KeyName,
                 window => window.KeyFileNameValidation.Text);
-            d(ViewModel!.Submit.Subscribe(Close));
+            // d(ViewModel!.Submit.Subscribe(Close));
         });
     }
 }

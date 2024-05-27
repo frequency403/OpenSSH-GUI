@@ -4,6 +4,9 @@
     <option name="projectPerEditor">
       <map>
         <entry key="OpenSSH_GUI/App.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Resources/Controls/BottomButtons.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Resources/Controls/OpenSshGuiBottomButtons.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
+        <entry key="OpenSSH_GUI/Resources/Controls/SomeControl.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Resources/Styles/ISshKeyStyles.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Resources/Styles/ManagedCredentialsStyle.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />
         <entry key="OpenSSH_GUI/Views/AddKeyWindow.axaml" value="OpenSSH_GUI/OpenSSH_GUI.csproj" />

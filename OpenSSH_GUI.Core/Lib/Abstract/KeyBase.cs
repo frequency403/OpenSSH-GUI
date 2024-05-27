@@ -43,34 +43,56 @@ public abstract class KeyBase : IKeyBase
     public int Id { get; set; }
 
     /// <summary>
-    /// Base class for SSH keys.
+    /// Retrieves the private key source for the SSH key.
     /// </summary>
-    protected KeyBase(string absoluteFilePath, string? password = null)
+    /// <returns>The private key source for the SSH key.</returns>
+    private IPrivateKeySource GetKeySource()
     {
-        AbsoluteFilePath = absoluteFilePath;
-        Filename = Path.GetFileNameWithoutExtension(AbsoluteFilePath);
-        Password = password;
-        try
-        {
-            _keySource = Path.GetExtension(AbsoluteFilePath) switch
+            return Path.GetExtension(AbsoluteFilePath) switch
             {
                 var x when x.Contains("ppk") => new PuttyKeyFile(AbsoluteFilePath, Password),
                 var x when x.Contains("pub") => new PrivateKeyFile(Path.ChangeExtension(AbsoluteFilePath, null),
                     Password),
                 _ => new PrivateKeyFile(AbsoluteFilePath, Password)
             };
-            if (password is not null) PasswordSuccess = true;
+    }
+
+    /// <summary>
+    /// Sets the private key source for the SSH key.
+    /// </summary>
+    /// <remarks>
+    /// This method is used to set the private key source for the SSH key. The private key source
+    /// contains the actual key material and is needed for cryptographic operations.
+    /// </remarks>
+    /// <param name="keySource">
+    /// The private key source to set for the SSH key.
+    /// </param>
+    private void SetKeySource()
+    {
+        try
+        {
+            _keySource = GetKeySource();
+            if (Password is not null) PasswordSuccess = true;
         }
         catch (SshPassPhraseNullOrEmptyException e)
         {
             Password = "";
-            return;
         }
         catch (Exception e)
         {
-            return;
+            // ignored
         }
+    }
 
+    /// <summary>
+    /// Base class for SSH keys.
+    /// </summary>
+    protected KeyBase(string absoluteFilePath, string? password = null)
+    {
+        AbsoluteFilePath = absoluteFilePath;
+        Filename = Path.GetFileName(AbsoluteFilePath);
+        Password = password;
+        SetKeySource();
         KeyType = new SshKeyType(_keySource.HostKeyAlgorithms.FirstOrDefault()?.Name);
         Fingerprint = _keySource.FingerprintHash();
     }

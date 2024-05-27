@@ -6,18 +6,15 @@
 
 #endregion
 
-using System;
-using Avalonia.ReactiveUI;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
-using ReactiveUI;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class EditAuthorizedKeysWindow : ReactiveWindow<EditAuthorizedKeysViewModel>
+public partial class EditAuthorizedKeysWindow : WindowBase<EditAuthorizedKeysViewModel>
 {
     public EditAuthorizedKeysWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.Submit.Subscribe(Close)));
     }
 }

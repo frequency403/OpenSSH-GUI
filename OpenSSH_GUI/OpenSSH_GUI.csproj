@@ -58,6 +58,10 @@
       </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Resources\Controls\OpenSshGuiBottomButtons.axaml" />
+    </ItemGroup>
+
     <PropertyGroup> <!-- OSX Settings -->
         <CFBundleName>OpenSSH GUI</CFBundleName> <!-- Also defines .app file name -->
         <CFBundleDisplayName>OpenSSH GUI</CFBundleDisplayName>

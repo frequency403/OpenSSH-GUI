@@ -6,18 +6,15 @@
 
 #endregion
 
-using System;
-using Avalonia.ReactiveUI;
+using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
-using ReactiveUI;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class EditSavedServerEntry : ReactiveWindow<EditSavedServerEntryViewModel>
+public partial class EditSavedServerEntry : WindowBase<EditSavedServerEntryViewModel>
 {
     public EditSavedServerEntry()
     {
         InitializeComponent();
-        this.WhenActivated(d => d(ViewModel!.Close.Subscribe(Close)));
     }
 }

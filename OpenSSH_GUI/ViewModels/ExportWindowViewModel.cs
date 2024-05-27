@@ -6,13 +6,29 @@
 
 #endregion
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using System.Reactive;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
 public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
 {
+    public ExportWindowViewModel()
+    {
+        BooleanSubmit = ReactiveCommand.Create<bool, ExportWindowViewModel?>(boolean =>
+        {
+            if (!boolean) return null;
+            if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return null;
+            var mainWindow = desktop.MainWindow;
+            var clipboard = mainWindow.Clipboard;
+
+            clipboard.SetTextAsync(Export).ConfigureAwait(false);
+            return this;
+        });
+    }
+    
     public string WindowTitle { get; set; } = "";
     public string Export { get; set; } = "";
 }

@@ -36,14 +36,14 @@
                   VerticalAlignment="Bottom" />
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal"
                     HorizontalAlignment="Stretch">
-            <Button Command="{Binding Close}"
+            <Button Command="{Binding BooleanSubmit}"
                     Foreground="Firebrick">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
                 </Button.CommandParameter>
                 <avalonia:MaterialIcon Kind="CloseCircle" />
             </Button>
-            <Button Command="{Binding Close}"
+            <Button Command="{Binding BooleanSubmit}"
                     Foreground="LawnGreen">
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
