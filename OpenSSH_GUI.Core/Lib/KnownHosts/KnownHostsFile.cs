@@ -150,7 +150,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
         if (_isFromServer) return;
         if (stream is null)
         {
-            using var fileStream = File.OpenRead(_fileKnownHostsPath);
+            using var fileStream = File.Open(_fileKnownHostsPath, FileMode.OpenOrCreate);
             using var streamReader = new StreamReader(fileStream);
             SetKnownHosts(streamReader.ReadToEnd());
         }
