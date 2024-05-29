@@ -6,13 +6,8 @@
 
 #endregion
 
-using System.Linq.Expressions;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -93,6 +88,7 @@ public abstract class KeyBase : IKeyBase
         Filename = Path.GetFileName(AbsoluteFilePath);
         Password = password;
         SetKeySource();
+        if (NeedPassword) return;
         KeyType = new SshKeyType(_keySource.HostKeyAlgorithms.FirstOrDefault()?.Name);
         Fingerprint = _keySource.FingerprintHash();
     }

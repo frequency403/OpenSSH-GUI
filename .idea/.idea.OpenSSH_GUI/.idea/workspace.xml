@@ -7,9 +7,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="Impl File checking #2">
+    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="ConnectionStringIssues fix for linux #2">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +91,7 @@
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection.Abstractions/src/ServiceProviderServiceExtensions.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteChain.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/dotnet/runtime/9e6ba1f68c6a9c7206dacdf1e4cac67ea19931eb/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteFactory.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://R:/OpenSSH_GUI/OpenSSH_GUI.Core/Database/Context/OpenSshGuiDbContext.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock://R:/OpenSSH_GUI/OpenSSH_GUI/App.axaml.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -182,7 +183,7 @@
       <workItem from="1716790769280" duration="21536000" />
       <workItem from="1716896018645" duration="2551000" />
       <workItem from="1716994018313" duration="297000" />
-      <workItem from="1716994368541" duration="1888000" />
+      <workItem from="1716994368541" duration="2568000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -288,7 +289,15 @@
       <option name="project" value="LOCAL" />
       <updated>1716995244565</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="ConnectionStringIssues fix for linux #2">
+      <option name="closed" value="true" />
+      <created>1716996612003</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1716996612003</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -323,7 +332,8 @@
     <MESSAGE value="Disabled the custom control" />
     <MESSAGE value="Impl check if files exist in DbContext" />
     <MESSAGE value="Impl File checking #2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Impl File checking #2" />
+    <MESSAGE value="ConnectionStringIssues fix for linux #2" />
+    <option name="LAST_COMMIT_MESSAGE" value="ConnectionStringIssues fix for linux #2" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -433,43 +443,17 @@
           <option name="timeStamp" value="129" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs</url>
-          <line>46</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetFromDisk'">
-            <startOffsets>
-              <option value="1577" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1597" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="130" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs</url>
-          <line>91</line>
+          <line>95</line>
           <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Abstract\KeyBase.cs" containingFunctionPresentation="Constructor 'KeyBase'">
             <startOffsets>
-              <option value="2749" />
+              <option value="2902" />
             </startOffsets>
             <endOffsets>
-              <option value="2785" />
+              <option value="2919" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="131" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs</url>
-          <line>73</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Abstract\KeyBase.cs" containingFunctionPresentation="Method 'SetKeySource'">
-            <startOffsets>
-              <option value="2315" />
-            </startOffsets>
-            <endOffsets>
-              <option value="2343" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="132" />
+          <option name="timeStamp" value="133" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
