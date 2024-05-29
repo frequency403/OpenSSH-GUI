@@ -57,8 +57,9 @@ public class OpenSshGuiDbContext : DbContext
     {
         var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName);
+        if (!Directory.Exists(appDataPath)) Directory.CreateDirectory(appDataPath);
         var dbFilePath = Path.Combine(appDataPath, $"{AppDomain.CurrentDomain.FriendlyName}");
-        optionsBuilder.UseSqlite($"DataSource={dbFilePath}")
+        optionsBuilder.UseSqlite($"DataSource={dbFilePath}{(!File.Exists(dbFilePath) ? ";New=True;" : "")}")
             .UseLazyLoadingProxies();
         base.OnConfiguring(optionsBuilder);
     }

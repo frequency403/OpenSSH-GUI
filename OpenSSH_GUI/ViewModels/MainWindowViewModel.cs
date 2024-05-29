@@ -82,7 +82,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     public MainWindowViewModel()
     {
-        _sshKeys = new ObservableCollection<ISshKey?>(DirectoryCrawler.GetAllKeys());
+        _sshKeys = new ObservableCollection<ISshKey?>();
+        foreach (var key in DirectoryCrawler.GetAllKeysYield().ToBlockingEnumerable())
+        {
+            SshKeys.Add(key);
+        }
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
     }
