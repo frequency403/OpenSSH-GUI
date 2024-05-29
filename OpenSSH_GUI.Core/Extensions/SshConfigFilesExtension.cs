@@ -35,6 +35,46 @@ public static class SshConfigFilesExtension
     /// </summary>
     private const string SshRootPathWin = "%PROGRAMDATA%\\ssh";
 
+    public static void ValidateDirectories()
+    {
+        switch (Environment.OSVersion.Platform)
+        {
+            case PlatformID.Win32S:
+            case PlatformID.Win32Windows:
+            case PlatformID.Win32NT:
+            case PlatformID.WinCE:
+                var sshPathWin = Environment.ExpandEnvironmentVariables(SshPathWithVariableWindows);
+                var sshConfigPathWin = Environment.ExpandEnvironmentVariables(SshRootPathWin);
+                if (!Directory.Exists(sshPathWin)) Directory.CreateDirectory(sshPathWin);
+                try
+                {
+                    if (!Directory.Exists(sshConfigPathWin)) Directory.CreateDirectory(sshConfigPathWin);
+                }
+                catch (Exception e)
+                {
+                    //
+                }
+                break;
+            case PlatformID.Unix:
+            case PlatformID.MacOSX:
+                var sshPath = Environment.ExpandEnvironmentVariables(SshPathWithVariableLinux);
+                if (!Directory.Exists(sshPath)) Directory.CreateDirectory(sshPath);
+                try
+                {
+                    if (!Directory.Exists(SshRootPathLinux)) Directory.CreateDirectory(SshRootPathLinux);
+                }
+                catch (Exception e)
+                {
+                    //
+                }
+                break;
+            case PlatformID.Other:
+            case PlatformID.Xbox:
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
     /// <summary>
     /// Retrieves the root SSH path based on the platform.
     /// </summary>

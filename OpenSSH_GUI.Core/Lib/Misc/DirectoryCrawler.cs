@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Static;

@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.ViewModels;
@@ -56,6 +57,7 @@ public class App : Application
     private void InitAndOrPrepareServices()
     {
         DirectoryCrawler.ProvideContext(ServiceProvider.GetRequiredService<ILogger<App>>());
+        SshConfigFilesExtension.ValidateDirectories();
     }
 
     private ServiceCollection BuildServiceCollection()
