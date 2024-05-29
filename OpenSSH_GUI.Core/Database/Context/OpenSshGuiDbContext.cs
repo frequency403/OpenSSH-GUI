@@ -2,6 +2,7 @@
 // Created: 17.05.2024 - 08:05:28
 // Last edit: 17.05.2024 - 08:05:29
 
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.DataEncryption;
 using Microsoft.EntityFrameworkCore.DataEncryption.Providers;
@@ -59,7 +60,13 @@ public class OpenSshGuiDbContext : DbContext
             AppDomain.CurrentDomain.FriendlyName);
         if (!Directory.Exists(appDataPath)) Directory.CreateDirectory(appDataPath);
         var dbFilePath = Path.Combine(appDataPath, $"{AppDomain.CurrentDomain.FriendlyName}");
-        optionsBuilder.UseSqlite($"DataSource={dbFilePath}{(!File.Exists(dbFilePath) ? ";New=True;" : "")}")
+        var builder = new SqliteConnectionStringBuilder
+        {
+            DataSource = dbFilePath,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+            Pooling = true
+        };
+        optionsBuilder.UseSqlite(builder.ToString())
             .UseLazyLoadingProxies();
         base.OnConfiguring(optionsBuilder);
     }
