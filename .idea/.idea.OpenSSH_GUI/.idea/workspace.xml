@@ -7,9 +7,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="ConnectionStringIssues fix for linux #2">
+    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="Added Permission handling on unix systems">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSHA-GUI/.idea/.name" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSHA-GUI/.idea/projectSettingsUpdater.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSHA-GUI/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/.name" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/OpenSSHA-GUI.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/KeyFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/KeyFactory.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +36,7 @@
   </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;git@github.com:frequency403/OpenSSH-GUI.git&quot;,
+    &quot;url&quot;: &quot;https://github.com/frequency403/OpenSSH-GUI.git&quot;,
     &quot;accountId&quot;: &quot;355f72fc-0924-4d3a-9d1f-806b6b3da7f9&quot;
   }
 }</component>
@@ -128,15 +134,15 @@
       &quot;sqlite&quot;
     ],
     &quot;rider.external.source.directories&quot;: [
-      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache&quot;,
-      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache&quot;,
-      &quot;C:\\Users\\frequ\\AppData\\Local\\Symbols\\src&quot;
+      &quot;/home/olli/.config/JetBrains/Rider2024.1/resharper-host/DecompilerCache&quot;,
+      &quot;/home/olli/.config/JetBrains/Rider2024.1/resharper-host/SourcesCache&quot;,
+      &quot;/home/olli/.local/share/Symbols/src&quot;
     ]
   }
 }</component>
-  <component name="RunManager" selected=".NET Project.OpenSSH_GUI">
+  <component name="RunManager" selected="Publish to folder.Publish OpenSSH_GUI to folder">
     <configuration name="Publish OpenSSH_GUI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
-      <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" runtime="win-x64" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/win-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341" />
+      <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" runtime="linux-x64" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/linux-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341" />
       <method v="2">
         <option name="CleanSolution" enabled="true" />
       </method>
@@ -184,6 +190,8 @@
       <workItem from="1716896018645" duration="2551000" />
       <workItem from="1716994018313" duration="297000" />
       <workItem from="1716994368541" duration="2568000" />
+      <workItem from="1717025688823" duration="654000" />
+      <workItem from="1717026381920" duration="944000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -333,7 +341,8 @@
     <MESSAGE value="Impl check if files exist in DbContext" />
     <MESSAGE value="Impl File checking #2" />
     <MESSAGE value="ConnectionStringIssues fix for linux #2" />
-    <option name="LAST_COMMIT_MESSAGE" value="ConnectionStringIssues fix for linux #2" />
+    <MESSAGE value="Added Permission handling on unix systems" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Permission handling on unix systems" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -341,118 +350,55 @@
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs</url>
           <line>232</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="">
-            <startOffsets>
-              <option value="9238" />
-            </startOffsets>
-            <endOffsets>
-              <option value="9276" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\MainWindowViewModel.cs" containingFunctionPresentation="" />
           <option name="timeStamp" value="113" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cc2a3752363a4754a533c459d67953a6f8e00/1f/bdb9fb58/Window.cs</url>
           <line>371</line>
-          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'Close'">
-            <startOffsets>
-              <option value="19247" />
-            </startOffsets>
-            <endOffsets>
-              <option value="19281" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'Close'" />
           <option name="timeStamp" value="122" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cc2a3752363a4754a533c459d67953a6f8e00/1f/bdb9fb58/Window.cs</url>
           <line>377</line>
-          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'CloseCore'">
-            <startOffsets>
-              <option value="19437" />
-            </startOffsets>
-            <endOffsets>
-              <option value="19454" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'CloseCore'" />
           <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cc2a3752363a4754a533c459d67953a6f8e00/1f/bdb9fb58/Window.cs</url>
           <line>359</line>
-          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'Close'">
-            <startOffsets>
-              <option value="18593" />
-            </startOffsets>
-            <endOffsets>
-              <option value="18646" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'Close'" />
           <option name="timeStamp" value="124" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cc2a3752363a4754a533c459d67953a6f8e00/1f/bdb9fb58/Window.cs</url>
           <line>398</line>
-          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'HandleClosing'">
-            <startOffsets>
-              <option value="20066" />
-            </startOffsets>
-            <endOffsets>
-              <option value="20136" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'HandleClosing'" />
           <option name="timeStamp" value="125" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cc2a3752363a4754a533c459d67953a6f8e00/1f/bdb9fb58/Window.cs</url>
           <line>406</line>
-          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'CloseInternal'">
-            <startOffsets>
-              <option value="20258" />
-            </startOffsets>
-            <endOffsets>
-              <option value="20331" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'CloseInternal'" />
           <option name="timeStamp" value="126" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$USER_HOME$/AppData/Local/JetBrains/Shared/vAny/DecompilerCache/decompiler/cc2a3752363a4754a533c459d67953a6f8e00/1f/bdb9fb58/Window.cs</url>
           <line>415</line>
-          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'ShouldCancelClose'">
-            <startOffsets>
-              <option value="20563" />
-            </startOffsets>
-            <endOffsets>
-              <option value="20592" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="C:\Users\frequ\AppData\Local\JetBrains\Shared\vAny\DecompilerCache\decompiler\cc2a3752363a4754a533c459d67953a6f8e00\1f\bdb9fb58\Window.cs" containingFunctionPresentation="Method 'ShouldCancelClose'" />
           <option name="timeStamp" value="127" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Misc/DirectoryCrawler.cs</url>
           <line>89</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetAllKeysYield'">
-            <startOffsets>
-              <option value="3395" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3516" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Misc\DirectoryCrawler.cs" containingFunctionPresentation="Method 'GetAllKeysYield'" />
           <option name="timeStamp" value="129" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Abstract/KeyBase.cs</url>
           <line>95</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Abstract\KeyBase.cs" containingFunctionPresentation="Constructor 'KeyBase'">
-            <startOffsets>
-              <option value="2902" />
-            </startOffsets>
-            <endOffsets>
-              <option value="2919" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\Abstract\KeyBase.cs" containingFunctionPresentation="Constructor 'KeyBase'" />
           <option name="timeStamp" value="133" />
         </line-breakpoint>
       </breakpoints>

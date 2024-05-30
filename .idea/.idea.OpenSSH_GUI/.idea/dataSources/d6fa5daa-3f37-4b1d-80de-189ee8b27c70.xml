@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="OpenSSH_GUI">
   <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.52">
-    <root id="1">
-      <ServerVersion>3.45.1</ServerVersion>
-    </root>
+    <root id="1"/>
     <collation id="2" parent="1" name="BINARY"/>
     <collation id="3" parent="1" name="NOCASE"/>
     <collation id="4" parent="1" name="RTRIM"/>

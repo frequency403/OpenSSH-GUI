@@ -2,6 +2,7 @@
 // Created: 18.05.2024 - 13:05:52
 // Last edit: 18.05.2024 - 13:05:53
 
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Enums;
@@ -40,6 +41,7 @@ public static class KeyFactory
                 nameof(@params.FileName));
         await using var privateStream = new MemoryStream();
         await using var dbContext = new OpenSshGuiDbContext();
+        // @TODO FilePermissions (UNIX) 600!!
         var generated = SshNet.Keygen.SshKey.Generate(privateStream, @params.ToInfo());
         ISshKey key;
         switch (@params.KeyFormat)
@@ -52,12 +54,20 @@ public static class KeyFactory
                     await privateStreamWriter.WriteAsync(generated.ToPuttyFormat());
                 }
 
+                if (Environment.OSVersion.Platform is PlatformID.Unix or PlatformID.MacOSX)
+                {
+                    using var proc = new Process();
+                    proc.StartInfo.FileName = "/bin/bash";
+                    proc.StartInfo.ArgumentList.Add("-c");
+                    proc.StartInfo.ArgumentList.Add($"chmod 600 {puttyFileName}");
+                }
                 key = new PpkKey(puttyFileName, @params.Password);
                 break;
             case SshKeyFormat.OpenSSH:
             default:
                 var pubPath = @params.KeyFormat.ChangeExtension(@params.FullFilePath);
-                await using (var privateStreamWriter = new StreamWriter(File.Create(@params.KeyFormat.ChangeExtension(@params.FullFilePath, false))))
+                var privPath = @params.KeyFormat.ChangeExtension(@params.FullFilePath, false);
+                await using (var privateStreamWriter = new StreamWriter(File.Create(privPath)))
                 {
                     await privateStreamWriter.WriteAsync(generated.ToOpenSshFormat());
                 }
@@ -66,7 +76,18 @@ public static class KeyFactory
                 {
                     await publicStreamWriter.WriteAsync(generated.ToOpenSshPublicFormat());
                 }
-
+                if (Environment.OSVersion.Platform is PlatformID.Unix or PlatformID.MacOSX)
+                {
+                    foreach (var path in new [] { pubPath, privPath })
+                    {
+                        using var proc = new Process();
+                        proc.StartInfo.FileName = "/bin/bash";
+                        proc.StartInfo.ArgumentList.Add("-c");
+                        proc.StartInfo.ArgumentList.Add($"chmod 600 {path}");
+                        proc.Start();
+                        await proc.WaitForExitAsync();
+                    }
+                }
                 key = new SshPublicKey(pubPath,@params.Password);
                 break;
         }
