@@ -14,28 +14,32 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
 
-/// *MultiKeyConnectionCredentials(string hostname, string username, <see cref="IEnumerable{T}"/>? keys)**
+/// *MultiKeyConnectionCredentials(string hostname, string username,
+/// <see cref="IEnumerable{T}" />
+/// ? keys)**
 public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyConnectionCredentials
 {
     /// <summary>
-    /// Represents a set of connection credentials for a multi-key authentication.
+    ///     Represents a set of connection credentials for a multi-key authentication.
     /// </summary>
-    public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys) : base(hostname, username, AuthType.MultiKey)
+    public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys) : base(hostname,
+        username, AuthType.MultiKey)
     {
         Keys = keys;
     }
 
     /// <summary>
-    /// Represents the credentials for a multi-key SSH connection.
+    ///     Represents the credentials for a multi-key SSH connection.
     /// </summary>
-    [JsonIgnore] public IEnumerable<ISshKey>? Keys { get; set; }
-    
+    [JsonIgnore]
+    public IEnumerable<ISshKey>? Keys { get; set; }
+
 
     /// <summary>
-    /// Retrieves the connection information for establishing an SSH connection.
+    ///     Retrieves the connection information for establishing an SSH connection.
     /// </summary>
     /// <returns>
-    /// The <see cref="ConnectionInfo"/> object representing the SSH connection information.
+    ///     The <see cref="ConnectionInfo" /> object representing the SSH connection information.
     /// </returns>
     public override ConnectionInfo GetConnectionInfo()
     {

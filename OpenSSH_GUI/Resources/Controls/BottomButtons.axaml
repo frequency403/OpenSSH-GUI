@@ -10,7 +10,7 @@
              x:Class="OpenSSH_GUI.Resources.Controls.BottomButtons">
     <Grid ColumnDefinitions="* *" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Button Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding Command}" 
+                Command="{Binding Command}"
                 IsEnabled="{Binding AbortEnabled}">
             <Button.CommandParameter>
                 <system:Boolean>False</system:Boolean>
@@ -20,8 +20,9 @@
             </ToolTip.Tip>
             <avalonia:MaterialIcon Kind="{Binding AbortIcon}" />
         </Button>
-        <Button Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding Command}" 
+        <Button Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom"
+                Command="{Binding Command}"
                 IsEnabled="{Binding SubmitEnabled}">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>

@@ -9,35 +9,35 @@
 namespace OpenSSH_GUI.Core.Enums;
 
 /// <summary>
-/// The available encryption types for SSH keys.
+///     The available encryption types for SSH keys.
 /// </summary>
 public enum EncryptionType
 {
     /// <summary>
-    /// Represents the NONE member of the EncryptionType enum.
+    ///     Represents the NONE member of the EncryptionType enum.
     /// </summary>
     NONE,
 
     /// <summary>
-    /// Represents the RSA encryption type.
+    ///     Represents the RSA encryption type.
     /// </summary>
     RSA,
 
     /// <summary>
-    /// Enumeration member representing the DSA encryption type.
+    ///     Enumeration member representing the DSA encryption type.
     /// </summary>
     DSA,
 
     /// <summary>
-    /// Represents the encryption type for ECDSA.
+    ///     Represents the encryption type for ECDSA.
     /// </summary>
     /// <remarks>
-    /// The ECDSA encryption type is used in the OpenSSH_GUI.Core library for representing ECDSA keys.
+    ///     The ECDSA encryption type is used in the OpenSSH_GUI.Core library for representing ECDSA keys.
     /// </remarks>
     ECDSA,
 
     /// <summary>
-    /// The ED25519 encryption type.
+    ///     The ED25519 encryption type.
     /// </summary>
     ED25519
 }

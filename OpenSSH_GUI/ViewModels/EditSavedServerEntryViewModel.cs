@@ -8,12 +8,8 @@
 
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive.Subjects;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Credentials;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
@@ -22,6 +18,8 @@ public sealed class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServe
 {
     //@TODO ValidateIncomingKeysForExistence
     private string _password = "";
+
+    private ISshKey _selectedKey;
 
     public EditSavedServerEntryViewModel()
     {
@@ -35,7 +33,6 @@ public sealed class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServe
             });
     }
 
-    private ISshKey _selectedKey;
     public IConnectionCredentials CredentialsToEdit { get; set; }
     public ObservableCollection<ISshKey> Keys { get; set; }
 

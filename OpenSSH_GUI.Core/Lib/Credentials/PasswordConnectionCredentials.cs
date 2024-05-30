@@ -24,22 +24,22 @@ public class PasswordConnectionCredentials(
     : ConnectionCredentials(hostname, username, AuthType.Password), IPasswordConnectionCredentials
 {
     /// <summary>
-    /// Represents connection credentials using password authentication.
+    ///     Represents connection credentials using password authentication.
     /// </summary>
     public string Password { get; set; } = password;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the password is encrypted.
+    ///     Gets or sets a value indicating whether the password is encrypted.
     /// </summary>
     /// <value>
-    /// <c>true</c> if the password is encrypted; otherwise, <c>false</c>.
+    ///     <c>true</c> if the password is encrypted; otherwise, <c>false</c>.
     /// </value>
     public bool EncryptedPassword { get; set; } = encryptedPassword;
 
     /// <summary>
-    /// Retrieves the connection information based on the provided credentials.
+    ///     Retrieves the connection information based on the provided credentials.
     /// </summary>
-    /// <returns>The <see cref="ConnectionInfo"/> object representing the SSH connection information.</returns>
+    /// <returns>The <see cref="ConnectionInfo" /> object representing the SSH connection information.</returns>
     public override ConnectionInfo GetConnectionInfo()
     {
         return new PasswordConnectionInfo(Hostname, Username, Password);

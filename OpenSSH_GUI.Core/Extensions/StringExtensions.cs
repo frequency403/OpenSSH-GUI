@@ -7,32 +7,34 @@
 #endregion
 
 using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace OpenSSH_GUI.Core.Extensions;
+
 /// <summary>
-/// Provides extension methods for string manipulation.
+///     Provides extension methods for string manipulation.
 /// </summary>
 public static partial class StringExtensions
 {
     [GeneratedRegex("\\.")]
     private static partial Regex EcapeRegex();
 
-     /// <summary>
-    /// Wraps the input string to the specified maximum length, optionally enclosing each chunk in a specified character.
+    /// <summary>
+    ///     Wraps the input string to the specified maximum length, optionally enclosing each chunk in a specified character.
     /// </summary>
     /// <param name="input">The input string to wrap.</param>
     /// <param name="maxLength">The maximum length of each wrapped chunk.</param>
-    /// <param name="wrapper">Optional. The character to use as a wrapper around each chunk. If null, uses a new line character.</param>
+    /// <param name="wrapper">
+    ///     Optional. The character to use as a wrapper around each chunk. If null, uses a new line
+    ///     character.
+    /// </param>
     /// <returns>The wrapped string.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string wrapped = "This is a long string that needs wrapping.".Wrap(10, '-');
     /// Console.WriteLine(wrapped);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // This is a- 
     /// // long stri-
@@ -47,18 +49,18 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Wraps the input string to the specified maximum length, optionally enclosing each chunk in a specified string.
+    ///     Wraps the input string to the specified maximum length, optionally enclosing each chunk in a specified string.
     /// </summary>
     /// <param name="input">The input string to wrap.</param>
     /// <param name="maxLength">The maximum length of each wrapped chunk.</param>
     /// <param name="wrapper">Optional. The string to use as a wrapper around each chunk. If null, uses a new line.</param>
     /// <returns>The wrapped string.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string wrapped = "This is a long string that needs wrapping.".Wrap(10, " | ");
     /// Console.WriteLine(wrapped);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // This is a | long stri | ng that n | eeds wra | pping.
     /// </code>
@@ -69,20 +71,20 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Splits the input string into chunks of the specified size.
+    ///     Splits the input string into chunks of the specified size.
     /// </summary>
     /// <param name="input">The input string to split.</param>
     /// <param name="chunkSize">The size of each chunk.</param>
     /// <returns>An enumerable collection of chunked strings.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// var chunks = "This is a long string".SplitToChunks(5);
     /// foreach (string chunk in chunks)
     /// {
     ///     Console.WriteLine(chunk);
     /// }
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // This 
     /// // is a 
@@ -96,18 +98,18 @@ public static partial class StringExtensions
         for (var i = 0; i < input.Length; i += chunkSize)
             yield return input.Substring(i, Math.Min(chunkSize, input.Length - i));
     }
-    
+
     /// <summary>
-    /// Converts the given string to snake_case.
+    ///     Converts the given string to snake_case.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to snake_case.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string snakeCase = "PascalCaseString".ToSnakeCase();
     /// Console.WriteLine(snakeCase);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // pascal_case_string
     /// </code>
@@ -117,17 +119,17 @@ public static partial class StringExtensions
         return Regex.Replace(str, "(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", "_$1").ToLower();
     }
 
-        /// <summary>
-    /// Converts the given string to camelCase.
+    /// <summary>
+    ///     Converts the given string to camelCase.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to camelCase.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string camelCase = "PascalCaseString".ToCamelCase();
     /// Console.WriteLine(camelCase);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // pascalCaseString
     /// </code>
@@ -139,16 +141,16 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Converts the given string to kebab-case.
+    ///     Converts the given string to kebab-case.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to kebab-case.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string kebabCase = "PascalCaseString".ToKebabCase();
     /// Console.WriteLine(kebabCase);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // pascal-case-string
     /// </code>
@@ -159,16 +161,16 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Converts the given string to PascalCase.
+    ///     Converts the given string to PascalCase.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to PascalCase.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string pascalCase = "snake_case_string".ToPascalCase();
     /// Console.WriteLine(pascalCase);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // SnakeCaseString
     /// </code>
@@ -179,16 +181,16 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Converts the given string to Title Case.
+    ///     Converts the given string to Title Case.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to Title Case.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string titleCase = "this is a title case string".ToTitleCase();
     /// Console.WriteLine(titleCase);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // This Is A Title Case String
     /// </code>
@@ -199,16 +201,16 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Converts the given string to Sentence case.
+    ///     Converts the given string to Sentence case.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to Sentence case.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string sentenceCase = "THIS IS A SENTENCE CASE STRING.".ToSentenceCase();
     /// Console.WriteLine(sentenceCase);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // This is a sentence case string.
     /// </code>
@@ -220,16 +222,16 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Converts the given string to StUdLyCaPs.
+    ///     Converts the given string to StUdLyCaPs.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to StUdLyCaPs.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string studlyCaps = "this is a studly caps string".ToStudlyCaps();
     /// Console.WriteLine(studlyCaps);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // tHiS Is a sTuDlY CaPs sTrInG
     /// </code>
@@ -241,16 +243,16 @@ public static partial class StringExtensions
     }
 
     /// <summary>
-    /// Converts the given string to Leet Speak.
+    ///     Converts the given string to Leet Speak.
     /// </summary>
     /// <param name="str">The input string to convert.</param>
     /// <returns>The string converted to Leet Speak.</returns>
     /// <example>
-    /// <code>
+    ///     <code>
     /// string leetSpeak = "Leet Speak is cool!".ToLeetSpeak();
     /// Console.WriteLine(leetSpeak);
     /// </code>
-    /// <code>
+    ///     <code>
     /// // Output:
     /// // 133t Sp34k 15 c00l!
     /// </code>

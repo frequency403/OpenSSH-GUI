@@ -18,6 +18,7 @@ public class ViewModelBase<T>() : ViewModelBase(App.ServiceProvider.GetRequiredS
     public ReactiveCommand<T, T?> Submit { get; set; } = ReactiveCommand.Create<T, T?>(e => null);
     public ReactiveCommand<bool, T?> BooleanSubmit { get; set; } = ReactiveCommand.Create<bool, T?>(e => null);
 }
+
 public class ViewModelBase(ILogger? logger = null) : ReactiveObject
 {
     protected ILogger Logger => logger ?? NullLogger.Instance;

@@ -12,7 +12,7 @@ using ReactiveUI;
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
 /// <summary>
-/// Represents a known host in the OpenSSH GUI.
+///     Represents a known host in the OpenSSH GUI.
 /// </summary>
 public class KnownHost : ReactiveObject, IKnownHost
 {
@@ -28,7 +28,7 @@ public class KnownHost : ReactiveObject, IKnownHost
     private List<IKnownHostKey> _keys = [];
 
     /// <summary>
-    /// Represents a known host entry in the known_hosts file.
+    ///     Represents a known host entry in the known_hosts file.
     /// </summary>
     public KnownHost(IGrouping<string, string> knownHosts)
     {
@@ -37,27 +37,27 @@ public class KnownHost : ReactiveObject, IKnownHost
     }
 
     /// <summary>
-    /// Gets or sets the toggled state of the switch.
+    ///     Gets or sets the toggled state of the switch.
     /// </summary>
     /// <remarks>
-    /// When the switch is toggled:
-    /// - If it was previously off, all known host keys are marked for deletion.
-    /// - If it was previously on, all known host keys are unmarked for deletion.
+    ///     When the switch is toggled:
+    ///     - If it was previously off, all known host keys are marked for deletion.
+    ///     - If it was previously on, all known host keys are unmarked for deletion.
     /// </remarks>
     private bool SwitchToggled { get; set; }
 
     /// <summary>
-    /// Represents a known host in the SSH known hosts file.
+    ///     Represents a known host in the SSH known hosts file.
     /// </summary>
     public string Host { get; }
 
     /// <summary>
-    /// Represents a known host that can be deleted in its entirety.
+    ///     Represents a known host that can be deleted in its entirety.
     /// </summary>
     public bool DeleteWholeHost => Keys.All(e => e.MarkedForDeletion);
 
     /// <summary>
-    /// Represents a known host in the OpenSSH_GUI.
+    ///     Represents a known host in the OpenSSH_GUI.
     /// </summary>
     public List<IKnownHostKey> Keys
     {
@@ -66,8 +66,9 @@ public class KnownHost : ReactiveObject, IKnownHost
     }
 
     /// <summary>
-    /// Toggles the marked for deletion flag of each <see cref="IKnownHostKey"/> within the <see cref="Keys"/> list.
-    /// If the <see cref="SwitchToggled"/> property is true, it sets the flag to false for all keys. Otherwise, it sets the flag to true for all keys.
+    ///     Toggles the marked for deletion flag of each <see cref="IKnownHostKey" /> within the <see cref="Keys" /> list.
+    ///     If the <see cref="SwitchToggled" /> property is true, it sets the flag to false for all keys. Otherwise, it sets
+    ///     the flag to true for all keys.
     /// </summary>
     public void KeysDeletionSwitch()
     {
@@ -86,11 +87,11 @@ public class KnownHost : ReactiveObject, IKnownHost
     }
 
     /// <summary>
-    /// Retrieves all entries for a known host in the known hosts file.
+    ///     Retrieves all entries for a known host in the known hosts file.
     /// </summary>
     /// <returns>
-    /// Returns a string containing all the entries for the known host.
-    /// If the entire host is marked for deletion, returns the line ending character.
+    ///     Returns a string containing all the entries for the known host.
+    ///     If the entire host is marked for deletion, returns the line ending character.
     /// </returns>
     public string GetAllEntries()
     {

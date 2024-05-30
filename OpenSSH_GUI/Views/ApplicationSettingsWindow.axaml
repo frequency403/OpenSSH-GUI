@@ -26,7 +26,8 @@
             </CheckBox>
             <Separator Padding="5" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" Margin="5"
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="2" HorizontalAlignment="Stretch"
+                    Margin="5"
                     VerticalAlignment="Stretch">
             <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsSavedServers}" />
             <Separator Padding="5" />

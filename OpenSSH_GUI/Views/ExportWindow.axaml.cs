@@ -6,9 +6,6 @@
 
 #endregion
 
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.ReactiveUI;
 using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 

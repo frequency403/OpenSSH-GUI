@@ -22,19 +22,25 @@ namespace OpenSSH_GUI.ViewModels;
 
 public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
 {
+    private bool _convertPpkAutomatically;
+
+    private List<IConnectionCredentials> _knownServers;
+
+    private readonly Settings _settings;
+
+    public ObservableCollection<ISshKey> Keys = [];
+    public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
+
     public ApplicationSettingsViewModel()
     {
         using var dbContext = new OpenSshGuiDbContext();
         _settings = dbContext.Settings.First();
         _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
         _knownServers = dbContext.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
-        
+
         BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel?>(async e =>
         {
-            if (!e)
-            {
-                return this;
-            }
+            if (!e) return this;
             await using var context = new OpenSshGuiDbContext();
             var file = context.Settings.Update(_settings).Entity;
             file.ConvertPpkAutomatically = ConvertPpkAutomatically;
@@ -44,17 +50,8 @@ public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSett
             return this; //@TODO Does not close.
         });
     }
-    
-    private Settings _settings;
-    
-    private bool _convertPpkAutomatically;
 
-    private List<IConnectionCredentials> _knownServers;
-    
-    public ObservableCollection<ISshKey> Keys = [];
-    public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
-    
-    
+
     public List<IConnectionCredentials> KnownServers
     {
         get => _knownServers;
@@ -83,12 +80,13 @@ public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSett
             {
                 if (e is IMultiKeyConnectionCredentials)
                 {
-                    var box = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.ApplicationSettingsEditErrorBoxTitle,
+                    var box = MessageBoxManager.GetMessageBoxStandard(
+                        StringsAndTexts.ApplicationSettingsEditErrorBoxTitle,
                         StringsAndTexts.ApplicationSettingsEditErrorBoxText);
                     await box.ShowAsync();
                     return null;
                 }
-    
+
                 var service = new EditSavedServerEntryViewModel();
                 service.SetValues(ref Keys, e);
                 var result = await ShowEditEntry.Handle(service);

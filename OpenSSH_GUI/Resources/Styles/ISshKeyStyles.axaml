@@ -104,7 +104,7 @@
     </DataTemplate>
     <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:ISshKey">
         <StackPanel>
-            <Border CornerRadius="25" Padding="5"  Classes="MainDisplay">
+            <Border CornerRadius="25" Padding="5" Classes="MainDisplay">
                 <Border.Styles>
                     <Style Selector="Border.MainDisplay:pointerover">
                         <Setter Property="RenderTransform" Value="scale(1.001)" />
@@ -168,7 +168,7 @@
                                     Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
                             </ToolTip.Tip>
                             <StackPanel Orientation="Horizontal">
-                                <avalonia:MaterialIcon Kind="Publish"></avalonia:MaterialIcon>
+                                <avalonia:MaterialIcon Kind="Publish" />
                                 <avalonia:MaterialIcon Kind="ShieldKeyOutline" />
                             </StackPanel>
                         </Button>

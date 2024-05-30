@@ -11,17 +11,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -33,6 +27,7 @@ namespace OpenSSH_GUI.ViewModels;
 
 public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
+    private readonly bool _firstCredentialSet;
     private bool _authWithAllKeys;
     private bool _authWithPublicKey;
 
@@ -52,17 +47,19 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
 
     private IBrush _statusButtonBackground = Brushes.Gray;
 
-    private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUnknown);
+    private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUnknown);
 
-    private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUntested);
+    private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUntested);
 
     private bool _tryingToConnect;
 
     private bool _uploadButtonEnabled;
     private string _userName = "";
-    private readonly bool _firstCredentialSet;
 
-    public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys, List<IConnectionCredentials> credentialsList)
+    public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys,
+        List<IConnectionCredentials> credentialsList)
     {
         PublicKeys = new ObservableCollection<ISshKey?>(keys.Where(e => e is not null && !e.NeedPassword));
         _selectedPublicKey = PublicKeys.FirstOrDefault();
@@ -76,7 +73,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
                 TestQuickConnection(SelectedConnection).Wait();
                 return e;
             }
-    
+
             var task = Task.Run(() =>
             {
                 try
@@ -88,7 +85,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
                             : new ServerConnection(Hostname, Username, SelectedPublicKey)
                         : new ServerConnection(Hostname, Username, Password);
                     if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
-    
+
                     return true;
                 }
                 catch (Exception exception)
@@ -100,28 +97,31 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
             TryingToConnect = true;
             if (await task)
             {
-                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusSuccess);
-                StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
+                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                    StringsAndTexts.ConnectToServerStatusSuccess);
+                StatusButtonToolTip =
+                    string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
                 StatusButtonBackground = Brushes.Green;
             }
             else
             {
-                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusFailed);
+                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                    StringsAndTexts.ConnectToServerStatusFailed);
                 StatusButtonBackground = Brushes.Red;
             }
-    
+
             TryingToConnect = false;
-    
+
             if (ServerConnection.IsConnected)
             {
                 UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
                 return e;
             }
-    
+
             var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
                 ButtonEnum.Ok, Icon.Error);
             await messageBox.ShowAsync();
-    
+
             return e;
         });
         ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
@@ -129,8 +129,10 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
             Hostname = "";
             Username = "";
             Password = "";
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUnknown);
-            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusUntested);
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                StringsAndTexts.ConnectToServerStatusUnknown);
+            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                StringsAndTexts.ConnectToServerStatusUntested);
             StatusButtonBackground = Brushes.Gray;
             ServerConnection = new ServerConnection("123", "123", "123");
             UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
@@ -139,7 +141,9 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ConnectToServerViewModel?>(
             async e =>
             {
-                ServerConnection.ConnectionCredentials.Id = (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase()??new ConnectionCredentialsDto()).Id;
+                ServerConnection.ConnectionCredentials.Id =
+                    (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase() ?? new ConnectionCredentialsDto())
+                    .Id;
                 return this;
             });
     }
@@ -210,7 +214,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
     }
 
-    public ObservableCollection<ISshKey?> PublicKeys { get; private set; }
+    public ObservableCollection<ISshKey?> PublicKeys { get; }
 
     public string Hostname
     {
@@ -259,6 +263,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         get => _keyComboBoxEnabled;
         set => this.RaiseAndSetIfChanged(ref _keyComboBoxEnabled, value);
     }
+
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
 
@@ -283,13 +288,15 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         TryingToConnect = true;
         if (TestConnectionInternal(credentials))
         {
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusSuccess);
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                StringsAndTexts.ConnectToServerStatusSuccess);
             StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
             StatusButtonBackground = Brushes.Green;
         }
         else
         {
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase, StringsAndTexts.ConnectToServerStatusFailed);
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                StringsAndTexts.ConnectToServerStatusFailed);
             StatusButtonBackground = Brushes.Red;
         }
 

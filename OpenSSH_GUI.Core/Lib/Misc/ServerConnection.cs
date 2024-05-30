@@ -85,40 +85,6 @@ public class ServerConnection : ReactiveObject, IServerConnection
         GC.SuppressFinalize(this);
     }
 
-    private bool TestMulti(IMultiKeyConnectionCredentials mkcc)
-    {
-        var workingKeys = new List<ISshKey>();
-        foreach (var key in mkcc.Keys)
-        {
-            try
-            {
-                using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetSshNetKeyType());
-                connection.Connect();
-                if (connection.IsConnected)
-                {
-                    workingKeys.Add(key);
-                }
-            }
-            catch (Exception e)
-            {
-                continue;
-            }
-        }
-
-        mkcc.Keys = workingKeys;
-        if (mkcc.Keys.Any())
-        {
-            ClientConnection.Connect();
-            IsConnected = ClientConnection.IsConnected;
-        }
-
-        if (!IsConnected) return IsConnected;
-        ServerOs = GetServerOs();
-        CheckForFilesAndCreateThemIfTheyNotExist();
-        ConnectionTime = DateTime.Now;
-        return ServerOs != PlatformID.Other && IsConnected;
-    }
-
     public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
     {
         exception = null;
@@ -198,6 +164,35 @@ public class ServerConnection : ReactiveObject, IServerConnection
             .RunCommand(
                 $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
             .ExitStatus == 0;
+    }
+
+    private bool TestMulti(IMultiKeyConnectionCredentials mkcc)
+    {
+        var workingKeys = new List<ISshKey>();
+        foreach (var key in mkcc.Keys!)
+            try
+            {
+                using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetSshNetKeyType());
+                connection.Connect();
+                if (connection.IsConnected) workingKeys.Add(key);
+            }
+            catch (Exception)
+            {
+                //
+            }
+
+        mkcc.Keys = workingKeys;
+        if (mkcc.Keys.Any())
+        {
+            ClientConnection.Connect();
+            IsConnected = ClientConnection.IsConnected;
+        }
+
+        if (!IsConnected) return IsConnected;
+        ServerOs = GetServerOs();
+        CheckForFilesAndCreateThemIfTheyNotExist();
+        ConnectionTime = DateTime.Now;
+        return ServerOs != PlatformID.Other && IsConnected;
     }
 
     private string ResolveRemoteEnvVariables(string originalPath)

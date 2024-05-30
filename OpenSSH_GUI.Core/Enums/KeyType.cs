@@ -9,23 +9,23 @@
 namespace OpenSSH_GUI.Core.Enums;
 
 /// <summary>
-/// Enumeration for SSH key types.
+///     Enumeration for SSH key types.
 /// </summary>
 public enum KeyType
 {
     // ReSharper disable InconsistentNaming
     /// <summary>
-    /// RSA key type.
+    ///     RSA key type.
     /// </summary>
     RSA,
 
     /// <summary>
-    /// Represents the ECDSA key type.
+    ///     Represents the ECDSA key type.
     /// </summary>
     ECDSA,
 
     /// <summary>
-    /// Represents the ED25519 key type.
+    ///     Represents the ED25519 key type.
     /// </summary>
     ED25519
 }

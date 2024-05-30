@@ -7,8 +7,8 @@
 #endregion
 
 using System.Collections.ObjectModel;
-using System.Text;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
+using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -22,17 +22,17 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     private readonly string _fileKnownHostsPath = "";
 
     /// <summary>
-    /// Gets or sets a boolean value indicating whether the `KnownHostsFile` object is created from a server or not.
+    ///     Gets or sets a boolean value indicating whether the `KnownHostsFile` object is created from a server or not.
     /// </summary>
     private readonly bool _isFromServer;
 
     /// <summary>
-    /// Represents a collection of known host entries in a file.
+    ///     Represents a collection of known host entries in a file.
     /// </summary>
     private ObservableCollection<IKnownHost> _knownHosts = [];
 
     /// <summary>
-    /// Represents a known hosts file that stores information about trusted hosts.
+    ///     Represents a known hosts file that stores information about trusted hosts.
     /// </summary>
     public KnownHostsFile(string knownHostsPathOrContent, bool fromServer = false)
     {
@@ -49,12 +49,12 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    /// Represents a file that contains known SSH hosts and their keys.
+    ///     Represents a file that contains known SSH hosts and their keys.
     /// </summary>
     public static string LineEnding { get; set; } = "\r\n";
 
     /// <summary>
-    /// Represents a known hosts file.
+    ///     Represents a known hosts file.
     /// </summary>
     public ObservableCollection<IKnownHost> KnownHosts
     {
@@ -63,17 +63,19 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    /// Asynchronously reads the contents of the known hosts file.
+    ///     Asynchronously reads the contents of the known hosts file.
     /// </summary>
-    /// <param name="stream">The file stream to read from. If null, the method reads from the file specified in the constructor.</param>
+    /// <param name="stream">
+    ///     The file stream to read from. If null, the method reads from the file specified in the
+    ///     constructor.
+    /// </param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ReadContentAsync(FileStream? stream = null)
     {
         if (_isFromServer) return;
         if (stream is null)
         {
-            await using var fileStream = File.OpenRead(_fileKnownHostsPath);
-            using var streamReader = new StreamReader(fileStream);
+            using var streamReader = new StreamReader(FileOperations.OpenOrCreate(_fileKnownHostsPath));
             SetKnownHosts(await streamReader.ReadToEndAsync());
         }
         else
@@ -84,7 +86,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    /// Synchronizes the known hosts with the given list of new known hosts.
+    ///     Synchronizes the known hosts with the given list of new known hosts.
     /// </summary>
     /// <param name="newKnownHosts">The new known hosts to synchronize.</param>
     public void SyncKnownHosts(IEnumerable<IKnownHost> newKnownHosts)
@@ -93,27 +95,22 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    /// Updates the content of the known hosts file.
+    ///     Updates the content of the known hosts file.
     /// </summary>
     /// <returns>A task representing the update operation.</returns>
     public async Task UpdateFile()
     {
         if (_isFromServer) return;
-        await using var fileStream = File.OpenWrite(_fileKnownHostsPath);
-        fileStream.SetLength(0);
-        await fileStream.FlushAsync();
+        await using var streamWriter = new StreamWriter(FileOperations.OpenTruncated(_fileKnownHostsPath));
         var newContent = KnownHosts
             .Where(e => !e.DeleteWholeHost)
             .Aggregate("", (current, host) => current + host.GetAllEntries());
-        var newContentBytes = Encoding.Default.GetBytes(newContent);
-        fileStream.SetLength(newContentBytes.Length);
-        await fileStream.WriteAsync(newContentBytes);
-        await fileStream.FlushAsync();
+        await streamWriter.WriteAsync(newContent);
         SetKnownHosts(newContent);
     }
 
     /// <summary>
-    /// Retrieves the updated contents of the known hosts file.
+    ///     Retrieves the updated contents of the known hosts file.
     /// </summary>
     /// <param name="platformId">The platform ID of the server.</param>
     /// <returns>The updated contents of the known hosts file as a string.</returns>
@@ -129,7 +126,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    /// Sets the known hosts for the file.
+    ///     Sets the known hosts for the file.
     /// </summary>
     /// <param name="fileContent">The contents of the known hosts file.</param>
     private void SetKnownHosts(string fileContent)
@@ -142,22 +139,11 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    /// Reads the content of the known hosts file.
+    ///     Reads the content of the known hosts file.
     /// </summary>
     /// <param name="stream">Optional file stream to read from. If null, the file specified during instantiation will be used.</param>
     private void ReadContent(FileStream? stream = null)
     {
-        if (_isFromServer) return;
-        if (stream is null)
-        {
-            using var fileStream = File.Open(_fileKnownHostsPath, FileMode.OpenOrCreate);
-            using var streamReader = new StreamReader(fileStream);
-            SetKnownHosts(streamReader.ReadToEnd());
-        }
-        else
-        {
-            using var streamReader = new StreamReader(stream);
-            SetKnownHosts(streamReader.ReadToEnd());
-        }
+        ReadContentAsync(stream).GetAwaiter().GetResult();
     }
 }

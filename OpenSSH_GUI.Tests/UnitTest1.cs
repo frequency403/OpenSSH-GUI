@@ -6,22 +6,12 @@
 
 #endregion
 
-using System.Security.Cryptography;
-using System.Text;
-using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Lib.Credentials;
-
 namespace OpenSSHA_Tests;
 
 public class Tests
 {
     [SetUp]
     public void Setup()
-    {
-    }
-
-    [Test]
-    public async Task Test1()
     {
     }
 }

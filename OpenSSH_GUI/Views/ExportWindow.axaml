@@ -21,10 +21,12 @@
     <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
         <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3">
             <SelectableTextBlock Name="ExportedText"
-                           Text="{Binding Export}" TextWrapping="Wrap" />
+                                 Text="{Binding Export}" TextWrapping="Wrap" />
         </ScrollViewer>
-        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ColumnDefinitions="* *" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
-            <Button Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ColumnDefinitions="* *" HorizontalAlignment="Stretch"
+              VerticalAlignment="Bottom">
+            <Button Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
                     Command="{Binding BooleanSubmit}" HorizontalContentAlignment="Center">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
@@ -34,7 +36,8 @@
                 </ToolTip.Tip>
                 <avalonia:MaterialIcon Kind="Cancel" />
             </Button>
-            <Button Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+            <Button Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
                     Command="{Binding BooleanSubmit}" HorizontalContentAlignment="Center">
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
@@ -48,6 +51,6 @@
                 </StackPanel>
             </Button>
         </Grid>
-        
+
     </Grid>
 </Window>

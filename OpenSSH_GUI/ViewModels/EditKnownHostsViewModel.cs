@@ -8,8 +8,6 @@
 
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
@@ -41,7 +39,7 @@ public class EditKnownHostsViewModel : ViewModelBase<EditKnownHostsViewModel>
         get => _knownHostsLocal;
         private set => this.RaiseAndSetIfChanged(ref _knownHostsLocal, value);
     }
-    
+
     public void SetServerConnection(ref IServerConnection connection)
     {
         ServerConnection = connection;

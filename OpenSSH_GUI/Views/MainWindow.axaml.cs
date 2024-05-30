@@ -86,7 +86,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         };
         interaction.SetOutput(await dialog.ShowDialog<ApplicationSettingsViewModel>(this));
     }
-    
+
     private async Task DoShowConnectToServerWindowAsync(
         IInteractionContext<ConnectToServerViewModel, ConnectToServerViewModel?> interaction)
     {

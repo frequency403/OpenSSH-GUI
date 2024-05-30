@@ -55,23 +55,23 @@
               RowDefinitions="* 10*">
 
             <!-- Heading  -->
-                <ToggleButton Grid.Row="0" Grid.Column="0" Classes="Sorter" IsChecked="{Binding KeyTypeSort}">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Spacing="3" Margin="5">
-                        <materialIcons:MaterialIcon Kind="KeyVariant" Margin="0" Padding="0" />
-                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
-                        <materialIcons:MaterialIcon Kind="{Binding KeyTypeSortDirectionIcon}" Margin="5 0" Padding="0" />
-                    </StackPanel>
-                </ToggleButton>
+            <ToggleButton Grid.Row="0" Grid.Column="0" Classes="Sorter" IsChecked="{Binding KeyTypeSort}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                    <materialIcons:MaterialIcon Kind="KeyVariant" Margin="0" Padding="0" />
+                    <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
+                    <materialIcons:MaterialIcon Kind="{Binding KeyTypeSortDirectionIcon}" Margin="5 0" Padding="0" />
+                </StackPanel>
+            </ToggleButton>
 
-                <ToggleButton Grid.Row="0" Grid.Column="1" Classes="Sorter" IsChecked="{Binding FingerPrintSort}">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Spacing="3" Margin="5">
-                        <materialIcons:MaterialIcon Kind="Fingerprint" Margin="0" Padding="0" />
-                        <Label
-                            Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
-                        <materialIcons:MaterialIcon Kind="{Binding FingerPrintSortDirectionIcon}" Margin="5 0" Padding="0" />
-                    </StackPanel>
-                </ToggleButton>
-            
+            <ToggleButton Grid.Row="0" Grid.Column="1" Classes="Sorter" IsChecked="{Binding FingerPrintSort}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                    <materialIcons:MaterialIcon Kind="Fingerprint" Margin="0" Padding="0" />
+                    <Label
+                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
+                    <materialIcons:MaterialIcon Kind="{Binding FingerPrintSortDirectionIcon}" Margin="5 0" Padding="0" />
+                </StackPanel>
+            </ToggleButton>
+
             <ToggleButton Grid.Row="0" Grid.Column="2" Classes="Sorter" IsChecked="{Binding CommentSort}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
                     <materialIcons:MaterialIcon Kind="Comment" Margin="0" Padding="0" />
@@ -82,7 +82,7 @@
             </ToggleButton>
 
             <ToggleButton Grid.Row="0" Grid.Column="3" Classes="Sorter" IsEnabled="False">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Spacing="3" Margin="5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
                     <materialIcons:MaterialIcon Kind="FileExportOutline" />
                     <Label
                         Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}" />
@@ -94,9 +94,8 @@
                               Margin="5"
                               VerticalAlignment="Stretch"
                               Name="TheItemsGrid"
-                              ItemTemplate="{DynamicResource SshKeyFullStyle}">
-                </ItemsControl>
-                
+                              ItemTemplate="{DynamicResource SshKeyFullStyle}" />
+
             </ScrollViewer>
         </Grid>
 

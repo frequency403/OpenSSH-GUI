@@ -6,7 +6,6 @@
 
 #endregion
 
-using System.Reactive;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using ReactiveUI;
@@ -20,7 +19,8 @@ public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
         BooleanSubmit = ReactiveCommand.Create<bool, ExportWindowViewModel?>(boolean =>
         {
             if (!boolean) return null;
-            if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return null;
+            if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                return null;
             var mainWindow = desktop.MainWindow;
             var clipboard = mainWindow.Clipboard;
 
@@ -28,7 +28,7 @@ public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
             return this;
         });
     }
-    
+
     public string WindowTitle { get; set; } = "";
     public string Export { get; set; } = "";
 }

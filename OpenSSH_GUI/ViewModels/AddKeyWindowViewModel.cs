@@ -12,12 +12,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
@@ -26,10 +23,6 @@ using ReactiveUI.Validation.Contexts;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
 using SshNet.Keygen;
-using SshNet.Keygen.Extensions;
-using SshNet.Keygen.SshKeyEncryption;
-using SshKey = SshNet.Keygen.SshKey;
-using SshKeyType = SshNet.Keygen.SshKeyType;
 
 namespace OpenSSH_GUI.ViewModels;
 
@@ -50,14 +43,15 @@ public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>
     {
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,
-            name => !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
+            name => !FileOperations.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
         BooleanSubmit = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
         {
             _createKey = b;
             if (!_createKey) return null;
-            return !File.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar + KeyName)
+            return !FileOperations.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar +
+                                          KeyName)
                 ? this
                 : null;
         });
@@ -70,7 +64,7 @@ public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>
         get => _keyNameValidationHelper;
         private init => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
     }
-    
+
     public ISshKeyType SelectedKeyType
     {
         get => _selectedKeyType;

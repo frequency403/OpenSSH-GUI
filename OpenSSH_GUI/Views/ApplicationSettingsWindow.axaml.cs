@@ -6,9 +6,6 @@
 
 #endregion
 
-using System;
-using Avalonia.ReactiveUI;
-using DynamicData.Binding;
 using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;

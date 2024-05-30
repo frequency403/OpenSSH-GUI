@@ -7,7 +7,6 @@
 #endregion
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Avalonia;
@@ -45,6 +44,7 @@ public class App : Application
             if (!db.Settings.Any()) db.Settings.Add(new Settings());
             db.SaveChanges();
         }
+
         InitAndOrPrepareServices();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = new MainWindow
@@ -65,7 +65,9 @@ public class App : Application
         var collection = new ServiceCollection();
         var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName);
-        var logFilePath = Path.Combine(appDataPath, "logs", $"{AppDomain.CurrentDomain.FriendlyName}.log");
+        var logFilebasePath = Path.Combine(appDataPath, "logs");
+        if (!Directory.Exists(logFilebasePath)) Directory.CreateDirectory(logFilebasePath);
+        var logFilePath = Path.Combine(logFilebasePath, $"{AppDomain.CurrentDomain.FriendlyName}.log");
         var serilog = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .WriteTo.File(logFilePath, LogEventLevel.Debug, rollingInterval: RollingInterval.Day)

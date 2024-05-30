@@ -12,12 +12,13 @@ using OpenSSH_GUI.Core.Lib.Static;
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
 /// <summary>
-/// Represents an SSH public key.
+///     Represents an SSH public key.
 /// </summary>
-public class SshPublicKey(string absoluteFilePath, string? password = null) : SshKey(absoluteFilePath, password), ISshPublicKey
+public class SshPublicKey(string absoluteFilePath, string? password = null)
+    : SshKey(absoluteFilePath, password), ISshPublicKey
 {
     /// <summary>
-    /// Represents a private key.
+    ///     Represents a private key.
     /// </summary>
-    public ISshKey PrivateKey { get; } = KeyFactory.FromPath(Path.ChangeExtension(absoluteFilePath, null), password);
+    public ISshKey PrivateKey { get; } = KeyFactory.FromPath(Path.ChangeExtension(absoluteFilePath, null), password)!;
 }

@@ -38,7 +38,8 @@
                     HorizontalAlignment="Center">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
                    Target="BitSizeComboBox" />
-            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowDefault}" IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}" />
+            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowDefault}"
+                   IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}" />
             <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
                       SelectedItem="{Binding SelectedKeyType.CurrentBitSize}"
                       IsVisible="{Binding !SelectedKeyType.HasDefaultBitSize}" />
@@ -57,7 +58,7 @@
                    Target="PasswordTextBox" />
             <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
         </StackPanel>
-        
+
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
@@ -70,7 +71,8 @@
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
                       SelectedItem="{Binding KeyFormat}" />
         </StackPanel>
-        <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+        <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom"
                 Command="{Binding BooleanSubmit}"
                 IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
             <Button.CommandParameter>
@@ -82,7 +84,8 @@
             <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
 
-        <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+        <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom"
                 Command="{Binding BooleanSubmit}">
             <Button.CommandParameter>
                 <system:Boolean>False</system:Boolean>

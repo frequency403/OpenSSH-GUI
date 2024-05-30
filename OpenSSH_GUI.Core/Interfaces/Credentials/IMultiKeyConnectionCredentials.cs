@@ -12,12 +12,13 @@ using OpenSSH_GUI.Core.Interfaces.Keys;
 namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 
 /// <summary>
-/// Represents the interface for multi-key connection credentials.
+///     Represents the interface for multi-key connection credentials.
 /// </summary>
 public interface IMultiKeyConnectionCredentials : IConnectionCredentials
 {
     /// <summary>
-    /// Represents the credentials for a multi-key connection.
+    ///     Represents the credentials for a multi-key connection.
     /// </summary>
-    [JsonIgnore] IEnumerable<ISshKey>? Keys { get; set; }
+    [JsonIgnore]
+    IEnumerable<ISshKey>? Keys { get; set; }
 }
