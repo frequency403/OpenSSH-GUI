@@ -326,6 +326,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                     },
                     Topmost = true,
                     Icon = Icon.Question,
+                    WindowIcon = App.WindowIcon,
                     ButtonDefinitions =
                     [
                         new ButtonDefinition
@@ -351,6 +352,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                         ContentMessage = string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
                             trys + 1, 3),
                         Icon = Icon.Warning,
+                        WindowIcon = App.WindowIcon,
                         ButtonDefinitions = ButtonEnum.OkAbort,
                         EnterDefaultButton = ClickEnum.Ok,
                         EscDefaultButton = ClickEnum.Abort
