@@ -10,8 +10,11 @@ using System;
 using System.IO;
 using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,7 +32,8 @@ namespace OpenSSH_GUI;
 public class App : Application
 {
     public static ServiceProvider ServiceProvider { get; private set; }
-
+    public static WindowIcon WindowIcon => new (new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);

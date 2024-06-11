@@ -10,22 +10,39 @@ namespace OpenSSH_GUI.Core.Lib.Static;
 
 public static class FileOperations
 {
+//     private static FileStreamOptions Options(FileMode mode) => new()
+//     {
+//         Access = FileAccess.ReadWrite, Mode = mode, Share = FileShare.ReadWrite,
+// #pragma warning disable CA1416
+//         UnixCreateMode =
+// #pragma warning restore CA1416
+//             Environment.OSVersion.Platform is PlatformID.Unix or PlatformID.MacOSX &&
+//             mode is FileMode.Create or FileMode.CreateNew or FileMode.OpenOrCreate
+//                 ? UnixFileMode.UserRead | UnixFileMode.UserWrite
+//                 : null
+//     };
+
     private static FileStreamOptions Options(FileMode mode)
     {
-        return new FileStreamOptions
+        var options = new FileStreamOptions
         {
             Access = FileAccess.ReadWrite,
             Mode = mode,
-            Share = FileShare.ReadWrite,
+            Share = FileShare.ReadWrite
+        };
+        if (Environment.OSVersion.Platform is PlatformID.Unix or PlatformID.MacOSX)
+        {
 #pragma warning disable CA1416
-            UnixCreateMode = mode
+            options.UnixCreateMode = mode
                 is FileMode.Create
                 or FileMode.CreateNew
                 or FileMode.OpenOrCreate
                 ? UnixFileMode.UserRead | UnixFileMode.UserWrite
-                : null
+                : null;
 #pragma warning restore CA1416
-        };
+        }
+
+        return options;
     }
 
     public static FileStream DeleteOldAndCreateNew(string filePath)

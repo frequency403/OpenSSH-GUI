@@ -31,8 +31,9 @@ public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSett
     public ObservableCollection<ISshKey> Keys = [];
     public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
 
-    public ApplicationSettingsViewModel()
+    public ApplicationSettingsViewModel(ref ObservableCollection<ISshKey> sshKeys)
     {
+        Keys = sshKeys;
         using var dbContext = new OpenSshGuiDbContext();
         _settings = dbContext.Settings.First();
         _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
@@ -47,7 +48,7 @@ public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSett
             var knownServerIds = KnownServers.Select(s => s.Id).ToList();
             await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
             await context.SaveChangesAsync();
-            return this; //@TODO Does not close.
+            return this;
         });
     }
 

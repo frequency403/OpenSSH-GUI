@@ -12,7 +12,7 @@
         x:DataType="viewModels:MainWindowViewModel"
         Width="1150"
         Height="450"
-        Icon="/Assets/appicon.ico"
+        
         Title="{x:Static openSshGui:StringsAndTexts.MainWindowTitle}">
     <Window.Resources>
         <converters:PlatformIdConverter x:Key="PlatformIdConverter" />

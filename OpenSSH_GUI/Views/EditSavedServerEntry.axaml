@@ -12,7 +12,6 @@
         Height="200"
         CanResize="False"
         Title="EditSavedServerEntry">
-    <!-- @TODO StyleAdjustmentToGeneralStyle -->
     <Grid RowDefinitions="* *" ColumnDefinitions="* * *" Margin="5">
         <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding CredentialsToEdit.Hostname}" Watermark="Hostname"
                  Margin="5 10"

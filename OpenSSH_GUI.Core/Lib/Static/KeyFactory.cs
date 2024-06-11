@@ -43,7 +43,6 @@ public static class KeyFactory
                 nameof(@params.FileName));
         await using var privateStream = new MemoryStream();
         await using var dbContext = new OpenSshGuiDbContext();
-        // @TODO FilePermissions (UNIX) 600!!
         var generated = SshKey.Generate(privateStream, @params.ToInfo());
         ISshKey key;
         switch (@params.KeyFormat)

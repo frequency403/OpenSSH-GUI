@@ -7,6 +7,7 @@
 #endregion
 
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
@@ -16,7 +17,6 @@ namespace OpenSSH_GUI.ViewModels;
 
 public sealed class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServerEntryViewModel>
 {
-    //@TODO ValidateIncomingKeysForExistence
     private string _password = "";
 
     private ISshKey _selectedKey;
@@ -49,7 +49,7 @@ public sealed class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServe
     }
 
     public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
-
+    
     public void SetValues(ref ObservableCollection<ISshKey> keys, IConnectionCredentials credentials)
     {
         Keys = keys;

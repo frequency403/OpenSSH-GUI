@@ -7,6 +7,8 @@
 #endregion
 
 using System.Collections.ObjectModel;
+using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
@@ -75,7 +77,8 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
         if (_isFromServer) return;
         if (stream is null)
         {
-            using var streamReader = new StreamReader(FileOperations.OpenOrCreate(_fileKnownHostsPath));
+            await using var file = FileOperations.OpenOrCreate(_fileKnownHostsPath);
+            using var streamReader = new StreamReader(file, leaveOpen: true);
             SetKnownHosts(await streamReader.ReadToEndAsync());
         }
         else
@@ -144,6 +147,11 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// <param name="stream">Optional file stream to read from. If null, the file specified during instantiation will be used.</param>
     private void ReadContent(FileStream? stream = null)
     {
+        if (stream is null)
+        {
+            SetKnownHosts(File.ReadAllText(SshConfigFiles.Known_Hosts.GetPathOfFile()));
+            return;
+        }
         ReadContentAsync(stream).GetAwaiter().GetResult();
     }
 }

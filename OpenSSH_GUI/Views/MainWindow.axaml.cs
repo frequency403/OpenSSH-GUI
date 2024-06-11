@@ -16,54 +16,11 @@ namespace OpenSSH_GUI.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
-    // public MainWindow()
-    // {
-    //     InitializeComponent();
-    //     this.WhenActivated(action => 
-    //         action(ViewModel!.ShowCreate.RegisterHandler(async interaction =>
-    //             await WindowInteraction.DialogMainWindow<AddKeyWindowViewModel, AddKeyWindow>(interaction, this))));
-    //     this.WhenActivated(action => 
-    //         action(ViewModel!.ShowAppSettings.RegisterHandler(async interaction =>
-    //             await WindowInteraction.DialogMainWindow<ApplicationSettingsViewModel, ApplicationSettingsWindow>(interaction, this))));
-    //     this.WhenActivated(action => 
-    //         action(ViewModel!.ShowEditKnownHosts.RegisterHandler(async interaction =>
-    //             await WindowInteraction.DialogMainWindow<EditKnownHostsViewModel, EditKnownHostsWindow>(interaction, this))));
-    //     this.WhenActivated(action => 
-    //         action(ViewModel!.ShowExportWindow.RegisterHandler(async interaction =>
-    //             await WindowInteraction.DialogMainWindow<ExportWindowViewModel, ExportWindow>(interaction, this))));
-    //     this.WhenActivated(action =>
-    //         action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(async interaction => 
-    //             await WindowInteraction.DialogMainWindow<EditAuthorizedKeysViewModel, EditAuthorizedKeysWindow>(interaction, this))));
-    //     this.WhenActivated(action =>
-    //         action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(async interaction =>
-    //             await WindowInteraction.DialogMainWindow<ConnectToServerViewModel, ConnectToServerWindow>(interaction, this))));
-    //     this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAdd)));
-    // }
-    //
-    // private async Task DoShowAdd(IInteractionContext<AddKeyWindowViewModel, AddKeyWindowViewModel?> interactionContext)
-    // {
-    //     var dialog = new AddKeyWindow
-    //     {
-    //         DataContext = interactionContext.Input
-    //         
-    //     };
-    //     var result = await dialog.ShowDialog<AddKeyWindowViewModel?>(this);
-    //     interactionContext.SetOutput(result);
-    // }
-    //
-    // private async Task DoShow<TWindow, TViewModel>(IInteractionContext<TViewModel, TViewModel?> interaction) where TWindow : ReactiveWindow<TViewModel>, new() where TViewModel : ViewModelBase
-    // {
-    //     var dialog = new TWindow
-    //     {
-    //         DataContext = interaction.Input
-    //     };
-    //     var result = await dialog.ShowDialog<TViewModel?>(this);
-    //     interaction.SetOutput(result);
-    // }
     private const WindowStartupLocation DefaultWindowStartupLocation = WindowStartupLocation.CenterScreen;
 
     public MainWindow()
     {
+        Icon = App.WindowIcon;
         InitializeComponent();
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
         this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));

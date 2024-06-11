@@ -12,7 +12,7 @@
         Height="375"
         x:Class="OpenSSH_GUI.Views.AddKeyWindow"
         x:DataType="viewModels:AddKeyWindowViewModel"
-        Icon="/Assets/appicon.ico"
+        
         Title="{x:Static assets:StringsAndTexts.AddKeyWindowTitle}"
         CanResize="False"
         ShowInTaskbar="True"
@@ -26,52 +26,48 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <viewModels:AddKeyWindowViewModel />
     </Design.DataContext>
-    <Grid ColumnDefinitions="* *" RowDefinitions="* * 2* * *">
+    <Grid ColumnDefinitions="* *" RowDefinitions="* * * * * *">
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top" Margin="20">
+                    VerticalAlignment="Top" Margin="20 5">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
                    Target="KeyFileNameTextBox" />
+            <Separator />
             <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
             <TextBlock x:Name="KeyFileNameValidation" Foreground="Red" FontSize="12" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top"
-                    HorizontalAlignment="Center">
-            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
-                   Target="BitSizeComboBox" />
-            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowDefault}"
-                   IsVisible="{Binding SelectedKeyType.HasDefaultBitSize}" />
-            <ComboBox Name="BitSizeComboBox" ItemsSource="{Binding SelectedKeyType.PossibleBitSizes}"
-                      SelectedItem="{Binding SelectedKeyType.CurrentBitSize}"
-                      IsVisible="{Binding !SelectedKeyType.HasDefaultBitSize}" />
-        </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top"
-                    HorizontalAlignment="Center">
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top"
+                    HorizontalAlignment="Stretch" Margin="20 5">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}"
                    Target="KeyTypesComboBox" />
+            <Separator />
             <ComboBox Name="KeyTypesComboBox"
+                      HorizontalAlignment="Stretch"
                       ItemsSource="{Binding SshKeyTypes, Converter={StaticResource SshKeyTypeConverter}}"
                       SelectedItem="{Binding SelectedKeyType, Converter={StaticResource SshKeyTypeConverter}}" />
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top"
-                    HorizontalAlignment="Stretch" Margin="20 0 20 10">
+                    HorizontalAlignment="Stretch" Margin="20 5">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
                    Target="PasswordTextBox" />
+            <Separator />
             <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 5" HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom">
             <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
                    Target="CommentTextBox" />
+            <Separator />
             <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
         </StackPanel>
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 0 20 0 " HorizontalAlignment="Stretch"
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 5" HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom">
             <Label Content="{x:Static assets:StringsAndTexts.KeyFormatDescription}" />
+            <Separator />
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
                       SelectedItem="{Binding KeyFormat}" />
         </StackPanel>
-        <Button Grid.Row="4" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+        <Button Grid.Row="5" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
                 VerticalAlignment="Bottom"
                 Command="{Binding BooleanSubmit}"
                 IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
@@ -84,7 +80,7 @@
             <avalonia:MaterialIcon Kind="KeyAdd" />
         </Button>
 
-        <Button Grid.Row="4" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
+        <Button Grid.Row="5" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
                 VerticalAlignment="Bottom"
                 Command="{Binding BooleanSubmit}">
             <Button.CommandParameter>

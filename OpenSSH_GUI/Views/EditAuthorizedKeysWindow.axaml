@@ -13,7 +13,7 @@
         Title="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}"
         Width="800"
         Height="600"
-        Icon="/Assets/appicon.ico"
+        
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">

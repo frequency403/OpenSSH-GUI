@@ -302,7 +302,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<Unit, ApplicationSettingsViewModel> OpenAppSettings =>
         ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel>(async u =>
         {
-            var vm = new ApplicationSettingsViewModel();
+            var vm = new ApplicationSettingsViewModel(ref _sshKeys);
             var result = await ShowAppSettings.Handle(vm);
             return result;
         });
@@ -319,12 +319,12 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                     ContentTitle = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
                     ContentHeader = string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
                         Path.GetFileName(key.AbsoluteFilePath)),
-                    // ContentHeader = $"Provide password for key: {Path.GetFileName(key.AbsoluteFilePath)}",
                     InputParams = new InputParams
                     {
                         Label = StringsAndTexts.MainWindowViewModelProvidePasswordPasswordLabel,
                         Multiline = false
                     },
+                    Topmost = true,
                     Icon = Icon.Question,
                     ButtonDefinitions =
                     [

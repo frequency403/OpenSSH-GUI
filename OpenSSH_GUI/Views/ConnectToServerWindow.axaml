@@ -12,7 +12,6 @@
         Width="650"
         Height="225"
         CanResize="False"
-        Icon="/Assets/appicon.ico"
         x:Class="OpenSSH_GUI.Views.ConnectToServerWindow"
         x:DataType="viewModels:ConnectToServerViewModel"
         Title="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}">
