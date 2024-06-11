@@ -1,0 +1,354 @@
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="AddKeyWindowAbortButtonToolTipText" xml:space="preserve">
+        <value>Abbruch</value>
+    </data>
+    <data name="AddKeyWindowAddKeyButtonToolTipText" xml:space="preserve">
+        <value>SSH-Schlüssel hinzufügen</value>
+    </data>
+    <data name="AddKeyWindowDefault" xml:space="preserve">
+        <value>ist vorgegeben!</value>
+    </data>
+    <data name="AddKeyWindowKeyBitSizeComboBoxLabel" xml:space="preserve">
+        <value>Bitgröße</value>
+    </data>
+    <data name="AddKeyWindowKeyCommentTextBoxLabel" xml:space="preserve">
+        <value>Kommentar (email@beispiel.de)</value>
+    </data>
+    <data name="AddKeyWindowKeyFileNameTextBoxLabel" xml:space="preserve">
+        <value>Schlüsseldateiname</value>
+    </data>
+    <data name="AddKeyWindowKeyKeyTypeComboBoxLabel" xml:space="preserve">
+        <value>Schlüsselart</value>
+    </data>
+    <data name="AddKeyWindowKeyPasswordTextBoxLabel" xml:space="preserve">
+        <value>Passwort? (leer lassen für keins)</value>
+    </data>
+    <data name="AddKeyWindowTitle" xml:space="preserve">
+        <value>Neuen SSH-Schlüssel hinzufügen</value>
+    </data>
+    <data name="ApplicationSettingsAutoConvertText" xml:space="preserve">
+        <value>PPK-Schlüssel beim Start automatisch in OpenSSH-Format konvertieren</value>
+    </data>
+    <data name="ApplicationSettingsDescription" xml:space="preserve">
+        <value>Anwendungseinstellungen</value>
+    </data>
+    <data name="ApplicationSettingsMaxServers" xml:space="preserve">
+        <value>Maximale Anzahl gespeicherter Server</value>
+    </data>
+    <data name="ApplicationSettingsSavedServers" xml:space="preserve">
+        <value>Gespeicherte Server</value>
+    </data>
+    <data name="AuthorizedKeysAddKeyToFileOf" xml:space="preserve">
+        <value>Schlüssel zur authorized_keys-Datei hinzufügen von</value>
+    </data>
+    <data name="AuthorizedKeysFileContentFrom" xml:space="preserve">
+        <value>Dateiinhalt von</value>
+    </data>
+    <data name="AuthorizedKeysFileContentLocal" xml:space="preserve">
+        <value>Dateiinhalt vom lokalen Rechner</value>
+    </data>
+    <data name="CancelAndClose" xml:space="preserve">
+        <value>Abbrechen und schließen</value>
+    </data>
+    <data name="ConfirmDialogDefaultNoText" xml:space="preserve">
+        <value>Nein</value>
+    </data>
+    <data name="ConfirmDialogDefaultOkText" xml:space="preserve">
+        <value>Ja</value>
+    </data>
+    <data name="ConfirmDialogDefaultQuestionText" xml:space="preserve">
+        <value>Ok?</value>
+    </data>
+    <data name="ConnectToServerDescription" xml:space="preserve">
+        <value>Mit Server verbinden</value>
+    </data>
+    <data name="ConnectWindowAcceptConnection" xml:space="preserve">
+        <value>Verbindung akzeptieren</value>
+    </data>
+    <data name="ConnectWindowQuickConnect" xml:space="preserve">
+        <value>Schnellverbindung</value>
+    </data>
+    <data name="ConnectWindowResetValues" xml:space="preserve">
+        <value>Werte zurücksetzen</value>
+    </data>
+    <data name="ConnectWindowTestConnection" xml:space="preserve">
+        <value>Verbindung testen</value>
+    </data>
+    <data name="ConnectWindowUseAllKeys" xml:space="preserve">
+        <value>Alle Schlüssel verwenden</value>
+    </data>
+    <data name="ConnectWindowUsePubKey" xml:space="preserve">
+        <value>Öffentlichen Schlüssel verwenden</value>
+    </data>
+    <data name="EditKnownHostsWindowConfirmButtonToolTipText" xml:space="preserve">
+        <value>Änderungen akzeptieren und in Datei schreiben</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderFingerprintText" xml:space="preserve">
+        <value>Fingerabdruck</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderKeySizeText" xml:space="preserve">
+        <value>Schlüsselgröße</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderKeyTypeText" xml:space="preserve">
+        <value>Schlüsselart</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderOptionsText" xml:space="preserve">
+        <value>Optionen</value>
+    </data>
+    <data name="EditKnownHostsWindowDismissButtonToolTipText" xml:space="preserve">
+        <value>Verwerfen und schließen</value>
+    </data>
+    <data name="EditKnownHostsWindowMarkForDeletionButtonToolTipText" xml:space="preserve">
+        <value>Für Löschung beim Speichern markieren</value>
+    </data>
+    <data name="EditKnownHostsWindowReloadButtonToolTipText" xml:space="preserve">
+        <value>Datei neu laden und Änderungen rückgängig machen</value>
+    </data>
+    <data name="EditKnownHostsWindowTitle" xml:space="preserve">
+        <value>known_hosts-Datei bearbeiten</value>
+    </data>
+    <data name="Error" xml:space="preserve">
+        <value>Fehler</value>
+    </data>
+    <data name="ExportWindowCopyToClipboardToolTipText" xml:space="preserve">
+        <value>In Zwischenablage kopieren</value>
+    </data>
+    <data name="KeyFormatDescription" xml:space="preserve">
+        <value>Schlüsselformat</value>
+    </data>
+    <data name="MainWindowAddKeyToolTip" xml:space="preserve">
+        <value>SSH-Schlüssel hinzufügen</value>
+    </data>
+    <data name="MainWindowConnectionTooltipConnectedOn" xml:space="preserve">
+        <value>Verbunden seit:</value>
+    </data>
+    <data name="MainWindowConnectionTooltipDisconnected" xml:space="preserve">
+        <value>Aktuell nicht verbunden. Rechtsklick, um das Verbindungsmenü zu öffnen und eine Verbindung herzustellen.</value>
+    </data>
+    <data name="MainWindowConnectionTooltipServerOs" xml:space="preserve">
+        <value>Server-Betriebssystem:</value>
+    </data>
+    <data name="MainWindowConvertTooltip" xml:space="preserve">
+        <value>In entgegengesetztes Format konvertieren</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingCommentText" xml:space="preserve">
+        <value>Kommentar</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingExportDeleteText" xml:space="preserve">
+        <value>Exportieren / Löschen</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingFingerprintText" xml:space="preserve">
+        <value>Fingerabdruck</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingKeySizeText" xml:space="preserve">
+        <value>Schlüsselgröße in Byte</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingKeyTypeText" xml:space="preserve">
+        <value>Schlüsselart</value>
+    </data>
+    <data name="MainWindowDataGridControlsDeleteKeyToolTipText" xml:space="preserve">
+        <value>Schlüssel von Festplatte entfernen</value>
+    </data>
+    <data name="MainWindowDataGridControlsExportPrivateKeyToolTipText" xml:space="preserve">
+        <value>Privatschlüssel exportieren</value>
+    </data>
+    <data name="MainWindowDataGridControlsExportPublicKeyToolTipText" xml:space="preserve">
+        <value>Öffentlichen Schlüssel exportieren</value>
+    </data>
+    <data name="MainWindowDataGridRowDetailsAbsolutePathText" xml:space="preserve">
+        <value>Absoluter Pfad:</value>
+    </data>
+    <data name="MainWindowDataGridRowDetailsFilenameText" xml:space="preserve">
+        <value>Dateiname auf Festplatte:</value>
+    </data>
+    <data name="MainWindowDataGridRowDetailsPrivateKeyFilenameText" xml:space="preserve">
+        <value>Dateiname des Privatschlüssels:</value>
+    </data>
+    <data name="MainWindowEditAuthorizedKeys" xml:space="preserve">
+        <value>authorized_keys bearbeiten</value>
+    </data>
+    <data name="MainWindowEditKnownHostsFileToolTip" xml:space="preserve">
+        <value>"known_hosts"-Datei bearbeiten</value>
+    </data>
+    <data name="MainWindowFoundKeyPairsCountLabelPart2" xml:space="preserve">
+        <value>Schlüsselpaare im SSH-Verzeichnis gefunden</value>
+    </data>
+    <data name="MainWindowIsNotRemoteTooltipText" xml:space="preserve">
+        <value>Mit einem Server verbinden, um die Datei auf dem Server zu bearbeiten!</value>
+    </data>
+    <data name="MainWindowKeyFormatType" xml:space="preserve">
+        <value>Schlüsselformat/-art:</value>
+    </data>
+    <data name="MainWindowRightClickHelp" xml:space="preserve">
+        <value>Rechtsklick für Hilfe</value>
+    </data>
+    <data name="MainWindowRightClickOptions" xml:space="preserve">
+        <value>Rechtsklick für Optionen</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyQuestionText" xml:space="preserve">
+        <value>SSH-Schlüssel wirklich löschen?</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyTitleText" xml:space="preserve">
+        <value>{0} löschen?</value>
+    </data>
+    <data name="MainWindowViewModelDynamicExportWindowTitle" xml:space="preserve">
+        <value>{0}-Schlüssel exportieren: {1}</value>
+    </data>
+    <data name="MainWindowViewModelExportKeyErrorMessage" xml:space="preserve">
+        <value>Fehler beim Exportieren der Schlüsseldatei</value>
+    </data>
+    <data name="MainWindowViewModelProblemLoadingFileText" xml:space="preserve">
+        <value>Problem beim Laden von "{0}": {1}</value>
+    </data>
+    <data name="SaveAndClose" xml:space="preserve">
+        <value>Änderungen speichern und schließen</value>
+    </data>
+    <data name="MainWindowFoundKeyPairsCountLabelPart1" xml:space="preserve">
+        <value>Es wurden</value>
+    </data>
+    <data name="MainWindowTitle" xml:space="preserve">
+        <value>OpenSSH GUI</value>
+    </data>
+    <data name="ErrorAction" xml:space="preserve">
+        <value>Fehler {0}</value>
+    </data>
+    <data name="MainWindowConvertKeyMessageBoxTitle" xml:space="preserve">
+        <value>{0}-Schlüssel zu einem {1}-Schlüssel</value>
+    </data>
+    <data name="MainWindowConvertKeyMessageBoxText" xml:space="preserve">
+        <value>Hiermit wird ihr {0}. Möchten Sie den alten Schlüssel löschen?</value>
+    </data>
+    <data name="MainWindowConvertKeyMessageBoxErrorText" xml:space="preserve">
+        <value>Es trat ein problem beim Konvertieren auf. Konsultieren Sie die Log-Datei für mehr Informationen</value>
+    </data>
+    <data name="MainWindowDisconnectBoxTextNone" xml:space="preserve">
+        <value>Keine Verbindung zum schließen!</value>
+    </data>
+    <data name="MainWindowDisconnectBoxTextSuccess" xml:space="preserve">
+        <value>Verbindung erfolgreich geschlossen!</value>
+    </data>
+    <data name="MainWindowDisconnectBoxTitle" xml:space="preserve">
+        <value>Verbindung schließen</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyQuestionTextPair" xml:space="preserve">
+        <value>SSH-Schlüsselpaar wiklich löschen?</value>
+    </data>
+    <data name="NotImplementedBoxText" xml:space="preserve">
+        <value>Diese Funktion ist noch nicht implementiert, aber geplant!</value>
+    </data>
+    <data name="NotImplementedBoxTitle" xml:space="preserve">
+        <value>Noch nicht implementiert</value>
+    </data>
+    <data name="ApplicationSettingsEditErrorBoxText" xml:space="preserve">
+        <value>Sie können keine Multi-Schlüssel Authentifizierung ändern!</value>
+    </data>
+    <data name="ApplicationSettingsEditErrorBoxTitle" xml:space="preserve">
+        <value>Multi-Schlüssel Authentifizierung kann nicht editiert werden</value>
+    </data>
+    <data name="AddKeyWindowFilenameError" xml:space="preserve">
+        <value>Dateiname exisitert bereits!</value>
+    </data>
+    <data name="ConnectToServerStatusBase" xml:space="preserve">
+        <value>Status: {0}</value>
+    </data>
+    <data name="ConnectToServerStatusFailed" xml:space="preserve">
+        <value>Fehler</value>
+    </data>
+    <data name="ConnectToServerStatusSuccess" xml:space="preserve">
+        <value>Erfolg</value>
+    </data>
+    <data name="ConnectToServerStatusUnknown" xml:space="preserve">
+        <value>Unbekannt</value>
+    </data>
+    <data name="ConnectToServerValidationError" xml:space="preserve">
+        <value>Hostname/Ip, Nutzername oder Password fehlen!</value>
+    </data>
+    <data name="ConnectToServerStatusUntested" xml:space="preserve">
+        <value>Nicht getestet</value>
+    </data>
+    <data name="ConnectToServerSshConnectionString" xml:space="preserve">
+        <value>Verbunden mit ssh://{0}@{1}</value>
+    </data>
+    <data name="MainWindowConnectMenuConnect" xml:space="preserve">
+        <value>Verbindung herstellen</value>
+    </data>
+    <data name="MainWindowConnectMenuDisconnect" xml:space="preserve">
+        <value>Verbindung trennen</value>
+    </data>
+    <data name="MainWindowSettingsMenuAppSettings" xml:space="preserve">
+        <value>Anwendungseinstellungen</value>
+    </data>
+    <data name="MainWindowSettingsMenuLocalUserSshConfig" xml:space="preserve">
+        <value>SSH-Konfiguration (Lokaler Nutzer)</value>
+    </data>
+    <data name="MainWindowSettingsMenuMachineSshdConfig" xml:space="preserve">
+        <value>SSH-Konfiguration (PC)</value>
+    </data>
+    <data name="MainWindowSettingsMenuRemoteMachineSshdConfig" xml:space="preserve">
+        <value>SSH-Konfiguration (Server Nutzer)</value>
+    </data>
+    <data name="MainWindowSettingsMenuRemoteUserSshConfig" xml:space="preserve">
+        <value>SSH-Konfiguration (Server)</value>
+    </data>
+    <data name="MainWindowHelpMenuAbout" xml:space="preserve">
+        <value>Über OpenSSH-GUI</value>
+    </data>
+    <data name="MainWindowHelpMenuQuestion" xml:space="preserve">
+        <value>Frage stellen oder um Hilfe bitten</value>
+    </data>
+    <data name="MainWindowHelpMenuWebsite" xml:space="preserve">
+        <value>Website / Handbuch</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDisk" xml:space="preserve">
+        <value>Schlüssel neu von Festplatte laden</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords" xml:space="preserve">
+        <value>Schlüssel neu laden und Passwörter vergessen</value>
+    </data>
+    <data name="KeysShowPassword" xml:space="preserve">
+        <value>Passwort anzeigen</value>
+    </data>
+    <data name="KeysForgetPassword" xml:space="preserve">
+        <value>Passwort vergessen</value>
+    </data>
+    <data name="KeysShowPasswordOf" xml:space="preserve">
+        <value>Passwort für {0} anzeigen</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPromptHeading" xml:space="preserve">
+        <value>Passwort eingeben:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
+        <value>Passwürt für {0} Schlüsseldatei bereitstellen</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPasswordLabel" xml:space="preserve">
+        <value>Passwort:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
+        <value>Falsches Passwort!</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorContent" xml:space="preserve">
+        <value>Sie haben ein falsches passwort eingegeben. Dies ist Versuch {0} von {1} möglichen Versuchen. Möchten sie es erneut versuchen?</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonAbort" xml:space="preserve">
+        <value>Abbrechen</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonSubmit" xml:space="preserve">
+        <value>Speichern</value>
+    </data>
+</root>

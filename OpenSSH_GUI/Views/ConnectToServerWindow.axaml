@@ -1,0 +1,172 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:credentials="clr-namespace:OpenSSH_GUI.Core.Interfaces.Credentials;assembly=OpenSSH_GUI.Core"
+        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
+        Width="650"
+        Height="225"
+        CanResize="False"
+        x:Class="OpenSSH_GUI.Views.ConnectToServerWindow"
+        x:DataType="viewModels:ConnectToServerViewModel"
+        Title="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}">
+    <Window.Styles>
+        <Style Selector="TextBlock.Working">
+            <Setter Property="Text" />
+            <Style.Animations>
+                <Animation IterationCount="INFINITE" Duration="0:0:1">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0.0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="RotateTransform.Angle" Value="180.0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360.0" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </Window.Styles>
+    <Design.DataContext>
+        <viewModels:ConnectToServerViewModel />
+    </Design.DataContext>
+    <Grid RowDefinitions="* * * * *" ColumnDefinitions="* * *" Margin="5">
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold"
+                   Text="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}" HorizontalAlignment="Center" />
+        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"
+                  IsChecked="{Binding QuickConnect}"
+                  IsVisible="{Binding QuickConnectAvailable}">
+            <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowQuickConnect}" />
+        </CheckBox>
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left"
+                    IsVisible="{Binding !QuickConnect}"
+                    VerticalAlignment="Center">
+            <CheckBox IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUsePubKey}" />
+            </CheckBox>
+            <CheckBox IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}">
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUseAllKeys}" />
+            </CheckBox>
+        </StackPanel>
+        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  IsVisible="{Binding QuickConnect}"
+                  ItemsSource="{Binding ConnectionCredentials}"
+                  SelectedItem="{Binding SelectedConnection}"
+                  IsEnabled="{Binding !TryingToConnect}">
+            <ComboBox.DataTemplates>
+                <DataTemplate DataType="credentials:IKeyConnectionCredentials">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <Label Content="{Binding Display}" />
+                        <Separator />
+                        <Label Content="{Binding AuthType}" />
+                        <Separator />
+                        <Label Content="{Binding Key.Filename}" />
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate DataType="credentials:IMultiKeyConnectionCredentials">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <Label Content="{Binding Display}" />
+                        <Separator />
+                        <Label Content="{Binding AuthType}" />
+                        <Separator />
+                        <ItemsControl ItemsSource="{Binding Keys}">
+                            <ItemsControl.DataTemplates>
+                                <DataTemplate DataType="keys:ISshKey">
+                                    <Label Content="{Binding Filename}" />
+                                </DataTemplate>
+                            </ItemsControl.DataTemplates>
+                        </ItemsControl>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate DataType="credentials:IPasswordConnectionCredentials">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <Label Content="{Binding Display}" />
+                        <Separator />
+                        <Label Content="{Binding AuthType}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.DataTemplates>
+        </ComboBox>
+        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
+                 Height="30"
+                 VerticalContentAlignment="Center"
+                 IsVisible="{Binding !QuickConnect}"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
+
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
+                 Height="30"
+                 VerticalContentAlignment="Center"
+                 IsVisible="{Binding !QuickConnect}"
+                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
+
+        <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2" IsVisible="{Binding !QuickConnect}"
+                    VerticalAlignment="Top">
+            <TextBox Height="30"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding Password}" Watermark="Password" PasswordChar="*"
+                     IsEnabled="{Binding !ServerConnection.IsConnected}"
+                     IsVisible="{Binding !AuthWithPublicKey}" />
+            <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
+                      IsVisible="{Binding AuthWithPublicKey}"
+                      ItemsSource="{Binding PublicKeys}"
+                      SelectedItem="{Binding SelectedPublicKey}"
+                      ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
+        </StackPanel>
+        <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
+                Command="{Binding TestConnection}"
+                IsEnabled="{Binding !ServerConnection.IsConnected}"
+                HotKey="Enter">
+            <ToolTip.Tip>
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowTestConnection}" />
+            </ToolTip.Tip>
+            <StackPanel Orientation="Horizontal">
+                <avalonia:MaterialIcon Kind="LanConnect" />
+                <avalonia:MaterialIcon Kind="Help" />
+            </StackPanel>
+        </Button>
+
+        <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5"
+                   IsVisible="{Binding TryingToConnect}" Classes="Working">
+            <avalonia:MaterialIcon Classes="Working" Kind="Autorenew" />
+        </TextBlock>
+
+
+        <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5"
+                   Padding="5"
+                   Background="{Binding StatusButtonBackground}" IsVisible="{Binding !TryingToConnect}">
+            <ToolTip.Tip>
+                <Label Content="{Binding StatusButtonToolTip}" />
+            </ToolTip.Tip>
+            <TextBlock Text="{Binding StatusButtonText}" VerticalAlignment="Center" />
+            <Button HorizontalAlignment="Right" Background="DarkSlateGray"
+                    Command="{Binding ResetCommand}"
+                    IsVisible="{Binding ServerConnection.IsConnected}">
+                <ToolTip.Tip>
+                    <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowResetValues}" />
+                </ToolTip.Tip>
+                <avalonia:MaterialIcon Kind="Replay" />
+            </Button>
+        </TextBlock>
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
+                Background="LimeGreen" IsEnabled="{Binding UploadButtonEnabled}"
+                Command="{Binding BooleanSubmit}"
+                HotKey="Enter">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
+            <ToolTip.Tip>
+                <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowAcceptConnection}" />
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="Check" />
+        </Button>
+    </Grid>
+</Window>

@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="controls:BottomButtons"
+             x:Class="OpenSSH_GUI.Resources.Controls.BottomButtons">
+    <Grid ColumnDefinitions="* *" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Button Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                Command="{Binding Command}"
+                IsEnabled="{Binding AbortEnabled}">
+            <Button.CommandParameter>
+                <system:Boolean>False</system:Boolean>
+            </Button.CommandParameter>
+            <ToolTip.Tip>
+                <Label Content="{Binding AbortButtonToolTip}" />
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="{Binding AbortIcon}" />
+        </Button>
+        <Button Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom"
+                Command="{Binding Command}"
+                IsEnabled="{Binding SubmitEnabled}">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
+            <ToolTip.Tip>
+                <Label Content="{Binding SubmitButtonToolTip}" />
+            </ToolTip.Tip>
+            <avalonia:MaterialIcon Kind="{Binding SubmitIcon}" />
+        </Button>
+    </Grid>
+</UserControl>

@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root"
+                xmlns="">
+        <xsd:element name="root" msdata:IsDataSet="true">
+
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="AddKeyWindowAbortButtonToolTipText" xml:space="preserve">
+        <value>Abort</value>
+    </data>
+    <data name="AddKeyWindowAddKeyButtonToolTipText" xml:space="preserve">
+        <value>Add SSH key</value>
+    </data>
+    <data name="AddKeyWindowKeyBitSizeComboBoxLabel" xml:space="preserve">
+        <value>Bitsize</value>
+    </data>
+    <data name="AddKeyWindowKeyCommentTextBoxLabel" xml:space="preserve">
+        <value>Comment (email@example.com)</value>
+    </data>
+    <data name="AddKeyWindowKeyFileNameTextBoxLabel" xml:space="preserve">
+        <value>Key filename</value>
+    </data>
+    <data name="AddKeyWindowKeyKeyTypeComboBoxLabel" xml:space="preserve">
+        <value>Keytype</value>
+    </data>
+    <data name="AddKeyWindowKeyPasswordTextBoxLabel" xml:space="preserve">
+        <value>Password? (leave empty for none)</value>
+    </data>
+    <data name="AddKeyWindowTitle" xml:space="preserve">
+        <value>Add new SSH key</value>
+    </data>
+    <data name="ConfirmDialogDefaultNoText" xml:space="preserve">
+        <value>No</value>
+    </data>
+    <data name="ConfirmDialogDefaultOkText" xml:space="preserve">
+        <value>Yes</value>
+    </data>
+    <data name="ConfirmDialogDefaultQuestionText" xml:space="preserve">
+        <value>Allright?</value>
+    </data>
+    <data name="EditKnownHostsWindowConfirmButtonToolTipText" xml:space="preserve">
+        <value>Accept changes and write to file</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderFingerprintText" xml:space="preserve">
+        <value>Fingerprint</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderKeySizeText" xml:space="preserve">
+        <value>Keysize</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderKeyTypeText" xml:space="preserve">
+        <value>Keytype</value>
+    </data>
+    <data name="EditKnownHostsWindowDataGridColumnHeaderOptionsText" xml:space="preserve">
+        <value>Options</value>
+    </data>
+    <data name="EditKnownHostsWindowDismissButtonToolTipText" xml:space="preserve">
+        <value>Dismiss and Close</value>
+    </data>
+    <data name="EditKnownHostsWindowMarkForDeletionButtonToolTipText" xml:space="preserve">
+        <value>Mark for deletion on save</value>
+    </data>
+    <data name="EditKnownHostsWindowReloadButtonToolTipText" xml:space="preserve">
+        <value>Reload file and revert changes</value>
+    </data>
+    <data name="EditKnownHostsWindowTitle" xml:space="preserve">
+        <value>Edit known_hosts file</value>
+    </data>
+    <data name="Error" xml:space="preserve">
+        <value>Error</value>
+    </data>
+    <data name="ExportWindowCopyToClipboardToolTipText" xml:space="preserve">
+        <value>Copy to clipboard</value>
+    </data>
+    <data name="KeyFormatDescription" xml:space="preserve">
+        <value>Key Format</value>
+    </data>
+    <data name="MainWindowAddKeyToolTip" xml:space="preserve">
+        <value>Add SSH key</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingCommentText" xml:space="preserve">
+        <value>Comment</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingExportDeleteText" xml:space="preserve">
+        <value>Export / Delete</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingFingerprintText" xml:space="preserve">
+        <value>Fingerprint</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingKeySizeText" xml:space="preserve">
+        <value>Keysize in bytes</value>
+    </data>
+    <data name="MainWindowDataGridColumnHeadingKeyTypeText" xml:space="preserve">
+        <value>Keytype</value>
+    </data>
+    <data name="MainWindowDataGridControlsDeleteKeyToolTipText" xml:space="preserve">
+        <value>Delete key from disk</value>
+    </data>
+    <data name="MainWindowDataGridControlsExportPrivateKeyToolTipText" xml:space="preserve">
+        <value>Export private key</value>
+    </data>
+    <data name="MainWindowDataGridControlsExportPublicKeyToolTipText" xml:space="preserve">
+        <value>Export public key</value>
+    </data>
+    <data name="MainWindowDataGridRowDetailsAbsolutePathText" xml:space="preserve">
+        <value>Absolute path:</value>
+    </data>
+    <data name="MainWindowDataGridRowDetailsFilenameText" xml:space="preserve">
+        <value>Filename on disk:</value>
+    </data>
+    <data name="MainWindowDataGridRowDetailsPrivateKeyFilenameText" xml:space="preserve">
+        <value>Private key filename:</value>
+    </data>
+    <data name="MainWindowEditKnownHostsFileToolTip" xml:space="preserve">
+        <value>Edit "known_hosts" file</value>
+    </data>
+    <data name="MainWindowFoundKeyPairsCountLabelPart1" xml:space="preserve">
+        <value>Found</value>
+    </data>
+    <data name="MainWindowFoundKeyPairsCountLabelPart2" xml:space="preserve">
+        <value>keypairs in SSH directory</value>
+    </data>
+    <data name="MainWindowTitle" xml:space="preserve">
+        <value>OpenSSH GUI</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyQuestionText" xml:space="preserve">
+        <value>Really delete the SSH key?</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyTitleText" xml:space="preserve">
+        <value>Delete {0}?</value>
+    </data>
+    <data name="MainWindowViewModelDynamicExportWindowTitle" xml:space="preserve">
+        <value>Export {0} key: {1}</value>
+    </data>
+    <data name="MainWindowViewModelExportKeyErrorMessage" xml:space="preserve">
+        <value>Error exporting keyfile!</value>
+    </data>
+    <data name="MainWindowViewModelProblemLoadingFileText" xml:space="preserve">
+        <value>Problem loading "{0}": {1}</value>
+    </data>
+    <data name="ApplicationSettingsDescription" xml:space="preserve">
+        <value>Application Settings</value>
+    </data>
+    <data name="ApplicationSettingsMaxServers" xml:space="preserve">
+        <value>Max count of servers to save</value>
+    </data>
+    <data name="ApplicationSettingsAutoConvertText" xml:space="preserve">
+        <value>Convert ppk keys to openssh format automatically at start</value>
+    </data>
+    <data name="ApplicationSettingsSavedServers" xml:space="preserve">
+        <value>Saved Servers</value>
+    </data>
+    <data name="CancelAndClose" xml:space="preserve">
+        <value>Cancel and close</value>
+    </data>
+    <data name="SaveAndClose" xml:space="preserve">
+        <value>Save changes and close</value>
+    </data>
+    <data name="ConnectWindowQuickConnect" xml:space="preserve">
+        <value>Quick connect</value>
+    </data>
+    <data name="ConnectWindowUsePubKey" xml:space="preserve">
+        <value>Use public key</value>
+    </data>
+    <data name="ConnectWindowUseAllKeys" xml:space="preserve">
+        <value>Use all keys</value>
+    </data>
+    <data name="ConnectWindowTestConnection" xml:space="preserve">
+        <value>Test connection</value>
+    </data>
+    <data name="ConnectWindowResetValues" xml:space="preserve">
+        <value>Reset values</value>
+    </data>
+    <data name="ConnectWindowAcceptConnection" xml:space="preserve">
+        <value>Accept connection</value>
+    </data>
+    <data name="AuthorizedKeysFileContentLocal" xml:space="preserve">
+        <value>File content from local machine</value>
+    </data>
+    <data name="AuthorizedKeysFileContentFrom" xml:space="preserve">
+        <value>File content from</value>
+    </data>
+    <data name="AuthorizedKeysAddKeyToFileOf" xml:space="preserve">
+        <value>Add key to authorized_keys file of</value>
+    </data>
+    <data name="MainWindowKeyFormatType" xml:space="preserve">
+        <value>Key Format/Type:</value>
+    </data>
+    <data name="MainWindowEditAuthorizedKeys" xml:space="preserve">
+        <value>Edit authorized_keys</value>
+    </data>
+    <data name="MainWindowIsNotRemoteTooltipText" xml:space="preserve">
+        <value>Connect to a server to edit the remote file!</value>
+    </data>
+    <data name="MainWindowConnectionTooltipServerOs" xml:space="preserve">
+        <value>Server OS:</value>
+    </data>
+    <data name="MainWindowConnectionTooltipConnectedOn" xml:space="preserve">
+        <value>Connected on:</value>
+    </data>
+    <data name="MainWindowConnectionTooltipDisconnected" xml:space="preserve">
+        <value>Currenty disconnected. Right click to open connection menu to establish a connection</value>
+    </data>
+    <data name="MainWindowRightClickOptions" xml:space="preserve">
+        <value>Right click for options</value>
+    </data>
+    <data name="MainWindowRightClickHelp" xml:space="preserve">
+        <value>Right click for help</value>
+    </data>
+    <data name="AddKeyWindowDefault" xml:space="preserve">
+        <value>is default!</value>
+    </data>
+    <data name="MainWindowConvertTooltip" xml:space="preserve">
+        <value>Convert to opposite format</value>
+    </data>
+    <data name="ConnectToServerDescription" xml:space="preserve">
+        <value>Connect to server</value>
+    </data>
+    <data name="ErrorAction" xml:space="preserve">
+        <value>Error {0}</value>
+    </data>
+    <data name="MainWindowConvertKeyMessageBoxTitle" xml:space="preserve">
+        <value>{0}-key to a {1}-key</value>
+    </data>
+    <data name="MainWindowConvertKeyMessageBoxText" xml:space="preserve">
+        <value>This will convert your {0}. Do you want to delete the old file?</value>
+    </data>
+    <data name="MainWindowConvertKeyMessageBoxErrorText" xml:space="preserve">
+        <value>There was an error converting the keyfile. See the log for details.</value>
+    </data>
+    <data name="MainWindowViewModelDeleteKeyQuestionTextPair" xml:space="preserve">
+        <value>Really delete the SSH keypair?</value>
+    </data>
+    <data name="MainWindowDisconnectBoxTitle" xml:space="preserve">
+        <value>Disconnect from Server</value>
+    </data>
+    <data name="MainWindowDisconnectBoxTextSuccess" xml:space="preserve">
+        <value>Disconnected successfully!</value>
+    </data>
+    <data name="MainWindowDisconnectBoxTextNone" xml:space="preserve">
+        <value>Nothing to disconnect from!</value>
+    </data>
+    <data name="NotImplementedBoxTitle" xml:space="preserve">
+        <value>Not implemented yet</value>
+    </data>
+    <data name="NotImplementedBoxText" xml:space="preserve">
+        <value>This function is not implemented yet, but planned!</value>
+    </data>
+    <data name="ApplicationSettingsEditErrorBoxTitle" xml:space="preserve">
+        <value>Multi-key cannot be edited</value>
+    </data>
+    <data name="ApplicationSettingsEditErrorBoxText" xml:space="preserve">
+        <value>You cannot edit a multi-key</value>
+    </data>
+    <data name="AddKeyWindowFilenameError" xml:space="preserve">
+        <value>Filename does already exist!</value>
+    </data>
+    <data name="ConnectToServerStatusBase" xml:space="preserve">
+        <value>Status: {0}</value>
+    </data>
+    <data name="ConnectToServerStatusUnknown" xml:space="preserve">
+        <value>unknown</value>
+    </data>
+    <data name="ConnectToServerStatusUntested" xml:space="preserve">
+        <value>not yet tested</value>
+    </data>
+    <data name="ConnectToServerStatusFailed" xml:space="preserve">
+        <value>failed</value>
+    </data>
+    <data name="ConnectToServerStatusSuccess" xml:space="preserve">
+        <value>success</value>
+    </data>
+    <data name="ConnectToServerValidationError" xml:space="preserve">
+        <value>Missing hostname/ip, username or password!</value>
+    </data>
+    <data name="ConnectToServerSshConnectionString" xml:space="preserve">
+        <value>Connected to ssh://{0}@{1}</value>
+    </data>
+    <data name="MainWindowConnectMenuConnect" xml:space="preserve">
+        <value>Connect</value>
+    </data>
+    <data name="MainWindowConnectMenuDisconnect" xml:space="preserve">
+        <value>Disconnect</value>
+    </data>
+    <data name="MainWindowSettingsMenuAppSettings" xml:space="preserve">
+        <value>Application settings</value>
+    </data>
+    <data name="MainWindowSettingsMenuLocalUserSshConfig" xml:space="preserve">
+        <value>Local user ssh config</value>
+    </data>
+    <data name="MainWindowSettingsMenuMachineSshdConfig" xml:space="preserve">
+        <value>Machine sshd config</value>
+    </data>
+    <data name="MainWindowSettingsMenuRemoteUserSshConfig" xml:space="preserve">
+        <value>Remote machine sshd config</value>
+    </data>
+    <data name="MainWindowSettingsMenuRemoteMachineSshdConfig" xml:space="preserve">
+        <value>Remote user ssh config</value>
+    </data>
+    <data name="MainWindowHelpMenuWebsite" xml:space="preserve">
+        <value>Website/Manual</value>
+    </data>
+    <data name="MainWindowHelpMenuQuestion" xml:space="preserve">
+        <value>Ask a question or for help</value>
+    </data>
+    <data name="MainWindowHelpMenuAbout" xml:space="preserve">
+        <value>About</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDisk" xml:space="preserve">
+        <value>Reload keys from disk</value>
+    </data>
+    <data name="MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords" xml:space="preserve">
+        <value>Reload keys and forget passwords</value>
+    </data>
+    <data name="KeysShowPassword" xml:space="preserve">
+        <value>Show password</value>
+    </data>
+    <data name="KeysForgetPassword" xml:space="preserve">
+        <value>Forget password</value>
+    </data>
+    <data name="KeysShowPasswordOf" xml:space="preserve">
+        <value>Show password of {0}</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPromptHeading" xml:space="preserve">
+        <value>Enter the password:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
+        <value>Provide password for key {0}</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordPasswordLabel" xml:space="preserve">
+        <value>Password:</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
+        <value>Password incorrect!</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordErrorContent" xml:space="preserve">
+        <value>You provided a wrong password. Try {0} of {1}. Do you want to try again?</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonAbort" xml:space="preserve">
+        <value>Abort</value>
+    </data>
+    <data name="MainWindowViewModelProvidePasswordButtonSubmit" xml:space="preserve">
+        <value>Submit</value>
+    </data>
+</root>

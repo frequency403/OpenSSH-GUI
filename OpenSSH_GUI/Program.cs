@@ -1,0 +1,36 @@
+﻿#region CopyrightNotice
+
+// File Created by: Oliver Schantz
+// Created: 15.05.2024 - 00:05:44
+// Last edit: 15.05.2024 - 01:05:36
+
+#endregion
+
+using System;
+using Avalonia;
+using Avalonia.ReactiveUI;
+
+namespace OpenSSH_GUI;
+
+internal sealed class Program
+{
+    // Initialization code. Don't use any Avalonia, third-party APIs or any
+    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
+    // yet and stuff might break.
+    [STAThread]
+    public static void Main(string[] args)
+    {
+        BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
+    }
+
+    // Avalonia configuration, don't remove; also used by visual designer.
+    private static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace()
+            .UseReactiveUI();
+    }
+}

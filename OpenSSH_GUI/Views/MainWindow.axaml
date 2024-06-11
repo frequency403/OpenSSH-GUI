@@ -1,0 +1,352 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
+        x:Class="OpenSSH_GUI.Views.MainWindow"
+        x:DataType="viewModels:MainWindowViewModel"
+        Width="1150"
+        Height="450"
+        
+        Title="{x:Static openSshGui:StringsAndTexts.MainWindowTitle}">
+    <Window.Resources>
+        <converters:PlatformIdConverter x:Key="PlatformIdConverter" />
+
+    </Window.Resources>
+    <Window.Styles>
+        <Style Selector="ToggleButton.Sorter:pressed">
+            <Setter Property="RenderTransform" Value="{x:Null}" />
+        </Style>
+        <Style Selector="ToggleButton.Sorter">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="Transparent"
+                            BorderBrush="DimGray"
+                            BorderThickness="0 0 1 1"
+                            CornerRadius="0">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+            <Setter Property="IsThreeState" Value="True" />
+            <Setter Property="ClickMode" Value="Release" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Margin" Value="0 0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="0 10" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="* 7* *" ColumnDefinitions="* * *" Margin="20 5" HorizontalAlignment="Stretch">
+
+        <!-- Key List -->
+
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" ColumnDefinitions="* 3* * *"
+              RowDefinitions="* 10*">
+
+            <!-- Heading  -->
+            <ToggleButton Grid.Row="0" Grid.Column="0" Classes="Sorter" IsChecked="{Binding KeyTypeSort}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                    <materialIcons:MaterialIcon Kind="KeyVariant" Margin="0" Padding="0" />
+                    <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
+                    <materialIcons:MaterialIcon Kind="{Binding KeyTypeSortDirectionIcon}" Margin="5 0" Padding="0" />
+                </StackPanel>
+            </ToggleButton>
+
+            <ToggleButton Grid.Row="0" Grid.Column="1" Classes="Sorter" IsChecked="{Binding FingerPrintSort}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                    <materialIcons:MaterialIcon Kind="Fingerprint" Margin="0" Padding="0" />
+                    <Label
+                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
+                    <materialIcons:MaterialIcon Kind="{Binding FingerPrintSortDirectionIcon}" Margin="5 0" Padding="0" />
+                </StackPanel>
+            </ToggleButton>
+
+            <ToggleButton Grid.Row="0" Grid.Column="2" Classes="Sorter" IsChecked="{Binding CommentSort}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                    <materialIcons:MaterialIcon Kind="Comment" Margin="0" Padding="0" />
+                    <TextPresenter
+                        Text="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingCommentText}" />
+                    <materialIcons:MaterialIcon Kind="{Binding CommentSortDirectionIcon}" Margin="5 0" Padding="0" />
+                </StackPanel>
+            </ToggleButton>
+
+            <ToggleButton Grid.Row="0" Grid.Column="3" Classes="Sorter" IsEnabled="False">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                    <materialIcons:MaterialIcon Kind="FileExportOutline" />
+                    <Label
+                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}" />
+                </StackPanel>
+            </ToggleButton>
+
+            <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
+                <ItemsControl ItemsSource="{Binding SshKeys}"
+                              Margin="5"
+                              VerticalAlignment="Stretch"
+                              Name="TheItemsGrid"
+                              ItemTemplate="{DynamicResource SshKeyFullStyle}" />
+
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Bottom Controls -->
+
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*" ColumnDefinitions="* * * *">
+
+            <!-- Open Add Key Window -->
+
+            <Button Grid.Column="0"
+                    Command="{Binding OpenCreateKeyWindow}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Background="ForestGreen">
+                <ToolTip.Tip>
+                    <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowAddKeyToolTip}" />
+                </ToolTip.Tip>
+                <StackPanel Orientation="Horizontal">
+                    <materialIcons:MaterialIcon Kind="KeyAdd" />
+                </StackPanel>
+            </Button>
+
+            <!-- Open Edit Known Host Window  -->
+
+            <Button Grid.Column="1"
+                    Command="{Binding OpenEditKnownHostsWindow}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Background="CornflowerBlue">
+                <ToolTip.Tip>
+                    <StackPanel>
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
+                               Foreground="OrangeRed"
+                               IsVisible="{Binding !ServerConnection.IsConnected}" />
+                    </StackPanel>
+                </ToolTip.Tip>
+                <StackPanel Orientation="Horizontal">
+                    <materialIcons:MaterialIcon Kind="FileAccountOutline" />
+                </StackPanel>
+            </Button>
+
+            <!-- Open Edit Authorized Keys Window -->
+
+            <Button Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Background="DarkOliveGreen"
+                    Command="{Binding OpenEditAuthorizedKeysWindow}">
+                <ToolTip.Tip>
+                    <StackPanel>
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}" />
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
+                               Foreground="OrangeRed"
+                               IsVisible="{Binding !ServerConnection.IsConnected}" />
+                    </StackPanel>
+                </ToolTip.Tip>
+                <StackPanel Orientation="Horizontal">
+                    <materialIcons:MaterialIcon Kind="FileCogOutline" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Status Panel -->
+        <Border Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10 5"
+                Background="#8c656c73" CornerRadius="5">
+            <Grid ColumnDefinitions="* * * *">
+
+                <!-- Connection -->
+
+                <Border Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                        Background="Gray" Margin="10 5" Padding="7" CornerRadius="5">
+                    <ToolTip.Tip>
+                        <StackPanel>
+                            <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
+                                  IsVisible="{Binding ServerConnection.IsConnected}">
+                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
+                                       Content="{Binding ServerConnection.ConnectionString}" FontWeight="Bold" />
+                                <Label Grid.Row="1" Grid.Column="0"
+                                       Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipServerOs}" />
+                                <Label Grid.Row="1" Grid.Column="1"
+                                       Content="{Binding ServerConnection.ServerOs, Converter={StaticResource PlatformIdConverter}}"
+                                       FontWeight="Bold" />
+                                <Label Grid.Row="2" Grid.Column="0"
+                                       Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipConnectedOn}" />
+                                <Label Grid.Row="2" Grid.Column="1" Content="{Binding ServerConnection.ConnectionTime}" />
+                            </Grid>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipDisconnected}"
+                                IsVisible="{Binding !ServerConnection.IsConnected}" />
+                        </StackPanel>
+
+
+                    </ToolTip.Tip>
+                    <Border.ContextMenu>
+                        <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuConnect}"
+                                      IsEnabled="{Binding !ServerConnection.IsConnected}"
+                                      Command="{Binding OpenConnectToServerWindow}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIconExt Kind="LanConnect" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuDisconnect}"
+                                      IsEnabled="{Binding ServerConnection.IsConnected}"
+                                      Command="{Binding DisconnectServer}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIconExt Kind="LanDisconnect" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Border.ContextMenu>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding ServerConnection.IsConnected}">
+                            <materialIcons:MaterialIcon Kind="Signal" Foreground="Green" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !ServerConnection.IsConnected}">
+                            <materialIcons:MaterialIcon Kind="SignalOff" Foreground="Red" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Item Count -->
+
+                <Border Grid.Column="1" Background="Gray" Margin="10 5" Padding="5" HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" CornerRadius="5" Child="{Binding ItemsCount}">
+                    <ToolTip.Tip>
+                        <StackPanel Orientation="Horizontal">
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
+                            <Label Content="{Binding SshKeys.Count}" FontWeight="Bold" />
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
+                        </StackPanel>
+                    </ToolTip.Tip>
+                </Border>
+
+                <!-- Settings -->
+
+                <Border Grid.Column="2" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" CornerRadius="5">
+                    <ToolTip.Tip>
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickOptions}" />
+                    </ToolTip.Tip>
+                    <Border.ContextMenu>
+                        <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                            <MenuItem
+                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords}"
+                                Command="{Binding ReloadKeys}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Boolean>True</sys:Boolean>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="Reload" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDisk}"
+                                Command="{Binding ReloadKeys}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Boolean>False</sys:Boolean>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="Reload" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuAppSettings}"
+                                      Command="{Binding OpenAppSettings}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuLocalUserSshConfig}"
+                                Command="{Binding NotImplementedMessage}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="AccountCogOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuMachineSshdConfig}"
+                                Command="{Binding NotImplementedMessage}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="BookCogOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem
+                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteUserSshConfig}"
+                                IsEnabled="{Binding ServerConnection.IsConnected}"
+                                Command="{Binding NotImplementedMessage}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="ServerNetworkOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem
+                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteMachineSshdConfig}"
+                                IsEnabled="{Binding ServerConnection.IsConnected}"
+                                Command="{Binding NotImplementedMessage}">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="ServerOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Border.ContextMenu>
+                    <materialIcons:MaterialIcon Kind="CogOutline" />
+                </Border>
+
+                <!-- Help -->
+
+                <Border Grid.Column="3" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch" CornerRadius="5">
+                    <ToolTip.Tip>
+                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickHelp}" />
+                    </ToolTip.Tip>
+                    <Border.ContextMenu>
+                        <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuWebsite}"
+                                      Command="{Binding OpenBrowser}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Int32>0</sys:Int32>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="Web" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator />
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuQuestion}"
+                                      Command="{Binding OpenBrowser}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Int32>1</sys:Int32>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="LightbulbQuestionOutline" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuAbout}"
+                                      Command="{Binding OpenBrowser}">
+                                <MenuItem.CommandParameter>
+                                    <sys:Int32>2</sys:Int32>
+                                </MenuItem.CommandParameter>
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="Help" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Border.ContextMenu>
+                    <materialIcons:MaterialIcon Kind="HelpCircleOutline" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

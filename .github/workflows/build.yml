@@ -31,13 +31,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Build for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
+        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSH_GUI/OpenSSH_GUI.csproj
 
       - name: Build for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
+        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSH_GUI/OpenSSH_GUI.csproj
         
       - name: Build for macOS
-        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSHA-GUI/OpenSSHA-GUI.csproj
+        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSH_GUI/OpenSSH_GUI.csproj
 
       - name: Create Release
         id: create_release
@@ -56,7 +56,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/linux-x64/publish/OpenSSHA-GUI
+          asset_path: OpenSSH_GUI/bin/Release/net8.0/linux-x64/publish/OpenSSH_GUI
           asset_name: OpenSSH-GUI-linux-x64.bin
           asset_content_type: application/x-openssh-gui
 
@@ -66,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/win-x64/publish/OpenSSHA-GUI.exe
+          asset_path: OpenSSH_GUI/bin/Release/net8.0/win-x64/publish/OpenSSH_GUI.exe
           asset_name: OpenSSH-GUI-win-x64.exe
           asset_content_type: application/x-openssh-gui
 
@@ -76,6 +76,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSHA-GUI/bin/Release/net8.0/osx-x64/publish/OpenSSHA-GUI
+          asset_path: OpenSSH_GUI/bin/Release/net8.0/osx-x64/publish/OpenSSH_GUI
           asset_name: OpenSSH-GUI-osx-x64.bin
           asset_content_type: application/x-openssh-gui

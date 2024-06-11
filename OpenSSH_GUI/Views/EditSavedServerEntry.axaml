@@ -1,0 +1,54 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="OpenSSH_GUI.Views.EditSavedServerEntry"
+        x:DataType="viewModels:EditSavedServerEntryViewModel"
+        Width="600"
+        Height="200"
+        CanResize="False"
+        Title="EditSavedServerEntry">
+    <Grid RowDefinitions="* *" ColumnDefinitions="* * *" Margin="5">
+        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding CredentialsToEdit.Hostname}" Watermark="Hostname"
+                 Margin="5 10"
+                 Height="25" VerticalAlignment="Bottom" />
+
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CredentialsToEdit.Username}" Watermark="Username"
+                 Margin="5 10"
+                 Height="25" VerticalAlignment="Bottom" />
+
+        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Password}" Watermark="Password"
+                 Margin="5 10" Height="25" IsEnabled="{Binding IsPasswordKey}"
+                 IsVisible="{Binding IsPasswordKey}" VerticalAlignment="Bottom" />
+        <ComboBox Grid.Row="0" Grid.Column="2" Margin="5 10" Height="25"
+                  IsEnabled="{Binding !IsPasswordKey}"
+                  IsVisible="{Binding !IsPasswordKey}"
+                  ItemsSource="{Binding Keys}"
+                  SelectedItem="{Binding SelectedKey}"
+                  ItemTemplate="{StaticResource SshKeyComboBoxStyle}"
+                  VerticalAlignment="Bottom" />
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Spacing="5" Orientation="Horizontal"
+                    HorizontalAlignment="Stretch">
+            <Button Command="{Binding BooleanSubmit}"
+                    Foreground="Firebrick">
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+                <avalonia:MaterialIcon Kind="CloseCircle" />
+            </Button>
+            <Button Command="{Binding BooleanSubmit}"
+                    Foreground="LawnGreen">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
+                <avalonia:MaterialIcon Kind="FloppyDisk" />
+            </Button>
+        </StackPanel>
+
+    </Grid>
+
+</Window>
