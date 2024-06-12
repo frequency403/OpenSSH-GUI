@@ -18,6 +18,7 @@ public static class FileOperations
     public static void EnsureFilesAndFoldersExist(ILogger? logger = null)
     {
         logger??= NullLogger.Instance;
+        SshConfigFilesExtension.ValidateDirectories(logger);
         foreach (var configFile in Enum.GetValues<SshConfigFiles>())
         {
             var pathOfFile = configFile.GetPathOfFile();
@@ -30,7 +31,6 @@ public static class FileOperations
                 logger.LogError(e, "Error creating file {pathOfFile}", pathOfFile);
             }
         }
-        SshConfigFilesExtension.ValidateDirectories(logger);
     }
 
     private static FileStreamOptions Options(FileMode mode)
