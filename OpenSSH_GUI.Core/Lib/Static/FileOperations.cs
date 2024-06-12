@@ -6,21 +6,32 @@
 
 #endregion
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
+
 namespace OpenSSH_GUI.Core.Lib.Static;
 
 public static class FileOperations
 {
-//     private static FileStreamOptions Options(FileMode mode) => new()
-//     {
-//         Access = FileAccess.ReadWrite, Mode = mode, Share = FileShare.ReadWrite,
-// #pragma warning disable CA1416
-//         UnixCreateMode =
-// #pragma warning restore CA1416
-//             Environment.OSVersion.Platform is PlatformID.Unix or PlatformID.MacOSX &&
-//             mode is FileMode.Create or FileMode.CreateNew or FileMode.OpenOrCreate
-//                 ? UnixFileMode.UserRead | UnixFileMode.UserWrite
-//                 : null
-//     };
+    public static void EnsureFilesAndFoldersExist(ILogger? logger = null)
+    {
+        logger??= NullLogger.Instance;
+        foreach (var configFile in Enum.GetValues<SshConfigFiles>())
+        {
+            var pathOfFile = configFile.GetPathOfFile();
+            try
+            {
+                if (!File.Exists(pathOfFile)) OpenOrCreate(pathOfFile);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error creating file {pathOfFile}", pathOfFile);
+            }
+        }
+        SshConfigFilesExtension.ValidateDirectories(logger);
+    }
 
     private static FileStreamOptions Options(FileMode mode)
     {
