@@ -8,12 +8,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_11_06_2024_10_09__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_11_06_2024_10_09__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_21_05_2024_08_03__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_21_05_2024_08_03__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/SshConfigFilesExtension.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/SshConfigFilesExtension.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/FileOperations.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/FileOperations.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +16,12 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="master" />
@@ -142,35 +143,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Project.OpenSSH_GUI.executor&quot;: &quot;Debug&quot;,
-    &quot;73246cd7-706d-442f-93d2-b067f06d41d3.executor&quot;: &quot;Debug&quot;,
-    &quot;Publish to folder.Publish OpenSSH_GUI to folder.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.5023256&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;RiderNuGetOptionsPageId&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Project.OpenSSH_GUI.executor": "Debug",
+    "73246cd7-706d-442f-93d2-b067f06d41d3.executor": "Debug",
+    "Publish to folder.Publish OpenSSH_GUI to folder.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "XThreadsFramesViewSplitterKey": "0.5023256",
+    "git-widget-placeholder": "#5 on development",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "RiderNuGetOptionsPageId",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
     ],
-    &quot;rider.external.source.directories&quot;: [
-      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache&quot;,
-      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache&quot;,
-      &quot;C:\\Users\\frequ\\AppData\\Local\\Symbols\\src&quot;
+    "rider.external.source.directories": [
+      "C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache",
+      "C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache",
+      "C:\\Users\\frequ\\AppData\\Local\\Symbols\\src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Project.OpenSSH_GUI">
     <configuration name="Publish OpenSSH_GUI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
       <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" runtime="win-x64" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/win-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341" />
@@ -223,6 +224,7 @@
       <workItem from="1716994368541" duration="2568000" />
       <workItem from="1718097314327" duration="8723000" />
       <workItem from="1718185546848" duration="771000" />
+      <workItem from="1718188112365" duration="73000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -377,11 +379,38 @@
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/development" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/development" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
