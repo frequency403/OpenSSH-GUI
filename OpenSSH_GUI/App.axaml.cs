@@ -22,6 +22,7 @@ using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
+using OpenSSH_GUI.Core.Lib.Static;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog;
@@ -60,8 +61,9 @@ public class App : Application
 
     private void InitAndOrPrepareServices()
     {
-        DirectoryCrawler.ProvideContext(ServiceProvider.GetRequiredService<ILogger<App>>());
-        SshConfigFilesExtension.ValidateDirectories();
+        var logger = ServiceProvider.GetRequiredService<ILogger<App>>();
+        DirectoryCrawler.ProvideContext(logger);
+        FileOperations.EnsureFilesAndFoldersExist(logger);
     }
 
     private ServiceCollection BuildServiceCollection()

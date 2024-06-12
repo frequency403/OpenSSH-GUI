@@ -6,6 +6,8 @@
 
 #endregion
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Enums;
 
 namespace OpenSSH_GUI.Core.Extensions;
@@ -35,45 +37,17 @@ public static class SshConfigFilesExtension
     /// </summary>
     private const string SshRootPathWin = "%PROGRAMDATA%\\ssh";
 
-    public static void ValidateDirectories()
+    public static void ValidateDirectories(ILogger? logger = null)
     {
-        switch (Environment.OSVersion.Platform)
+        logger ??= NullLogger.Instance;
+        try
         {
-            case PlatformID.Win32S:
-            case PlatformID.Win32Windows:
-            case PlatformID.Win32NT:
-            case PlatformID.WinCE:
-                var sshPathWin = Environment.ExpandEnvironmentVariables(SshPathWithVariableWindows);
-                var sshConfigPathWin = Environment.ExpandEnvironmentVariables(SshRootPathWin);
-                if (!Directory.Exists(sshPathWin)) Directory.CreateDirectory(sshPathWin);
-                try
-                {
-                    if (!Directory.Exists(sshConfigPathWin)) Directory.CreateDirectory(sshConfigPathWin);
-                }
-                catch (Exception e)
-                {
-                    //
-                }
-
-                break;
-            case PlatformID.Unix:
-            case PlatformID.MacOSX:
-                var sshPath = Environment.ExpandEnvironmentVariables(SshPathWithVariableLinux);
-                if (!Directory.Exists(sshPath)) Directory.CreateDirectory(sshPath);
-                try
-                {
-                    if (!Directory.Exists(SshRootPathLinux)) Directory.CreateDirectory(SshRootPathLinux);
-                }
-                catch (Exception e)
-                {
-                    //
-                }
-
-                break;
-            case PlatformID.Other:
-            case PlatformID.Xbox:
-            default:
-                throw new ArgumentOutOfRangeException();
+            if (!Directory.Exists(GetRootSshPath())) Directory.CreateDirectory(GetRootSshPath());
+            if (!Directory.Exists(GetBaseSshPath())) Directory.CreateDirectory(GetBaseSshPath());
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error creating config path");
         }
     }
 

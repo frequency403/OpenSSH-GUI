@@ -8,26 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources/d6fa5daa-3f37-4b1d-80de-189ee8b27c70.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_11_06_2024_10_09__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_11_06_2024_10_09__Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_21_05_2024_08_03__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_21_05_2024_08_03__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/KnownHosts/KnownHostsFile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/KnownHosts/KnownHostsFile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/SshConfigFilesExtension.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Extensions/SshConfigFilesExtension.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/FileOperations.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/FileOperations.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/KeyFactory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Static/KeyFactory.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Wrapper/WindowBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Resources/Wrapper/WindowBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditSavedServerEntryViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditSavedServerEntryViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/ViewModels/MainWindowViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/AddKeyWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/AddKeyWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ConnectToServerWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditAuthorizedKeysWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditKnownHostsWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditSavedServerEntry.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/EditSavedServerEntry.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/ExportWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/MainWindow.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/MainWindow.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/Views/MainWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/Views/MainWindow.axaml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,6 +21,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -45,6 +36,29 @@
 }</component>
   <component name="GitToolBoxStore">
     <option name="projectConfigVersion" value="5" />
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="development" />
+                    <option name="lastUsedInstant" value="1718106002" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="master" />
+                    <option name="lastUsedInstant" value="1718105915" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
   </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
@@ -207,7 +221,8 @@
       <workItem from="1716896018645" duration="2551000" />
       <workItem from="1716994018313" duration="297000" />
       <workItem from="1716994368541" duration="2568000" />
-      <workItem from="1718097314327" duration="4045000" />
+      <workItem from="1718097314327" duration="8723000" />
+      <workItem from="1718185546848" duration="771000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -321,7 +336,39 @@
       <option name="project" value="LOCAL" />
       <updated>1716996612003</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Minor bug fixes and readme changes">
+      <option name="closed" value="true" />
+      <created>1718104842261</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1718104842261</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Update README with new features and dependencies &#10;&#10;Added explanations and screenshots of new V2 UI features to the README. These include options to convert key formats, sort keys, and quickly connect to previously saved connections. Also, updated the list of dependencies and added a new section on how the program handles password storage.">
+      <option name="closed" value="true" />
+      <created>1718104864003</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1718104864003</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Add window icon to dialog boxes&#10;&#10;The window icon has been added to several dialog boxes in the MainWindowViewModel. This addition helps maintain consistent branding and user interface experience across all dialog boxes in the application.">
+      <option name="closed" value="true" />
+      <created>1718105092092</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1718105092092</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Image Updates">
+      <option name="closed" value="true" />
+      <created>1718105254463</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1718105254463</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -357,7 +404,11 @@
     <MESSAGE value="Impl check if files exist in DbContext" />
     <MESSAGE value="Impl File checking #2" />
     <MESSAGE value="ConnectionStringIssues fix for linux #2" />
-    <option name="LAST_COMMIT_MESSAGE" value="ConnectionStringIssues fix for linux #2" />
+    <MESSAGE value="Minor bug fixes and readme changes" />
+    <MESSAGE value="Update README with new features and dependencies &#10;&#10;Added explanations and screenshots of new V2 UI features to the README. These include options to convert key formats, sort keys, and quickly connect to previously saved connections. Also, updated the list of dependencies and added a new section on how the program handles password storage." />
+    <MESSAGE value="Add window icon to dialog boxes&#10;&#10;The window icon has been added to several dialog boxes in the MainWindowViewModel. This addition helps maintain consistent branding and user interface experience across all dialog boxes in the application." />
+    <MESSAGE value="Image Updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="Image Updates" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -481,29 +532,42 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs</url>
-          <line>97</line>
+          <line>98</line>
           <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\ApplicationSettingsViewModel.cs" containingFunctionPresentation="">
             <startOffsets>
-              <option value="3729" />
+              <option value="3753" />
             </startOffsets>
             <endOffsets>
-              <option value="3749" />
+              <option value="3773" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="143" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/ApplicationSettingsViewModel.cs</url>
-          <line>89</line>
+          <line>90</line>
           <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\ApplicationSettingsViewModel.cs" containingFunctionPresentation="">
             <startOffsets>
-              <option value="3307" />
+              <option value="3331" />
             </startOffsets>
             <endOffsets>
-              <option value="3357" />
+              <option value="3381" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="144" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs</url>
+          <line>63</line>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\App.axaml.cs" containingFunctionPresentation="Method 'InitAndOrPrepareServices'">
+            <startOffsets>
+              <option value="1831" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1895" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="145" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
