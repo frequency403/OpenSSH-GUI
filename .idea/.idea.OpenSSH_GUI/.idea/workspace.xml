@@ -143,35 +143,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.OpenSSH_GUI.executor": "Debug",
-    "73246cd7-706d-442f-93d2-b067f06d41d3.executor": "Debug",
-    "Publish to folder.Publish OpenSSH_GUI to folder.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "XThreadsFramesViewSplitterKey": "0.5023256",
-    "git-widget-placeholder": "#5 on development",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "RiderNuGetOptionsPageId",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.OpenSSH_GUI.executor&quot;: &quot;Debug&quot;,
+    &quot;73246cd7-706d-442f-93d2-b067f06d41d3.executor&quot;: &quot;Debug&quot;,
+    &quot;Publish to folder.Publish OpenSSH_GUI to folder.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.5023256&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#5 on development&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;RiderNuGetOptionsPageId&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "sqlite"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;sqlite&quot;
     ],
-    "rider.external.source.directories": [
-      "C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache",
-      "C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache",
-      "C:\\Users\\frequ\\AppData\\Local\\Symbols\\src"
+    &quot;rider.external.source.directories&quot;: [
+      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\DecompilerCache&quot;,
+      &quot;C:\\Users\\frequ\\AppData\\Local\\JetBrains\\Shared\\vAny\\SourcesCache&quot;,
+      &quot;C:\\Users\\frequ\\AppData\\Local\\Symbols\\src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Project.OpenSSH_GUI">
     <configuration name="Publish OpenSSH_GUI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
       <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" runtime="win-x64" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/win-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341" />
