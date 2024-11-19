@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="OpenSSH_GUI">
-  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.52">
+  <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.53">
     <root id="1">
       <ServerVersion>3.45.1</ServerVersion>
     </root>
@@ -1602,14 +1602,14 @@
       <System>1</System>
     </table>
     <column id="562" parent="555" name="ConnectionCredentialsDtoId">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="563" parent="555" name="KeyDtosId">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <foreign-key id="564" parent="555" name="FK_ConnectionCredentialsDtoSshKeyDto_ConnectionCredentialsDtos_ConnectionCredentialsDtoId">
       <ColNames>ConnectionCredentialsDtoId</ColNames>
@@ -1640,38 +1640,38 @@ KeyDtosId</ColNames>
     </key>
     <column id="569" parent="556" name="Id">
       <AutoIncrement>1</AutoIncrement>
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="570" parent="556" name="Hostname">
-      <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="571" parent="556" name="Username">
-      <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="572" parent="556" name="Port">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>4</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="573" parent="556" name="AuthType">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>5</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="574" parent="556" name="Password">
-      <DasType>TEXT|0s</DasType>
       <Position>6</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="575" parent="556" name="PasswordEncrypted">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>7</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <key id="576" parent="556" name="PK_ConnectionCredentialsDtos">
       <ColNames>Id</ColNames>
@@ -1679,23 +1679,23 @@ KeyDtosId</ColNames>
     </key>
     <column id="577" parent="557" name="Id">
       <AutoIncrement>1</AutoIncrement>
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="578" parent="557" name="AbsolutePath">
-      <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="579" parent="557" name="Format">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>3</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="580" parent="557" name="Password">
-      <DasType>TEXT|0s</DasType>
       <Position>4</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <index id="581" parent="557" name="IX_KeyDtos_AbsolutePath">
       <ColNames>AbsolutePath</ColNames>
@@ -1706,14 +1706,14 @@ KeyDtosId</ColNames>
       <Primary>1</Primary>
     </key>
     <column id="583" parent="558" name="Version">
-      <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="584" parent="558" name="ConvertPpkAutomatically">
-      <DasType>INTEGER|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
     </column>
     <index id="585" parent="558" name="sqlite_autoindex_Settings_1">
       <ColNames>Version</ColNames>
@@ -1726,14 +1726,14 @@ KeyDtosId</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_Settings_1</UnderlyingIndexName>
     </key>
     <column id="587" parent="559" name="MigrationId">
-      <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>1</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="588" parent="559" name="ProductVersion">
-      <DasType>TEXT|0s</DasType>
       <NotNull>1</NotNull>
       <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <index id="589" parent="559" name="sqlite_autoindex___EFMigrationsHistory_1">
       <ColNames>MigrationId</ColNames>
@@ -1746,24 +1746,24 @@ KeyDtosId</ColNames>
       <UnderlyingIndexName>sqlite_autoindex___EFMigrationsHistory_1</UnderlyingIndexName>
     </key>
     <column id="591" parent="560" name="type">
-      <DasType>TEXT|0s</DasType>
       <Position>1</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="592" parent="560" name="name">
-      <DasType>TEXT|0s</DasType>
       <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="593" parent="560" name="tbl_name">
-      <DasType>TEXT|0s</DasType>
       <Position>3</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="594" parent="560" name="rootpage">
-      <DasType>INT|0s</DasType>
       <Position>4</Position>
+      <StoredType>INT|0s</StoredType>
     </column>
     <column id="595" parent="560" name="sql">
-      <DasType>TEXT|0s</DasType>
       <Position>5</Position>
+      <StoredType>TEXT|0s</StoredType>
     </column>
     <column id="596" parent="561" name="name">
       <Position>1</Position>
