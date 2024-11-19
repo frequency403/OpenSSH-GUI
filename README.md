@@ -166,7 +166,7 @@ who participated in this project.
 
 ## License
 
-This project is licensed under the [GNU General Public License v3](LICENSE)
+This project is licensed under the [MIT License](LICENSE)
 - see the [LICENSE](LICENSE) file for
 details
 
