@@ -7,13 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/qodana_code_quality.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/indexLayout.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-    </list>
+    <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -481,27 +475,13 @@
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/ViewModels/EditKnownHostsViewModel.cs</url>
           <line>44</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\EditKnownHostsViewModel.cs" containingFunctionPresentation="Method 'SetServerConnection'">
-            <startOffsets>
-              <option value="1315" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1345" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\ViewModels\EditKnownHostsViewModel.cs" containingFunctionPresentation="Method 'SetServerConnection'" />
           <option name="timeStamp" value="137" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/KnownHosts/KnownHostsFile.cs</url>
           <line>79</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\KnownHosts\KnownHostsFile.cs" containingFunctionPresentation="Method 'ReadContentAsync'">
-            <startOffsets>
-              <option value="2392" />
-            </startOffsets>
-            <endOffsets>
-              <option value="2464" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI.Core\Lib\KnownHosts\KnownHostsFile.cs" containingFunctionPresentation="Method 'ReadContentAsync'" />
           <option name="timeStamp" value="138" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
@@ -519,14 +499,7 @@
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/OpenSSH_GUI/App.axaml.cs</url>
           <line>63</line>
-          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\App.axaml.cs" containingFunctionPresentation="Method 'InitAndOrPrepareServices'">
-            <startOffsets>
-              <option value="1831" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1895" />
-            </endOffsets>
-          </properties>
+          <properties documentPath="R:\OpenSSH_GUI\OpenSSH_GUI\App.axaml.cs" containingFunctionPresentation="Method 'InitAndOrPrepareServices'" />
           <option name="timeStamp" value="145" />
         </line-breakpoint>
       </breakpoints>
