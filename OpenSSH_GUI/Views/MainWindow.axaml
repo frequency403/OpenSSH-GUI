@@ -300,6 +300,11 @@
                                     <materialIcons:MaterialIcon Kind="ServerOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
+                            <MenuItem Header="{Binding Version}" IsEnabled="False">
+                                <MenuItem.Icon>
+                                    <materialIcons:MaterialIcon Kind="LocalOffer"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
                         </ContextMenu>
                     </Border.ContextMenu>
                     <materialIcons:MaterialIcon Kind="CogOutline" />

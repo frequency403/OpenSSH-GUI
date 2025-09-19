@@ -716,5 +716,11 @@ namespace OpenSSH_GUI {
                 return ResourceManager.GetString("MainWindowViewModelProvidePasswordButtonSubmit", resourceCulture);
             }
         }
+        
+        public static string Version {
+            get {
+                return ResourceManager.GetString("Version", resourceCulture);
+            }
+        }
     }
 }
