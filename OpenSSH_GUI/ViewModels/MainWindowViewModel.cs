@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Material.Icons;
@@ -66,6 +67,13 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private ObservableCollection<ISshKey?> _sshKeys;
 
+    private string _version;
+    public string Version
+    {
+        get => _version;
+        set => this.RaiseAndSetIfChanged(ref _version, value);
+    }
+
     public MainWindowViewModel()
     {
         _sshKeys = new ObservableCollection<ISshKey?>();
@@ -73,6 +81,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
         _sshKeys.CollectionChanged += (sender, args) => EvaluateAppropriateIcon();
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        Version = version is null ? "0.0.0" : string.Format(StringsAndTexts.Version, version?.Major, version?.Minor, version?.Build);
     }
 
     public bool KeyContextMenuEnabled { get; } = true;

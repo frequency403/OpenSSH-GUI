@@ -359,4 +359,7 @@
     <data name="MainWindowViewModelProvidePasswordButtonSubmit" xml:space="preserve">
         <value>Submit</value>
     </data>
+    <data name="Version" xml:space="preserve">
+        <value>Version {0}.{1}.{2}</value>
+    </data>
 </root>
