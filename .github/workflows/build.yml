@@ -2,80 +2,72 @@
 
 on:
   workflow_dispatch:
-  
   push:
     tags:
-      - '*'
+      - 'v*.*.*' # Trigger only on version tags like v1.2.3
 
 jobs:
   build_and_release:
+    name: Build & Release
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write # Required to create a release and upload assets
+
+    strategy:
+      matrix:
+        # Define build targets for different platforms
+        include:
+          - target: linux-x64
+            asset_name: OpenSSH-GUI-linux-x64.bin
+            asset_content_type: application/octet-stream
+          - target: win-x64
+            asset_name: OpenSSH-GUI-win-x64.exe
+            asset_content_type: application/vnd.microsoft.portable-executable
+          - target: osx-x64
+            asset_name: OpenSSH-GUI-osx-x64.bin
+            asset_content_type: application/octet-stream
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.nuget/packages
-            ~/.dotnet
-          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-dotnet-
+        uses: actions/checkout@v4
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: '9.0.x' # Updated .NET version
 
-      - name: Build for Linux
-        run: dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSH_GUI/OpenSSH_GUI.csproj
-
-      - name: Build for Windows
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSH_GUI/OpenSSH_GUI.csproj
-        
-      - name: Build for macOS
-        run: dotnet publish -c Release -r osx-x64 --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true OpenSSH_GUI/OpenSSH_GUI.csproj
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      # Cache NuGet packages to speed up subsequent builds
+      - name: Cache dependencies
+        uses: actions/cache@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
 
-      - name: Upload Linux release to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSH_GUI/bin/Release/net8.0/linux-x64/publish/OpenSSH_GUI
-          asset_name: OpenSSH-GUI-linux-x64.bin
-          asset_content_type: application/x-openssh-gui
+      # Restore, build, and publish the application for the specific target
+      - name: Publish application
+        id: publish
+        run: |
+          # Use a variable for the output path to avoid repetition
+          ARTIFACT_DIR="artifacts/${{ matrix.target }}"
+          dotnet publish OpenSSH_GUI/OpenSSH_GUI.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.target }} \
+            --output "${ARTIFACT_DIR}" \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true
+          
+          # Set the artifact path as an output for the upload step
+          echo "artifact_path=${ARTIFACT_DIR}" >> $GITHUB_OUTPUT
 
-      - name: Upload Windows release to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      # Create a single release and upload all artifacts from the matrix builds
+      - name: Release with artifacts
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSH_GUI/bin/Release/net8.0/win-x64/publish/OpenSSH_GUI.exe
-          asset_name: OpenSSH-GUI-win-x64.exe
-          asset_content_type: application/x-openssh-gui
-
-      - name: Upload macOS release to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: OpenSSH_GUI/bin/Release/net8.0/osx-x64/publish/OpenSSH_GUI
-          asset_name: OpenSSH-GUI-osx-x64.bin
-          asset_content_type: application/x-openssh-gui
+          # Use the output from the publish step to find the files
+          files: |
+            ${{ steps.publish.outputs.artifact_path }}/*
+          # Automatically generate the release body from commits
+          generate_release_notes: true
