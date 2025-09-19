@@ -8,9 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/qodana_code_quality.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/indexLayout.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,31 +90,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Project.OpenSSH_GUI.executor&quot;: &quot;Debug&quot;,
-    &quot;73246cd7-706d-442f-93d2-b067f06d41d3.executor&quot;: &quot;Debug&quot;,
-    &quot;Publish to folder.Publish OpenSSH_GUI to folder.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.5023256&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/frequ/AppData/Roaming/OpenSSH_GUI/Untitled.csv&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.Language Defaults&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Project.OpenSSH_GUI.executor": "Debug",
+    "73246cd7-706d-442f-93d2-b067f06d41d3.executor": "Debug",
+    "Publish to folder.Publish OpenSSH_GUI to folder.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "XThreadsFramesViewSplitterKey": "0.5023256",
+    "git-widget-placeholder": "development",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "/home/olli/Development/OpenSSH-GUI/.github/workflows",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors.Language Defaults",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Project.OpenSSH_GUI">
     <configuration name="Publish OpenSSH_GUI to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
       <riderPublish configuration="Release" include_native_libs_for_self_extract="true" platform="Any CPU" produce_single_file="true" ready_to_run="true" self_contained="true" target_folder="$PROJECT_DIR$/OpenSSH_GUI/bin/Release/net8.0/win-x64/publish" target_framework="net8.0" uuid_high="-8990180896529235926" uuid_low="-7266688196892877341">
@@ -180,7 +182,7 @@
       <workItem from="1748900746276" duration="500000" />
       <workItem from="1749379046653" duration="1864000" />
       <workItem from="1758319131607" duration="137000" />
-      <workItem from="1758319309846" duration="1299000" />
+      <workItem from="1758319309846" duration="2368000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -350,7 +352,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758320051324</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Upgrade projects to .NET 9, update NuGet package versions, and add IDE metadata changes.">
+      <option name="closed" value="true" />
+      <created>1758320707091</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1758320707091</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -420,7 +430,8 @@
     <MESSAGE value="Hotfix for file creation #2" />
     <MESSAGE value="File creation hotfix" />
     <MESSAGE value="Remove OpenSSH_GUI.Tests project and obsolete IDE metadata files." />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove OpenSSH_GUI.Tests project and obsolete IDE metadata files." />
+    <MESSAGE value="Upgrade projects to .NET 9, update NuGet package versions, and add IDE metadata changes." />
+    <option name="LAST_COMMIT_MESSAGE" value="Upgrade projects to .NET 9, update NuGet package versions, and add IDE metadata changes." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

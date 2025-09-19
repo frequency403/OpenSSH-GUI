@@ -127,7 +127,7 @@ Only the program itself can read any kind of string value inside the database.
 - [ ] Beautify UI
 - [X] ~~Add functionality for editing authorized_keys~~
 - [ ] Add functionality for editing local and remote SSH (user/root) Settings
-- [ ] Add functionality for editing application settings
+- [X] ~~Add functionality for editing application settings~~
 - [X] ~~Servers should be saved and quickly accessed in the connect window.~~
 - many more not yet known!
 
