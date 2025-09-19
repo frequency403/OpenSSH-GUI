@@ -8,19 +8,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac249a51-5c68-47b5-b241-c4c670c32b0c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Config/SshConfig.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Config/SshConfigParser.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/Lib/Config/SshHostEntry.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/projectSettingsUpdater.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/projectSettingsUpdater.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Merge_at_12_06_2024_12_45_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Merge_at_12_06_2024_12_45__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_11_06_2024_10_09_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/shelf/Uncommitted_changes_before_Update_at_11_06_2024_10_09__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenSSH_GUI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Tests/OpenSSH_GUI.Tests.csproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Tests/UnitTest1.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.sln" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/OpenSSH_GUI/OpenSSH_GUI.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +76,9 @@
     <setting file="file://$PROJECT_DIR$/OpenSSH_GUI/Program.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="AISelfReview" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -187,7 +180,7 @@
       <workItem from="1748900746276" duration="500000" />
       <workItem from="1749379046653" duration="1864000" />
       <workItem from="1758319131607" duration="137000" />
-      <workItem from="1758319309846" duration="645000" />
+      <workItem from="1758319309846" duration="1299000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup?">
       <option name="closed" value="true" />
@@ -349,7 +342,15 @@
       <option name="project" value="LOCAL" />
       <updated>1718189193664</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Remove OpenSSH_GUI.Tests project and obsolete IDE metadata files.">
+      <option name="closed" value="true" />
+      <created>1758320051324</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1758320051324</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -418,7 +419,8 @@
     <MESSAGE value="Image Updates" />
     <MESSAGE value="Hotfix for file creation #2" />
     <MESSAGE value="File creation hotfix" />
-    <option name="LAST_COMMIT_MESSAGE" value="File creation hotfix" />
+    <MESSAGE value="Remove OpenSSH_GUI.Tests project and obsolete IDE metadata files." />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove OpenSSH_GUI.Tests project and obsolete IDE metadata files." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
