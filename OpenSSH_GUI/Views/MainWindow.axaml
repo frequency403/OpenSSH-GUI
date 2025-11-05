@@ -127,7 +127,7 @@
                     Background="CornflowerBlue">
                 <ToolTip.Tip>
                     <StackPanel>
-                        <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
+                        <TextBlock Margin="2" Text="{x:Static openSshGui:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
                                Foreground="OrangeRed"
                                IsVisible="{Binding !ServerConnection.IsConnected}" />
