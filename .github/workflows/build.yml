@@ -78,6 +78,9 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       # Download all artifacts (from the matrix builds) into a single directory
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -86,6 +89,12 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -R artifacts
+
+      - name: Prepare extra assets
+        run: |
+          cp openssh-gui.desktop artifacts/
+          cp OpenSSH_GUI/Assets/appicon.png artifacts/
+          cp LICENSE artifacts/
 
       # Create a single release and upload all files from the 'artifacts' directory
       - name: Create Release and Upload Assets
@@ -97,3 +106,54 @@ jobs:
           files: "artifacts/**/*"
           # Automatically generate the release body from commits since the last tag
           generate_release_notes: true
+
+  deploy-aur:
+    name: Update AUR Packages
+    runs-on: ubuntu-latest
+    needs: release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: OpenSSH-GUI-linux-x64
+          path: ./
+
+      - name: Update PKGBUILD for openssh-gui-bin
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          SHA_BIN=$(sha256sum OpenSSH-GUI-linux-x64 | cut -d' ' -f1)
+          SHA_ICON=$(sha256sum OpenSSH_GUI/Assets/appicon.png | cut -d' ' -f1)
+          SHA_DESKTOP=$(sha256sum openssh-gui.desktop | cut -d' ' -f1)
+          SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
+          
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
+          sed -i "s/sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-bin/PKGBUILD
+          
+          # Also update openssh-gui-git pkgver for consistency
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
+
+      - name: Update AUR (openssh-gui-bin)
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: openssh-gui-bin
+          pkgbuild: ./openssh-gui-bin/PKGBUILD
+          commit_username: ${{ github.repository_owner }}
+          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ github.ref_name }}"
+
+      - name: Update AUR (openssh-gui-git)
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: openssh-gui-git
+          pkgbuild: ./openssh-gui-git/PKGBUILD
+          commit_username: ${{ github.repository_owner }}
+          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ github.ref_name }}"
