@@ -42,6 +42,7 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+        <None Include="..\openssh-gui.desktop" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

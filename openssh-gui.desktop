@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=OpenSSH GUI
+Comment=A GUI for OpenSSH configuration and management
+Exec=openssh-gui
+Icon=openssh-gui
+Categories=Utility;Network;
+Terminal=false
+StartupWMClass=OpenSSH_GUI
