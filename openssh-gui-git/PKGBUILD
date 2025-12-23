@@ -27,7 +27,7 @@ build() {
     -p:PublishSingleFile=true \
     -p:PublishReadyToRun=true \
     -p:IncludeNativeLibrariesForSelfExtract=true \
-    --self-contained true
+    --self-contained false
 }
 
 package() {
