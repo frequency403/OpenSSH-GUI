@@ -20,8 +20,6 @@ namespace OpenSSH_GUI.ViewModels;
 
 public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
 {
-    private bool _addButtonEnabled;
-
     private ObservableCollection<ISshKey?> _publicKeys;
 
     private ISshKey? _selectedKey;
@@ -30,8 +28,8 @@ public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewM
 
     public bool AddButtonEnabled
     {
-        get => _addButtonEnabled;
-        set => this.RaiseAndSetIfChanged(ref _addButtonEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public ISshKey? SelectedKey

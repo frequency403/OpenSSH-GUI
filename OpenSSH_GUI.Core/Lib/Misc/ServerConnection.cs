@@ -24,8 +24,6 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 
 public class ServerConnection : ReactiveObject, IServerConnection
 {
-    private DateTime _connectionTime = DateTime.Now;
-    private bool _isConnected;
     private SshClient _sshClient;
 
     public ServerConnection(IConnectionCredentials? credentials = null)
@@ -64,14 +62,14 @@ public class ServerConnection : ReactiveObject, IServerConnection
 
     public DateTime ConnectionTime
     {
-        get => _connectionTime;
-        set => this.RaiseAndSetIfChanged(ref _connectionTime, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = DateTime.Now;
 
     public bool IsConnected
     {
-        get => _isConnected;
-        set => this.RaiseAndSetIfChanged(ref _isConnected, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public string ConnectionString =>

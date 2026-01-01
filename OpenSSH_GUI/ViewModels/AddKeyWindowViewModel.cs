@@ -28,12 +28,7 @@ namespace OpenSSH_GUI.ViewModels;
 
 public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
 {
-    private readonly ValidationHelper _keyNameValidationHelper = new(new ValidationContext());
     private bool _createKey;
-
-    private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
-
-    private string _keyName = "id_rsa";
 
     private ISshKeyType _selectedKeyType;
 
@@ -61,9 +56,9 @@ public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>
 
     public ValidationHelper KeyNameValidationHelper
     {
-        get => _keyNameValidationHelper;
-        private init => this.RaiseAndSetIfChanged(ref _keyNameValidationHelper, value);
-    }
+        get;
+        private init => this.RaiseAndSetIfChanged(ref field, value);
+    } = new(new ValidationContext());
 
     public ISshKeyType SelectedKeyType
     {
@@ -90,18 +85,18 @@ public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>
 
     public SshKeyFormat KeyFormat
     {
-        get => _keyFormat;
-        set => this.RaiseAndSetIfChanged(ref _keyFormat, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = SshKeyFormat.OpenSSH;
 
     public SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
 
     public string KeyName
     {
-        get => _keyName;
-        set => this.RaiseAndSetIfChanged(ref _keyName, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "id_rsa";
 
     public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
     public string Password { get; set; } = "";

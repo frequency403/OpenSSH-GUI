@@ -8,7 +8,7 @@
 
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.ReactiveUI;
+using ReactiveUI.Avalonia;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
 

@@ -27,11 +27,6 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <summary>
     ///     Represents an authorized keys file.
     /// </summary>
-    private ObservableCollection<IAuthorizedKey> _authorizedKeys = [];
-
-    /// <summary>
-    ///     Represents an authorized keys file.
-    /// </summary>
     public AuthorizedKeysFile(string fileContentsOrPath, bool fromServer = false)
     {
         IsFileFromServer = fromServer;
@@ -52,9 +47,9 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary
     public ObservableCollection<IAuthorizedKey> AuthorizedKeys
     {
-        get => _authorizedKeys;
-        set => this.RaiseAndSetIfChanged(ref _authorizedKeys, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
     /// <summary>
     ///     Adds an authorized key to the authorized keys file.

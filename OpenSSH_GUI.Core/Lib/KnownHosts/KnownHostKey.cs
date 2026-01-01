@@ -18,11 +18,6 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 public class KnownHostKey : ReactiveObject, IKnownHostKey
 {
     /// <summary>
-    ///     Represents a known host key.
-    /// </summary>
-    private bool _markedForDeletion;
-
-    /// <summary>
     ///     Represents a known host key in the OpenSSH GUI.
     /// </summary>
     public KnownHostKey(string entry)
@@ -62,7 +57,7 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
     /// </summary>
     public bool MarkedForDeletion
     {
-        get => _markedForDeletion;
-        set => this.RaiseAndSetIfChanged(ref _markedForDeletion, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 }

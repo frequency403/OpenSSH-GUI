@@ -46,32 +46,14 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
 
-    private bool? _commentSort;
-
-    private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
-
-    private bool? _fingerPrintSort;
-    private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
-
-    private MaterialIcon _itemsCount = new()
-    {
-        Kind = MaterialIconKind.NumericZero,
-        Width = 20,
-        Height = 20
-    };
-
-    private bool? _keyTypeSort;
-
-    private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
     private IServerConnection _serverConnection;
 
     private ObservableCollection<ISshKey?> _sshKeys;
 
-    private string _version;
     public string Version
     {
-        get => _version;
-        set => this.RaiseAndSetIfChanged(ref _version, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public MainWindowViewModel()
@@ -89,9 +71,14 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     public MaterialIcon ItemsCount
     {
-        get => _itemsCount;
-        set => this.RaiseAndSetIfChanged(ref _itemsCount, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = new()
+    {
+        Kind = MaterialIconKind.NumericZero,
+        Width = 20,
+        Height = 20
+    };
 
     public ReactiveCommand<Unit, Unit> NotImplementedMessage => ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
     {
@@ -398,7 +385,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     public bool? KeyTypeSort
     {
-        get => _keyTypeSort;
+        get;
         set
         {
             KeyTypeSortDirectionIcon = EvaluateSortIconKind(value);
@@ -408,19 +395,19 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 true => SshKeys.OrderBy(e => e.KeyType.BaseType),
                 false => SshKeys.OrderByDescending(e => e.KeyType.BaseType)
             });
-            this.RaiseAndSetIfChanged(ref _keyTypeSort, value);
+            this.RaiseAndSetIfChanged(ref field, value);
         }
     }
 
     public MaterialIconKind KeyTypeSortDirectionIcon
     {
-        get => _keyTypeSortDirectionIcon;
-        set => this.RaiseAndSetIfChanged(ref _keyTypeSortDirectionIcon, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = MaterialIconKind.CircleOutline;
 
     public bool? CommentSort
     {
-        get => _commentSort;
+        get;
         set
         {
             CommentSortDirectionIcon = EvaluateSortIconKind(value);
@@ -430,19 +417,19 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 true => SshKeys.OrderBy(e => e.Comment),
                 false => SshKeys.OrderByDescending(e => e.Comment)
             });
-            this.RaiseAndSetIfChanged(ref _commentSort, value);
+            this.RaiseAndSetIfChanged(ref field, value);
         }
     }
 
     public MaterialIconKind CommentSortDirectionIcon
     {
-        get => _commentSortDirectionIcon;
-        set => this.RaiseAndSetIfChanged(ref _commentSortDirectionIcon, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = MaterialIconKind.CircleOutline;
 
     public bool? FingerPrintSort
     {
-        get => _fingerPrintSort;
+        get;
         set
         {
             FingerPrintSortDirectionIcon = EvaluateSortIconKind(value);
@@ -452,15 +439,15 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 true => SshKeys.OrderBy(e => e.Fingerprint),
                 false => SshKeys.OrderByDescending(e => e.Fingerprint)
             });
-            this.RaiseAndSetIfChanged(ref _fingerPrintSort, value);
+            this.RaiseAndSetIfChanged(ref field, value);
         }
     }
 
     public MaterialIconKind FingerPrintSortDirectionIcon
     {
-        get => _fingerPrintSortDirectionIcon;
-        set => this.RaiseAndSetIfChanged(ref _fingerPrintSortDirectionIcon, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = MaterialIconKind.CircleOutline;
 
     private async Task UpdateKeyInDatabase(ISshKey key)
     {

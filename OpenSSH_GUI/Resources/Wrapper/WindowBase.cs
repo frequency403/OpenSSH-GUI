@@ -3,11 +3,9 @@
 // Last edit: 27.05.2024 - 08:05:51
 
 using System;
-using Avalonia.Controls;
-using Avalonia.Media.Imaging;
-using Avalonia.ReactiveUI;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Resources.Wrapper;
 

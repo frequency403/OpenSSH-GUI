@@ -16,17 +16,6 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// </summary>
 public class KnownHost : ReactiveObject, IKnownHost
 {
-    /// The _keys variable represents a collection of known host keys for a specific host.
-    /// It is an instance variable of the KnownHost class.
-    /// The _keys variable is a list of IKnownHostKey objects that store information about individual host keys.
-    /// Each IKnownHostKey object represents a known host key and provides access to its properties such as key type, fingerprint, and deletion status.
-    /// Usage:
-    /// var knownHost = new KnownHost(knownHosts);
-    /// knownHost.Keys = _keys; // Set the list of known host keys
-    /// See IKnownHostKey and KnownHost classes for more information.
-    /// /
-    private List<IKnownHostKey> _keys = [];
-
     /// <summary>
     ///     Represents a known host entry in the known_hosts file.
     /// </summary>
@@ -61,9 +50,9 @@ public class KnownHost : ReactiveObject, IKnownHost
     /// </summary>
     public List<IKnownHostKey> Keys
     {
-        get => _keys;
-        set => this.RaiseAndSetIfChanged(ref _keys, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
     /// <summary>
     ///     Toggles the marked for deletion flag of each <see cref="IKnownHostKey" /> within the <see cref="Keys" /> list.

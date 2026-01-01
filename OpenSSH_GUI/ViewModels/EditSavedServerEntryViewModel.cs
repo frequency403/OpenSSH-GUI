@@ -17,10 +17,6 @@ namespace OpenSSH_GUI.ViewModels;
 
 public sealed class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServerEntryViewModel>
 {
-    private string _password = "";
-
-    private ISshKey _selectedKey;
-
     public EditSavedServerEntryViewModel()
     {
         BooleanSubmit =
@@ -38,15 +34,15 @@ public sealed class EditSavedServerEntryViewModel : ViewModelBase<EditSavedServe
 
     public ISshKey SelectedKey
     {
-        get => _selectedKey;
-        set => this.RaiseAndSetIfChanged(ref _selectedKey, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public string Password
     {
-        get => _password;
-        set => this.RaiseAndSetIfChanged(ref _password, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
     

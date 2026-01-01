@@ -28,35 +28,10 @@ namespace OpenSSH_GUI.ViewModels;
 public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
     private readonly bool _firstCredentialSet;
-    private bool _authWithAllKeys;
-    private bool _authWithPublicKey;
 
     private List<IConnectionCredentials> _connectionCredentials;
 
-    private string _hostName = "";
-
-    private bool _keyComboBoxEnabled;
-    private string _password = "";
-
-    private bool _quickConnect;
-
-    private IConnectionCredentials? _selectedConnection;
-
     private ISshKey? _selectedPublicKey;
-    private IServerConnection _serverConnection = new ServerConnection("123", "123", "123");
-
-    private IBrush _statusButtonBackground = Brushes.Gray;
-
-    private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUnknown);
-
-    private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUntested);
-
-    private bool _tryingToConnect;
-
-    private bool _uploadButtonEnabled;
-    private string _userName = "";
 
     public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys,
         List<IConnectionCredentials> credentialsList)
@@ -158,25 +133,25 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
 
     public IConnectionCredentials? SelectedConnection
     {
-        get => _selectedConnection;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _selectedConnection, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             TestQuickConnection(value).Wait();
         }
     }
 
     public bool QuickConnect
     {
-        get => _quickConnect;
-        set => this.RaiseAndSetIfChanged(ref _quickConnect, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public IServerConnection ServerConnection
     {
-        get => _serverConnection;
-        private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
-    }
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = new ServerConnection("123", "123", "123");
 
     private bool ValidData => SelectedPublicKey is null
         ? Hostname != "" && Username != "" && Password != ""
@@ -184,26 +159,26 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
 
     public bool UploadButtonEnabled
     {
-        get => _uploadButtonEnabled;
-        set => this.RaiseAndSetIfChanged(ref _uploadButtonEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public bool AuthWithPublicKey
     {
-        get => _authWithPublicKey;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _authWithPublicKey, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             UpdateComboBoxState();
         }
     }
 
     public bool AuthWithAllKeys
     {
-        get => _authWithAllKeys;
+        get;
         set
         {
-            this.RaiseAndSetIfChanged(ref _authWithAllKeys, value);
+            this.RaiseAndSetIfChanged(ref field, value);
             UpdateComboBoxState();
         }
     }
@@ -218,50 +193,52 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
 
     public string Hostname
     {
-        get => _hostName;
-        set => this.RaiseAndSetIfChanged(ref _hostName, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     public string Username
     {
-        get => _userName;
-        set => this.RaiseAndSetIfChanged(ref _userName, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     public string Password
     {
-        get => _password;
-        set => this.RaiseAndSetIfChanged(ref _password, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
 
     public bool TryingToConnect
     {
-        get => _tryingToConnect;
-        set => this.RaiseAndSetIfChanged(ref _tryingToConnect, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public string StatusButtonToolTip
     {
-        get => _statusButtonToolTip;
-        set => this.RaiseAndSetIfChanged(ref _statusButtonToolTip, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUntested);
 
     public string StatusButtonText
     {
-        get => _statusButtonText;
-        set => this.RaiseAndSetIfChanged(ref _statusButtonText, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUnknown);
 
     public IBrush StatusButtonBackground
     {
-        get => _statusButtonBackground;
-        set => this.RaiseAndSetIfChanged(ref _statusButtonBackground, value);
-    }
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = Brushes.Gray;
 
     public bool KeyComboBoxEnabled
     {
-        get => _keyComboBoxEnabled;
-        set => this.RaiseAndSetIfChanged(ref _keyComboBoxEnabled, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }

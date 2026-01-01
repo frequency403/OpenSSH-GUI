@@ -19,10 +19,6 @@ namespace OpenSSH_GUI.ViewModels;
 
 public class EditKnownHostsViewModel : ViewModelBase<EditKnownHostsViewModel>
 {
-    private ObservableCollection<IKnownHost> _knownHostsLocal = [];
-
-    private ObservableCollection<IKnownHost> _knownHostsRemote = [];
-
     public IServerConnection ServerConnection { get; private set; }
 
     private IKnownHostsFile KnownHostsFileLocal { get; set; }
@@ -30,15 +26,15 @@ public class EditKnownHostsViewModel : ViewModelBase<EditKnownHostsViewModel>
 
     public ObservableCollection<IKnownHost> KnownHostsRemote
     {
-        get => _knownHostsRemote;
-        private set => this.RaiseAndSetIfChanged(ref _knownHostsRemote, value);
-    }
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
     public ObservableCollection<IKnownHost> KnownHostsLocal
     {
-        get => _knownHostsLocal;
-        private set => this.RaiseAndSetIfChanged(ref _knownHostsLocal, value);
-    }
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
     public void SetServerConnection(ref IServerConnection connection)
     {

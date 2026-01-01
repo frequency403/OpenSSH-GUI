@@ -29,11 +29,6 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     private readonly bool _isFromServer;
 
     /// <summary>
-    ///     Represents a collection of known host entries in a file.
-    /// </summary>
-    private ObservableCollection<IKnownHost> _knownHosts = [];
-
-    /// <summary>
     ///     Represents a known hosts file that stores information about trusted hosts.
     /// </summary>
     public KnownHostsFile(string knownHostsPathOrContent, bool fromServer = false)
@@ -60,9 +55,9 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// </summary>
     public ObservableCollection<IKnownHost> KnownHosts
     {
-        get => _knownHosts;
-        private set => this.RaiseAndSetIfChanged(ref _knownHosts, value);
-    }
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
     /// <summary>
     ///     Asynchronously reads the contents of the known hosts file.
