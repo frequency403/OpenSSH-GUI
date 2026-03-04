@@ -4,6 +4,11 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/AUR Files/">
+    <File Path="openssh-gui-bin/PKGBUILD" />
+    <File Path="openssh-gui-git/PKGBUILD" />
+    <File Path="openssh-gui.desktop" />
+  </Folder>
   <Folder Name="/CI/">
     <File Path=".github/FUNDING.yml" />
     <File Path=".github/workflows/build.yml" />
