@@ -4,6 +4,7 @@
 
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI.Avalonia;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
@@ -13,14 +14,6 @@ namespace OpenSSH_GUI.Resources.Wrapper;
 
 public static class WindowInteraction
 {
-    public static async Task DialogMainWindow<TViewModel, TWindow>(
-        IInteractionContext<TViewModel, TViewModel?> interaction, MainWindow windowOwner)
-        where TViewModel : ViewModelBase<TViewModel>, new()
-        where TWindow : ReactiveWindow<TViewModel>, new()
-    {
-        await DialogAnyWindow<TViewModel, TWindow, MainWindow, MainWindowViewModel>(interaction, windowOwner);
-    }
-
     public static async Task DialogAnyWindow<T, TWindow, TWindowOwner, TWindowViewModel>(
         IInteractionContext<T, T?> interaction,
         TWindowOwner windowOwner)

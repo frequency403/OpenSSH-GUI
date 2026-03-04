@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
@@ -29,6 +30,7 @@ using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Static;
+using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 using SshNet.Keygen;
 
@@ -48,7 +50,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private IServerConnection _serverConnection;
 
-    private ObservableCollection<ISshKey?> _sshKeys;
+    private ObservableCollection<ISshKey?> _sshKeys = [];
 
     public string Version
     {
@@ -56,10 +58,14 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public MainWindowViewModel()
+    private readonly DirectoryCrawler directoryCrawler;
+    private readonly IServiceProvider serviceProvider;
+    
+    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler directoryCrawler, IServiceProvider serviceProvider) : base(logger)
     {
-        _sshKeys = new ObservableCollection<ISshKey?>();
-        foreach (var key in DirectoryCrawler.GetAllKeysYield().ToBlockingEnumerable()) SshKeys.Add(key);
+        this.directoryCrawler = directoryCrawler;
+        this.serviceProvider = serviceProvider;
+        foreach (var key in this.directoryCrawler.GetAllKeysYield().ToBlockingEnumerable()) SshKeys.Add(key);
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
         _sshKeys.CollectionChanged += (sender, args) => EvaluateAppropriateIcon();
@@ -90,26 +96,41 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     public ReactiveCommand<int, Unit?> OpenBrowser => ReactiveCommand.Create<int, Unit?>(e =>
     {
+        var projectUrl = Assembly.GetExecutingAssembly()
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(a => a.Key == "ProjectUrl")
+            ?.Value;
         var url = e switch
         {
-            1 => "https://github.com/frequency403/OpenSSH-GUI/issues",
-            2 => "https://github.com/frequency403/OpenSSH-GUI#authors",
-            _ => "https://github.com/frequency403/OpenSSH-GUI"
+            1 => string.Join("/", projectUrl, "issues"),
+            2 => string.Join("#", projectUrl, "authors"),
+            _ => projectUrl
         };
-
+        
+        
+        var processStartInfo = new ProcessStartInfo
+        {
+            Arguments = url
+        };
+        
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            url = url.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            Process.Start("xdg-open", url);
+            processStartInfo.FileName = "cmd";
+            processStartInfo.Arguments = string.Empty;
+            processStartInfo.ArgumentList.Add("/c");
+            processStartInfo.ArgumentList.Add("start");
+            processStartInfo.ArgumentList.Add(url.Replace("&", "^&"));
+            processStartInfo.CreateNoWindow = true;
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            Process.Start("open", url);
+            processStartInfo.FileName = "open";
         }
+        else
+        {
+            processStartInfo.FileName = "xdg-open";
+        }
+        Process.Start(processStartInfo);
 
         return null;
     });
@@ -266,7 +287,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.CreateFromTask<bool, bool>(async input =>
     {
         SshKeys.Clear();
-        await foreach (var key in DirectoryCrawler.GetAllKeysYield(true, input)) SshKeys.Add(key);
+        await foreach (var key in directoryCrawler.GetAllKeysYield(true, input)) SshKeys.Add(key);
         return input;
     });
 

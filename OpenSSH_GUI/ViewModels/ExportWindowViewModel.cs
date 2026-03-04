@@ -8,6 +8,7 @@
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;

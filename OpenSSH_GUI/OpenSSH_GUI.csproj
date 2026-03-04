@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+
+        <!-- Target framework and other specs in Directory.Build.props -->
+        
         <OutputType>Exe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
-        <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -15,7 +16,6 @@
         <NeutralLanguage>en</NeutralLanguage>
         <AssemblyOriginatorKeyFile>OpenSSH-GUI.snk</AssemblyOriginatorKeyFile>
         <PublicSign>false</PublicSign>
-        <LangVersion>latestmajor</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

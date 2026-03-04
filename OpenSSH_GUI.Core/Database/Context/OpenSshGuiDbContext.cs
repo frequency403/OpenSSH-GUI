@@ -14,7 +14,7 @@ namespace OpenSSH_GUI.Core.Database.Context;
 /// <summary>
 ///     Represents the database context for the OpenSSH GUI application.
 /// </summary>
-public class OpenSshGuiDbContext : DbContext
+public class OpenSshGuiDbContext() : DbContext
 {
     /// <summary>
     ///     Represents the initialization vector (IV) used for data encryption in the OpenSshGuiDbContext class.

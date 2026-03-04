@@ -14,6 +14,7 @@ using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
+using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;

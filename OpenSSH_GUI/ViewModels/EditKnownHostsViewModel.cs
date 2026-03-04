@@ -13,6 +13,7 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
+using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;

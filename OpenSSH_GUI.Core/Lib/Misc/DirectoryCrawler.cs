@@ -19,19 +19,8 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// <summary>
 ///     Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public static class DirectoryCrawler
+public class DirectoryCrawler(ILogger<DirectoryCrawler> logger)
 {
-    private static ILogger _logger = null!;
-
-    /// <summary>
-    ///     Provides the logger context for the DirectoryCrawler class.
-    /// </summary>
-    /// <param name="logger">The logger instance to be used by the DirectoryCrawler class.</param>
-    public static void ProvideContext(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     /// <summary>
     ///     Retrieves SSH keys from disk.
     /// </summary>
@@ -40,7 +29,7 @@ public static class DirectoryCrawler
     ///     false.
     /// </param>
     /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
-    private static IEnumerable<ISshKey> GetFromDisk(bool convert)
+    private IEnumerable<ISshKey> GetFromDisk(bool convert)
     {
         foreach (var filePath in Directory
                      .EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", SearchOption.TopDirectoryOnly)
@@ -54,7 +43,7 @@ public static class DirectoryCrawler
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while reading key from {path}", filePath);
+                logger.LogError(ex, "Error while reading key from {path}", filePath);
             }
 
             if (key is null) continue;
@@ -68,7 +57,7 @@ public static class DirectoryCrawler
     /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
     /// <param name="purgePasswords">Optional. Indicates whether to purge passwords from cache. Default is false.</param>
     /// <returns>An asynchronous enumerable collection of ISshKey representing the SSH keys.</returns>
-    public static async IAsyncEnumerable<ISshKey> GetAllKeysYield(bool loadFromDisk = false,
+    public async IAsyncEnumerable<ISshKey> GetAllKeysYield(bool loadFromDisk = false,
         bool purgePasswords = false)
     {
         await using var dbContext = new OpenSshGuiDbContext();
@@ -114,15 +103,5 @@ public static class DirectoryCrawler
                 yield return key;
             }
         }
-    }
-
-    /// <summary>
-    ///     Retrieves all SSH keys from disk or cache.
-    /// </summary>
-    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
-    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
-    public static IEnumerable<ISshKey> GetAllKeys(bool loadFromDisk = false)
-    {
-        return GetAllKeysYield(loadFromDisk).ToBlockingEnumerable();
     }
 }

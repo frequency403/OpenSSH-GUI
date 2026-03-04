@@ -9,7 +9,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using OpenSSH_GUI.ViewModels;
+using OpenSSH_GUI.Core.MVVM;
 
 namespace OpenSSH_GUI;
 

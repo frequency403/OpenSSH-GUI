@@ -26,24 +26,58 @@ using OpenSSH_GUI.Core.Lib.Static;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog;
-using Serilog.Events;
+using Serilog.Core;
 
 namespace OpenSSH_GUI;
 
 public class App : Application
 {
     public static ServiceProvider ServiceProvider { get; private set; }
-    public static WindowIcon WindowIcon => new (new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
+    public static WindowIcon WindowIcon { get; } = new(new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
     
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
+    public override void RegisterServices()
+    {
+        var collection = new ServiceCollection();
+        var loggingLevelSwitch = new LoggingLevelSwitch(
+#if!DEBUG
+            LogEventLevel.Verbose
+#endif
+        );
+        collection.AddSingleton(loggingLevelSwitch);
+        
+        var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        if (!Directory.Exists(logConfiguration.LogFilePath)) 
+            Directory.CreateDirectory(logConfiguration.LogFilePath);
+        
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            #if DEBUG
+            .WriteTo.Console(levelSwitch: loggingLevelSwitch)
+            #endif
+            .WriteTo.File(
+                path: logConfiguration.LogFileFullPath, 
+                levelSwitch: loggingLevelSwitch,
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+        // AddServices
+
+        collection.AddLogging(e => e.AddSerilog());
+        collection.AddTransient<DirectoryCrawler>();
+        collection.AddDbContext<OpenSshGuiDbContext>();
+        collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>();
+        
+        ServiceProvider = collection.BuildServiceProvider();
+        base.RegisterServices();
+    }
+
     public override void OnFrameworkInitializationCompleted()
     {
-        ServiceProvider = BuildServiceCollection().BuildServiceProvider();
-        using (var db = new OpenSshGuiDbContext())
+        using (var db = ServiceProvider.GetRequiredService<OpenSshGuiDbContext>())
         {
             db.Database.Migrate();
             if (!db.Settings.Any()) db.Settings.Add(new Settings());
@@ -52,38 +86,14 @@ public class App : Application
 
         InitAndOrPrepareServices();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel()
-            };
+            desktop.MainWindow = ServiceProvider.ResolveView<MainWindow>();
         base.OnFrameworkInitializationCompleted();
     }
 
     private void InitAndOrPrepareServices()
     {
         var logger = ServiceProvider.GetRequiredService<ILogger<App>>();
-        DirectoryCrawler.ProvideContext(logger);
         FileOperations.EnsureFilesAndFoldersExist(logger);
-    }
-
-    private ServiceCollection BuildServiceCollection()
-    {
-        var collection = new ServiceCollection();
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            AppDomain.CurrentDomain.FriendlyName);
-        var logFilebasePath = Path.Combine(appDataPath, "logs");
-        if (!Directory.Exists(logFilebasePath)) Directory.CreateDirectory(logFilebasePath);
-        var logFilePath = Path.Combine(logFilebasePath, $"{AppDomain.CurrentDomain.FriendlyName}.log");
-        var serilog = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .WriteTo.File(logFilePath, LogEventLevel.Debug, rollingInterval: RollingInterval.Day)
-            .CreateLogger();
-        // AddServices
-
-        collection.AddLogging(e => e.AddSerilog(serilog, true));
-
-        // return ServiceCollection
-        return collection;
     }
 
     private void CloseProgram(object? sender, EventArgs e)

@@ -192,19 +192,11 @@ public abstract class KeyBase : IKeyBase
     ///     If the key format is OpenSSH and the file extension is ".pub", only the public key file will be deleted.
     ///     Otherwise, both the public and private key files will be deleted.
     /// </remarks>
-    /// <param name="key">The key for which to delete the associated files.</param>
     public void DeleteKey()
     {
-        switch (this)
-        {
-            case ISshPublicKey pub:
-                FileOperations.Delete(AbsoluteFilePath);
-                pub.PrivateKey.DeleteKey();
-                break;
-            default:
-                FileOperations.Delete(AbsoluteFilePath);
-                break;
-        }
+        FileOperations.Delete(AbsoluteFilePath);
+        if (this is ISshPublicKey publicKey)
+            publicKey.PrivateKey.DeleteKey();
     }
 
     /// <summary>
@@ -229,9 +221,6 @@ public abstract class KeyBase : IKeyBase
     ///     This method is used to set the private key source for the SSH key. The private key source
     ///     contains the actual key material and is needed for cryptographic operations.
     /// </remarks>
-    /// <param name="keySource">
-    ///     The private key source to set for the SSH key.
-    /// </param>
     private void SetKeySource()
     {
         try
@@ -239,11 +228,11 @@ public abstract class KeyBase : IKeyBase
             _keySource = GetKeySource();
             if (Password is not null) PasswordSuccess = true;
         }
-        catch (SshPassPhraseNullOrEmptyException e)
+        catch (SshPassPhraseNullOrEmptyException)
         {
             Password = "";
         }
-        catch (Exception e)
+        catch (Exception)
         {
             // ignored
         }
