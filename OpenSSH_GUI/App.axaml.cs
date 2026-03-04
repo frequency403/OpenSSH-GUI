@@ -67,6 +67,7 @@ public class App : Application
         // AddServices
 
         collection.AddLogging(e => e.AddSerilog());
+        collection.AddTransient<SshKeyFile>();
         collection.AddTransient<DirectoryCrawler>();
         collection.AddDbContext<OpenSshGuiDbContext>();
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>();
@@ -77,12 +78,10 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        using (var db = ServiceProvider.GetRequiredService<OpenSshGuiDbContext>())
-        {
-            db.Database.Migrate();
-            if (!db.Settings.Any()) db.Settings.Add(new Settings());
-            db.SaveChanges();
-        }
+        var db = ServiceProvider.GetRequiredService<OpenSshGuiDbContext>();
+        db.Database.Migrate();
+        if (!db.Settings.Any()) db.Settings.Add(new Settings());
+        db.SaveChanges();
 
         InitAndOrPrepareServices();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

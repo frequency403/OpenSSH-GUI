@@ -50,7 +50,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private IServerConnection _serverConnection;
 
-    private ObservableCollection<ISshKey?> _sshKeys = [];
+    private ObservableCollection<SshKeyFile> _sshKeys = [];
 
     public string Version
     {
@@ -65,7 +65,10 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     {
         this.directoryCrawler = directoryCrawler;
         this.serviceProvider = serviceProvider;
-        foreach (var key in this.directoryCrawler.GetAllKeysYield().ToBlockingEnumerable()) SshKeys.Add(key);
+        foreach (var sshKeyFile in directoryCrawler.GetNewFromDisk())
+        {
+            _sshKeys.Add(sshKeyFile);
+        }
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
         _sshKeys.CollectionChanged += (sender, args) => EvaluateAppropriateIcon();

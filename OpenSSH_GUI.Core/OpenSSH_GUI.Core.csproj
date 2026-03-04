@@ -32,4 +32,8 @@
     <ItemGroup>
         <Folder Include="Database\Migrations\"/>
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\OpenSSH_GUI.SshConfig\OpenSSH_GUI.SshConfig.csproj" />
+    </ItemGroup>
 </Project>
