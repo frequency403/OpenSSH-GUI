@@ -6,19 +6,16 @@
 
 #endregion
 
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
@@ -26,11 +23,13 @@ using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Static;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using SshNet.Keygen;
 
@@ -45,7 +44,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys =
         new();
 
-    public readonly Interaction<EditKnownHostsViewModel, EditKnownHostsViewModel?> ShowEditKnownHosts = new();
+    public readonly Interaction<EditKnownHostsWindowViewModel, EditKnownHostsWindowViewModel?> ShowEditKnownHosts = new();
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
 
     private IServerConnection _serverConnection;
@@ -58,13 +57,15 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private readonly DirectoryCrawler directoryCrawler;
-    private readonly IServiceProvider serviceProvider;
+    private readonly DirectoryCrawler _directoryCrawler;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly KeyLocatorService _keyLocatorService;
     
-    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler directoryCrawler, IServiceProvider serviceProvider) : base(logger)
+    public MainWindowViewModel(ILogger<MainWindowViewModel> logger, DirectoryCrawler directoryCrawler, KeyLocatorService locatorService, IServiceProvider serviceProvider) : base(logger)
     {
-        this.directoryCrawler = directoryCrawler;
-        this.serviceProvider = serviceProvider;
+        _directoryCrawler = directoryCrawler;
+        _serviceProvider = serviceProvider;
+        _keyLocatorService = locatorService;
         foreach (var sshKeyFile in directoryCrawler.GetNewFromDisk())
         {
             _sshKeys.Add(sshKeyFile);
@@ -166,21 +167,16 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow =>
         ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
         {
-            await using var context = new OpenSshGuiDbContext();
-            var connectToServer = new ConnectToServerViewModel(ref _sshKeys,
-                (await context.ConnectionCredentialsDtos.Include(e => e.KeyDtos).ToListAsync()).Where(dto =>
-                    dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key =>
-                        _sshKeys.Select(p => p.AbsoluteFilePath).Contains(key.AbsolutePath))
-                ).Select(e => e.ToCredentials()).ToList());
+            var connectToServer = _serviceProvider.GetService<ConnectToServerViewModel>();
             var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
             if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
             return windowResult;
         });
 
-    public ReactiveCommand<Unit, EditKnownHostsViewModel?> OpenEditKnownHostsWindow =>
-        ReactiveCommand.CreateFromTask<Unit, EditKnownHostsViewModel?>(async e =>
+    public ReactiveCommand<Unit, EditKnownHostsWindowViewModel?> OpenEditKnownHostsWindow =>
+        ReactiveCommand.CreateFromTask<Unit, EditKnownHostsWindowViewModel?>(async e =>
         {
-            var editKnownHosts = new EditKnownHostsViewModel();
+            var editKnownHosts = _serviceProvider.GetService<EditKnownHostsWindowViewModel>();
             editKnownHosts.SetServerConnection(ref _serverConnection);
             return await ShowEditKnownHosts.Handle(editKnownHosts);
         });
@@ -199,8 +195,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             {
                 try
                 {
-                    var editAuthorizedKeysViewModel = new EditAuthorizedKeysViewModel();
-                    editAuthorizedKeysViewModel.SetConnectionAndKeys(ref _serverConnection, ref _sshKeys);
+                    var editAuthorizedKeysViewModel = _serviceProvider.GetService<EditAuthorizedKeysViewModel>();
+                    //editAuthorizedKeysViewModel.SetConnectionAndKeys(ref _serverConnection, ref _sshKeys);
                     return await ShowEditAuthorizedKeys.Handle(editAuthorizedKeysViewModel);
                 }
                 catch (Exception exception)
@@ -290,7 +286,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.CreateFromTask<bool, bool>(async input =>
     {
         SshKeys.Clear();
-        await foreach (var key in directoryCrawler.GetAllKeysYield(true, input)) SshKeys.Add(key);
+        await foreach (var key in _directoryCrawler.GetAllKeysYield(true, input)) SshKeys.Add(key);
         return input;
     });
 
@@ -323,7 +319,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<Unit, ApplicationSettingsViewModel> OpenAppSettings =>
         ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel>(async u =>
         {
-            var vm = new ApplicationSettingsViewModel(ref _sshKeys);
+            var vm = _serviceProvider.GetRequiredService<ApplicationSettingsViewModel>();
             var result = await ShowAppSettings.Handle(vm);
             return result;
         });
@@ -401,11 +397,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
     }
 
-    public ObservableCollection<ISshKey?> SshKeys
-    {
-        get => _sshKeys;
-        set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
-    }
+    public ObservableCollection<ISshKey?> SshKeys { get; set; } = new ObservableCollection<ISshKey?>();
+    // {
+    //     get => _sshKeys;
+    //     set => this.RaiseAndSetIfChanged(ref _sshKeys, value);
+    // }
 
     public bool? KeyTypeSort
     {

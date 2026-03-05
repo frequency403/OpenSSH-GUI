@@ -6,9 +6,6 @@
 
 #endregion
 
-using System;
-using System.IO;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -23,10 +20,12 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.Core.Lib.Static;
+using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog;
 using Serilog.Core;
+using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
@@ -50,11 +49,11 @@ public class App : Application
         );
         collection.AddSingleton(loggingLevelSwitch);
         
-        var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        var logConfiguration = LoggerConfiguration.Default;
         if (!Directory.Exists(logConfiguration.LogFilePath)) 
             Directory.CreateDirectory(logConfiguration.LogFilePath);
         
-        Log.Logger = new LoggerConfiguration()
+        Log.Logger = new Serilog.LoggerConfiguration()
             .Enrich.FromLogContext()
             #if DEBUG
             .WriteTo.Console(levelSwitch: loggingLevelSwitch)
@@ -69,8 +68,16 @@ public class App : Application
         collection.AddLogging(e => e.AddSerilog());
         collection.AddTransient<SshKeyFile>();
         collection.AddTransient<DirectoryCrawler>();
+        collection.AddTransient<KeyLocatorService>();
         collection.AddDbContext<OpenSshGuiDbContext>();
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>();
+        collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
+        collection.RegisterViewWithViewModel<EditSavedServerEntry, EditSavedServerEntryViewModel>();
+        collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
+        collection.RegisterViewWithViewModel<EditAuthorizedKeysWindow,  EditAuthorizedKeysViewModel>();
+        collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
+        collection.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
+        collection.RegisterViewWithViewModel<AddKeyWindow,  AddKeyWindowViewModel>();
         
         ServiceProvider = collection.BuildServiceProvider();
         base.RegisterServices();

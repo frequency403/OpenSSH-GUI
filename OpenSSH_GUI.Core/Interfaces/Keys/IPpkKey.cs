@@ -39,5 +39,5 @@ public interface IPpkKey : ISshKey
     /// <summary>
     ///     Represents a PPK key.
     /// </summary>
-    string PrivateMAC { get; }
+    string PrivateMac { get; }
 }

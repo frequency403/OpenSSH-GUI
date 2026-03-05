@@ -16,17 +16,17 @@ public enum EncryptionType
     /// <summary>
     ///     Represents the NONE member of the EncryptionType enum.
     /// </summary>
-    NONE,
+    None,
 
     /// <summary>
     ///     Represents the RSA encryption type.
     /// </summary>
-    RSA,
+    Rsa,
 
     /// <summary>
     ///     Enumeration member representing the DSA encryption type.
     /// </summary>
-    DSA,
+    Dsa,
 
     /// <summary>
     ///     Represents the encryption type for ECDSA.
@@ -34,10 +34,10 @@ public enum EncryptionType
     /// <remarks>
     ///     The ECDSA encryption type is used in the OpenSSH_GUI.Core library for representing ECDSA keys.
     /// </remarks>
-    ECDSA,
+    Ecdsa,
 
     /// <summary>
     ///     The ED25519 encryption type.
     /// </summary>
-    ED25519
+    Ed25519
 }

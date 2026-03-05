@@ -6,39 +6,37 @@
 
 #endregion
 
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
+public sealed class ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, KeyLocatorService locatorService, OpenSshGuiDbContext dbContext) : ViewModelBase<ApplicationSettingsViewModel>(logger)
 {
     private bool _convertPpkAutomatically;
 
     private List<IConnectionCredentials> _knownServers;
 
-    private readonly Settings _settings;
+    private Settings _settings;
 
-    public ObservableCollection<ISshKey> Keys = [];
+    public ObservableCollection<ISshKey> Keys = []; // = locatorSerivce.SshKeys
     public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
 
-    public ApplicationSettingsViewModel(ref ObservableCollection<ISshKey> sshKeys)
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
-        Keys = sshKeys;
-        using var dbContext = new OpenSshGuiDbContext();
         _settings = dbContext.Settings.First();
         _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
-        _knownServers = dbContext.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
+        _knownServers = await dbContext.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToListAsync(cancellationToken: cancellationToken);
 
         BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel?>(async e =>
         {
@@ -47,8 +45,8 @@ public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSett
             var file = context.Settings.Update(_settings).Entity;
             file.ConvertPpkAutomatically = ConvertPpkAutomatically;
             var knownServerIds = KnownServers.Select(s => s.Id).ToList();
-            await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
-            await context.SaveChangesAsync();
+            await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync(cancellationToken: cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
             return this;
         });
     }

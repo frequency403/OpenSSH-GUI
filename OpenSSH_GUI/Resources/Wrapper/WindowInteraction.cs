@@ -2,13 +2,10 @@
 // Created: 21.05.2024 - 11:05:46
 // Last edit: 21.05.2024 - 11:05:47
 
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using OpenSSH_GUI.Core.MVVM;
-using ReactiveUI.Avalonia;
-using OpenSSH_GUI.ViewModels;
-using OpenSSH_GUI.Views;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Resources.Wrapper;
 

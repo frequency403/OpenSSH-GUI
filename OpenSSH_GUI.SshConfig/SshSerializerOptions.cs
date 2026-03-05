@@ -20,7 +20,7 @@ public sealed record SshSerializerOptions
     /// <see cref="Indent"/>, <see cref="KeyValueSeparator"/>, and <see cref="NewLine"/>.
     /// </para>
     /// </summary>
-    public bool RoundTrip { get; init; } = false;
+    public bool RoundTrip { get; init; }
 
     /// <summary>
     /// Gets the string used to indent directives inside <c>Host</c> and <c>Match</c> blocks.

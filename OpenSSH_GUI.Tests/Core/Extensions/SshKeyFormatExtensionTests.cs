@@ -1,6 +1,6 @@
 using OpenSSH_GUI.Core.Extensions;
-using SshNet.Keygen;
 using Shouldly;
+using SshNet.Keygen;
 using Xunit;
 
 namespace OpenSSH_GUI.Tests.Core.Extensions;

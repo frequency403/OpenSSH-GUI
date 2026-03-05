@@ -36,7 +36,7 @@ public sealed record SshConfigParserOptions
     /// When <see langword="false"/>, unknown keywords are silently accepted and stored verbatim.
     /// Defaults to <see langword="false"/>.
     /// </summary>
-    public bool ThrowOnUnknownKey { get; init; } = false;
+    public bool ThrowOnUnknownKey { get; init; }
 
     /// <summary>Gets the default options instance.</summary>
     public static SshConfigParserOptions Default { get; } = new();

@@ -7,8 +7,6 @@
 #endregion
 
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.MVVM;

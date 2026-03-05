@@ -6,6 +6,7 @@
 
 #endregion
 
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,7 +17,6 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Static;
 using OpenSSH_GUI.SshConfig;
-using Org.BouncyCastle.Crypto.Digests;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
@@ -25,7 +25,7 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// </summary>
 public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbContext dbContext, IServiceProvider serviceProvider)
 {
-    private static string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
+    private static string[] _importantFileNames = Enum.GetNames<SshConfigFiles>();
     
     private SshKeyFile? GenerateKeyFile()
     {
@@ -41,7 +41,7 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
         return file;
     }
 
-    public IEnumerable<SshKeyFile> GetNewFromDisk()
+    public async IAsyncEnumerable<SshKeyFile> GetNewFromDiskAsyncEnumerable([EnumeratorCancellation] CancellationToken token = default)
     {
         var possibleKeyFiles = new List<string>();
 
@@ -50,7 +50,9 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
             var file = SshConfigFiles.Config.GetPathOfFile();
             if (File.Exists(file))
             {
-                var fileContent = File.OpenText(file).ReadToEnd();
+                await using var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                using var streamReader = new StreamReader(fileStream);
+                var fileContent =  await streamReader.ReadToEndAsync(token);
                 if (!string.IsNullOrWhiteSpace(fileContent))
                 {
                     foreach (var identityFileName in SshConfigParser.Parse(fileContent)
@@ -61,8 +63,6 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
                     }
                 }
             }
-            
-            
         }
         catch (FileNotFoundException foundException)
         {
@@ -75,12 +75,12 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
 
         possibleKeyFiles = possibleKeyFiles.Concat(
             Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions
-            {
-                IgnoreInaccessible = true,
-                RecurseSubdirectories = false
-            }).Select(e => new FileInfo(e))
-                .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-            .Where(e => string.IsNullOrWhiteSpace(e.Extension))
+                {
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = false
+                }).Select(e => new FileInfo(e))
+                .Where(e => !_importantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
+                .Where(e => string.IsNullOrWhiteSpace(e.Extension))
                 .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => e.FullName)
         ).ToList();
         var keyFileCount = 0;
@@ -89,11 +89,12 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
             SshKeyFile? keyFile = null;
             try
             {
-                if (GenerateKeyFile() is not { } keyFileGenerated) 
+                if (GenerateKeyFile() is not { } keyFileGenerated)
                 {
                     continue;
                 }
-                keyFileGenerated.Load(possibleKeyFile);
+
+                await keyFileGenerated.Load(possibleKeyFile);
                 keyFile = keyFileGenerated;
             }
             catch (Exception e)
@@ -105,8 +106,11 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
             keyFileCount++;
             yield return keyFile;
         }
+
         logger.LogInformation("Found {count} keys", keyFileCount);
     }
+
+    public IEnumerable<SshKeyFile> GetNewFromDisk() => GetNewFromDiskAsyncEnumerable().ToBlockingEnumerable();
     
     /// <summary>
     ///     Retrieves SSH keys from disk.

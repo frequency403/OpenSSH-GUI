@@ -11,7 +11,7 @@ using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsViewModel>
+public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsWindowViewModel>
 {
     public EditKnownHostsWindow()
     {

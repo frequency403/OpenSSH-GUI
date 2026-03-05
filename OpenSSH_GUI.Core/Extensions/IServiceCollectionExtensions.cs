@@ -1,18 +1,20 @@
-﻿using System.Reflection;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.MVVM;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
-public static class IServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     private static bool ValidateNamingConvention<T1, T2>()
     {
         var t1Name  = typeof(T1).Name;
         var t2Name = typeof(T2).Name;
         if (t1Name == t2Name) return false;
-        return t2Name.StartsWith(t1Name) && t2Name.EndsWith("ViewModel");
+        var option1 = string.Equals(t1Name.Replace("Window", ""), t2Name.Replace("ViewModel", ""),
+            StringComparison.Ordinal);
+        var option2 = t2Name.StartsWith(t1Name) && t2Name.EndsWith("ViewModel");
+        return  option1 || option2;
     }
     
     public static IServiceCollection RegisterViewWithViewModel<TView, TViewModel>(this IServiceCollection services, bool registerAsSingleton = true)
@@ -34,7 +36,7 @@ public static class IServiceCollectionExtensions
         return services;
     }
 
-    public static TView ResolveView<TView>(this IServiceProvider provider) where TView : Window
+    public static TView ResolveView<TView>(this IServiceProvider provider, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen) where TView : Window
     {
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
@@ -46,6 +48,7 @@ public static class IServiceCollectionExtensions
             throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
 
         resolvedView.DataContext = provider.GetRequiredKeyedService(viewModelType, viewModelType.Name);
+        resolvedView.WindowStartupLocation = windowStartupLocation;
         return resolvedView;
     }
 }

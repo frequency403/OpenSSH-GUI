@@ -15,6 +15,15 @@ public class ViewModelBase<T>(ILogger<T>? logger = null) : ViewModelBase(typeof(
 {
     public ReactiveCommand<T, T?> Submit { get; set; } = ReactiveCommand.Create<T, T?>(e => null);
     public ReactiveCommand<bool, T?> BooleanSubmit { get; set; } = ReactiveCommand.Create<bool, T?>(e => null);
+    
+    public virtual void Intitialize()
+    {
+    }
+    
+    public virtual ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.CompletedTask;
+    }
 }
 
 public class ViewModelBase(Type type, ILogger? logger = null): ReactiveObject

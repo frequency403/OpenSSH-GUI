@@ -6,40 +6,41 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive;
-using System.Threading.Tasks;
 using Avalonia.Media;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Database.DTO;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
+public sealed class ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, KeyLocatorService keyLocatorService, OpenSshGuiDbContext dbContext) : ViewModelBase<ConnectToServerViewModel>
 {
-    private readonly bool _firstCredentialSet;
+    private bool _firstCredentialSet;
 
     private List<IConnectionCredentials> _connectionCredentials;
 
     private ISshKey? _selectedPublicKey;
-
-    public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys,
-        List<IConnectionCredentials> credentialsList)
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
-        PublicKeys = new ObservableCollection<ISshKey?>(keys.Where(e => e is not null && !e.NeedPassword));
         _selectedPublicKey = PublicKeys.FirstOrDefault();
-        _connectionCredentials = credentialsList;
+        _connectionCredentials = (await dbContext.ConnectionCredentialsDtos.Include(e => e.KeyDtos).ToListAsync(cancellationToken: cancellationToken)).Where(dto =>
+            dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key =>
+                keyLocatorService.SshKeys.Select(p => p.AbsoluteFilePath).Contains(key.AbsolutePath))
+        ).Select(e => e.ToCredentials()).ToList();
         _firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
@@ -190,7 +191,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
     }
 
-    public ObservableCollection<ISshKey?> PublicKeys { get; }
+    public ObservableCollection<ISshKey?> PublicKeys { get; } // = keyLocatorService.SshKeys;
 
     public string Hostname
     {
@@ -242,8 +243,8 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public ReactiveCommand<Unit, Unit> TestConnection { get; }
-    public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+    public ReactiveCommand<Unit, Unit> TestConnection { get; private set; }
+    public ReactiveCommand<Unit, Unit> ResetCommand { get; private set; }
 
     private bool TestConnectionInternal(IConnectionCredentials credentials)
     {

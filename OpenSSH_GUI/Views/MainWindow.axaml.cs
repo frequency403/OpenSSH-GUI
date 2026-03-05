@@ -6,20 +6,25 @@
 
 #endregion
 
-using System.Threading.Tasks;
 using Avalonia.Controls;
-using ReactiveUI.Avalonia;
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
+    private readonly ILogger<MainWindow> _logger;
+    private readonly IServiceProvider _serviceProvider;
     private const WindowStartupLocation DefaultWindowStartupLocation = WindowStartupLocation.CenterScreen;
 
-    public MainWindow()
+    public MainWindow(ILogger<MainWindow> logger, IServiceProvider serviceProvider)
     {
+        _logger = logger;
+        _serviceProvider = serviceProvider;
         Icon = App.WindowIcon;
         InitializeComponent();
         this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
@@ -34,67 +39,32 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     }
 
     private async Task DoShowApplicationSettingsWindowAsync(
-        IInteractionContext<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> interaction)
-    {
-        var dialog = new ApplicationSettingsWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<ApplicationSettingsViewModel>(this));
-    }
+        IInteractionContext<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> interaction) =>
+        interaction.SetOutput(await _serviceProvider.ResolveView<ApplicationSettingsWindow>()
+            .ShowDialog<ApplicationSettingsViewModel>(this));
 
     private async Task DoShowConnectToServerWindowAsync(
-        IInteractionContext<ConnectToServerViewModel, ConnectToServerViewModel?> interaction)
-    {
-        var dialog = new ConnectToServerWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<ConnectToServerViewModel>(this));
-    }
+        IInteractionContext<ConnectToServerViewModel, ConnectToServerViewModel?> interaction) =>
+        interaction.SetOutput(await _serviceProvider.ResolveView<ConnectToServerWindow>()
+            .ShowDialog<ConnectToServerViewModel>(this));
 
     private async Task DoShowEditAuthorizedKeysWindowAsync(
-        IInteractionContext<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> interaction)
-    {
-        var dialog = new EditAuthorizedKeysWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<EditAuthorizedKeysViewModel>(this));
-    }
+        IInteractionContext<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> interaction) =>
+        interaction.SetOutput(await _serviceProvider.ResolveView<EditAuthorizedKeysWindow>()
+            .ShowDialog<EditAuthorizedKeysViewModel>(this));
 
     private async Task DoShowExportWindowAsync(
-        IInteractionContext<ExportWindowViewModel, ExportWindowViewModel?> interaction)
-    {
-        var dialog = new ExportWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<ExportWindowViewModel>(this));
-    }
+        IInteractionContext<ExportWindowViewModel, ExportWindowViewModel?> interaction) =>
+        interaction.SetOutput(
+            await _serviceProvider.ResolveView<ExportWindow>().ShowDialog<ExportWindowViewModel>(this));
 
-    private async Task DoShowAddKeyAsync(IInteractionContext<AddKeyWindowViewModel, AddKeyWindowViewModel?> interaction)
-    {
-        var dialog = new AddKeyWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<AddKeyWindowViewModel>(this));
-    }
+    private async Task
+        DoShowAddKeyAsync(IInteractionContext<AddKeyWindowViewModel, AddKeyWindowViewModel?> interaction) =>
+        interaction.SetOutput(
+            await _serviceProvider.ResolveView<AddKeyWindow>().ShowDialog<AddKeyWindowViewModel>(this));
 
     private async Task DoShowEditKnownHostsAsync(
-        IInteractionContext<EditKnownHostsViewModel, EditKnownHostsViewModel?> interaction)
-    {
-        var dialog = new EditKnownHostsWindow
-        {
-            DataContext = interaction.Input,
-            WindowStartupLocation = DefaultWindowStartupLocation
-        };
-        interaction.SetOutput(await dialog.ShowDialog<EditKnownHostsViewModel>(this));
-    }
+        IInteractionContext<EditKnownHostsWindowViewModel, EditKnownHostsWindowViewModel?> interaction) =>
+        interaction.SetOutput(await _serviceProvider.ResolveView<EditKnownHostsWindow>()
+            .ShowDialog<EditKnownHostsWindowViewModel>(this));
 }

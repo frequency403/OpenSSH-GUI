@@ -12,69 +12,73 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 
 public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyncDisposable
 {
-    private FileInfo? fileInfo;
-    private PrivateKeyFile? privateKeyFile;
-    public bool IsInitialized => privateKeyFile != null && fileInfo is { Exists: true };
+    private FileInfo? _fileInfo;
+    private PrivateKeyFile? _privateKeyFile;
+    public bool IsInitialized => _privateKeyFile != null && _fileInfo is { Exists: true };
     
-    public IReadOnlyCollection<HostAlgorithm> HostKeyAlgorithms => privateKeyFile?.HostKeyAlgorithms ?? throw new SshPassPhraseNullOrEmptyException();
-    public Key Key => privateKeyFile?.Key ?? throw new SshPassPhraseNullOrEmptyException();
-    public Certificate? Certificate => privateKeyFile?.Certificate ?? throw new SshPassPhraseNullOrEmptyException();
+    public IReadOnlyCollection<HostAlgorithm> HostKeyAlgorithms => _privateKeyFile?.HostKeyAlgorithms ?? throw new SshPassPhraseNullOrEmptyException();
+    public Key Key => _privateKeyFile?.Key ?? throw new SshPassPhraseNullOrEmptyException();
+    public Certificate? Certificate => _privateKeyFile?.Certificate;
+    public string AbsoluteFilePath => _fileInfo?.FullName ?? string.Empty;
 
-    private (string keySize, string fingerprintAlgorithm, string fingerprint, string comment, string keyType)
-        extractKeyInformation()
+    private async ValueTask ExtractKeyInformation()
     {
+        if (_fileInfo is not { Exists: true })
+            throw new FileNotFoundException();
         var processInformation = new ProcessStartInfo
         {
             FileName = "ssh-keygen",
-            Arguments = $"-lf {fileInfo.FullName}",
+            Arguments = $"-lf {_fileInfo.FullName}",
             CreateNoWindow = true,
-            WorkingDirectory = fileInfo.DirectoryName,
+            WorkingDirectory = _fileInfo.DirectoryName,
             UseShellExecute = false,
             RedirectStandardOutput = true
         };
-        var process = Process.Start(processInformation);
-        var splitted = process.StandardOutput.ReadToEnd().TrimEnd('\r', '\n').Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var pingerprintSplit = splitted[1].Split(':');
-        return (splitted[0], pingerprintSplit[0], pingerprintSplit[1], splitted[2], splitted[3]);
+
+        if (Process.Start(processInformation) is { } process)
+        {
+            var splitted = (await process.StandardOutput.ReadToEndAsync()).TrimEnd('\r', '\n').Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var pingerprintSplit = splitted[1].Split(':');
+        
+            _keySizeField = int.Parse(splitted[0]);
+            _hashAlgorithmNameField = Enum.Parse<SshKeyHashAlgorithmName>(pingerprintSplit[0]);
+            _fingerPrintField = pingerprintSplit[1];
+            _commentField = splitted[2];
+            _keyTypeField = splitted[3];
+        }
     }
 
-    private int keySizeField = 0;
-    public int KeySize => privateKeyFile?.Key.KeyLength ?? keySizeField;
+    private int _keySizeField;
+    public int KeySize => _privateKeyFile?.Key.KeyLength ?? _keySizeField;
 
-    private SshKeyHashAlgorithmName hashAlgorithmNameField = SshKeyHashAlgorithmName.SHA256;
+    private SshKeyHashAlgorithmName _hashAlgorithmNameField = SshKeyHashAlgorithmName.SHA256;
 
     public SshKeyHashAlgorithmName HashAlgorithmName =>
-        Enum.TryParse<SshKeyHashAlgorithmName>(privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name,
+        Enum.TryParse<SshKeyHashAlgorithmName>(_privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name,
             out var enumValue)
             ? enumValue
-            : hashAlgorithmNameField;
+            : _hashAlgorithmNameField;
     
-    private string fingerPrintField = string.Empty;
-    public string FingerprintString => privateKeyFile?.Fingerprint(HashAlgorithmName) ?? fingerPrintField;
+    private string _fingerPrintField = string.Empty;
+    public string FingerprintString => _privateKeyFile?.Fingerprint(HashAlgorithmName) ?? _fingerPrintField;
     
-    private string commentField = string.Empty;
-    public string Comment => privateKeyFile?.Key.Comment ?? commentField;
+    private string _commentField = string.Empty;
+    public string Comment => _privateKeyFile?.Key.Comment ?? _commentField;
     
-    private string keyTypeField = string.Empty;
-    public string KeyType => privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? keyTypeField;
+    private string _keyTypeField = string.Empty;
+    public string KeyType => _privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? _keyTypeField;
     
-    public void Load(string filePath, string? passPhrase = null)
+    public async ValueTask Load(string filePath, string? passPhrase = null)
     {
         try
         {
-            fileInfo = new FileInfo(filePath);
-            privateKeyFile = new PrivateKeyFile(fileInfo.FullName, passPhrase);
+            _fileInfo = new FileInfo(filePath);
+            _privateKeyFile = new PrivateKeyFile(_fileInfo.FullName, passPhrase);
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
             Logger.LogWarning("Missing Password for keyfile {filePath}", filePath);
-            var info = extractKeyInformation();
-
-            keySizeField = int.Parse(info.keySize);
-            hashAlgorithmNameField = Enum.Parse<SshKeyHashAlgorithmName>(info.fingerprintAlgorithm);
-            fingerPrintField = info.fingerprint;
-            commentField = info.comment;
-            keyTypeField = info.keyType;
+            await ExtractKeyInformation();
         }
         catch (Exception e)
         {
@@ -83,36 +87,38 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
         }
     }
     
-    public string ToPublic() => privateKeyFile?.ToPublic() ?? throw new SshPassPhraseNullOrEmptyException();
-    public string ToPublic(SshKeyFormat format) => privateKeyFile?.ToPublic(format) ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPublic() => _privateKeyFile?.ToPublic() ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPublic(SshKeyFormat format) => _privateKeyFile?.ToPublic(format) ?? throw new SshPassPhraseNullOrEmptyException();
     
-    public string Fingerprint() => privateKeyFile?.Fingerprint() ?? throw new SshPassPhraseNullOrEmptyException();
-    public string Fingerprint(SshKeyHashAlgorithmName hashAlgorithmName) => privateKeyFile?.Fingerprint(hashAlgorithmName) ?? throw new SshPassPhraseNullOrEmptyException();
+    public string Fingerprint() => _privateKeyFile?.Fingerprint() ?? throw new SshPassPhraseNullOrEmptyException();
+    public string Fingerprint(SshKeyHashAlgorithmName hashAlgorithmName) => _privateKeyFile?.Fingerprint(hashAlgorithmName) ?? throw new SshPassPhraseNullOrEmptyException();
     
-    public string ToOpenSshFormat() => privateKeyFile?.ToOpenSshFormat() ?? throw  new SshPassPhraseNullOrEmptyException();
-    public string ToOpenSshFormat(string passphrase) => privateKeyFile?.ToOpenSshFormat(passphrase) ?? throw  new SshPassPhraseNullOrEmptyException();
-    public string ToOpenSshFormat(ISshKeyEncryption keyEncryption) => privateKeyFile?.ToOpenSshFormat(keyEncryption) ?? throw  new SshPassPhraseNullOrEmptyException();
+    public string ToOpenSshFormat() => _privateKeyFile?.ToOpenSshFormat() ?? throw  new SshPassPhraseNullOrEmptyException();
+    public string ToOpenSshFormat(string passphrase) => _privateKeyFile?.ToOpenSshFormat(passphrase) ?? throw  new SshPassPhraseNullOrEmptyException();
+    public string ToOpenSshFormat(ISshKeyEncryption keyEncryption) => _privateKeyFile?.ToOpenSshFormat(keyEncryption) ?? throw  new SshPassPhraseNullOrEmptyException();
     
-    public string ToPuttyFormat() => privateKeyFile?.ToPuttyFormat() ?? throw new SshPassPhraseNullOrEmptyException();
-    public string ToPuttyFormat(string passphrase) => privateKeyFile?.ToPuttyFormat(passphrase) ?? throw new SshPassPhraseNullOrEmptyException();
-    public string ToPuttyFormat(string passphrase, SshKeyFormat keyFormat) => privateKeyFile?.ToPuttyFormat(passphrase, keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
-    public string ToPuttyFormat(ISshKeyEncryption keyEncryption, SshKeyFormat keyFormat) => privateKeyFile?.ToPuttyFormat(keyEncryption, keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
-    public string ToPuttyFormat(SshKeyFormat keyFormat) => privateKeyFile?.ToPuttyFormat(keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPuttyFormat() => _privateKeyFile?.ToPuttyFormat() ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPuttyFormat(string passphrase) => _privateKeyFile?.ToPuttyFormat(passphrase) ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPuttyFormat(string passphrase, SshKeyFormat keyFormat) => _privateKeyFile?.ToPuttyFormat(passphrase, keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPuttyFormat(ISshKeyEncryption keyEncryption, SshKeyFormat keyFormat) => _privateKeyFile?.ToPuttyFormat(keyEncryption, keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPuttyFormat(SshKeyFormat keyFormat) => _privateKeyFile?.ToPuttyFormat(keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
     
-    public string ToOpenSshPublicFormat() => privateKeyFile?.ToOpenSshPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
-    public string ToPuttyPublicFormat => privateKeyFile?.ToPuttyPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToOpenSshPublicFormat() => _privateKeyFile?.ToOpenSshPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
+    public string ToPuttyPublicFormat => _privateKeyFile?.ToPuttyPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
 
 
-    public bool SetPassword(ReadOnlySpan<byte> password)
+    public async ValueTask<bool> SetPassword(ReadOnlyMemory<byte> password)
     {
         try
         {
-            Load(fileInfo.FullName, Encoding.UTF8.GetString(password));
+            if(_fileInfo is not { Exists: true})
+                throw new Exception("");
+            await Load(_fileInfo.FullName, Encoding.UTF8.GetString(password.Span));
             return true;
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
-            Logger.LogWarning("Missing Password for keyfile {filePath}", fileInfo.FullName);
+            Logger.LogWarning("Missing Password for keyfile {filePath}", _fileInfo.FullName);
         }
         catch (Exception e)
         {

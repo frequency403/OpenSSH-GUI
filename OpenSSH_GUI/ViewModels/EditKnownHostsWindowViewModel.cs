@@ -7,7 +7,6 @@
 #endregion
 
 using System.Collections.ObjectModel;
-using System.Linq;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
@@ -18,7 +17,7 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditKnownHostsViewModel : ViewModelBase<EditKnownHostsViewModel>
+public class EditKnownHostsWindowViewModel : ViewModelBase<EditKnownHostsWindowViewModel>
 {
     public IServerConnection ServerConnection { get; private set; }
 
@@ -44,7 +43,7 @@ public class EditKnownHostsViewModel : ViewModelBase<EditKnownHostsViewModel>
         KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
         KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, EditKnownHostsViewModel?>(async e =>
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, EditKnownHostsWindowViewModel?>(async e =>
         {
             if (!e) return this;
             KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);

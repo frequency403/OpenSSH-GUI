@@ -73,11 +73,11 @@ public partial class PpkKey : KeyBase, IPpkKey
             EncryptionRegex().Replace(lines.FirstOrDefault(e => e.StartsWith(EncryptionLineStart))!, ""),
             out var parsedEncryptionType)
             ? parsedEncryptionType
-            : EncryptionType.NONE;
+            : EncryptionType.None;
         Comment = CommentRegex().Replace(lines.FirstOrDefault(e => e.StartsWith(CommentLineStart)) ?? "", "").Trim();
         PrivateKeyString = ExtractLines(lines, PrivateKeyLineStart);
         PublicKeyString = ExtractLines(lines, PublicKeyLineStart);
-        PrivateMAC = MacRegex().Replace(lines.FirstOrDefault(e => e.StartsWith(MacLineStart)) ?? "", "")
+        PrivateMac = MacRegex().Replace(lines.FirstOrDefault(e => e.StartsWith(MacLineStart)) ?? "", "")
             .Replace(MacLineStart, "").Trim();
     }
 
@@ -113,7 +113,7 @@ public partial class PpkKey : KeyBase, IPpkKey
     /// <summary>
     ///     The MAC (Message Authentication Code) used for the private key in a PpkKey file.
     /// </summary>
-    public string PrivateMAC { get; }
+    public string PrivateMac { get; }
 
     /// <summary>
     ///     Gets a value indicating whether the key is a PuTTY key.

@@ -6,10 +6,7 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Avalonia.Data.Converters;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Keys;

@@ -6,7 +6,6 @@
 
 #endregion
 
-using System;
 using Avalonia;
 using ReactiveUI.Avalonia;
 

@@ -14,12 +14,12 @@ namespace OpenSSH_GUI.Core.Database.Context;
 /// <summary>
 ///     Represents the database context for the OpenSSH GUI application.
 /// </summary>
-public class OpenSshGuiDbContext() : DbContext
+public class OpenSshGuiDbContext : DbContext
 {
     /// <summary>
     ///     Represents the initialization vector (IV) used for data encryption in the OpenSshGuiDbContext class.
     /// </summary>
-    private readonly byte[] _encyptionIV = Convert.FromBase64String("lWXnTKuRPnieE8nzpyl1Gg==");
+    private readonly byte[] _encyptionIv = Convert.FromBase64String("lWXnTKuRPnieE8nzpyl1Gg==");
 
     /// <summary>
     ///     Represents the encryption key used for data encryption in the OpenSshGuiDbContext class.
@@ -29,7 +29,7 @@ public class OpenSshGuiDbContext() : DbContext
     /// <summary>
     ///     Represents an encryption provider used by the OpenSshGuiDbContext.
     /// </summary>
-    private IEncryptionProvider _provider => new AesProvider(_encyptionKey, _encyptionIV);
+    private IEncryptionProvider Provider => new AesProvider(_encyptionKey, _encyptionIv);
 
 
     /// <summary>
@@ -76,7 +76,7 @@ public class OpenSshGuiDbContext() : DbContext
     /// <param name="modelBuilder">The builder that defines the model for the context.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.UseEncryption(_provider);
+        modelBuilder.UseEncryption(Provider);
 
         modelBuilder.Entity<Settings>().HasKey(e => e.Version);
 

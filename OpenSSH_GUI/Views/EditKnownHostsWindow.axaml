@@ -9,7 +9,7 @@
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
         x:Class="OpenSSH_GUI.Views.EditKnownHostsWindow"
-        x:DataType="viewModels:EditKnownHostsViewModel"
+        x:DataType="viewModels:EditKnownHostsWindowViewModel"
         Width="800"
         Height="600"
         
