@@ -172,7 +172,7 @@
                     <ToolTip.Tip>
                         <StackPanel>
                             <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
-                                  IsVisible="{Binding ServerConnection.IsConnected}">
+                                  IsVisible="{Binding ServerConnection.IsConnected, FallbackValue=False}">
                                 <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
                                        Content="{Binding ServerConnection.ConnectionString}" FontWeight="Bold" />
                                 <Label Grid.Row="1" Grid.Column="0"
@@ -194,14 +194,14 @@
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuConnect}"
-                                      IsEnabled="{Binding !ServerConnection.IsConnected}"
+                                      IsEnabled="{Binding !ServerConnection.IsConnected, FallbackValue=True}"
                                       Command="{Binding OpenConnectToServerWindow}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanConnect" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuDisconnect}"
-                                      IsEnabled="{Binding ServerConnection.IsConnected}"
+                                      IsEnabled="{Binding ServerConnection.IsConnected, FallbackValue=False}"
                                       Command="{Binding DisconnectServer}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanDisconnect" />
@@ -210,10 +210,10 @@
                         </ContextMenu>
                     </Border.ContextMenu>
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding ServerConnection.IsConnected}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding ServerConnection.IsConnected, FallbackValue=False}">
                             <materialIcons:MaterialIcon Kind="Signal" Foreground="Green" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !ServerConnection.IsConnected}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !ServerConnection.IsConnected, FallbackValue=True}">
                             <materialIcons:MaterialIcon Kind="SignalOff" Foreground="Red" />
                         </StackPanel>
                     </StackPanel>

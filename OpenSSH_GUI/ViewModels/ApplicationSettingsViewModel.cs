@@ -16,11 +16,10 @@ using ReactiveUI;
 namespace OpenSSH_GUI.ViewModels;
 
 public sealed class ApplicationSettingsViewModel(
-    ILogger<ApplicationSettingsViewModel> logger,
     KeyLocatorService locatorService,
     IServiceProvider serviceProvider,
     IDialogHost dialogHost,
-    OpenSshGuiDbContext dbContext) : ViewModelBase<ApplicationSettingsViewModel>(logger)
+    OpenSshGuiDbContext dbContext) : ViewModelBase<ApplicationSettingsViewModel>
 {
     private bool _convertPpkAutomatically;
 

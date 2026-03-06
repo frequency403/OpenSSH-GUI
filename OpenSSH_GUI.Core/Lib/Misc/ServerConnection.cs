@@ -75,6 +75,32 @@ public class ServerConnection : ReactiveObject, IServerConnection
         GC.SuppressFinalize(this);
     }
 
+    public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
+    {
+        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return TestMulti(mkcc);
+        await ClientConnection.ConnectAsync(token);
+        IsConnected = ClientConnection.IsConnected;
+        if (!IsConnected) return ServerOs != PlatformID.Other && IsConnected;
+        ServerOs = GetServerOs();
+        CheckForFilesAndCreateThemIfTheyNotExist();
+        ConnectionTime = DateTime.Now;
+        return ServerOs != PlatformID.Other && IsConnected;
+    }
+
+    public ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default)
+    {
+        try
+        {
+            ClientConnection.Disconnect();
+            IsConnected = false;
+            return ValueTask.FromResult(true);
+        }
+        catch(Exception e)
+        {
+            return ValueTask.FromException<bool>(e);
+        }
+    }
+    
     public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
     {
         exception = null;

@@ -36,15 +36,29 @@ public interface IServerConnection : IReactiveObject, IDisposable
     PlatformID ServerOs { get; set; }
 
     /// <summary>
-    ///     Tests the connection to the server and opens a connection if successful.
+    /// Establishes a connection to the server using the provided credentials and updates the connection state.
     /// </summary>
-    /// <param name="exception">
-    ///     An <see cref="Exception" /> that represents the error that occurred during the test and open
-    ///     connection process, if any. If the test and open connection process is successful, this value is <c>null</c>.
+    /// <param name="token">
+    /// A <see cref="CancellationToken" /> that can be used to cancel the connection attempt.
     /// </param>
-    /// <returns><c>true</c> if the test and open connection process is successful; otherwise, <c>false</c>.</returns>
-    bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception);
+    /// <returns>
+    /// A <see cref="ValueTask{Boolean}" /> representing the asynchronous connection operation.
+    /// Returns <c>true</c> if the connection is established successfully; otherwise, <c>false</c>.
+    /// </returns>
+    ValueTask<bool> ConnectToServerAsync(CancellationToken token = default);
 
+    /// <summary>
+    /// Disconnects from the server and updates the connection state asynchronously.
+    /// </summary>
+    /// <param name="token">
+    /// A <see cref="CancellationToken" /> that can be used to cancel the disconnection attempt.
+    /// </param>
+    /// <returns>
+    /// A <see cref="ValueTask{Boolean}" /> representing the asynchronous disconnection operation.
+    /// Returns <c>true</c> if the disconnection is successful; otherwise, <c>false</c>.
+    /// </returns>
+    ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default);
+    
     /// <summary>
     ///     Closes the server connection.
     /// </summary>

@@ -1,12 +1,14 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger) : ViewModelBase<ExportWindowViewModel>(logger)
+public class ExportWindowViewModel(IClipboardService clipboardService) : ViewModelBase<ExportWindowViewModel>
 {
     public string WindowTitle { get; private set; } = "";
     public string Export { get; private set; } = "";
@@ -18,19 +20,16 @@ public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger) : View
             WindowTitle = initializerParameters.WindowTitle;
             Export = initializerParameters.Export;
         }
-
-        BooleanSubmit = ReactiveCommand.Create<bool, ExportWindowViewModel?>(boolean =>
-        {
-            if (!boolean) return null;
-            if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-                return null;
-            var mainWindow = desktop.MainWindow;
-            var clipboard = mainWindow.Clipboard;
-
-            clipboard.SetTextAsync(Export).ConfigureAwait(false);
-            return this;
-        });
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ExportWindowViewModel?>(Execute);
         base.Initialize(parameters);
+    }
+
+    private async Task<ExportWindowViewModel?> Execute(bool arg)
+    {
+        if(arg)
+            await clipboardService.SetTextAsync(Export);
+        RequestClose();
+        return this;
     }
 }
 

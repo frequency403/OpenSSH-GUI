@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
@@ -60,6 +62,7 @@ public class App : Application
         collection.AddLogging(e => e.AddSerilog());
         collection.AddKeyedSingleton<Bitmap>("AppIcon",
             (_, _) => new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
+        collection.AddSingleton<IServerConnectionService, ServerConnectionService>();
         collection.AddTransient<SshKeyFile>();
         collection.AddTransient<DirectoryCrawler>();
         collection.AddTransient<KeyLocatorService>();
@@ -67,8 +70,8 @@ public class App : Application
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
             serviceCollection =>
             {
-                serviceCollection.AddSingleton<IDialogHost>(sp =>
-                    sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                serviceCollection.AddSingleton<IClipboardHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                serviceCollection.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
             });
         collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
         collection.RegisterViewWithViewModel<EditSavedServerEntry, EditSavedServerEntryViewModel>();
@@ -77,7 +80,8 @@ public class App : Application
         collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
         collection.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
-
+        collection.AddTransient<IClipboardService, ClipboardService>();
+        
         ServiceProvider = collection.BuildServiceProvider();
         base.RegisterServices();
     }

@@ -17,7 +17,7 @@ public class WindowBase<T>(ILogger<WindowBase<T>> logger) : ReactiveWindow<T> wh
     {
         if (ViewModel is null)
             ArgumentNullException.ThrowIfNull(ViewModel);
-        ViewModel.RequestCose += RequestClose;
+        ViewModel.Close += RequestClose;
     }
 
     private void RequestClose(object? sender, EventArgs e)

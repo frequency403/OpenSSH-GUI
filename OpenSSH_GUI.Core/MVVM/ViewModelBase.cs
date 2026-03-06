@@ -6,16 +6,12 @@ namespace OpenSSH_GUI.Core.MVVM;
 
 public class ViewModelBase<T>(ILogger<T>? logger = null) : ViewModelBase(typeof(T), logger) where T : ViewModelBase
 {
-    public ReactiveCommand<T, T?> Submit { get; set; } = ReactiveCommand.Create<T, T?>(e => null);
     public ReactiveCommand<bool, T?> BooleanSubmit { get; set; } = ReactiveCommand.Create<bool, T?>(e => null);
 
-    public EventHandler RequestCose { get; set; } = delegate { };
-
-    public ReactiveCommand<Unit?, Unit?> Close { get; set; } = ReactiveCommand.Create<Unit?, Unit?>(_ => null);
-
+    public EventHandler Close { get; set; } = delegate { };
     protected void RequestClose()
     {
-        RequestCose.Invoke(this, EventArgs.Empty);
+        Close.Invoke(this, EventArgs.Empty);
     }
 
     public virtual void Initialize(IInitializerParameters<T>? parameters = null)

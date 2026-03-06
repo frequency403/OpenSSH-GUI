@@ -12,9 +12,7 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel(
-    ILogger<EditAuthorizedKeysViewModel> logger,
-    KeyLocatorService keyLocatorService) : ViewModelBase<EditAuthorizedKeysViewModel>(logger)
+public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService) : ViewModelBase<EditAuthorizedKeysViewModel>
 {
     private SshKeyFile? _selectedKey;
     private IServerConnection _serverConnection;
@@ -35,7 +33,7 @@ public class EditAuthorizedKeysViewModel(
         }
     }
 
-    public ObservableCollection<SshKeyFile> PublicKeys { get; set; } // TODO = keyLocatorService.SshKeys;
+    public ObservableCollection<SshKeyFile> PublicKeys { get; set; } = keyLocatorService.SshKeys;
 
     public bool KeyAddPossible => PublicKeys.Count > 0;
 

@@ -52,13 +52,8 @@ public static class ServiceCollectionExtensions
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
         resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
-
-        var viewModelType = typeof(TView).Assembly.GetTypes()
-            .FirstOrDefault(t => t.Name == viewName + "ViewModel");
-        if (viewModelType == null)
-            throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
-
-        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelType.Name);
+        var viewModelName = typeof(TViewModel).Name;
+        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
         await viewModel.InitializeAsync(initializerParameters, token);
         if (!viewModel.IsInitialized)
             throw new InvalidOperationException("ViewModel not properly initialized");
@@ -77,13 +72,8 @@ public static class ServiceCollectionExtensions
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
         resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
-
-        var viewModelType = typeof(TView).Assembly.GetTypes()
-            .FirstOrDefault(t => t.Name == viewName + "ViewModel");
-        if (viewModelType == null)
-            throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
-
-        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelType.Name);
+        var viewModelName = typeof(TViewModel).Name;
+        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
         viewModel.Initialize(initializerParameters);
         if (!viewModel.IsInitialized)
             throw new InvalidOperationException("ViewModel not properly initialized");

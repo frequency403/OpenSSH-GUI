@@ -10,11 +10,10 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditKnownHostsWindowViewModel(ILogger<EditKnownHostsWindowViewModel> logger)
-    : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
+public class EditKnownHostsWindowViewModel
+    : ViewModelBase<EditKnownHostsWindowViewModel>
 {
     public IServerConnection ServerConnection { get; private set; }
-
     private IKnownHostsFile KnownHostsFileLocal { get; set; }
     private IKnownHostsFile KnownHostsFileRemote { get; set; }
 

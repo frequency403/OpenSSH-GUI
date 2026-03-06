@@ -15,8 +15,7 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger, KeyLocatorService keyLocatorService)
-    : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
+public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService) : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
 {
     private static readonly SshKeyType[] _sshKeyTypes = Enum.GetValues<SshKeyType>();
     private bool _createKey;
@@ -92,7 +91,7 @@ public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error creating key");
+            Logger.LogError(e, "Error creating key");
             var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, e.Message,
                 ButtonEnum.Ok, Icon.Error);
             await msgBox.ShowAsync();

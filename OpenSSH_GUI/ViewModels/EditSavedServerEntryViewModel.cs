@@ -7,8 +7,8 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryViewModel> logger)
-    : ViewModelBase<EditSavedServerEntryViewModel>(logger)
+public sealed class EditSavedServerEntryViewModel
+    : ViewModelBase<EditSavedServerEntryViewModel>
 {
     public string WindowTitle
     {

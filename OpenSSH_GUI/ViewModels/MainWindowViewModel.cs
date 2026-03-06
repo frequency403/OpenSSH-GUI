@@ -18,6 +18,7 @@ using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
@@ -31,25 +32,12 @@ using SshNet.Keygen;
 namespace OpenSSH_GUI.ViewModels;
 
 public class MainWindowViewModel(
-    ILogger<MainWindowViewModel> logger,
-    DirectoryCrawler directoryCrawler,
     KeyLocatorService locatorService,
+    IServerConnectionService serverConnectionService,
     IServiceProvider serviceProvider,
     IDialogHost dialogHost)
-    : ViewModelBase<MainWindowViewModel>(logger)
+    : ViewModelBase<MainWindowViewModel>()
 {
-    public readonly Interaction<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> ShowAppSettings = new();
-    public readonly Interaction<ConnectToServerViewModel, ConnectToServerViewModel?> ShowConnectToServerWindow = new();
-    public readonly Interaction<AddKeyWindowViewModel, AddKeyWindowViewModel?> ShowCreate = new();
-
-    public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys =
-        new();
-
-    public readonly Interaction<EditKnownHostsWindowViewModel, EditKnownHostsWindowViewModel?> ShowEditKnownHosts =
-        new();
-
-    public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
-
     private IServerConnection _serverConnection;
 
     public string Version
@@ -125,9 +113,13 @@ public class MainWindowViewModel(
     {
         var messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextSuccess;
         var messageBoxIcon = Icon.Success;
-        if (ServerConnection.IsConnected)
+        if (serverConnectionService.IsConnected)
         {
-            if (!ServerConnection.CloseConnection(out var exception))
+            try
+            {
+                await serverConnectionService.CloseConnection();
+            }
+            catch (Exception exception)
             {
                 messageBoxText = exception.Message;
                 messageBoxIcon = Icon.Error;
@@ -149,10 +141,8 @@ public class MainWindowViewModel(
     public ReactiveCommand<Unit, ConnectToServerViewModel?> OpenConnectToServerWindow =>
         ReactiveCommand.CreateFromTask<Unit, ConnectToServerViewModel?>(async e =>
         {
-            var connectToServer = serviceProvider.GetService<ConnectToServerViewModel>();
-            var windowResult = await ShowConnectToServerWindow.Handle(connectToServer);
-            if (windowResult is not null) ServerConnection = windowResult.ServerConnection;
-            return windowResult;
+            await dialogHost.ShowDialog<ConnectToServerWindow, ConnectToServerViewModel>(await serviceProvider.ResolveViewAsync<ConnectToServerWindow, ConnectToServerViewModel>());
+            return null;
         });
 
     public ReactiveCommand<Unit, EditKnownHostsWindowViewModel?> OpenEditKnownHostsWindow =>
@@ -222,8 +212,7 @@ public class MainWindowViewModel(
         ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async key =>
         {
             var currentFormat = Enum.GetName(key.SshKeyFormat);
-            var oppositeFormat =
-                Enum.GetName(key.SshKeyFormat is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH);
+            var oppositeFormat = Enum.GetName(key.SshKeyFormat is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH);
 
             var title = string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat,
                 oppositeFormat);
@@ -289,9 +278,9 @@ public class MainWindowViewModel(
     public ReactiveCommand<Unit, ApplicationSettingsViewModel> OpenAppSettings =>
         ReactiveCommand.CreateFromTask<Unit, ApplicationSettingsViewModel>(async u =>
         {
-            var vm = serviceProvider.GetRequiredService<ApplicationSettingsViewModel>();
-            var result = await ShowAppSettings.Handle(vm);
-            return result;
+            await dialogHost.ShowDialog<ApplicationSettingsWindow, ApplicationSettingsViewModel>(
+                await serviceProvider.ResolveViewAsync<ApplicationSettingsWindow, ApplicationSettingsViewModel>());
+            return null;
         });
 
     public ReactiveCommand<SshKeyFile, SshKeyFile?> ProvidePassword =>
@@ -360,11 +349,7 @@ public class MainWindowViewModel(
             return key;
         });
 
-    public IServerConnection ServerConnection
-    {
-        get => _serverConnection;
-        private set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
-    }
+    public IServerConnection? ServerConnection => serverConnectionService.ServerConnection;
 
     public ObservableCollection<SshKeyFile> SshKeys => locatorService.SshKeys;
 
@@ -456,7 +441,7 @@ public class MainWindowViewModel(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error while exporting key to {publicOrNot} format", @public ? "public" : "private");
+            Logger.LogError(e, "Error while exporting key to {publicOrNot} format", @public ? "public" : "private");
         }
 
         if (keyExport is null)

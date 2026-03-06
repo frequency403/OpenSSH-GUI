@@ -39,15 +39,8 @@
     <Grid RowDefinitions="* * * * *" ColumnDefinitions="* * *" Margin="5">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold"
                    Text="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}" HorizontalAlignment="Center" />
-        <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"
-                  IsChecked="{Binding QuickConnect}"
-                  IsVisible="{Binding QuickConnectAvailable}">
-            <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowQuickConnect}" />
-        </CheckBox>
-        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left"
-                    IsVisible="{Binding !QuickConnect}"
-                    VerticalAlignment="Center">
-            <CheckBox IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnection.IsConnected}">
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <CheckBox IsChecked="{Binding AuthWithPublicKey}" IsEnabled="{Binding !ServerConnectionService.IsConnected}">
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUsePubKey}" />
             </CheckBox>
             <CheckBox IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}">
@@ -57,7 +50,6 @@
         <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                  IsVisible="{Binding QuickConnect}"
                   ItemsSource="{Binding ConnectionCredentials}"
                   SelectedItem="{Binding SelectedConnection}"
                   IsEnabled="{Binding !TryingToConnect}">
@@ -98,31 +90,29 @@
         <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
-                 IsVisible="{Binding !QuickConnect}"
-                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
+                 IsEnabled="{Binding !ServerConnectionService.IsConnected}" VerticalAlignment="Bottom" />
 
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
-                 IsVisible="{Binding !QuickConnect}"
-                 IsEnabled="{Binding !ServerConnection.IsConnected}" VerticalAlignment="Bottom" />
+                 IsEnabled="{Binding !ServerConnectionService.IsConnected}" VerticalAlignment="Bottom" />
 
-        <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2" IsVisible="{Binding !QuickConnect}"
+        <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2"
                     VerticalAlignment="Top">
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
                      Text="{Binding Password}" Watermark="Password" PasswordChar="*"
-                     IsEnabled="{Binding !ServerConnection.IsConnected}"
+                     IsEnabled="{Binding !ServerConnectionService.IsConnected}"
                      IsVisible="{Binding !AuthWithPublicKey}" />
             <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
-                      ItemsSource="{Binding PublicKeys}"
+                      ItemsSource="{Binding KeyLocatorService.SshKeys}"
                       SelectedItem="{Binding SelectedPublicKey}"
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
                 Command="{Binding TestConnection}"
-                IsEnabled="{Binding !ServerConnection.IsConnected}"
+                IsEnabled="{Binding !ServerConnectionService.IsConnected}"
                 HotKey="Enter">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowTestConnection}" />
@@ -148,7 +138,7 @@
             <TextBlock Text="{Binding StatusButtonText}" VerticalAlignment="Center" />
             <Button HorizontalAlignment="Right" Background="DarkSlateGray"
                     Command="{Binding ResetCommand}"
-                    IsVisible="{Binding ServerConnection.IsConnected}">
+                    IsVisible="{Binding ServerConnectionService.IsConnected}">
                 <ToolTip.Tip>
                     <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowResetValues}" />
                 </ToolTip.Tip>
