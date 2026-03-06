@@ -34,7 +34,7 @@ public sealed class ConnectToServerViewModel(ILogger<ConnectToServerViewModel> l
     private List<IConnectionCredentials> _connectionCredentials;
 
     private ISshKey? _selectedPublicKey;
-    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    public override async ValueTask InitializeAsync(IInitializerParameters<ConnectToServerViewModel>? initializerParameters = null, CancellationToken cancellationToken = default)
     {
         _selectedPublicKey = PublicKeys.FirstOrDefault();
         _connectionCredentials = (await dbContext.ConnectionCredentialsDtos.Include(e => e.KeyDtos).ToListAsync(cancellationToken: cancellationToken)).Where(dto =>
@@ -47,7 +47,7 @@ public sealed class ConnectToServerViewModel(ILogger<ConnectToServerViewModel> l
         {
             if (QuickConnect)
             {
-                TestQuickConnection(SelectedConnection).Wait();
+                await TestQuickConnection(SelectedConnection);
                 return e;
             }
 
@@ -70,7 +70,7 @@ public sealed class ConnectToServerViewModel(ILogger<ConnectToServerViewModel> l
                     StatusButtonToolTip = exception.Message;
                     return false;
                 }
-            });
+            }, cancellationToken);
             TryingToConnect = true;
             if (await task)
             {

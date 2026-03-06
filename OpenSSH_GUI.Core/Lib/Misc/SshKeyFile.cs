@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Renci.SshNet;
@@ -14,12 +15,29 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
 {
     private FileInfo? _fileInfo;
     private PrivateKeyFile? _privateKeyFile;
+    
+    [MemberNotNullWhen(true, nameof(_fileInfo), nameof(_privateKeyFile))]
     public bool IsInitialized => _privateKeyFile != null && _fileInfo is { Exists: true };
+
+    public bool IsPuttyKey => SshKeyFormat is not SshKeyFormat.OpenSSH;
+    
+    public bool NeedsPassword { get; set; }
+    
+    [MemberNotNullWhen(true, nameof(Password))]
+    public bool HasPassword => Password is not null && !NeedsPassword;
+    public ReadOnlyMemory<byte>? Password { get; set; } = null;
     
     public IReadOnlyCollection<HostAlgorithm> HostKeyAlgorithms => _privateKeyFile?.HostKeyAlgorithms ?? throw new SshPassPhraseNullOrEmptyException();
     public Key Key => _privateKeyFile?.Key ?? throw new SshPassPhraseNullOrEmptyException();
     public Certificate? Certificate => _privateKeyFile?.Certificate;
     public string AbsoluteFilePath => _fileInfo?.FullName ?? string.Empty;
+    public string FileName => _fileInfo?.Name ?? string.Empty;
+
+    public SshKeyFormat SshKeyFormat => _fileInfo?.Extension switch
+    {
+        { } extension when extension.EndsWith("ppk") => SshKeyFormat.PuTTYv3,
+        _ => SshKeyFormat.OpenSSH
+    };
 
     private async ValueTask ExtractKeyInformation()
     {
@@ -68,12 +86,13 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
     private string _keyTypeField = string.Empty;
     public string KeyType => _privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? _keyTypeField;
     
-    public async ValueTask Load(string filePath, string? passPhrase = null)
+    public async ValueTask Load(string filePath, ReadOnlyMemory<byte>? passPhrase = null)
     {
         try
         {
             _fileInfo = new FileInfo(filePath);
-            _privateKeyFile = new PrivateKeyFile(_fileInfo.FullName, passPhrase);
+            _privateKeyFile = passPhrase is not { } memory ? new PrivateKeyFile(_fileInfo.FullName) : new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span));
+            Password = passPhrase;
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
@@ -92,9 +111,16 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
     
     public string Fingerprint() => _privateKeyFile?.Fingerprint() ?? throw new SshPassPhraseNullOrEmptyException();
     public string Fingerprint(SshKeyHashAlgorithmName hashAlgorithmName) => _privateKeyFile?.Fingerprint(hashAlgorithmName) ?? throw new SshPassPhraseNullOrEmptyException();
+
+    public string? ToOpenSshFormat()
+    {
+        if(NeedsPassword)
+            throw new SshPassPhraseNullOrEmptyException();
+        if (HasPassword && IsInitialized)
+            return _privateKeyFile.ToOpenSshFormat(Encoding.UTF8.GetString(Password.Value.Span));
+        return IsInitialized ? _privateKeyFile.ToOpenSshFormat() : null;
+    }
     
-    public string ToOpenSshFormat() => _privateKeyFile?.ToOpenSshFormat() ?? throw  new SshPassPhraseNullOrEmptyException();
-    public string ToOpenSshFormat(string passphrase) => _privateKeyFile?.ToOpenSshFormat(passphrase) ?? throw  new SshPassPhraseNullOrEmptyException();
     public string ToOpenSshFormat(ISshKeyEncryption keyEncryption) => _privateKeyFile?.ToOpenSshFormat(keyEncryption) ?? throw  new SshPassPhraseNullOrEmptyException();
     
     public string ToPuttyFormat() => _privateKeyFile?.ToPuttyFormat() ?? throw new SshPassPhraseNullOrEmptyException();
@@ -113,11 +139,13 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
         {
             if(_fileInfo is not { Exists: true})
                 throw new Exception("");
-            await Load(_fileInfo.FullName, Encoding.UTF8.GetString(password.Span));
+            await Load(_fileInfo.FullName, password);
+            NeedsPassword = false;
             return true;
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
+            NeedsPassword = true;
             Logger.LogWarning("Missing Password for keyfile {filePath}", _fileInfo.FullName);
         }
         catch (Exception e)

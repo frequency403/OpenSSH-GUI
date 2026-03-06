@@ -7,6 +7,7 @@
 #endregion
 
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
@@ -17,7 +18,7 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditKnownHostsWindowViewModel : ViewModelBase<EditKnownHostsWindowViewModel>
+public class EditKnownHostsWindowViewModel(ILogger<EditKnownHostsWindowViewModel> logger) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
     public IServerConnection ServerConnection { get; private set; }
 
@@ -36,9 +37,11 @@ public class EditKnownHostsWindowViewModel : ViewModelBase<EditKnownHostsWindowV
         private set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
-    public void SetServerConnection(ref IServerConnection connection)
+    public override ValueTask InitializeAsync(IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
     {
-        ServerConnection = connection;
+        if(parameters is not EditKnownHostWindowViewModelInitializerParameters initializerParameters)
+            throw new ArgumentException("invalid parameters", nameof(parameters));
+        ServerConnection = initializerParameters.ServerConnection;
         KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
         KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
@@ -52,5 +55,11 @@ public class EditKnownHostsWindowViewModel : ViewModelBase<EditKnownHostsWindowV
             if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
             return this;
         });
+        return base.InitializeAsync(parameters, cancellationToken);
     }
+}
+
+public record EditKnownHostWindowViewModelInitializerParameters : IInitializerParameters<EditKnownHostsWindowViewModel>
+{
+    public IServerConnection ServerConnection { get; set; }
 }

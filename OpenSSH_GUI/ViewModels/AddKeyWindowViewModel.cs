@@ -8,12 +8,16 @@
 
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reactive;
 using Microsoft.Extensions.Logging;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Static;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
@@ -23,38 +27,62 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
+public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger, KeyLocatorService keyLocatorService) : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
     private bool _createKey;
-
     private ISshKeyType _selectedKeyType;
-
     private ObservableCollection<ISshKeyType> _sshKeyTypes;
 
-    public AddKeyWindowViewModel()
+    private async Task<AddKeyWindowViewModel?> OnSubmit(bool createKey)
+    {
+        _createKey = createKey;
+        if (!_createKey)
+        {
+            RequestClose();
+            return null;
+        }
+        var fullNewFilePath = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), KeyName);
+        if (!File.Exists(fullNewFilePath)) return null;
+        try
+        {
+            await keyLocatorService.GenerateNewKeyInFile(fullNewFilePath, new SshKeyGenerateParams(
+                SelectedKeyType.BaseType,
+                KeyFormat,
+                string.IsNullOrWhiteSpace(KeyName) ? null : KeyName,
+                null,
+                string.IsNullOrWhiteSpace(Password) ? null : Password,
+                string.IsNullOrWhiteSpace(Comment) ? null : Comment,
+                SelectedKeyType.CurrentBitSize
+            ));
+            RequestClose();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error creating key");
+            var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, e.Message,
+                ButtonEnum.Ok, Icon.Error);
+            await msgBox.ShowAsync();
+        }
+        return null;
+    }
+    
+    public override void Initialize(IInitializerParameters<AddKeyWindowViewModel>? parameters = null)
     {
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,
-            name => !FileOperations.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
+            name => name is not null && !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
-        BooleanSubmit = ReactiveCommand.Create<bool, AddKeyWindowViewModel?>(b =>
-        {
-            _createKey = b;
-            if (!_createKey) return null;
-            return !FileOperations.Exists(SshConfigFilesExtension.GetBaseSshPath() + Path.DirectorySeparatorChar +
-                                          KeyName)
-                ? this
-                : null;
-        });
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, AddKeyWindowViewModel?>(OnSubmit);
         _sshKeyTypes = new ObservableCollection<ISshKeyType>(KeyTypeExtension.GetAvailableKeyTypes());
         _selectedKeyType = _sshKeyTypes.First();
+        base.Initialize(parameters);
     }
 
     public ValidationHelper KeyNameValidationHelper
     {
         get;
-        private init => this.RaiseAndSetIfChanged(ref field, value);
+        private set => this.RaiseAndSetIfChanged(ref field, value);
     } = new(new ValidationContext());
 
     public ISshKeyType SelectedKeyType
@@ -99,25 +127,4 @@ public sealed class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>
     public string Password { get; set; } = "";
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
-
-    public async ValueTask<ISshKey?> RunKeyGen()
-    {
-        try
-        {
-            return await KeyFactory.GenerateNewAsync(new SshKeyGenerateParams(
-                SelectedKeyType.BaseType,
-                KeyFormat,
-                string.IsNullOrWhiteSpace(KeyName) ? null : KeyName,
-                null,
-                string.IsNullOrWhiteSpace(Password) ? null : Password,
-                string.IsNullOrWhiteSpace(Comment) ? null : Comment,
-                SelectedKeyType.CurrentBitSize
-            ));
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, "Error creating key");
-            return null;
-        }
-    }
 }

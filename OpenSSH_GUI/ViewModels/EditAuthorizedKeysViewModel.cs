@@ -7,6 +7,7 @@
 #endregion
 
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
@@ -14,17 +15,39 @@ using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
+public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> logger, KeyLocatorService keyLocatorService) : ViewModelBase<EditAuthorizedKeysViewModel>(logger)
 {
-    private ObservableCollection<ISshKey?> _publicKeys;
-
     private ISshKey? _selectedKey;
-
     private IServerConnection _serverConnection;
+
+    public override ValueTask InitializeAsync(IInitializerParameters<EditAuthorizedKeysViewModel>? parameters = null, CancellationToken cancellationToken = default)
+    {
+        if (parameters is not EditAuthorizedKeysViewModelInitializeParameters initParams)
+            throw new ArgumentException("parameters is not valid", nameof(parameters));
+        _serverConnection = initParams.ServerConnection;
+        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
+        _selectedKey = PublicKeys.FirstOrDefault();
+        UpdateAddButton();
+        BooleanSubmit = ReactiveCommand.Create<bool, EditAuthorizedKeysViewModel?>(e =>
+        {
+            if (!e) return this;
+            AuthorizedKeysFileLocal.PersistChangesInFile();
+            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
+            return this;
+        });
+        AddKey = ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async e =>
+        {
+            await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
+            UpdateAddButton();
+            return e;
+        });
+        return base.InitializeAsync(parameters, cancellationToken);
+    }
 
     public bool AddButtonEnabled
     {
@@ -42,11 +65,7 @@ public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewM
         }
     }
 
-    public ObservableCollection<ISshKey> PublicKeys
-    {
-        get => _publicKeys;
-        set => this.RaiseAndSetIfChanged(ref _publicKeys, value);
-    }
+    public ObservableCollection<ISshKey> PublicKeys { get; set; } // TODO = keyLocatorService.SshKeys;
 
     public bool KeyAddPossible => PublicKeys.Count > 0;
 
@@ -68,27 +87,9 @@ public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewM
         AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key =>
             string.Equals(key.Fingerprint, SelectedKey.ExportAuthorizedKey().Fingerprint));
     }
+}
 
-    public void SetConnectionAndKeys(ref IServerConnection serverConnection,
-        ref ObservableCollection<ISshKey?> keys)
-    {
-        _serverConnection = serverConnection;
-        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
-        _publicKeys = keys;
-        _selectedKey = PublicKeys.FirstOrDefault();
-        UpdateAddButton();
-        BooleanSubmit = ReactiveCommand.Create<bool, EditAuthorizedKeysViewModel?>(e =>
-        {
-            if (!e) return this;
-            AuthorizedKeysFileLocal.PersistChangesInFile();
-            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
-            return this;
-        });
-        AddKey = ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async e =>
-        {
-            await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
-            UpdateAddButton();
-            return e;
-        });
-    }
+public record EditAuthorizedKeysViewModelInitializeParameters() : IInitializerParameters<EditAuthorizedKeysViewModel>
+{
+    public IServerConnection ServerConnection { get; set; }
 }

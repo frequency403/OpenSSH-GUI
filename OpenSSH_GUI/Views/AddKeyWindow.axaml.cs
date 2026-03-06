@@ -6,6 +6,8 @@
 
 #endregion
 
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
@@ -15,7 +17,7 @@ namespace OpenSSH_GUI.Views;
 
 public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
 {
-    public AddKeyWindow()
+    public AddKeyWindow(ILogger<AddKeyWindow> logger) : base(logger)
     {
         InitializeComponent();
         this.WhenActivated(d =>

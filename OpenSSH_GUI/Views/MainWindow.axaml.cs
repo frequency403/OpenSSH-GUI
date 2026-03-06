@@ -8,63 +8,42 @@
 
 using Avalonia.Controls;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core;
+using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
-using ReactiveUI;
 using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost
 {
     private readonly ILogger<MainWindow> _logger;
-    private readonly IServiceProvider _serviceProvider;
-    private const WindowStartupLocation DefaultWindowStartupLocation = WindowStartupLocation.CenterScreen;
-
-    public MainWindow(ILogger<MainWindow> logger, IServiceProvider serviceProvider)
+    public MainWindow(ILogger<MainWindow> logger) : base(logger)
     {
         _logger = logger;
-        _serviceProvider = serviceProvider;
-        Icon = App.WindowIcon;
         InitializeComponent();
-        this.WhenActivated(action => action(ViewModel!.ShowCreate.RegisterHandler(DoShowAddKeyAsync)));
-        this.WhenActivated(action => action(ViewModel!.ShowEditKnownHosts.RegisterHandler(DoShowEditKnownHostsAsync)));
-        this.WhenActivated(action => action(ViewModel!.ShowExportWindow.RegisterHandler(DoShowExportWindowAsync)));
-        this.WhenActivated(action =>
-            action(ViewModel!.ShowEditAuthorizedKeys.RegisterHandler(DoShowEditAuthorizedKeysWindowAsync)));
-        this.WhenActivated(action =>
-            action(ViewModel!.ShowConnectToServerWindow.RegisterHandler(DoShowConnectToServerWindowAsync)));
-        this.WhenActivated(action =>
-            action(ViewModel!.ShowAppSettings.RegisterHandler(DoShowApplicationSettingsWindowAsync)));
     }
 
-    private async Task DoShowApplicationSettingsWindowAsync(
-        IInteractionContext<ApplicationSettingsViewModel, ApplicationSettingsViewModel?> interaction) =>
-        interaction.SetOutput(await _serviceProvider.ResolveView<ApplicationSettingsWindow>()
-            .ShowDialog<ApplicationSettingsViewModel>(this));
+    public Task ShowDialog<TWindow>(TWindow dialogWindow) where TWindow : Window
+    {
+        _logger.LogDebug("Showing dialog {nameOfWindow}", typeof(TWindow).Name);
+        return dialogWindow.ShowDialog(this);
+    }
 
-    private async Task DoShowConnectToServerWindowAsync(
-        IInteractionContext<ConnectToServerViewModel, ConnectToServerViewModel?> interaction) =>
-        interaction.SetOutput(await _serviceProvider.ResolveView<ConnectToServerWindow>()
-            .ShowDialog<ConnectToServerViewModel>(this));
-
-    private async Task DoShowEditAuthorizedKeysWindowAsync(
-        IInteractionContext<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> interaction) =>
-        interaction.SetOutput(await _serviceProvider.ResolveView<EditAuthorizedKeysWindow>()
-            .ShowDialog<EditAuthorizedKeysViewModel>(this));
-
-    private async Task DoShowExportWindowAsync(
-        IInteractionContext<ExportWindowViewModel, ExportWindowViewModel?> interaction) =>
-        interaction.SetOutput(
-            await _serviceProvider.ResolveView<ExportWindow>().ShowDialog<ExportWindowViewModel>(this));
-
-    private async Task
-        DoShowAddKeyAsync(IInteractionContext<AddKeyWindowViewModel, AddKeyWindowViewModel?> interaction) =>
-        interaction.SetOutput(
-            await _serviceProvider.ResolveView<AddKeyWindow>().ShowDialog<AddKeyWindowViewModel>(this));
-
-    private async Task DoShowEditKnownHostsAsync(
-        IInteractionContext<EditKnownHostsWindowViewModel, EditKnownHostsWindowViewModel?> interaction) =>
-        interaction.SetOutput(await _serviceProvider.ResolveView<EditKnownHostsWindow>()
-            .ShowDialog<EditKnownHostsWindowViewModel>(this));
+    public 
+#if DEBUG
+    async
+#endif
+        Task<TResult?> ShowDialog<TWindow, TResult>(TWindow dialogWindow) where TWindow : Window where TResult : ViewModelBase
+    {
+        _logger.LogDebug("Showing dialog {nameOfWindow} with expected result {nameOfResult}", typeof(TWindow).Name, typeof(TResult).Name);
+        #if !DEBUG
+        return dialogWindow.ShowDialog<TResult?>(this);
+#else
+        var result = await dialogWindow.ShowDialog<TResult?>(this);
+        _logger.LogDebug("Result: {nameOfResult}", result?.GetType().Name);
+        return result;
+#endif
+    }
 }

@@ -1,6 +1,9 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Resources.Wrapper;
+using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
@@ -17,12 +20,13 @@ public static class ServiceCollectionExtensions
         return  option1 || option2;
     }
     
-    public static IServiceCollection RegisterViewWithViewModel<TView, TViewModel>(this IServiceCollection services, bool registerAsSingleton = true)
+    public static IServiceCollection RegisterViewWithViewModel<TView, TViewModel>(this IServiceCollection services, bool registerAsSingleton = false, Action<IServiceCollection>? configure = null)
         where TViewModel : ViewModelBase<TViewModel>
     where TView : Window
     {
         if(!ValidateNamingConvention<TView, TViewModel>())
             throw new InvalidOperationException($"Viewmodels must follow the following convention: $NameOfView + $ViewModel -> in that case your Viewmodel must be renamed to \"{typeof(TView).Name+"ViewModel"}\"");
+        configure?.Invoke(services);
         if (registerAsSingleton)
         {
             services.AddKeyedSingleton<TView>(typeof(TView).Name);
@@ -36,19 +40,54 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static TView ResolveView<TView>(this IServiceProvider provider, WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen) where TView : Window
+    public static async ValueTask<TView> ResolveViewAsync<TView, TViewModel>(this IServiceProvider provider,
+        IInitializerParameters<TViewModel>? initializerParameters = null,
+        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
+        CancellationToken token = default)
+        where TView : WindowBase<TViewModel>
+        where TViewModel : ViewModelBase<TViewModel>
     {
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
-
+        resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
+        
         var viewModelType = typeof(TView).Assembly.GetTypes()
             .FirstOrDefault(t => t.Name == viewName + "ViewModel");
-
         if (viewModelType == null)
             throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
-
-        resolvedView.DataContext = provider.GetRequiredKeyedService(viewModelType, viewModelType.Name);
+        
+        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelType.Name);
+        await viewModel.InitializeAsync(initializerParameters, token);
+        if(!viewModel.IsInitialized)
+            throw new InvalidOperationException("ViewModel not properly initialized");
+        resolvedView.DataContext = viewModel;
         resolvedView.WindowStartupLocation = windowStartupLocation;
+        resolvedView.AttachCloseRequest();
+        return resolvedView;
+    }
+    
+    public static TView ResolveView<TView, TViewModel>(this IServiceProvider provider,
+        IInitializerParameters<TViewModel>? initializerParameters = null,
+        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen)
+        where TView : WindowBase<TViewModel>
+        where TViewModel : ViewModelBase<TViewModel>
+    {
+        var viewName = typeof(TView).Name;
+        var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
+        resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
+        
+        var viewModelType = typeof(TView).Assembly.GetTypes()
+            .FirstOrDefault(t => t.Name == viewName + "ViewModel");
+        if (viewModelType == null)
+            throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
+        
+        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelType.Name);
+        viewModel.Initialize(initializerParameters);
+        if(!viewModel.IsInitialized)
+            throw new InvalidOperationException("ViewModel not properly initialized");
+        resolvedView.DataContext = viewModel;
+        resolvedView.WindowStartupLocation = windowStartupLocation;
+        resolvedView.AttachCloseRequest();
         return resolvedView;
     }
 }

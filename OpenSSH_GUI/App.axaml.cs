@@ -15,6 +15,7 @@ using Avalonia.Platform;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Misc;
@@ -31,9 +32,7 @@ namespace OpenSSH_GUI;
 
 public class App : Application
 {
-    public static ServiceProvider ServiceProvider { get; private set; }
-    public static WindowIcon WindowIcon { get; } = new(new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
-    
+    private static ServiceProvider ServiceProvider { get; set; }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -66,11 +65,16 @@ public class App : Application
         // AddServices
 
         collection.AddLogging(e => e.AddSerilog());
+        collection.AddKeyedSingleton<Bitmap>("AppIcon",
+            (_, _) => new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
         collection.AddTransient<SshKeyFile>();
         collection.AddTransient<DirectoryCrawler>();
         collection.AddTransient<KeyLocatorService>();
         collection.AddDbContext<OpenSshGuiDbContext>();
-        collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>();
+        collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(registerAsSingleton: true, configure: serviceCollection =>
+        {
+            serviceCollection.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(serviceKey: nameof(MainWindow)));
+        } );
         collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
         collection.RegisterViewWithViewModel<EditSavedServerEntry, EditSavedServerEntryViewModel>();
         collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
@@ -92,7 +96,7 @@ public class App : Application
 
         InitAndOrPrepareServices();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = ServiceProvider.ResolveView<MainWindow>();
+            desktop.MainWindow = ServiceProvider.ResolveView<MainWindow, MainWindowViewModel>();
         base.OnFrameworkInitializationCompleted();
     }
 

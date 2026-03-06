@@ -6,6 +6,9 @@
 
 #endregion
 
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
@@ -14,19 +17,17 @@ namespace OpenSSH_GUI.Views;
 
 public partial class ApplicationSettingsWindow : WindowBase<ApplicationSettingsViewModel>
 {
-    public ApplicationSettingsWindow()
+    public ApplicationSettingsWindow(ILogger<ApplicationSettingsWindow> logger, IServiceProvider serviceProvider) : base(logger)
     {
         InitializeComponent();
         this.WhenActivated(d =>
         {
             d(ViewModel!.ShowEditEntry.RegisterHandler(async interaction =>
             {
-                var dialog = new EditSavedServerEntry
+                var result = (await(await serviceProvider.ResolveViewAsync<EditSavedServerEntry, EditSavedServerEntryViewModel>(new EditSavedServerEntryViewModelInitializeParameters()
                 {
-                    DataContext = interaction.Input,
-                    Title = interaction.Input.CredentialsToEdit.Display
-                };
-                var result = await dialog.ShowDialog<EditSavedServerEntryViewModel>(this);
+                    Title =  interaction.Input.CredentialsToEdit.Display,
+                })).ShowDialog<EditSavedServerEntryViewModel>(this));
                 interaction.SetOutput(result);
             }));
         });

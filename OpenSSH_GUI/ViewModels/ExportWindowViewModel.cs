@@ -8,15 +8,24 @@
 
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
+public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger) : ViewModelBase<ExportWindowViewModel>(logger)
 {
-    public ExportWindowViewModel()
+    public string WindowTitle { get; private set; } = "";
+    public string Export { get; private set; } = "";
+
+    public override void Initialize(IInitializerParameters<ExportWindowViewModel>? parameters = null)
     {
+        if (parameters is ExportWindowViewModelInitializerParameters initializerParameters)
+        {
+            WindowTitle = initializerParameters.WindowTitle;
+            Export = initializerParameters.Export;
+        }
         BooleanSubmit = ReactiveCommand.Create<bool, ExportWindowViewModel?>(boolean =>
         {
             if (!boolean) return null;
@@ -28,8 +37,12 @@ public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
             clipboard.SetTextAsync(Export).ConfigureAwait(false);
             return this;
         });
+        base.Initialize(parameters);
     }
+}
 
-    public string WindowTitle { get; set; } = "";
-    public string Export { get; set; } = "";
+public record ExportWindowViewModelInitializerParameters : IInitializerParameters<ExportWindowViewModel>
+{
+    public string WindowTitle { get; init; } = string.Empty;
+    public string Export { get; init; } = string.Empty;
 }

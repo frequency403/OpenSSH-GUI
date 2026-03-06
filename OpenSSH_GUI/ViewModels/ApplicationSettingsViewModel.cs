@@ -11,17 +11,20 @@ using System.Reactive.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
+using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Database.Context;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
+using OpenSSH_GUI.Views;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, KeyLocatorService locatorService, OpenSshGuiDbContext dbContext) : ViewModelBase<ApplicationSettingsViewModel>(logger)
+public sealed class ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, KeyLocatorService locatorService, IServiceProvider serviceProvider, IDialogHost dialogHost, OpenSshGuiDbContext dbContext) : ViewModelBase<ApplicationSettingsViewModel>(logger)
 {
     private bool _convertPpkAutomatically;
 
@@ -32,7 +35,7 @@ public sealed class ApplicationSettingsViewModel(ILogger<ApplicationSettingsView
     public ObservableCollection<ISshKey> Keys = []; // = locatorSerivce.SshKeys
     public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
 
-    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    public override async ValueTask InitializeAsync(IInitializerParameters<ApplicationSettingsViewModel>? initializerParameters = null, CancellationToken cancellationToken = default)
     {
         _settings = dbContext.Settings.First();
         _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
@@ -49,6 +52,7 @@ public sealed class ApplicationSettingsViewModel(ILogger<ApplicationSettingsView
             await context.SaveChangesAsync(cancellationToken);
             return this;
         });
+        await base.InitializeAsync(initializerParameters, cancellationToken);
     }
 
 
@@ -87,9 +91,13 @@ public sealed class ApplicationSettingsViewModel(ILogger<ApplicationSettingsView
                     return null;
                 }
 
-                var service = new EditSavedServerEntryViewModel();
-                service.SetValues(ref Keys, e);
-                var result = await ShowEditEntry.Handle(service);
+                var s = await serviceProvider.ResolveViewAsync<EditSavedServerEntry, EditSavedServerEntryViewModel>(
+                    new EditSavedServerEntryViewModelInitializeParameters()
+                    {
+                        Keys = Keys,
+                        CredentialsToEdit = e
+                    });
+                var result = await dialogHost.ShowDialog<EditSavedServerEntry, EditSavedServerEntryViewModel>(s);
                 if (result is null) return e;
                 var list = KnownServers.ToList();
                 var index = list.IndexOf(e);
