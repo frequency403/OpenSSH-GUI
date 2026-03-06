@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:45
-
-#endregion
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -18,7 +10,8 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditKnownHostsWindowViewModel(ILogger<EditKnownHostsWindowViewModel> logger) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
+public class EditKnownHostsWindowViewModel(ILogger<EditKnownHostsWindowViewModel> logger)
+    : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
     public IServerConnection ServerConnection { get; private set; }
 
@@ -37,9 +30,10 @@ public class EditKnownHostsWindowViewModel(ILogger<EditKnownHostsWindowViewModel
         private set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
-    public override ValueTask InitializeAsync(IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
+    public override ValueTask InitializeAsync(IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null,
+        CancellationToken cancellationToken = default)
     {
-        if(parameters is not EditKnownHostWindowViewModelInitializerParameters initializerParameters)
+        if (parameters is not EditKnownHostWindowViewModelInitializerParameters initializerParameters)
             throw new ArgumentException("invalid parameters", nameof(parameters));
         ServerConnection = initializerParameters.ServerConnection;
         KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());

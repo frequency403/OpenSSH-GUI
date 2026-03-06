@@ -5,103 +5,134 @@ using System.Diagnostics;
 namespace OpenSSH_GUI.SshConfig;
 
 /// <summary>
-/// Parses SSH client configuration files (<c>~/.ssh/config</c>) into a structured
-/// <see cref="SshConfigDocument"/>, fully resolving all <c>Include</c> directives.
+///     Parses SSH client configuration files (<c>~/.ssh/config</c>) into a structured
+///     <see cref="SshConfigDocument" />, fully resolving all <c>Include</c> directives.
 /// </summary>
 /// <remarks>
-/// <para>
-/// The parser accepts the full <c>ssh_config(5)</c> syntax including:
-/// <list type="bullet">
-///   <item><description><c>Host</c> blocks with wildcard and negation patterns</description></item>
-///   <item><description><c>Match</c> blocks with all standard criteria</description></item>
-///   <item><description><c>Include</c> directives with glob expansion and tilde resolution, at any nesting level</description></item>
-///   <item><description>Both <c>Key Value</c> and <c>Key=Value</c> separator styles</description></item>
-///   <item><description>Double-quoted values containing spaces</description></item>
-///   <item><description>Inline comments (<c># …</c>) on directive lines</description></item>
-///   <item><description>Standalone comment lines and blank lines (preserved for round-trip)</description></item>
-/// </list>
-/// </para>
-/// <para>
-/// <c>Include</c> directives are resolved during parsing; the resulting
-/// <see cref="SshConfigDocument"/> is flat and contains no <c>Include</c> entries.
-/// </para>
+///     <para>
+///         The parser accepts the full <c>ssh_config(5)</c> syntax including:
+///         <list type="bullet">
+///             <item>
+///                 <description><c>Host</c> blocks with wildcard and negation patterns</description>
+///             </item>
+///             <item>
+///                 <description><c>Match</c> blocks with all standard criteria</description>
+///             </item>
+///             <item>
+///                 <description><c>Include</c> directives with glob expansion and tilde resolution, at any nesting level</description>
+///             </item>
+///             <item>
+///                 <description>Both <c>Key Value</c> and <c>Key=Value</c> separator styles</description>
+///             </item>
+///             <item>
+///                 <description>Double-quoted values containing spaces</description>
+///             </item>
+///             <item>
+///                 <description>Inline comments (<c># …</c>) on directive lines</description>
+///             </item>
+///             <item>
+///                 <description>Standalone comment lines and blank lines (preserved for round-trip)</description>
+///             </item>
+///         </list>
+///     </para>
+///     <para>
+///         <c>Include</c> directives are resolved during parsing; the resulting
+///         <see cref="SshConfigDocument" /> is flat and contains no <c>Include</c> entries.
+///     </para>
 /// </remarks>
 public static class SshConfigParser
 {
+    // ─────────────────────────────────────────────────────────────────────────
+    // Match criteria parser
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private static readonly FrozenSet<string> MatchKeywords =
+        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+            "all", "canonical", "final",
+            "exec", "host", "originalhost",
+            "user", "localuser", "tagged", "localnetwork");
+
+    private static readonly FrozenSet<string> NoArgMatchKeywords =
+        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+            "all", "canonical", "final");
     // ─────────────────────────────────────────────────────────────────────────
     // Public API
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Parses the SSH configuration file at <paramref name="path"/>.
+    ///     Parses the SSH configuration file at <paramref name="path" />.
     /// </summary>
     /// <param name="path">Absolute or relative path to the configuration file.</param>
-    /// <param name="options">Parser options, or <see langword="null"/> to use <see cref="SshConfigParserOptions.Default"/>.</param>
-    /// <returns>The fully parsed and include-resolved <see cref="SshConfigDocument"/>.</returns>
+    /// <param name="options">Parser options, or <see langword="null" /> to use <see cref="SshConfigParserOptions.Default" />.</param>
+    /// <returns>The fully parsed and include-resolved <see cref="SshConfigDocument" />.</returns>
     /// <exception cref="SshConfigParseException">The file contains a syntax error.</exception>
     /// <exception cref="IOException">The file could not be read.</exception>
     public static SshConfigDocument Load(string path, SshConfigParserOptions? options = null)
     {
         var fullPath = Path.GetFullPath(path);
-        var content  = File.ReadAllText(fullPath);
-        return ParseDocument(content, fullPath, options ?? SshConfigParserOptions.Default, depth: 0);
+        var content = File.ReadAllText(fullPath);
+        return ParseDocument(content, fullPath, options ?? SshConfigParserOptions.Default, 0);
     }
 
     /// <summary>
-    /// Asynchronously parses the SSH configuration file at <paramref name="path"/>.
+    ///     Asynchronously parses the SSH configuration file at <paramref name="path" />.
     /// </summary>
     /// <param name="path">Absolute or relative path to the configuration file.</param>
-    /// <param name="options">Parser options, or <see langword="null"/> to use <see cref="SshConfigParserOptions.Default"/>.</param>
+    /// <param name="options">Parser options, or <see langword="null" /> to use <see cref="SshConfigParserOptions.Default" />.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     public static async Task<SshConfigDocument> LoadAsync(
-        string                   path,
-        SshConfigParserOptions?  options           = null,
-        CancellationToken        cancellationToken = default)
+        string path,
+        SshConfigParserOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         var fullPath = Path.GetFullPath(path);
-        var content  = await File.ReadAllTextAsync(fullPath, cancellationToken).ConfigureAwait(false);
-        return ParseDocument(content, fullPath, options ?? SshConfigParserOptions.Default, depth: 0);
+        var content = await File.ReadAllTextAsync(fullPath, cancellationToken).ConfigureAwait(false);
+        return ParseDocument(content, fullPath, options ?? SshConfigParserOptions.Default, 0);
     }
 
     /// <summary>
-    /// Parses SSH configuration content from a string.
-    /// <c>Include</c> directives are resolved relative to
-    /// <see cref="SshConfigParserOptions.IncludeBasePath"/> when set, or the current directory.
+    ///     Parses SSH configuration content from a string.
+    ///     <c>Include</c> directives are resolved relative to
+    ///     <see cref="SshConfigParserOptions.IncludeBasePath" /> when set, or the current directory.
     /// </summary>
     /// <param name="content">Raw configuration text.</param>
-    /// <param name="options">Parser options, or <see langword="null"/> to use <see cref="SshConfigParserOptions.Default"/>.</param>
-    public static SshConfigDocument Parse(string content, SshConfigParserOptions? options = null) =>
-        ParseDocument(content, filePath: null, options ?? SshConfigParserOptions.Default, depth: 0);
+    /// <param name="options">Parser options, or <see langword="null" /> to use <see cref="SshConfigParserOptions.Default" />.</param>
+    public static SshConfigDocument Parse(string content, SshConfigParserOptions? options = null)
+    {
+        return ParseDocument(content, null, options ?? SshConfigParserOptions.Default, 0);
+    }
 
     /// <summary>
-    /// Parses SSH configuration content from a <see cref="ReadOnlySpan{T}"/> of characters.
+    ///     Parses SSH configuration content from a <see cref="ReadOnlySpan{T}" /> of characters.
     /// </summary>
     /// <param name="content">Raw configuration characters.</param>
-    /// <param name="options">Parser options, or <see langword="null"/> to use <see cref="SshConfigParserOptions.Default"/>.</param>
-    public static SshConfigDocument Parse(ReadOnlySpan<char> content, SshConfigParserOptions? options = null) =>
-        ParseDocument(content.ToString(), filePath: null, options ?? SshConfigParserOptions.Default, depth: 0);
+    /// <param name="options">Parser options, or <see langword="null" /> to use <see cref="SshConfigParserOptions.Default" />.</param>
+    public static SshConfigDocument Parse(ReadOnlySpan<char> content, SshConfigParserOptions? options = null)
+    {
+        return ParseDocument(content.ToString(), null, options ?? SshConfigParserOptions.Default, 0);
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Core parse loop
     // ─────────────────────────────────────────────────────────────────────────
 
     private static SshConfigDocument ParseDocument(
-        string                  content,
-        string?                 filePath,
-        SshConfigParserOptions  options,
-        int                     depth)
+        string content,
+        string? filePath,
+        SshConfigParserOptions options,
+        int depth)
     {
-        var globalItems  = ImmutableArray.CreateBuilder<SshLineItem>();
-        var blocks       = ImmutableArray.CreateBuilder<SshBlock>();
-        BlockBuilder?    currentBlock  = null;
-        Queue<SshBlock>  pendingBlocks = new();  // blocks deferred from Include-inside-block
-        var              lineNumber    = 0;
+        var globalItems = ImmutableArray.CreateBuilder<SshLineItem>();
+        var blocks = ImmutableArray.CreateBuilder<SshBlock>();
+        BlockBuilder? currentBlock = null;
+        Queue<SshBlock> pendingBlocks = new(); // blocks deferred from Include-inside-block
+        var lineNumber = 0;
 
         foreach (var rawLine in content.AsSpan().EnumerateLines())
         {
             lineNumber++;
             var rawLineStr = rawLine.ToString();
-            var trimmed    = rawLine.TrimStart();
+            var trimmed = rawLine.TrimStart();
 
             if (trimmed.IsEmpty)
             {
@@ -126,11 +157,11 @@ public static class SshConfigParser
                     FinalizeBlock(ref currentBlock, blocks, pendingBlocks);
                     currentBlock = new BlockBuilder
                     {
-                        IsHost        = true,
-                        HostPatterns  = values,
-                        LineNumber    = lineNumber,
+                        IsHost = true,
+                        HostPatterns = values,
+                        LineNumber = lineNumber,
                         RawHeaderText = rawLineStr,
-                        HeaderComment = inlineComment,
+                        HeaderComment = inlineComment
                     };
                     break;
 
@@ -138,11 +169,11 @@ public static class SshConfigParser
                     FinalizeBlock(ref currentBlock, blocks, pendingBlocks);
                     currentBlock = new BlockBuilder
                     {
-                        IsHost        = false,
+                        IsHost = false,
                         MatchCriteria = ParseMatchCriteria(values, lineNumber, filePath),
-                        LineNumber    = lineNumber,
+                        LineNumber = lineNumber,
                         RawHeaderText = rawLineStr,
-                        HeaderComment = inlineComment,
+                        HeaderComment = inlineComment
                     };
                     break;
 
@@ -161,6 +192,7 @@ public static class SshConfigParser
                         foreach (var deferred in included.Blocks)
                             pendingBlocks.Enqueue(deferred);
                     }
+
                     break;
 
                 default:
@@ -184,34 +216,32 @@ public static class SshConfigParser
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Tokenizes a single trimmed, non-empty, non-comment configuration line into
-    /// its key, value tokens, and optional inline comment.
+    ///     Tokenizes a single trimmed, non-empty, non-comment configuration line into
+    ///     its key, value tokens, and optional inline comment.
     /// </summary>
     private static (string Key, ImmutableArray<string> Values, string? InlineComment) TokenizeLine(
-        ReadOnlySpan<char>  trimmedLine,
-        int                 lineNumber,
-        string?             filePath)
+        ReadOnlySpan<char> trimmedLine,
+        int lineNumber,
+        string? filePath)
     {
         var keyEnd = 0;
         while (keyEnd < trimmedLine.Length
                && trimmedLine[keyEnd] != ' '
                && trimmedLine[keyEnd] != '\t'
                && trimmedLine[keyEnd] != '=')
-        {
             keyEnd++;
-        }
 
         if (keyEnd == 0)
             throw new SshConfigParseException(
                 "Expected a configuration keyword.", lineNumber, 1, filePath);
 
-        var key  = trimmedLine[..keyEnd].ToString();
+        var key = trimmedLine[..keyEnd].ToString();
         var rest = trimmedLine[keyEnd..].TrimStart();
 
         if (!rest.IsEmpty && rest[0] == '=')
             rest = rest[1..].TrimStart();
 
-        var values         = ImmutableArray.CreateBuilder<string>();
+        var values = ImmutableArray.CreateBuilder<string>();
         string? inlineComment = null;
 
         while (!rest.IsEmpty)
@@ -223,7 +253,7 @@ public static class SshConfigParser
             }
 
             string token;
-            int    advance;
+            int advance;
 
             if (rest[0] == '"')
             {
@@ -235,13 +265,13 @@ public static class SshConfigParser
                         trimmedLine.Length - rest.Length + 1,
                         filePath);
 
-                token   = rest[1..(closeQuote + 1)].ToString();
+                token = rest[1..(closeQuote + 1)].ToString();
                 advance = closeQuote + 2;
             }
             else
             {
                 var end = FindTokenEnd(rest);
-                token   = rest[..end].ToString();
+                token = rest[..end].ToString();
                 advance = end;
             }
 
@@ -253,48 +283,32 @@ public static class SshConfigParser
     }
 
     /// <summary>
-    /// Returns the length of the next unquoted token in <paramref name="span"/>,
-    /// stopping at the first whitespace character.
+    ///     Returns the length of the next unquoted token in <paramref name="span" />,
+    ///     stopping at the first whitespace character.
     /// </summary>
     private static int FindTokenEnd(ReadOnlySpan<char> span)
     {
         for (var i = 0; i < span.Length; i++)
-        {
             if (span[i] == ' ' || span[i] == '\t')
                 return i;
-        }
         return span.Length;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Match criteria parser
-    // ─────────────────────────────────────────────────────────────────────────
-
-    private static readonly FrozenSet<string> MatchKeywords =
-        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
-            "all", "canonical", "final",
-            "exec", "host", "originalhost",
-            "user", "localuser", "tagged", "localnetwork");
-
-    private static readonly FrozenSet<string> NoArgMatchKeywords =
-        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
-            "all", "canonical", "final");
-
     /// <summary>
-    /// Parses the token list from a <c>Match</c> header line into an ordered array of
-    /// <see cref="SshMatchCriterion"/> objects.
+    ///     Parses the token list from a <c>Match</c> header line into an ordered array of
+    ///     <see cref="SshMatchCriterion" /> objects.
     /// </summary>
     private static ImmutableArray<SshMatchCriterion> ParseMatchCriteria(
-        ImmutableArray<string>  tokens,
-        int                     lineNumber,
-        string?                 filePath)
+        ImmutableArray<string> tokens,
+        int lineNumber,
+        string? filePath)
     {
         if (tokens.IsEmpty)
             throw new SshConfigParseException(
                 "A 'Match' block requires at least one criterion.", lineNumber, 7, filePath);
 
         var criteria = ImmutableArray.CreateBuilder<SshMatchCriterion>(tokens.Length);
-        var i        = 0;
+        var i = 0;
 
         while (i < tokens.Length)
         {
@@ -308,10 +322,10 @@ public static class SshConfigParser
             {
                 criteria.Add(keyword.ToLowerInvariant() switch
                 {
-                    "all"       => SshMatchCriterion.All,
+                    "all" => SshMatchCriterion.All,
                     "canonical" => SshMatchCriterion.Canonical,
-                    "final"     => SshMatchCriterion.Final,
-                    _           => throw new UnreachableException(),
+                    "final" => SshMatchCriterion.Final,
+                    _ => throw new UnreachableException()
                 });
                 i++;
             }
@@ -323,16 +337,16 @@ public static class SshConfigParser
                         lineNumber, 1, filePath);
 
                 var pattern = tokens[i + 1];
-                var kind    = keyword.ToLowerInvariant() switch
+                var kind = keyword.ToLowerInvariant() switch
                 {
-                    "exec"         => SshMatchCriterionKind.Exec,
-                    "host"         => SshMatchCriterionKind.Host,
+                    "exec" => SshMatchCriterionKind.Exec,
+                    "host" => SshMatchCriterionKind.Host,
                     "originalhost" => SshMatchCriterionKind.OriginalHost,
-                    "user"         => SshMatchCriterionKind.User,
-                    "localuser"    => SshMatchCriterionKind.LocalUser,
-                    "tagged"       => SshMatchCriterionKind.Tagged,
+                    "user" => SshMatchCriterionKind.User,
+                    "localuser" => SshMatchCriterionKind.LocalUser,
+                    "tagged" => SshMatchCriterionKind.Tagged,
                     "localnetwork" => SshMatchCriterionKind.LocalNetwork,
-                    _              => throw new UnreachableException(),
+                    _ => throw new UnreachableException()
                 };
 
                 criteria.Add(new SshMatchCriterion(kind, pattern));
@@ -348,16 +362,16 @@ public static class SshConfigParser
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Resolves and recursively parses all files referenced by the value tokens of an
-    /// <c>Include</c> directive.  Patterns are glob-expanded in alphabetical order,
-    /// consistent with OpenSSH behaviour.
+    ///     Resolves and recursively parses all files referenced by the value tokens of an
+    ///     <c>Include</c> directive.  Patterns are glob-expanded in alphabetical order,
+    ///     consistent with OpenSSH behaviour.
     /// </summary>
     private static SshConfigDocument ResolveInclude(
-        ImmutableArray<string>  patterns,
-        string?                 currentFilePath,
-        SshConfigParserOptions  options,
-        int                     depth,
-        int                     lineNumber)
+        ImmutableArray<string> patterns,
+        string? currentFilePath,
+        SshConfigParserOptions options,
+        int depth,
+        int lineNumber)
     {
         if (depth >= options.MaxIncludeDepth)
             throw new SshConfigParseException(
@@ -365,11 +379,11 @@ public static class SshConfigParser
                 lineNumber, 1, currentFilePath);
 
         var basePath = options.IncludeBasePath
-            ?? (currentFilePath is not null ? Path.GetDirectoryName(currentFilePath) : null)
-            ?? Directory.GetCurrentDirectory();
+                       ?? (currentFilePath is not null ? Path.GetDirectoryName(currentFilePath) : null)
+                       ?? Directory.GetCurrentDirectory();
 
         var globalItems = ImmutableArray.CreateBuilder<SshLineItem>();
-        var blocks      = ImmutableArray.CreateBuilder<SshBlock>();
+        var blocks = ImmutableArray.CreateBuilder<SshBlock>();
 
         foreach (var rawPattern in patterns)
         {
@@ -379,7 +393,7 @@ public static class SshConfigParser
                 ? expanded
                 : Path.Combine(basePath, expanded);
 
-            var dir         = Path.GetDirectoryName(fullPattern) ?? basePath;
+            var dir = Path.GetDirectoryName(fullPattern) ?? basePath;
             var filePattern = Path.GetFileName(fullPattern);
 
             if (!Directory.Exists(dir))
@@ -388,7 +402,7 @@ public static class SshConfigParser
             foreach (var file in Directory.GetFiles(dir, filePattern).Order(StringComparer.Ordinal))
             {
                 var fileContent = File.ReadAllText(file);
-                var included    = ParseDocument(fileContent, file, options, depth + 1);
+                var included = ParseDocument(fileContent, file, options, depth + 1);
                 globalItems.AddRange(included.GlobalItems);
                 blocks.AddRange(included.Blocks);
             }
@@ -398,7 +412,7 @@ public static class SshConfigParser
     }
 
     /// <summary>
-    /// Replaces a leading <c>~</c> or <c>~/</c> with the current user's home directory.
+    ///     Replaces a leading <c>~</c> or <c>~/</c> with the current user's home directory.
     /// </summary>
     private static string ExpandTilde(string path)
     {
@@ -408,6 +422,7 @@ public static class SshConfigParser
             var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             return path.Length == 1 ? home : Path.Combine(home, path[2..]);
         }
+
         return path;
     }
 
@@ -416,13 +431,13 @@ public static class SshConfigParser
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Builds and appends the current <see cref="BlockBuilder"/> to <paramref name="blocks"/>,
-    /// then drains any blocks that were deferred from <c>Include</c> directives inside it.
+    ///     Builds and appends the current <see cref="BlockBuilder" /> to <paramref name="blocks" />,
+    ///     then drains any blocks that were deferred from <c>Include</c> directives inside it.
     /// </summary>
     private static void FinalizeBlock(
-        ref BlockBuilder?               currentBlock,
+        ref BlockBuilder? currentBlock,
         ImmutableArray<SshBlock>.Builder blocks,
-        Queue<SshBlock>                  pendingBlocks)
+        Queue<SshBlock> pendingBlocks)
     {
         if (currentBlock is null)
             return;
@@ -435,13 +450,13 @@ public static class SshConfigParser
     }
 
     /// <summary>
-    /// Appends <paramref name="item"/> to the current block's items when inside a block,
-    /// or to the global items list when at the top level.
+    ///     Appends <paramref name="item" /> to the current block's items when inside a block,
+    ///     or to the global items list when at the top level.
     /// </summary>
     private static void AddToContext(
-        SshLineItem                          item,
-        ImmutableArray<SshLineItem>.Builder  globalItems,
-        BlockBuilder?                        currentBlock)
+        SshLineItem item,
+        ImmutableArray<SshLineItem>.Builder globalItems,
+        BlockBuilder? currentBlock)
     {
         if (currentBlock is not null)
             currentBlock.Items.Add(item);
@@ -455,16 +470,19 @@ public static class SshConfigParser
 
     private sealed class BlockBuilder
     {
-        public required bool                                    IsHost        { get; init; }
-        public          ImmutableArray<string>                  HostPatterns  { get; init; } = [];
-        public          ImmutableArray<SshMatchCriterion>       MatchCriteria { get; init; } = [];
-        public required int                                     LineNumber    { get; init; }
-        public required string                                  RawHeaderText { get; init; }
-        public          string?                                 HeaderComment { get; init; }
-        public          ImmutableArray<SshLineItem>.Builder     Items         { get; }       = ImmutableArray.CreateBuilder<SshLineItem>();
+        public required bool IsHost { get; init; }
+        public ImmutableArray<string> HostPatterns { get; init; } = [];
+        public ImmutableArray<SshMatchCriterion> MatchCriteria { get; init; } = [];
+        public required int LineNumber { get; init; }
+        public required string RawHeaderText { get; init; }
+        public string? HeaderComment { get; init; }
+        public ImmutableArray<SshLineItem>.Builder Items { get; } = ImmutableArray.CreateBuilder<SshLineItem>();
 
-        public SshBlock Build() => IsHost
-            ? new SshHostBlock(HostPatterns, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment)
-            : new SshMatchBlock(MatchCriteria, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment);
+        public SshBlock Build()
+        {
+            return IsHost
+                ? new SshHostBlock(HostPatterns, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment)
+                : new SshMatchBlock(MatchCriteria, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment);
+        }
     }
 }

@@ -3,21 +3,21 @@ using System.Text;
 namespace OpenSSH_GUI.SshConfig;
 
 /// <summary>
-/// Serializes a <see cref="SshConfigDocument"/> back to SSH configuration text,
-/// supporting both lossless round-trip and clean-reformat modes.
+///     Serializes a <see cref="SshConfigDocument" /> back to SSH configuration text,
+///     supporting both lossless round-trip and clean-reformat modes.
 /// </summary>
 /// <remarks>
-/// <para>
-/// In <b>round-trip mode</b> (<see cref="SshSerializerOptions.RoundTrip"/> = <see langword="true"/>),
-/// any item or block header with a non-empty <see cref="SshLineItem.RawText"/> /
-/// <see cref="SshBlock.RawHeaderText"/> is written verbatim.  Items where <c>RawText</c>
-/// is <see cref="string.Empty"/> are regenerated from structured data, enabling surgical
-/// in-place edits without disturbing surrounding formatting.
-/// </para>
-/// <para>
-/// In <b>clean mode</b> (the default), all output is regenerated using the formatting
-/// parameters in <see cref="SshSerializerOptions"/>.
-/// </para>
+///     <para>
+///         In <b>round-trip mode</b> (<see cref="SshSerializerOptions.RoundTrip" /> = <see langword="true" />),
+///         any item or block header with a non-empty <see cref="SshLineItem.RawText" /> /
+///         <see cref="SshBlock.RawHeaderText" /> is written verbatim.  Items where <c>RawText</c>
+///         is <see cref="string.Empty" /> are regenerated from structured data, enabling surgical
+///         in-place edits without disturbing surrounding formatting.
+///     </para>
+///     <para>
+///         In <b>clean mode</b> (the default), all output is regenerated using the formatting
+///         parameters in <see cref="SshSerializerOptions" />.
+///     </para>
 /// </remarks>
 public static class SshConfigSerializer
 {
@@ -26,12 +26,15 @@ public static class SshConfigSerializer
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Writes <paramref name="document"/> to the file at <paramref name="path"/>,
-    /// creating or overwriting it.
+    ///     Writes <paramref name="document" /> to the file at <paramref name="path" />,
+    ///     creating or overwriting it.
     /// </summary>
     /// <param name="document">The document to serialize.</param>
     /// <param name="path">Destination file path.</param>
-    /// <param name="options">Serializer options, or <see langword="null"/> to use <see cref="SshSerializerOptions.Default"/>.</param>
+    /// <param name="options">
+    ///     Serializer options, or <see langword="null" /> to use <see cref="SshSerializerOptions.Default" />
+    ///     .
+    /// </param>
     public static void Save(SshConfigDocument document, string path, SshSerializerOptions? options = null)
     {
         var content = Serialize(document, options);
@@ -39,45 +42,49 @@ public static class SshConfigSerializer
     }
 
     /// <summary>
-    /// Asynchronously writes <paramref name="document"/> to the file at <paramref name="path"/>.
+    ///     Asynchronously writes <paramref name="document" /> to the file at <paramref name="path" />.
     /// </summary>
     /// <param name="document">The document to serialize.</param>
     /// <param name="path">Destination file path.</param>
-    /// <param name="options">Serializer options, or <see langword="null"/> to use <see cref="SshSerializerOptions.Default"/>.</param>
+    /// <param name="options">
+    ///     Serializer options, or <see langword="null" /> to use <see cref="SshSerializerOptions.Default" />
+    ///     .
+    /// </param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     public static async Task SaveAsync(
-        SshConfigDocument       document,
-        string                  path,
-        SshSerializerOptions?   options           = null,
-        CancellationToken       cancellationToken = default)
+        SshConfigDocument document,
+        string path,
+        SshSerializerOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         var content = Serialize(document, options);
         await File.WriteAllTextAsync(path, content, Encoding.UTF8, cancellationToken)
-                  .ConfigureAwait(false);
+            .ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Serializes <paramref name="document"/> to a string.
+    ///     Serializes <paramref name="document" /> to a string.
     /// </summary>
     /// <param name="document">The document to serialize.</param>
-    /// <param name="options">Serializer options, or <see langword="null"/> to use <see cref="SshSerializerOptions.Default"/>.</param>
+    /// <param name="options">
+    ///     Serializer options, or <see langword="null" /> to use <see cref="SshSerializerOptions.Default" />
+    ///     .
+    /// </param>
     public static string Serialize(SshConfigDocument document, SshSerializerOptions? options = null)
     {
         var opts = options ?? SshSerializerOptions.Default;
-        var sb   = new StringBuilder();
+        var sb = new StringBuilder();
 
         foreach (var item in document.GlobalItems)
-            WriteItem(sb, item, indent: string.Empty, opts);
+            WriteItem(sb, item, string.Empty, opts);
 
         var isFirstBlock = true;
 
         foreach (var block in document.Blocks)
         {
             if (!opts.RoundTrip && opts.BlankLineBetweenBlocks)
-            {
                 if (!isFirstBlock || document.GlobalItems.Length > 0)
                     sb.Append(opts.NewLine);
-            }
 
             WriteBlock(sb, block, opts);
             isFirstBlock = false;
@@ -107,9 +114,9 @@ public static class SshConfigSerializer
     {
         var header = block switch
         {
-            SshHostBlock  host  => $"Host {string.Join(' ', host.Patterns)}",
+            SshHostBlock host => $"Host {string.Join(' ', host.Patterns)}",
             SshMatchBlock match => $"Match {string.Join(' ', match.Criteria.Select(static c => c.ToString()))}",
-            _                   => throw new ArgumentException($"Unsupported block type: {block.GetType().Name}"),
+            _ => throw new ArgumentException($"Unsupported block type: {block.GetType().Name}")
         };
 
         return block.HeaderComment is null ? header : $"{header} {block.HeaderComment}";
@@ -129,12 +136,15 @@ public static class SshConfigSerializer
 
             case SshCommentLine comment:
                 if (opts.RoundTrip && comment.RawText.Length > 0)
+                {
                     sb.Append(comment.RawText);
+                }
                 else
                 {
                     sb.Append(indent);
                     sb.Append(comment.Comment);
                 }
+
                 sb.Append(opts.NewLine);
                 break;
 
@@ -151,15 +161,17 @@ public static class SshConfigSerializer
     private static string BuildEntryLine(SshConfigEntry entry, string indent, SshSerializerOptions opts)
     {
         var valueStr = string.Join(' ', entry.Values.Select(QuoteIfNeeded));
-        var line     = $"{indent}{entry.Key}{opts.KeyValueSeparator}{valueStr}";
+        var line = $"{indent}{entry.Key}{opts.KeyValueSeparator}{valueStr}";
 
         return entry.InlineComment is null ? line : $"{line} {entry.InlineComment}";
     }
 
     /// <summary>
-    /// Wraps <paramref name="value"/> in double quotes when it contains whitespace,
-    /// preserving unquoted values that are already safe.
+    ///     Wraps <paramref name="value" /> in double quotes when it contains whitespace,
+    ///     preserving unquoted values that are already safe.
     /// </summary>
-    private static string QuoteIfNeeded(string value) =>
-        value.AsSpan().ContainsAny(' ', '\t') ? $"\"{value}\"" : value;
+    private static string QuoteIfNeeded(string value)
+    {
+        return value.AsSpan().ContainsAny(' ', '\t') ? $"\"{value}\"" : value;
+    }
 }

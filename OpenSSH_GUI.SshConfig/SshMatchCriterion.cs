@@ -4,8 +4,8 @@ namespace OpenSSH_GUI.SshConfig;
 public enum SshMatchCriterionKind
 {
     /// <summary>
-    /// Matches all connections unconditionally (<c>Match all</c>).
-    /// When present, must be the sole criterion or the final one on the line.
+    ///     Matches all connections unconditionally (<c>Match all</c>).
+    ///     When present, must be the sole criterion or the final one on the line.
     /// </summary>
     All,
 
@@ -16,8 +16,8 @@ public enum SshMatchCriterionKind
     Final,
 
     /// <summary>
-    /// Matches when the specified shell command exits with status 0 (<c>Match exec</c>).
-    /// Percent-tokens are expanded in the command before execution.
+    ///     Matches when the specified shell command exits with status 0 (<c>Match exec</c>).
+    ///     Percent-tokens are expanded in the command before execution.
     /// </summary>
     Exec,
 
@@ -37,18 +37,18 @@ public enum SshMatchCriterionKind
     Tagged,
 
     /// <summary>Matches when the local machine belongs to the specified network subnet (<c>Match localnetwork</c>).</summary>
-    LocalNetwork,
+    LocalNetwork
 }
 
 /// <summary>
-/// Represents a single criterion (and its optional pattern or argument) within a <c>Match</c> block header.
+///     Represents a single criterion (and its optional pattern or argument) within a <c>Match</c> block header.
 /// </summary>
 /// <param name="Kind">The type of condition to evaluate.</param>
 /// <param name="Pattern">
-/// The pattern, glob, or argument for the criterion, or <see langword="null"/> for
-/// <see cref="SshMatchCriterionKind.All"/>, <see cref="SshMatchCriterionKind.Canonical"/>,
-/// and <see cref="SshMatchCriterionKind.Final"/>.
-/// Comma-separated patterns (e.g. <c>*.example.com,!bad.example.com</c>) are stored as a single string.
+///     The pattern, glob, or argument for the criterion, or <see langword="null" /> for
+///     <see cref="SshMatchCriterionKind.All" />, <see cref="SshMatchCriterionKind.Canonical" />,
+///     and <see cref="SshMatchCriterionKind.Final" />.
+///     Comma-separated patterns (e.g. <c>*.example.com,!bad.example.com</c>) are stored as a single string.
 /// </param>
 public sealed record SshMatchCriterion(SshMatchCriterionKind Kind, string? Pattern)
 {
@@ -62,33 +62,39 @@ public sealed record SshMatchCriterion(SshMatchCriterionKind Kind, string? Patte
     public static SshMatchCriterion Final { get; } = new(SshMatchCriterionKind.Final, null);
 
     /// <summary>Creates a <c>host</c> criterion with the given pattern.</summary>
-    public static SshMatchCriterion ForHost(string pattern) =>
-        new(SshMatchCriterionKind.Host, pattern);
+    public static SshMatchCriterion ForHost(string pattern)
+    {
+        return new SshMatchCriterion(SshMatchCriterionKind.Host, pattern);
+    }
 
     /// <summary>Creates a <c>user</c> criterion with the given pattern.</summary>
-    public static SshMatchCriterion ForUser(string pattern) =>
-        new(SshMatchCriterionKind.User, pattern);
+    public static SshMatchCriterion ForUser(string pattern)
+    {
+        return new SshMatchCriterion(SshMatchCriterionKind.User, pattern);
+    }
 
     /// <summary>Creates an <c>exec</c> criterion with the given shell command.</summary>
-    public static SshMatchCriterion ForExec(string command) =>
-        new(SshMatchCriterionKind.Exec, command);
+    public static SshMatchCriterion ForExec(string command)
+    {
+        return new SshMatchCriterion(SshMatchCriterionKind.Exec, command);
+    }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override string ToString()
     {
         var keyword = Kind switch
         {
-            SshMatchCriterionKind.All          => "all",
-            SshMatchCriterionKind.Canonical    => "canonical",
-            SshMatchCriterionKind.Final        => "final",
-            SshMatchCriterionKind.Exec         => "exec",
-            SshMatchCriterionKind.Host         => "host",
+            SshMatchCriterionKind.All => "all",
+            SshMatchCriterionKind.Canonical => "canonical",
+            SshMatchCriterionKind.Final => "final",
+            SshMatchCriterionKind.Exec => "exec",
+            SshMatchCriterionKind.Host => "host",
             SshMatchCriterionKind.OriginalHost => "originalhost",
-            SshMatchCriterionKind.User         => "user",
-            SshMatchCriterionKind.LocalUser    => "localuser",
-            SshMatchCriterionKind.Tagged       => "tagged",
+            SshMatchCriterionKind.User => "user",
+            SshMatchCriterionKind.LocalUser => "localuser",
+            SshMatchCriterionKind.Tagged => "tagged",
             SshMatchCriterionKind.LocalNetwork => "localnetwork",
-            _ => Kind.ToString().ToLowerInvariant(),
+            _ => Kind.ToString().ToLowerInvariant()
         };
 
         return Pattern is null ? keyword : $"{keyword} {Pattern}";

@@ -1,7 +1,3 @@
-// File Created by: Oliver Schantz
-// Created: 18.05.2024 - 14:05:52
-// Last edit: 18.05.2024 - 14:05:52
-
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Extensions;

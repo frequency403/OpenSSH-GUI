@@ -1,17 +1,10 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:46
-
-#endregion
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Material.Icons;
@@ -23,15 +16,13 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
-using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
-using OpenSSH_GUI.Core.Lib.Static;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
@@ -54,25 +45,17 @@ public class MainWindowViewModel(
     public readonly Interaction<EditAuthorizedKeysViewModel, EditAuthorizedKeysViewModel?> ShowEditAuthorizedKeys =
         new();
 
-    public readonly Interaction<EditKnownHostsWindowViewModel, EditKnownHostsWindowViewModel?> ShowEditKnownHosts = new();
+    public readonly Interaction<EditKnownHostsWindowViewModel, EditKnownHostsWindowViewModel?> ShowEditKnownHosts =
+        new();
+
     public readonly Interaction<ExportWindowViewModel, ExportWindowViewModel?> ShowExportWindow = new();
 
     private IServerConnection _serverConnection;
-    
+
     public string Version
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-    
-    public override ValueTask InitializeAsync(IInitializerParameters<MainWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
-    {
-        _serverConnection = new ServerConnection("123", "123", "123");
-        EvaluateAppropriateIcon();
-        locatorService.SshKeysCollectionChanged += (sender, args) => EvaluateAppropriateIcon();
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        Version = version is null ? "0.0.0" : string.Format(StringsAndTexts.Version, version?.Major, version?.Minor, version?.Build);
-        return base.InitializeAsync(parameters, cancellationToken);
     }
 
     public bool KeyContextMenuEnabled { get; } = true;
@@ -108,13 +91,13 @@ public class MainWindowViewModel(
             2 => string.Join("#", projectUrl, "authors"),
             _ => projectUrl
         };
-        
-        
+
+
         var processStartInfo = new ProcessStartInfo
         {
             Arguments = url
         };
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             processStartInfo.FileName = "cmd";
@@ -132,6 +115,7 @@ public class MainWindowViewModel(
         {
             processStartInfo.FileName = "xdg-open";
         }
+
         Process.Start(processStartInfo);
 
         return null;
@@ -174,10 +158,12 @@ public class MainWindowViewModel(
     public ReactiveCommand<Unit, EditKnownHostsWindowViewModel?> OpenEditKnownHostsWindow =>
         ReactiveCommand.CreateFromTask<Unit, EditKnownHostsWindowViewModel?>(async _ =>
         {
-            await dialogHost.ShowDialog(await serviceProvider.ResolveViewAsync<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(new EditKnownHostWindowViewModelInitializerParameters()
-            {
-                ServerConnection = _serverConnection
-            }));
+            await dialogHost.ShowDialog(
+                await serviceProvider.ResolveViewAsync<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(
+                    new EditKnownHostWindowViewModelInitializerParameters
+                    {
+                        ServerConnection = _serverConnection
+                    }));
             return null;
         });
 
@@ -190,54 +176,54 @@ public class MainWindowViewModel(
             await ShowExportWindowWithText(key, false));
 
     public ReactiveCommand<Unit, EditAuthorizedKeysViewModel?> OpenEditAuthorizedKeysWindow =>
-        ReactiveCommand.CreateFromTask<Unit, EditAuthorizedKeysViewModel?>(
-            async _ =>
+        ReactiveCommand.CreateFromTask<Unit, EditAuthorizedKeysViewModel?>(async _ =>
+        {
+            try
             {
-                try
-                {
-                    await dialogHost.ShowDialog(await serviceProvider.ResolveViewAsync<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(
-                        new EditAuthorizedKeysViewModelInitializeParameters()
+                await dialogHost.ShowDialog(
+                    await serviceProvider.ResolveViewAsync<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(
+                        new EditAuthorizedKeysViewModelInitializeParameters
                         {
-                            ServerConnection = _serverConnection,
+                            ServerConnection = _serverConnection
                         }));
-                }
-                catch (Exception exception)
-                {
-                    var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, exception.Message,
-                        ButtonEnum.Ok, Icon.Error);
-                    await messageBox.ShowAsync();
-                    
-                }
-                return null;
-            });
+            }
+            catch (Exception exception)
+            {
+                var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, exception.Message,
+                    ButtonEnum.Ok, Icon.Error);
+                await messageBox.ShowAsync();
+            }
+
+            return null;
+        });
 
     public ReactiveCommand<Unit, AddKeyWindowViewModel?> OpenCreateKeyWindow =>
-        ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async _ => await dialogHost.ShowDialog<AddKeyWindow, AddKeyWindowViewModel>(await serviceProvider.ResolveViewAsync<AddKeyWindow, AddKeyWindowViewModel>()));
+        ReactiveCommand.CreateFromTask<Unit, AddKeyWindowViewModel?>(async _ =>
+            await dialogHost.ShowDialog<AddKeyWindow, AddKeyWindowViewModel>(
+                await serviceProvider.ResolveViewAsync<AddKeyWindow, AddKeyWindowViewModel>()));
 
-    public ReactiveCommand<ISshKey, ISshKey?> DeleteKey =>
-        ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async u =>
+    public ReactiveCommand<SshKeyFile, SshKeyFile?> DeleteKey =>
+        ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async u =>
         {
             var box = MessageBoxManager.GetMessageBoxStandard(
-                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.Filename),
-                u is ISshPublicKey
-                    ? StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair
-                    : StringsAndTexts.MainWindowViewModelDeleteKeyQuestionText, ButtonEnum.YesNo, Icon.Question);
+                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, u.FileName),
+                StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, ButtonEnum.YesNo, Icon.Question);
             var res = await box.ShowAsync();
             if (res != ButtonResult.Yes) return null;
-            u.DeleteKey();
-            //SshKeys.Remove(u);
+            //u.DeleteKey();
+            SshKeys.Remove(u);
             await using var context = new OpenSshGuiDbContext();
             context.KeyDtos.Remove(await context.KeyDtos.FirstAsync(e => e.AbsolutePath == u.AbsoluteFilePath));
             await context.SaveChangesAsync();
             return u;
         });
 
-    public ReactiveCommand<ISshKey, ISshKey?> ConvertKey => ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(
-        async key =>
+    public ReactiveCommand<SshKeyFile, SshKeyFile?> ConvertKey =>
+        ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async key =>
         {
-            var currentFormat = Enum.GetName(key.Format);
+            var currentFormat = Enum.GetName(key.SshKeyFormat);
             var oppositeFormat =
-                Enum.GetName(key.Format is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH);
+                Enum.GetName(key.SshKeyFormat is SshKeyFormat.OpenSSH ? SshKeyFormat.PuTTYv3 : SshKeyFormat.OpenSSH);
 
             var title = string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat,
                 oppositeFormat);
@@ -248,44 +234,45 @@ public class MainWindowViewModel(
                 string.Format(StringsAndTexts.ErrorAction,
                     string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat)),
                 StringsAndTexts.MainWindowConvertKeyMessageBoxErrorText, ButtonEnum.Ok, Icon.Error);
-            //var oldIndex = SshKeys.IndexOf(key);
+            var oldIndex = SshKeys.IndexOf(key);
             var result = await box.ShowAsync();
             if (result is ButtonResult.Abort or ButtonResult.None) return key;
 
-            var formatted = await KeyFactory.ConvertToOppositeFormatAsync(key);
-            if (formatted is null)
-            {
-                await errorBox.ShowAsync();
-                return key;
-            }
+            // var formatted = await KeyFactory.ConvertToOppositeFormatAsync(key);
+            // if (formatted is null)
+            // {
+            //     await errorBox.ShowAsync();
+            //     return key;
+            // }
 
-            // SshKeys.Remove(key);
-            // SshKeys.Insert(oldIndex, formatted); @TODO
-            if (result == ButtonResult.Yes) key.DeleteKey();
+            SshKeys.Remove(key);
+            // SshKeys.Insert(oldIndex, formatted);
+            // if (result == ButtonResult.Yes) key.DeleteKey();
             return key;
         });
 
-    public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.CreateFromTask<bool, bool>(async input =>
+    public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.Create<bool, bool>(input =>
     {
-        // SshKeys.Clear();
-        // await foreach (var key in directoryCrawler.GetAllKeysYield(true, input)) SshKeys.Add(key);
+        SshKeys.Clear();
+        locatorService.RerunSearch();
         return input;
     });
 
-    public ReactiveCommand<ISshKey, ISshKey> ShowPassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey>(
-        async key =>
+    public ReactiveCommand<SshKeyFile, SshKeyFile> ShowPassword =>
+        ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile>(async key =>
         {
-            var expView = await serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel>(initializerParameters: new ExportWindowViewModelInitializerParameters()
-            {
-                Export = key.Password,
-                WindowTitle = string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath)
-            });
+            var expView = await serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel>(
+                new ExportWindowViewModelInitializerParameters
+                {
+                    Export = Encoding.UTF8.GetString(key.Password.Value.Span),
+                    WindowTitle = string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath)
+                });
             await dialogHost.ShowDialog(expView);
             return key;
         });
 
-    public ReactiveCommand<ISshKey, ISshKey> ForgetPassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey>(
-        async key =>
+    public ReactiveCommand<SshKeyFile, SshKeyFile> ForgetPassword =>
+        ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile>(async key =>
         {
             await using var context = new OpenSshGuiDbContext();
             var dto = await context.KeyDtos.FirstAsync(e => e.AbsolutePath == key.AbsoluteFilePath);
@@ -307,12 +294,12 @@ public class MainWindowViewModel(
             return result;
         });
 
-    public ReactiveCommand<ISshKey, ISshKey?> ProvidePassword => ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(
-        async key =>
+    public ReactiveCommand<SshKeyFile, SshKeyFile?> ProvidePassword =>
+        ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async key =>
         {
             var trys = 0;
 
-            while (key.NeedPassword && trys < 3)
+            while (key.NeedsPassword && trys < 3)
             {
                 var bitmap = new WindowIcon(serviceProvider.GetRequiredKeyedService<Bitmap>("AppIcon"));
                 var passwordDialog = MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams
@@ -344,8 +331,8 @@ public class MainWindowViewModel(
                 });
                 var result = await passwordDialog.ShowAsync();
                 if (result != StringsAndTexts.MainWindowViewModelProvidePasswordButtonSubmit) return null;
-                var sshKey = await KeyFactory.ProvidePasswordForKeyAsnyc(key, passwordDialog.InputValue);
-                if (sshKey.NeedPassword)
+                var setPasswordResult = await key.SetPassword(Encoding.UTF8.GetBytes(result));
+                if (!setPasswordResult)
                 {
                     var msgBox = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams
                     {
@@ -364,11 +351,9 @@ public class MainWindowViewModel(
                     continue;
                 }
 
-                await UpdateKeyInDatabase(sshKey);
-
-                // var index = SshKeys.IndexOf(key);
-                // SshKeys.RemoveAt(index);
-                // SshKeys.Insert(index, sshKey); @TODO
+                var index = SshKeys.IndexOf(key);
+                SshKeys.RemoveAt(index);
+                SshKeys.Insert(index, key);
                 break;
             }
 
@@ -389,7 +374,7 @@ public class MainWindowViewModel(
         set
         {
             KeyTypeSortDirectionIcon = EvaluateSortIconKind(value);
-            // SshKeys = new ObservableCollection<ISshKey>(value switch
+            // SshKeys = new ObservableCollection<SshKeyFile>(value switch
             // {
             //     null => SshKeys.OrderBy(e => e.Id),
             //     true => SshKeys.OrderBy(e => e.KeyType.BaseType),
@@ -411,7 +396,7 @@ public class MainWindowViewModel(
         set
         {
             CommentSortDirectionIcon = EvaluateSortIconKind(value);
-            // SshKeys = new ObservableCollection<ISshKey>(value switch
+            // SshKeys = new ObservableCollection<SshKeyFile>(value switch
             // {
             //     null => SshKeys.OrderBy(e => e.Id),
             //     true => SshKeys.OrderBy(e => e.Comment),
@@ -433,7 +418,7 @@ public class MainWindowViewModel(
         set
         {
             FingerPrintSortDirectionIcon = EvaluateSortIconKind(value);
-            // SshKeys = new ObservableCollection<ISshKey>(value switch
+            // SshKeys = new ObservableCollection<SshKeyFile>(value switch
             // {
             //     null => SshKeys.OrderBy(e => e.Id),
             //     true => SshKeys.OrderBy(e => e.Fingerprint),
@@ -449,23 +434,17 @@ public class MainWindowViewModel(
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = MaterialIconKind.CircleOutline;
 
-    private async Task UpdateKeyInDatabase(ISshKey key)
+    public override ValueTask InitializeAsync(IInitializerParameters<MainWindowViewModel>? parameters = null,
+        CancellationToken cancellationToken = default)
     {
-        await using var context = new OpenSshGuiDbContext();
-        var found = await context.KeyDtos.Where(e => e.AbsolutePath == key.AbsoluteFilePath).FirstOrDefaultAsync();
-        if (found is null)
-        {
-            context.KeyDtos.Add(key.ToDto());
-        }
-        else
-        {
-            var keyDto = key.ToDto();
-            found.AbsolutePath = keyDto.AbsolutePath;
-            found.Format = keyDto.Format;
-            found.Password = keyDto.Password;
-        }
-
-        await context.SaveChangesAsync();
+        _serverConnection = new ServerConnection("123", "123", "123");
+        EvaluateAppropriateIcon();
+        locatorService.SshKeysCollectionChanged += (sender, args) => EvaluateAppropriateIcon();
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        Version = version is null
+            ? "0.0.0"
+            : string.Format(StringsAndTexts.Version, version?.Major, version?.Minor, version?.Build);
+        return base.InitializeAsync(parameters, cancellationToken);
     }
 
     private async Task<ExportWindowViewModel?> ShowExportWindowWithText(SshKeyFile key, bool @public)
@@ -479,6 +458,7 @@ public class MainWindowViewModel(
         {
             logger.LogError(e, "Error while exporting key to {publicOrNot} format", @public ? "public" : "private");
         }
+
         if (keyExport is null)
         {
             var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
@@ -488,11 +468,13 @@ public class MainWindowViewModel(
             return null;
         }
 
-        var view = await serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel>(new ExportWindowViewModelInitializerParameters()
-        {
-            Export =  keyExport,
-            WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.KeyType, key.FileName)
-        });
+        var view = await serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel>(
+            new ExportWindowViewModelInitializerParameters
+            {
+                Export = keyExport,
+                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.KeyType,
+                    key.FileName)
+            });
         await dialogHost.ShowDialog(view);
         return null;
     }

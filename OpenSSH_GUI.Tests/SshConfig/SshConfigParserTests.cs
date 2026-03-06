@@ -26,7 +26,7 @@ Host example
         doc.Blocks.Length.ShouldBe(1);
         var hostBlock = doc.Blocks[0].ShouldBeOfType<SshHostBlock>();
         hostBlock.Patterns.ShouldContain("example");
-        
+
         var entries = hostBlock.GetEntries().ToArray();
         entries.Length.ShouldBe(2);
         entries[0].Key.ShouldBe("HostName");
@@ -65,10 +65,10 @@ Host example # host comment
 ";
         var doc = SshConfigParser.Parse(content);
         doc.GlobalItems[0].ShouldBeOfType<SshCommentLine>().Comment.ShouldBe("# Global comment");
-        
+
         var entry = doc.GlobalItems[1].ShouldBeOfType<SshConfigEntry>();
         entry.InlineComment.ShouldBe("# inline global");
-        
+
         var hostBlock = doc.Blocks[0].ShouldBeOfType<SshHostBlock>();
         hostBlock.HeaderComment.ShouldBe("# host comment");
     }

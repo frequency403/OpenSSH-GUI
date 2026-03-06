@@ -16,12 +16,25 @@ namespace OpenSSH_GUI.Core.Services;
 
 public class KeyLocatorService
 {
-    private readonly ILogger<KeyLocatorService> _logger;
     private readonly DirectoryCrawler _directoryCrawler;
+    private readonly ILogger<KeyLocatorService> _logger;
     private readonly IServiceProvider serviceProvider;
-    private Task _searchingTask;
     private bool _searching;
-    
+    private Task _searchingTask;
+
+    public KeyLocatorService(ILogger<KeyLocatorService> logger, DirectoryCrawler directoryCrawler,
+        IServiceProvider serviceProvider)
+    {
+        _logger = logger;
+        _directoryCrawler = directoryCrawler;
+        this.serviceProvider = serviceProvider;
+        SshKeys = new ObservableCollectionExtended<SshKeyFile>();
+        _searchingTask = SearchForKeysAndUpdateCollection();
+    }
+
+    public ObservableCollection<SshKeyFile> SshKeys { get; }
+    public NotifyCollectionChangedEventHandler SshKeysCollectionChanged { get; set; }
+
     private SshKeyFile? GenerateKeyFile()
     {
         SshKeyFile? file = null;
@@ -33,28 +46,17 @@ public class KeyLocatorService
         {
             _logger.LogError(e, "Error resolving generic SshKeyFile");
         }
+
         return file;
     }
-    
-    public KeyLocatorService(ILogger<KeyLocatorService> logger, DirectoryCrawler directoryCrawler, IServiceProvider serviceProvider)
-    {
-        _logger = logger;
-        _directoryCrawler = directoryCrawler;
-        this.serviceProvider = serviceProvider;
-        SshKeys = new ObservableCollectionExtended<SshKeyFile>();
-        _searchingTask = SearchForKeysAndUpdateCollection();
-    }
-
-    public ObservableCollection<SshKeyFile> SshKeys { get; } 
-    public NotifyCollectionChangedEventHandler SshKeysCollectionChanged { get; set; }
 
     public async ValueTask GenerateNewKeyInFile(string fullFilePath, SshKeyGenerateParams generateParams)
     {
-        if (File.Exists(fullFilePath)) 
+        if (File.Exists(fullFilePath))
             throw new InvalidOperationException("File already exists");
-        if(GenerateKeyFile() is not { } keyFile)
+        if (GenerateKeyFile() is not { } keyFile)
             throw new InvalidOperationException("Key file not generated");
-        
+
         await using var privateStream = new MemoryStream();
         var createdKey = SshKey.Generate(privateStream, generateParams.ToInfo());
         var privateKeyFilePath = fullFilePath;
@@ -63,7 +65,8 @@ public class KeyLocatorService
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
                 privateKeyFilePath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath);
-                await using (var privateStreamWriter = new StreamWriter(FileOperations.OpenOrCreate(privateKeyFilePath)))
+                await using (var privateStreamWriter =
+                             new StreamWriter(FileOperations.OpenOrCreate(privateKeyFilePath)))
                 {
                     await privateStreamWriter.WriteAsync(createdKey.ToPuttyFormat());
                 }
@@ -73,7 +76,8 @@ public class KeyLocatorService
             default:
                 var pubPath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath);
                 privateKeyFilePath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath, false);
-                await using (var privateStreamWriter = new StreamWriter(FileOperations.OpenOrCreate(privateKeyFilePath)))
+                await using (var privateStreamWriter =
+                             new StreamWriter(FileOperations.OpenOrCreate(privateKeyFilePath)))
                 {
                     await privateStreamWriter.WriteAsync(createdKey.ToOpenSshFormat());
                 }
@@ -82,15 +86,17 @@ public class KeyLocatorService
                 {
                     await publicStreamWriter.WriteAsync(createdKey.ToOpenSshPublicFormat());
                 }
+
                 break;
         }
+
         await keyFile.Load(privateKeyFilePath, Encoding.UTF8.GetBytes(generateParams.Password));
         SshKeys.Add(keyFile);
     }
-    
+
     public void RerunSearch()
     {
-        if(_searching)
+        if (_searching)
             throw new Exception("Can't rerun search while searching");
         _searchingTask = SearchForKeysAndUpdateCollection();
     }
@@ -99,7 +105,7 @@ public class KeyLocatorService
     {
         _searching = true;
         SshKeys.CollectionChanged -= SshKeysCollectionChanged;
-        await foreach(var key in _directoryCrawler.GetNewFromDiskAsyncEnumerable())
+        await foreach (var key in _directoryCrawler.GetNewFromDiskAsyncEnumerable())
             SshKeys.Add(key);
         SshKeys.CollectionChanged += SshKeysCollectionChanged;
         _searching = false;

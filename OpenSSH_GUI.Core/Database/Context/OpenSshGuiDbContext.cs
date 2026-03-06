@@ -1,7 +1,3 @@
-// File Created by: Oliver Schantz
-// Created: 17.05.2024 - 08:05:28
-// Last edit: 17.05.2024 - 08:05:29
-
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.DataEncryption;

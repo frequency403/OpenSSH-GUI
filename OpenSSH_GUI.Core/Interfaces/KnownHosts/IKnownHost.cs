@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:34
-
-#endregion
-
-using ReactiveUI;
+﻿using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Interfaces.KnownHosts;
 

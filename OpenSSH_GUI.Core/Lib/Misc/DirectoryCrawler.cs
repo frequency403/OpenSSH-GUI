@@ -1,21 +1,10 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:27
-
-#endregion
-
-using System.Runtime.CompilerServices;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Static;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.SshConfig;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
@@ -23,10 +12,12 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// <summary>
 ///     Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbContext dbContext, IServiceProvider serviceProvider)
+public class DirectoryCrawler(
+    ILogger<DirectoryCrawler> logger,
+    IServiceProvider serviceProvider)
 {
-    private static string[] _importantFileNames = Enum.GetNames<SshConfigFiles>();
-    
+    private static readonly string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
+
     private SshKeyFile? GenerateKeyFile()
     {
         SshKeyFile? file = null;
@@ -38,10 +29,20 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
         {
             logger.LogError(e, "Error resolving generic SshKeyFile");
         }
+
         return file;
     }
 
-    public async IAsyncEnumerable<SshKeyFile> GetNewFromDiskAsyncEnumerable([EnumeratorCancellation] CancellationToken token = default)
+    /// <summary>
+    ///     Retrieves new SSH key files from the disk asynchronously and yields them as an async enumerable.
+    ///     Filters out important configuration files and considers only valid SSH key files for processing.
+    /// </summary>
+    /// <param name="token">A cancellation token that can be used to monitor for cancellation requests.</param>
+    /// <returns>
+    ///     An asynchronous enumerable of <see cref="SshKeyFile" /> objects representing discovered SSH key files.
+    /// </returns>
+    public async IAsyncEnumerable<SshKeyFile> GetNewFromDiskAsyncEnumerable(
+        [EnumeratorCancellation] CancellationToken token = default)
     {
         var possibleKeyFiles = new List<string>();
 
@@ -52,16 +53,14 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
             {
                 await using var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
                 using var streamReader = new StreamReader(fileStream);
-                var fileContent =  await streamReader.ReadToEndAsync(token);
+                var fileContent = await streamReader.ReadToEndAsync(token);
                 if (!string.IsNullOrWhiteSpace(fileContent))
-                {
                     foreach (var identityFileName in SshConfigParser.Parse(fileContent)
                                  .Blocks.SelectMany(e => e.GetEntries("IdentityFile")).Select(e => e.Value))
                     {
                         if (string.IsNullOrWhiteSpace(identityFileName)) continue;
                         possibleKeyFiles.Add(identityFileName);
                     }
-                }
             }
         }
         catch (FileNotFoundException foundException)
@@ -79,7 +78,7 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
                     IgnoreInaccessible = true,
                     RecurseSubdirectories = false
                 }).Select(e => new FileInfo(e))
-                .Where(e => !_importantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
+                .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
                 .Where(e => string.IsNullOrWhiteSpace(e.Extension))
                 .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => e.FullName)
         ).ToList();
@@ -89,10 +88,7 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
             SshKeyFile? keyFile = null;
             try
             {
-                if (GenerateKeyFile() is not { } keyFileGenerated)
-                {
-                    continue;
-                }
+                if (GenerateKeyFile() is not { } keyFileGenerated) continue;
 
                 await keyFileGenerated.Load(possibleKeyFile);
                 keyFile = keyFileGenerated;
@@ -110,88 +106,8 @@ public class DirectoryCrawler(ILogger<DirectoryCrawler> logger, OpenSshGuiDbCont
         logger.LogInformation("Found {count} keys", keyFileCount);
     }
 
-    public IEnumerable<SshKeyFile> GetNewFromDisk() => GetNewFromDiskAsyncEnumerable().ToBlockingEnumerable();
-    
-    /// <summary>
-    ///     Retrieves SSH keys from disk.
-    /// </summary>
-    /// <param name="convert">
-    ///     Optional. Indicates whether to automatically convert PuTTY keys to OpenSSH format. Default is
-    ///     false.
-    /// </param>
-    /// <returns>An enumerable collection of ISshKey representing the SSH keys.</returns>
-    private IEnumerable<ISshKey> GetFromDisk(bool convert)
+    public IEnumerable<SshKeyFile> GetNewFromDisk()
     {
-        foreach (var filePath in Directory
-                     .EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", SearchOption.TopDirectoryOnly)
-                     .Where(e => e.EndsWith("pub") || e.EndsWith("ppk")))
-        {
-            ISshKey? key = null;
-            try
-            {
-                key = KeyFactory.FromPath(filePath);
-                if (key is IPpkKey && convert) key = KeyFactory.ConvertToOppositeFormat(key, true);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error while reading key from {path}", filePath);
-            }
-
-            if (key is null) continue;
-            yield return key;
-        }
-    }
-
-    /// <summary>
-    ///     Retrieves all SSH keys from disk or cache asynchronously, using a yield return method to lazily load the keys.
-    /// </summary>
-    /// <param name="loadFromDisk">Optional. Indicates whether to load keys from disk. Default is false.</param>
-    /// <param name="purgePasswords">Optional. Indicates whether to purge passwords from cache. Default is false.</param>
-    /// <returns>An asynchronous enumerable collection of ISshKey representing the SSH keys.</returns>
-    public async IAsyncEnumerable<ISshKey> GetAllKeysYield(bool loadFromDisk = false,
-        bool purgePasswords = false)
-    {
-        var cacheHasElements = await dbContext.KeyDtos.AnyAsync();
-        switch (loadFromDisk)
-        {
-            case false when cacheHasElements:
-                foreach (var keyFromCache in dbContext.KeyDtos.Select(e => e.ToKey())) yield return keyFromCache!;
-                yield break;
-            case false when !cacheHasElements:
-                loadFromDisk = true;
-                break;
-        }
-
-        if (!loadFromDisk && cacheHasElements) yield break;
-        {
-            foreach (var key in GetFromDisk((await dbContext.Settings.FirstAsync()).ConvertPpkAutomatically))
-            {
-                var found = await dbContext.KeyDtos.FirstOrDefaultAsync(e =>
-                    e.AbsolutePath == key.AbsoluteFilePath);
-                if (found is null)
-                {
-                    await dbContext.KeyDtos.AddAsync(new SshKeyDto
-                    {
-                        AbsolutePath = key.AbsoluteFilePath,
-                        Password = key.Password,
-                        Format = key.Format
-                    });
-                }
-                else
-                {
-                    found.AbsolutePath = key.AbsoluteFilePath;
-                    found.Format = key.Format;
-                    if (found.Password is not null) key.Password = found.Password;
-                    if (purgePasswords)
-                    {
-                        key.Password = key.HasPassword ? "" : null;
-                        found.Password = key.HasPassword ? "" : null;
-                    }
-                }
-
-                await dbContext.SaveChangesAsync();
-                yield return key;
-            }
-        }
+        return GetNewFromDiskAsyncEnumerable().ToBlockingEnumerable();
     }
 }

@@ -1,10 +1,6 @@
-// File Created by: Oliver Schantz
-// Created: 17.05.2024 - 08:05:19
-// Last edit: 17.05.2024 - 08:05:19
-
 using System.ComponentModel.DataAnnotations;
-using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Static;
+using System.Text;
+using OpenSSH_GUI.Core.Lib.Keys;
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Database.DTO;
@@ -45,11 +41,13 @@ public class SshKeyDto
     public virtual IEnumerable<ConnectionCredentialsDto> ConnectionCredentialsDto { get; set; }
 
     /// <summary>
-    ///     Converts an instance of <see cref="SshKeyDto" /> to an instance of <see cref="ISshKey" />.
+    ///     Converts an instance of <see cref="SshKeyDto" /> to an instance of <see cref="SshKeyFile" />.
     /// </summary>
-    /// <returns>The converted <see cref="ISshKey" /> instance.</returns>
-    public ISshKey? ToKey()
+    /// <returns>The converted <see cref="SshKeyFile" /> instance.</returns>
+    public ValueTask<SshKeyFile> ToKey()
     {
-        return KeyFactory.FromPath(AbsolutePath, Password, Id);
+        return Password is null
+            ? SshKeyFile.FromFile(AbsolutePath)
+            : SshKeyFile.FromFile(AbsolutePath, Encoding.UTF8.GetBytes(Password));
     }
 }

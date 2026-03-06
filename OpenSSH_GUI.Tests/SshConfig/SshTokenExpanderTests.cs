@@ -26,7 +26,7 @@ public class SshTokenExpanderTests
     public void Expand_CommonTokens_ShouldSubstituteCorrectly()
     {
         var context = new SshTokenContext(
-            RemoteHostname: "remote.host",
+            "remote.host",
             RemoteUser: "alice",
             Port: 2222,
             LocalUser: "bob"
@@ -56,19 +56,19 @@ public class SshTokenExpanderTests
     public void Expand_AllTokens_ShouldSubstituteCorrectly()
     {
         var context = new SshTokenContext(
-            RemoteHostname: "h",
-            LocalHostname: "H",
-            OriginalHostname: "n",
-            Port: 123,
-            RemoteUser: "r",
-            LocalUser: "u",
-            LocalUserId: 1000,
-            LocalHostnameFqdn: "l",
-            LocalHostnameShort: "L",
-            LocalHomeDirectory: "d",
-            HostKeyAlias: "k",
-            ConnectionHash: "C",
-            ProxySocketPath: "T"
+            "h",
+            "H",
+            "n",
+            123,
+            "r",
+            "u",
+            1000,
+            "l",
+            "L",
+            "d",
+            "k",
+            "C",
+            "T"
         );
 
         SshTokenExpander.Expand("%C %d %h %H %i %k %l %L %n %p %r %T %u %U", context)

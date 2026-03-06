@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:36
-
-#endregion
-
-using Avalonia;
+﻿using Avalonia;
 using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI;
@@ -30,9 +22,6 @@ internal sealed class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
-            .UseReactiveUI(builder =>
-            {
-                
-            });
+            .UseReactiveUI(builder => { });
     }
 }

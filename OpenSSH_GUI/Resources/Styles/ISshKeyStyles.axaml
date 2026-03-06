@@ -1,13 +1,12 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
                     xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
                     xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
                     xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
                     xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
-                    xmlns:misc="clr-namespace:OpenSSH_GUI.Core.Lib.Misc;assembly=OpenSSH_GUI.Core">
+                    xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core">
     <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
-    <DataTemplate x:Key="LocksAndType" DataType="misc:SshKeyFile">
+    <DataTemplate x:Key="LocksAndType" DataType="keys:SshKeyFile">
         <Grid ColumnDefinitions="* 3*"
               VerticalAlignment="Center" HorizontalAlignment="Stretch">
             <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Left">
@@ -64,7 +63,7 @@
             </StackPanel>
         </Grid>
     </DataTemplate>
-    <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="misc:SshKeyFile">
+    <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="keys:SshKeyFile">
         <StackPanel Orientation="Horizontal" Spacing="15">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="5">
                 <Panel Margin="0" IsVisible="{Binding HasPassword}">
@@ -103,7 +102,7 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
-    <DataTemplate x:Key="SshKeyFullStyle" DataType="misc:SshKeyFile">
+    <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:SshKeyFile">
         <StackPanel>
             <Border CornerRadius="25" Padding="5" Classes="MainDisplay">
                 <Border.Styles>

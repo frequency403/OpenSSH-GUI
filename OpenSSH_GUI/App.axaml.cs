@@ -1,13 +1,4 @@
-#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:35
-
-#endregion
-
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
@@ -15,12 +6,13 @@ using Avalonia.Platform;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Lib.Settings;
 using OpenSSH_GUI.Core.Lib.Static;
+using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
@@ -33,6 +25,7 @@ namespace OpenSSH_GUI;
 public class App : Application
 {
     private static ServiceProvider ServiceProvider { get; set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -47,18 +40,18 @@ public class App : Application
 #endif
         );
         collection.AddSingleton(loggingLevelSwitch);
-        
+
         var logConfiguration = LoggerConfiguration.Default;
-        if (!Directory.Exists(logConfiguration.LogFilePath)) 
+        if (!Directory.Exists(logConfiguration.LogFilePath))
             Directory.CreateDirectory(logConfiguration.LogFilePath);
-        
+
         Log.Logger = new Serilog.LoggerConfiguration()
             .Enrich.FromLogContext()
-            #if DEBUG
+#if DEBUG
             .WriteTo.Console(levelSwitch: loggingLevelSwitch)
-            #endif
+#endif
             .WriteTo.File(
-                path: logConfiguration.LogFileFullPath, 
+                logConfiguration.LogFileFullPath,
                 levelSwitch: loggingLevelSwitch,
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
@@ -71,18 +64,20 @@ public class App : Application
         collection.AddTransient<DirectoryCrawler>();
         collection.AddTransient<KeyLocatorService>();
         collection.AddDbContext<OpenSshGuiDbContext>();
-        collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(registerAsSingleton: true, configure: serviceCollection =>
-        {
-            serviceCollection.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(serviceKey: nameof(MainWindow)));
-        } );
+        collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
+            serviceCollection =>
+            {
+                serviceCollection.AddSingleton<IDialogHost>(sp =>
+                    sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+            });
         collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
         collection.RegisterViewWithViewModel<EditSavedServerEntry, EditSavedServerEntryViewModel>();
         collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
-        collection.RegisterViewWithViewModel<EditAuthorizedKeysWindow,  EditAuthorizedKeysViewModel>();
+        collection.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
         collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
         collection.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
-        collection.RegisterViewWithViewModel<AddKeyWindow,  AddKeyWindowViewModel>();
-        
+        collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
+
         ServiceProvider = collection.BuildServiceProvider();
         base.RegisterServices();
     }

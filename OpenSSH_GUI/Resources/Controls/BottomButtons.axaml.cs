@@ -1,7 +1,3 @@
-// File Created by: Oliver Schantz
-// Created: 27.05.2024 - 14:05:56
-// Last edit: 27.05.2024 - 14:05:56
-
 using System.ComponentModel;
 using System.Windows.Input;
 using Avalonia;

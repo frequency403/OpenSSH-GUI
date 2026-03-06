@@ -1,8 +1,3 @@
-// File Created by: Oliver Schantz
-// Created: 18.05.2024 - 13:05:38
-// Last edit: 18.05.2024 - 13:05:38
-
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using SshNet.Keygen;
 
@@ -10,7 +5,7 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 
 public readonly record struct SshKeyGenerateParams
 {
-    public SshKeyGenerateParams(KeyType type,
+    public SshKeyGenerateParams(SshKeyType type,
         SshKeyFormat format,
         string? fileName = null,
         string? filePath = null,
@@ -41,7 +36,7 @@ public readonly record struct SshKeyGenerateParams
     /// <summary>
     ///     Represents the type of SSH key.
     /// </summary>
-    public KeyType KeyType { get; }
+    public SshKeyType KeyType { get; }
 
     /// <summary>
     ///     Represents a comment associated with an SSH key.

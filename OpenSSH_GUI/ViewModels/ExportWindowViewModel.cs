@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:47
-
-#endregion
-
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
@@ -26,6 +18,7 @@ public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger) : View
             WindowTitle = initializerParameters.WindowTitle;
             Export = initializerParameters.Export;
         }
+
         BooleanSubmit = ReactiveCommand.Create<bool, ExportWindowViewModel?>(boolean =>
         {
             if (!boolean) return null;

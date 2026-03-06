@@ -65,7 +65,7 @@ public class SshConfigSerializerTests
                                         ServerAliveCountMax 3
                                         AddKeysToAgent yes
                                     """;
-    
+
     [Fact]
     public void Serialize_SimpleDocument_ShouldProduceCorrectOutput()
     {
@@ -75,7 +75,7 @@ public class SshConfigSerializerTests
         );
 
         var output = SshConfigSerializer.Serialize(doc, new SshSerializerOptions { Indent = "    " });
-        
+
         output.ShouldContain("VisualHostKey yes");
         output.ShouldContain("Host example");
         output.ShouldContain("    User alice");
@@ -84,10 +84,11 @@ public class SshConfigSerializerTests
     [Fact]
     public void Serialize_RoundTrip_ShouldPreserveFormatting()
     {
-        var input = "# Global comment\nVisualHostKey yes\n\nHost example\n    User alice\n    # item comment\n    Port 22";
+        var input =
+            "# Global comment\nVisualHostKey yes\n\nHost example\n    User alice\n    # item comment\n    Port 22";
         var doc = SshConfigParser.Parse(input);
         var output = SshConfigSerializer.Serialize(doc, SshSerializerOptions.RoundTripMode);
-        
+
         output.Replace("\r\n", "\n").Trim().ShouldBe(input.Replace("\r\n", "\n").Trim());
     }
 

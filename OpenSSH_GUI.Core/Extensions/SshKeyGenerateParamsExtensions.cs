@@ -1,8 +1,3 @@
-// File Created by: Oliver Schantz
-// Created: 18.05.2024 - 13:05:14
-// Last edit: 18.05.2024 - 13:05:14
-
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Lib.Misc;
 using SshNet.Keygen;
 using SshNet.Keygen.SshKeyEncryption;
@@ -23,13 +18,7 @@ public static class SshKeyGenerateParamsExtensions
     {
         return new SshKeyGenerateInfo
         {
-            KeyType = @params.KeyType switch
-            {
-                KeyType.RSA => SshKeyType.RSA,
-                KeyType.ECDSA => SshKeyType.ECDSA,
-                KeyType.ED25519 => SshKeyType.ED25519,
-                _ => throw new ArgumentOutOfRangeException()
-            },
+            KeyType = @params.KeyType,
             Comment = @params.Comment,
             KeyFormat = @params.KeyFormat,
             KeyLength = @params.KeyLength,

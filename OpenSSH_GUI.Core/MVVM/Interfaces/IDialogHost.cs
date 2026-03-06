@@ -1,8 +1,6 @@
 ﻿using Avalonia.Controls;
-using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.MVVM;
 
-namespace OpenSSH_GUI.Core;
+namespace OpenSSH_GUI.Core.MVVM.Interfaces;
 
 public interface IDialogHost
 {
@@ -10,5 +8,4 @@ public interface IDialogHost
 
     public Task<TResult?> ShowDialog<TWindow, TResult>(TWindow dialogWindow)
         where TWindow : Window where TResult : ViewModelBase;
-
 }

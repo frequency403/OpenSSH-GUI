@@ -1,13 +1,5 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:35
-
-#endregion
-
-using System.Collections.ObjectModel;
-using OpenSSH_GUI.Core.Interfaces.Keys;
+﻿using System.Collections.ObjectModel;
+using OpenSSH_GUI.Core.Lib.Keys;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
@@ -27,7 +19,7 @@ public interface IAuthorizedKeysFile : IReactiveObject
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>True if the key was successfully added, otherwise false.</returns>
-    bool AddAuthorizedKey(ISshKey key);
+    bool AddAuthorizedKey(SshKeyFile key);
 
     /// <summary>
     ///     Applies the changes to the authorized keys file.
@@ -50,7 +42,7 @@ public interface IAuthorizedKeysFile : IReactiveObject
     ///     A task representing the asynchronous operation. The task result is a boolean value indicating whether the key
     ///     was added successfully.
     /// </returns>
-    Task<bool> AddAuthorizedKeyAsync(ISshKey key);
+    Task<bool> AddAuthorizedKeyAsync(SshKeyFile key);
 
     /// <summary>
     ///     Removes the specified SSH key from the authorized keys list.
@@ -60,7 +52,7 @@ public interface IAuthorizedKeysFile : IReactiveObject
     ///     Returns <c>true</c> if the key is successfully removed;
     ///     otherwise, <c>false</c>.
     /// </returns>
-    bool RemoveAuthorizedKey(ISshKey key);
+    bool RemoveAuthorizedKey(SshKeyFile key);
 
     /// <summary>
     ///     Exports the content of the authorized keys file.

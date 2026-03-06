@@ -7,7 +7,7 @@
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:credentials="clr-namespace:OpenSSH_GUI.Core.Interfaces.Credentials;assembly=OpenSSH_GUI.Core"
-        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Interfaces.Keys;assembly=OpenSSH_GUI.Core"
+        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -68,7 +68,7 @@
                         <Separator />
                         <Label Content="{Binding AuthType}" />
                         <Separator />
-                        <Label Content="{Binding Key.Filename}" />
+                        <Label Content="{Binding Key.FileName}" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate DataType="credentials:IMultiKeyConnectionCredentials">
@@ -79,8 +79,8 @@
                         <Separator />
                         <ItemsControl ItemsSource="{Binding Keys}">
                             <ItemsControl.DataTemplates>
-                                <DataTemplate DataType="keys:ISshKey">
-                                    <Label Content="{Binding Filename}" />
+                                <DataTemplate DataType="keys:SshKeyFile">
+                                    <Label Content="{Binding FileName}" />
                                 </DataTemplate>
                             </ItemsControl.DataTemplates>
                         </ItemsControl>

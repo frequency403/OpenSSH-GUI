@@ -1,11 +1,3 @@
-#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:36
-
-#endregion
-
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using OpenSSH_GUI.Core.MVVM;

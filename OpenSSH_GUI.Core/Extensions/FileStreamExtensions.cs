@@ -1,11 +1,3 @@
-#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 30.05.2024 - 11:05:42
-// Last edit: 30.05.2024 - 11:05:42
-
-#endregion
-
 using System.Diagnostics;
 using OpenSSH_GUI.Core.Enums;
 

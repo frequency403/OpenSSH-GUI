@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:44
-
-#endregion
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using Avalonia.Media;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +10,8 @@ using OpenSSH_GUI.Core.Database.DTO;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
@@ -27,20 +19,148 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger, KeyLocatorService keyLocatorService, OpenSshGuiDbContext dbContext) : ViewModelBase<ConnectToServerViewModel>
+public sealed class ConnectToServerViewModel(
+    ILogger<ConnectToServerViewModel> logger,
+    KeyLocatorService keyLocatorService,
+    OpenSshGuiDbContext dbContext) : ViewModelBase<ConnectToServerViewModel>
 {
+    private List<IConnectionCredentials> _connectionCredentials = [];
     private bool _firstCredentialSet;
 
-    private List<IConnectionCredentials> _connectionCredentials;
+    private SshKeyFile? _selectedPublicKey;
 
-    private ISshKey? _selectedPublicKey;
-    public override async ValueTask InitializeAsync(IInitializerParameters<ConnectToServerViewModel>? initializerParameters = null, CancellationToken cancellationToken = default)
+    public bool QuickConnectAvailable => ConnectionCredentials.Any();
+
+    public List<IConnectionCredentials> ConnectionCredentials
+    {
+        get => _connectionCredentials;
+        set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
+    }
+
+    public IConnectionCredentials? SelectedConnection
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            TestQuickConnection(value).Wait();
+        }
+    }
+
+    public bool QuickConnect
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public IServerConnection ServerConnection
+    {
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = new ServerConnection("123", "123", "123");
+
+    private bool ValidData => SelectedPublicKey is null
+        ? Hostname != "" && Username != "" && Password != ""
+        : Hostname != "" && Username != "";
+
+    public bool UploadButtonEnabled
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public bool AuthWithPublicKey
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            UpdateComboBoxState();
+        }
+    }
+
+    public bool AuthWithAllKeys
+    {
+        get;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref field, value);
+            UpdateComboBoxState();
+        }
+    }
+
+    public SshKeyFile? SelectedPublicKey
+    {
+        get => _selectedPublicKey;
+        set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
+    }
+
+    public ObservableCollection<SshKeyFile?> PublicKeys { get; } // = keyLocatorService.SshKeys;
+
+    public string Hostname
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
+
+    public string Username
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
+
+    public string Password
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
+
+    public bool TryingToConnect
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public string StatusButtonToolTip
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUntested);
+
+    public string StatusButtonText
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUnknown);
+
+    public IBrush StatusButtonBackground
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = Brushes.Gray;
+
+    public bool KeyComboBoxEnabled
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public ReactiveCommand<Unit, Unit> TestConnection { get; private set; }
+    public ReactiveCommand<Unit, Unit> ResetCommand { get; private set; }
+
+    public override async ValueTask InitializeAsync(
+        IInitializerParameters<ConnectToServerViewModel>? initializerParameters = null,
+        CancellationToken cancellationToken = default)
     {
         _selectedPublicKey = PublicKeys.FirstOrDefault();
-        _connectionCredentials = (await dbContext.ConnectionCredentialsDtos.Include(e => e.KeyDtos).ToListAsync(cancellationToken: cancellationToken)).Where(dto =>
-            dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key =>
-                keyLocatorService.SshKeys.Select(p => p.AbsoluteFilePath).Contains(key.AbsolutePath))
-        ).Select(e => e.ToCredentials()).ToList();
+
+        foreach (var connectionCredentialsDto in dbContext.ConnectionCredentialsDtos.Include(e => e.KeyDtos)
+                     .Where(dto =>
+                         dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key =>
+                             keyLocatorService.SshKeys.Select(p => p.AbsoluteFilePath).Contains(key.AbsolutePath))))
+            _connectionCredentials.Add(await connectionCredentialsDto.ToCredentials());
         _firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
@@ -115,136 +235,14 @@ public sealed class ConnectToServerViewModel(ILogger<ConnectToServerViewModel> l
             UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
             return e;
         });
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ConnectToServerViewModel?>(
-            async e =>
-            {
-                ServerConnection.ConnectionCredentials.Id =
-                    (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase() ?? new ConnectionCredentialsDto())
-                    .Id;
-                return this;
-            });
-    }
-
-    public bool QuickConnectAvailable => ConnectionCredentials.Any();
-
-    public List<IConnectionCredentials> ConnectionCredentials
-    {
-        get => _connectionCredentials;
-        set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
-    }
-
-    public IConnectionCredentials? SelectedConnection
-    {
-        get;
-        set
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ConnectToServerViewModel?>(async e =>
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            TestQuickConnection(value).Wait();
-        }
+            ServerConnection.ConnectionCredentials.Id =
+                (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase() ?? new ConnectionCredentialsDto())
+                .Id;
+            return this;
+        });
     }
-
-    public bool QuickConnect
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public IServerConnection ServerConnection
-    {
-        get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new ServerConnection("123", "123", "123");
-
-    private bool ValidData => SelectedPublicKey is null
-        ? Hostname != "" && Username != "" && Password != ""
-        : Hostname != "" && Username != "";
-
-    public bool UploadButtonEnabled
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public bool AuthWithPublicKey
-    {
-        get;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref field, value);
-            UpdateComboBoxState();
-        }
-    }
-
-    public bool AuthWithAllKeys
-    {
-        get;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref field, value);
-            UpdateComboBoxState();
-        }
-    }
-
-    public ISshKey? SelectedPublicKey
-    {
-        get => _selectedPublicKey;
-        set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
-    }
-
-    public ObservableCollection<ISshKey?> PublicKeys { get; } // = keyLocatorService.SshKeys;
-
-    public string Hostname
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public string Username
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public string Password
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public bool TryingToConnect
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public string StatusButtonToolTip
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUntested);
-
-    public string StatusButtonText
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUnknown);
-
-    public IBrush StatusButtonBackground
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = Brushes.Gray;
-
-    public bool KeyComboBoxEnabled
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public ReactiveCommand<Unit, Unit> TestConnection { get; private set; }
-    public ReactiveCommand<Unit, Unit> ResetCommand { get; private set; }
 
     private bool TestConnectionInternal(IConnectionCredentials credentials)
     {

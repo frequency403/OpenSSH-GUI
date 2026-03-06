@@ -1,11 +1,3 @@
-#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 30.05.2024 - 12:05:06
-// Last edit: 30.05.2024 - 12:05:06
-
-#endregion
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Enums;
@@ -17,7 +9,7 @@ public static class FileOperations
 {
     public static void EnsureFilesAndFoldersExist(ILogger? logger = null)
     {
-        logger??= NullLogger.Instance;
+        logger ??= NullLogger.Instance;
         SshConfigFilesExtension.ValidateDirectories(logger);
         foreach (var configFile in Enum.GetValues<SshConfigFiles>())
         {
@@ -54,12 +46,6 @@ public static class FileOperations
         }
 
         return options;
-    }
-
-    public static FileStream DeleteOldAndCreateNew(string filePath)
-    {
-        if (Exists(filePath)) Delete(filePath);
-        return OpenOrCreate(filePath);
     }
 
     public static FileStream OpenOrCreate(string filePath)

@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <!-- Target framework and other specs in Directory.Build.props -->
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Optimize>true</Optimize>
-    <PackageId>OpenSSH_GUI.SshConfig</PackageId>
-  </PropertyGroup>
+    <PropertyGroup>
+        <!-- Target framework and other specs in Directory.Build.props -->
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Optimize>true</Optimize>
+        <PackageId>OpenSSH_GUI.SshConfig</PackageId>
+    </PropertyGroup>
 </Project>

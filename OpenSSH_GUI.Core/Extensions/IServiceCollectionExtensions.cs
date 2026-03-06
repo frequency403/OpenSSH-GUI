@@ -3,7 +3,6 @@ using Avalonia.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
-using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Core.Extensions;
 
@@ -11,21 +10,23 @@ public static class ServiceCollectionExtensions
 {
     private static bool ValidateNamingConvention<T1, T2>()
     {
-        var t1Name  = typeof(T1).Name;
+        var t1Name = typeof(T1).Name;
         var t2Name = typeof(T2).Name;
         if (t1Name == t2Name) return false;
         var option1 = string.Equals(t1Name.Replace("Window", ""), t2Name.Replace("ViewModel", ""),
             StringComparison.Ordinal);
         var option2 = t2Name.StartsWith(t1Name) && t2Name.EndsWith("ViewModel");
-        return  option1 || option2;
+        return option1 || option2;
     }
-    
-    public static IServiceCollection RegisterViewWithViewModel<TView, TViewModel>(this IServiceCollection services, bool registerAsSingleton = false, Action<IServiceCollection>? configure = null)
+
+    public static IServiceCollection RegisterViewWithViewModel<TView, TViewModel>(this IServiceCollection services,
+        bool registerAsSingleton = false, Action<IServiceCollection>? configure = null)
         where TViewModel : ViewModelBase<TViewModel>
-    where TView : Window
+        where TView : Window
     {
-        if(!ValidateNamingConvention<TView, TViewModel>())
-            throw new InvalidOperationException($"Viewmodels must follow the following convention: $NameOfView + $ViewModel -> in that case your Viewmodel must be renamed to \"{typeof(TView).Name+"ViewModel"}\"");
+        if (!ValidateNamingConvention<TView, TViewModel>())
+            throw new InvalidOperationException(
+                $"Viewmodels must follow the following convention: $NameOfView + $ViewModel -> in that case your Viewmodel must be renamed to \"{typeof(TView).Name + "ViewModel"}\"");
         configure?.Invoke(services);
         if (registerAsSingleton)
         {
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
             services.AddKeyedTransient<TView>(typeof(TView).Name);
             services.AddKeyedTransient<TViewModel>(typeof(TViewModel).Name);
         }
+
         return services;
     }
 
@@ -50,22 +52,22 @@ public static class ServiceCollectionExtensions
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
         resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
-        
+
         var viewModelType = typeof(TView).Assembly.GetTypes()
             .FirstOrDefault(t => t.Name == viewName + "ViewModel");
         if (viewModelType == null)
             throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
-        
+
         var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelType.Name);
         await viewModel.InitializeAsync(initializerParameters, token);
-        if(!viewModel.IsInitialized)
+        if (!viewModel.IsInitialized)
             throw new InvalidOperationException("ViewModel not properly initialized");
         resolvedView.DataContext = viewModel;
         resolvedView.WindowStartupLocation = windowStartupLocation;
         resolvedView.AttachCloseRequest();
         return resolvedView;
     }
-    
+
     public static TView ResolveView<TView, TViewModel>(this IServiceProvider provider,
         IInitializerParameters<TViewModel>? initializerParameters = null,
         WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen)
@@ -75,15 +77,15 @@ public static class ServiceCollectionExtensions
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
         resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
-        
+
         var viewModelType = typeof(TView).Assembly.GetTypes()
             .FirstOrDefault(t => t.Name == viewName + "ViewModel");
         if (viewModelType == null)
             throw new InvalidOperationException($"Could not find ViewModel for View '{viewName}'");
-        
+
         var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelType.Name);
         viewModel.Initialize(initializerParameters);
-        if(!viewModel.IsInitialized)
+        if (!viewModel.IsInitialized)
             throw new InvalidOperationException("ViewModel not properly initialized");
         resolvedView.DataContext = viewModel;
         resolvedView.WindowStartupLocation = windowStartupLocation;

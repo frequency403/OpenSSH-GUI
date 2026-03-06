@@ -1,13 +1,8 @@
-// File Created by: Oliver Schantz
-// Created: 18.05.2024 - 16:05:59
-// Last edit: 18.05.2024 - 16:05:59
-
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Lib.Credentials;
+using OpenSSH_GUI.Core.Lib.Keys;
 
 namespace OpenSSH_GUI.Core.Database.DTO;
 
@@ -64,27 +59,23 @@ public class ConnectionCredentialsDto
     ///     Converts a ConnectionCredentialsDto object to an instance of IConnectionCredentials.
     /// </summary>
     /// <returns>The converted IConnectionCredentials object.</returns>
-    public IConnectionCredentials ToCredentials()
+    public async ValueTask<IConnectionCredentials> ToCredentials()
     {
-        var g = KeyDtos.Select(e => e.ToKey());
-        return ToCredentials(ref g);
+        var g = KeyDtos.Select(async e => await e.ToKey()).ToArray();
+        await Task.WhenAll(g);
+        return await ToCredentials(g.Select(e => e.Result));
     }
 
-    public IConnectionCredentials ToCredentials(ref ObservableCollection<ISshKey> keys)
-    {
-        var g = keys.Select(e => e);
-        return ToCredentials(ref g);
-    }
 
-    public IConnectionCredentials ToCredentials(ref IEnumerable<ISshKey> keys)
+    public async ValueTask<IConnectionCredentials> ToCredentials(params IEnumerable<SshKeyFile> keys)
     {
         return AuthType switch
         {
-            AuthType.Key => new KeyConnectionCredentials(Hostname, Username, KeyDtos.First().ToKey()) { Id = Id },
+            AuthType.Key => new KeyConnectionCredentials(Hostname, Username, await KeyDtos.First().ToKey()) { Id = Id },
             AuthType.Password => new PasswordConnectionCredentials(Hostname, Username, Password,
                 PasswordEncrypted) { Id = Id },
             AuthType.MultiKey => new MultiKeyConnectionCredentials(Hostname, Username,
-                keys.Where(e => KeyDtos.All(f => f.Id != e.Id))) { Id = Id }
+                keys.Where(e => KeyDtos.All(f => f.AbsolutePath != e.AbsoluteFilePath))) { Id = Id }
         };
     }
 }

@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:35
-
-#endregion
-
-using OpenSSH_GUI.Core.Enums;
+﻿using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 
@@ -18,7 +10,7 @@ public interface IAuthorizedKey
     /// <summary>
     ///     Enumeration for SSH key types.
     /// </summary>
-    KeyType KeyType { get; }
+    SshKeyType KeyType { get; }
 
     /// <summary>
     ///     Represents an authorized key entry in an authorized keys file.

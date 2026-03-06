@@ -1,14 +1,6 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:32
-
-#endregion
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
-using OpenSSH_GUI.Core.Interfaces.Keys;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 
@@ -56,11 +48,11 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>True if the key was successfully added, otherwise false.</returns>
-    public bool AddAuthorizedKey(ISshKey key)
+    public bool AddAuthorizedKey(SshKeyFile key)
     {
-        if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
-        var export = key.ExportAuthorizedKeyEntry();
-        AuthorizedKeys.Add(new AuthorizedKey(export));
+        if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint())) return false;
+        // var export = key.ExportAuthorizedKeyEntry();
+        // AuthorizedKeys.Add(new AuthorizedKey(export)); @TODO
         return true;
     }
 
@@ -97,7 +89,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     A task representing the asynchronous operation. The task result is a boolean value indicating whether the key
     ///     was added successfully.
     /// </returns>
-    public Task<bool> AddAuthorizedKeyAsync(ISshKey key)
+    public Task<bool> AddAuthorizedKeyAsync(SshKeyFile key)
     {
         return Task.FromResult(AddAuthorizedKey(key));
     }
@@ -110,11 +102,11 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     Returns <c>true</c> if the key is successfully removed;
     ///     otherwise, <c>false</c>.
     /// </returns>
-    public bool RemoveAuthorizedKey(ISshKey key)
+    public bool RemoveAuthorizedKey(SshKeyFile key)
     {
-        if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint)) return false;
+        if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint())) return false;
         {
-            AuthorizedKeys.Remove(AuthorizedKeys.First(e => e.Fingerprint == key.Fingerprint));
+            AuthorizedKeys.Remove(AuthorizedKeys.First(e => e.Fingerprint == key.Fingerprint()));
             return true;
         }
     }

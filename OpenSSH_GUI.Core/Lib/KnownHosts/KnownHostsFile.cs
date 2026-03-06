@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:30
-
-#endregion
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
@@ -147,6 +139,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
             SetKnownHosts(File.ReadAllText(SshConfigFiles.Known_Hosts.GetPathOfFile()));
             return;
         }
+
         ReadContentAsync(stream).GetAwaiter().GetResult();
     }
 }

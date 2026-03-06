@@ -1,22 +1,38 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:45
-
-#endregion
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryViewModel> logger) : ViewModelBase<EditSavedServerEntryViewModel>(logger)
+public sealed class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryViewModel> logger)
+    : ViewModelBase<EditSavedServerEntryViewModel>(logger)
 {
+    public string WindowTitle
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public IConnectionCredentials CredentialsToEdit { get; set; }
+    public ObservableCollection<SshKeyFile> Keys { get; set; }
+
+    public SshKeyFile SelectedKey
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public string Password
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = "";
+
+    public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
+
     public override void Initialize(IInitializerParameters<EditSavedServerEntryViewModel>? parameters = null)
     {
         BooleanSubmit =
@@ -34,39 +50,17 @@ public sealed class EditSavedServerEntryViewModel(ILogger<EditSavedServerEntryVi
             CredentialsToEdit = initParams.CredentialsToEdit;
             if (CredentialsToEdit is IPasswordConnectionCredentials pwcc) Password = pwcc.Password;
             SelectedKey = CredentialsToEdit is IKeyConnectionCredentials kcc
-                ? Keys.FirstOrDefault(e => string.Equals(kcc.Key.Fingerprint, e.Fingerprint))
+                ? Keys.FirstOrDefault(e => string.Equals(kcc.Key.Fingerprint(), e.Fingerprint()))
                 : Keys.FirstOrDefault();
         }
+
         base.Initialize(parameters);
     }
-
-    public string WindowTitle
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public IConnectionCredentials CredentialsToEdit { get; set; }
-    public ObservableCollection<ISshKey> Keys { get; set; }
-
-    public ISshKey SelectedKey
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public string Password
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
 }
 
 public record EditSavedServerEntryViewModelInitializeParameters : IInitializerParameters<EditSavedServerEntryViewModel>
 {
     public string Title { get; init; } = "EditSavedServerEntry";
-    public ObservableCollection<ISshKey> Keys { get; init; }
+    public ObservableCollection<SshKeyFile> Keys { get; init; }
     public IConnectionCredentials CredentialsToEdit { get; init; }
 }

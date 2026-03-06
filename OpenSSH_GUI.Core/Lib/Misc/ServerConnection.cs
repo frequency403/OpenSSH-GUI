@@ -1,21 +1,13 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:28
-
-#endregion
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Credentials;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using ReactiveUI;
 using Renci.SshNet;
@@ -39,12 +31,12 @@ public class ServerConnection : ReactiveObject, IServerConnection
     {
     }
 
-    public ServerConnection(string hostname, string user, ISshKey key) : this(
+    public ServerConnection(string hostname, string user, SshKeyFile key) : this(
         new KeyConnectionCredentials(hostname.Trim(), user.Trim(), key))
     {
     }
 
-    public ServerConnection(string hostname, string user, IEnumerable<ISshKey> keys) : this(
+    public ServerConnection(string hostname, string user, IEnumerable<SshKeyFile> keys) : this(
         new MultiKeyConnectionCredentials(hostname.Trim(), user.Trim(), keys))
     {
     }
@@ -166,20 +158,20 @@ public class ServerConnection : ReactiveObject, IServerConnection
 
     private bool TestMulti(IMultiKeyConnectionCredentials mkcc)
     {
-        var workingKeys = new List<ISshKey>();
+        //var workingKeys = new List<SshKeyFile>();
         foreach (var key in mkcc.Keys!)
             try
             {
-                using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetSshNetKeyType());
-                connection.Connect();
-                if (connection.IsConnected) workingKeys.Add(key);
+                // using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetSshNetKeyType());
+                // connection.Connect();
+                // if (connection.IsConnected) workingKeys.Add(key);
             }
             catch (Exception)
             {
                 //
             }
 
-        mkcc.Keys = workingKeys;
+        //mkcc.Keys = workingKeys;
         if (mkcc.Keys.Any())
         {
             ClientConnection.Connect();

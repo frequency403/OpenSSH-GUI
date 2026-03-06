@@ -1,13 +1,5 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:32
-
-#endregion
-
-using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
+﻿using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
+using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 
@@ -26,7 +18,7 @@ public class AuthorizedKey : IAuthorizedKey
             throw new IndexOutOfRangeException("Authorized Keys must contain TYPE FINGERPRINT COMMENT");
 
         KeyTypeDeclarationInFile = split[0];
-        KeyType = Enum.Parse<KeyType>(
+        KeyType = Enum.Parse<SshKeyType>(
             KeyTypeDeclarationInFile.StartsWith("ssh-")
                 ? KeyTypeDeclarationInFile.Replace("ssh-", "")
                 : KeyTypeDeclarationInFile.Split('-')[0], true);
@@ -46,7 +38,7 @@ public class AuthorizedKey : IAuthorizedKey
     /// <summary>
     ///     Represents the type of an authorized key.
     /// </summary>
-    public KeyType KeyType { get; }
+    public SshKeyType KeyType { get; }
 
     /// <summary>
     ///     Represents an authorized key entry.

@@ -11,8 +11,7 @@
         Height="300"
         x:Class="OpenSSH_GUI.Views.ExportWindow"
         x:DataType="viewModels:ExportWindowViewModel"
-        Title="{Binding WindowTitle}"
-        >
+        Title="{Binding WindowTitle}">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
