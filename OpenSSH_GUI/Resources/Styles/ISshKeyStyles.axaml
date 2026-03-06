@@ -96,7 +96,7 @@
                     </Style>
                 </StackPanel.Styles>
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText"
-                           Text="{Binding KeyType, Converter={StaticResource SingleSshKeyTypeConverter}}" />
+                           Text="{Binding SshKeyFormat, Converter={StaticResource SingleSshKeyTypeConverter}}" />
                 <Separator Margin="0" />
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText" Text="{Binding FileName}" />
             </StackPanel>

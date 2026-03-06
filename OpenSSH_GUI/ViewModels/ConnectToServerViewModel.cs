@@ -23,28 +23,11 @@ namespace OpenSSH_GUI.ViewModels;
 
 public sealed class ConnectToServerViewModel(
     IServerConnectionService serverConnectionService,
-    KeyLocatorService keyLocatorService,
-    OpenSshGuiDbContext dbContext) : ViewModelBase<ConnectToServerViewModel>
+    KeyLocatorService keyLocatorService) : ViewModelBase<ConnectToServerViewModel>
 {
-    private List<IConnectionCredentials> _connectionCredentials = [];
-    private bool _firstCredentialSet;
-
     private SshKeyFile? _selectedPublicKey;
-    
     public KeyLocatorService KeyLocatorService => keyLocatorService;
     public IServerConnectionService ServerConnectionService => serverConnectionService;
-
-    public List<IConnectionCredentials> ConnectionCredentials
-    {
-        get => _connectionCredentials;
-        set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
-    }
-
-    public IConnectionCredentials? SelectedConnection
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
     
     private bool ValidData => SelectedPublicKey is null
         ? Hostname != "" && Username != "" && Password != ""
@@ -140,13 +123,6 @@ public sealed class ConnectToServerViewModel(
         CancellationToken cancellationToken = default)
     {
         _selectedPublicKey = keyLocatorService.SshKeys.FirstOrDefault();
-
-        foreach (var connectionCredentialsDto in dbContext.ConnectionCredentialsDtos.Include(e => e.KeyDtos)
-                     .Where(dto =>
-                         dto.AuthType == AuthType.Password || dto.KeyDtos.Any(key =>
-                             keyLocatorService.SshKeys.Select(p => p.AbsoluteFilePath).Contains(key.AbsolutePath))))
-            _connectionCredentials.Add(await connectionCredentialsDto.ToCredentials());
-        _firstCredentialSet = false;
         UploadButtonEnabled = !TryingToConnect && serverConnectionService.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
         {
@@ -231,6 +207,6 @@ public sealed class ConnectToServerViewModel(
 
     public void UpdateComboBoxState()
     {
-        KeyComboBoxEnabled = serverConnectionService.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
+        KeyComboBoxEnabled = !serverConnectionService.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
     }
 }

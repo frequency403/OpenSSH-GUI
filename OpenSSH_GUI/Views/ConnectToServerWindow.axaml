@@ -47,46 +47,6 @@
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUseAllKeys}" />
             </CheckBox>
         </StackPanel>
-        <ComboBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  ItemsSource="{Binding ConnectionCredentials}"
-                  SelectedItem="{Binding SelectedConnection}"
-                  IsEnabled="{Binding !TryingToConnect}">
-            <ComboBox.DataTemplates>
-                <DataTemplate DataType="credentials:IKeyConnectionCredentials">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                        <Label Content="{Binding Display}" />
-                        <Separator />
-                        <Label Content="{Binding AuthType}" />
-                        <Separator />
-                        <Label Content="{Binding Key.FileName}" />
-                    </StackPanel>
-                </DataTemplate>
-                <DataTemplate DataType="credentials:IMultiKeyConnectionCredentials">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                        <Label Content="{Binding Display}" />
-                        <Separator />
-                        <Label Content="{Binding AuthType}" />
-                        <Separator />
-                        <ItemsControl ItemsSource="{Binding Keys}">
-                            <ItemsControl.DataTemplates>
-                                <DataTemplate DataType="keys:SshKeyFile">
-                                    <Label Content="{Binding FileName}" />
-                                </DataTemplate>
-                            </ItemsControl.DataTemplates>
-                        </ItemsControl>
-                    </StackPanel>
-                </DataTemplate>
-                <DataTemplate DataType="credentials:IPasswordConnectionCredentials">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                        <Label Content="{Binding Display}" />
-                        <Separator />
-                        <Label Content="{Binding AuthType}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ComboBox.DataTemplates>
-        </ComboBox>
         <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding Hostname}" Watermark="Hostname" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
