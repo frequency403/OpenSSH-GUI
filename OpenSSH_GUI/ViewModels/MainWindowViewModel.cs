@@ -23,6 +23,7 @@ using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
+using OpenSSH_GUI.SshConfig;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
 using SshNet.Keygen;
@@ -33,6 +34,8 @@ public class MainWindowViewModel(
     KeyLocatorService locatorService,
     IServerConnectionService serverConnectionService,
     IServiceProvider serviceProvider,
+    [FromKeyedServices("ssh_config")] SshConfiguration sshConfig,
+    [FromKeyedServices("sshd_config")] SshConfiguration sshdConfig,
     IConfiguration configuration,
     IDialogHost dialogHost)
     : ViewModelBase<MainWindowViewModel>

@@ -11,7 +11,7 @@ public interface IKnownHostsFile : IReactiveObject
     /// <summary>
     ///     Represents the line ending character used in the known_hosts file.
     /// </summary>
-    static string LineEnding { get; set; }
+    static string LineEnding { get; set; } = string.Empty;
 
     /// <summary>
     ///     Represents a file that contains known host entries.

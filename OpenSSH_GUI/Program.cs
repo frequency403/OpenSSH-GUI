@@ -115,6 +115,15 @@ internal sealed class Program
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
         collection.AddTransient<IClipboardService, ClipboardService>();
         collection.AddHostedService<FileSystemAnalyzer>();
+        
+        collection.AddKeyedSingleton("ssh_config",
+            (_, _) => SshConfigFileService.LoadFromFile(
+                SshConfigFiles.Config.GetPathOfFile()));
+
+        collection.AddKeyedSingleton("sshd_config",
+            (_, _) => SshConfigFileService.LoadFromFile(
+                SshConfigFiles.Sshd_Config.GetPathOfFile()));
+
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

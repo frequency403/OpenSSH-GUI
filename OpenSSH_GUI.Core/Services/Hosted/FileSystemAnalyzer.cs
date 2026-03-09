@@ -38,7 +38,7 @@ public class FileSystemAnalyzer(ILogger<FileSystemAnalyzer> logger) : IHostedSer
                         UnixFileMode.UserExecute); // 700
                 else
                     Directory.CreateDirectory(baseSshPath);
-#pragma warning enable CA1416
+#pragma warning restore CA1416
             
         }
         catch (Exception e)

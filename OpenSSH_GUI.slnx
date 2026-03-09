@@ -12,6 +12,7 @@
     <Folder Name="/CI/">
         <File Path=".github/FUNDING.yml" />
         <File Path=".github/workflows/build.yml" />
+        <File Path=".github/workflows/staging.yml" />
     </Folder>
     <Folder Name="/Images/">
         <File Path="images/AddKeyWindow.png" />
