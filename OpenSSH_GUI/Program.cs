@@ -11,6 +11,7 @@ using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
+using OpenSSH_GUI.Core.Services.Hosted;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using ReactiveUI.Avalonia;
@@ -106,6 +107,7 @@ internal sealed class Program
         collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
         collection.AddTransient<IClipboardService, ClipboardService>();
+        collection.AddHostedService<FileSystemAnalyzer>();
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

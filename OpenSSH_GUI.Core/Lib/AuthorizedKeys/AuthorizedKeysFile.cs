@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Keys;
-using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
@@ -14,25 +13,28 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <summary>
     ///     The contents of the authorized keys file or the path to the file.
     /// </summary>
-    private readonly string _fileContentsOrPath;
+    private string _fileContentsOrPath;
 
     /// <summary>
     ///     Represents an authorized keys file.
     /// </summary>
-    public AuthorizedKeysFile(string fileContentsOrPath, bool fromServer = false)
+
+
+    public async ValueTask<IAuthorizedKeysFile> InitializeAsync(string fileContentsOrPath, bool fromServer = false, CancellationToken cancellationToken = default)
     {
         IsFileFromServer = fromServer;
         _fileContentsOrPath = fileContentsOrPath;
         if (IsFileFromServer)
             LoadFileContents(_fileContentsOrPath);
         else
-            ReadAndLoadFileContents(_fileContentsOrPath);
+            await ReadAndLoadFileContents(_fileContentsOrPath, cancellationToken);
+        return this;
     }
 
     /// <summary>
     ///     Gets a value indicating whether the file is from a server.
     /// </summary>
-    private bool IsFileFromServer { get; }
+    private bool IsFileFromServer { get; set; }
 
     /// <summary>
     ///     Represents the authorized keys file.
@@ -72,12 +74,13 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     Persists the changes made to the authorized keys file.
     /// </summary>
     /// <returns>The modified <see cref="IAuthorizedKeysFile" /> object.</returns>
-    public IAuthorizedKeysFile PersistChangesInFile()
+    public async ValueTask<IAuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
     {
         if (IsFileFromServer) return this;
-        using var streamWriter = new StreamWriter(FileOperations.OpenTruncated(_fileContentsOrPath));
-        streamWriter.Write(ExportFileContent());
-        ReadAndLoadFileContents(_fileContentsOrPath);
+        await using var file = new FileStream(_fileContentsOrPath, FileMode.Truncate);
+        await using var streamWriter = new StreamWriter(file);
+        await streamWriter.WriteAsync(ExportFileContent());
+        await ReadAndLoadFileContents(_fileContentsOrPath, token);
         return this;
     }
 
@@ -147,9 +150,10 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     Reads and loads the contents of a file.
     /// </summary>
     /// <param name="pathToFile">The path to the file to be read and loaded.</param>
-    private void ReadAndLoadFileContents(string pathToFile)
+    private async ValueTask ReadAndLoadFileContents(string pathToFile, CancellationToken cancellationToken = default)
     {
-        using var streamReader = new StreamReader(FileOperations.OpenOrCreate(pathToFile));
-        LoadFileContents(streamReader.ReadToEnd());
+        await using var fileStream = File.Open(pathToFile, FileMode.OpenOrCreate);
+        using var streamReader = new StreamReader(fileStream);
+        LoadFileContents(await streamReader.ReadToEndAsync(cancellationToken));
     }
 }

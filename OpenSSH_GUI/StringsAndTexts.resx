@@ -139,7 +139,7 @@
         <value>keypairs in SSH directory</value>
     </data>
     <data name="MainWindowTitle" xml:space="preserve">
-        <value>OpenSSH GUI</value>
+        <value>OpenSSH GUI {0}</value>
     </data>
     <data name="MainWindowViewModelDeleteKeyQuestionText" xml:space="preserve">
         <value>Really delete the SSH key?</value>

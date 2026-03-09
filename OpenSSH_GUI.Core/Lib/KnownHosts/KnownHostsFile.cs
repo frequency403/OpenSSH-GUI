@@ -2,7 +2,6 @@
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -64,7 +63,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
         if (_isFromServer) return;
         if (stream is null)
         {
-            await using var file = FileOperations.OpenOrCreate(_fileKnownHostsPath);
+            await using var file = new FileStream(_fileKnownHostsPath, FileMode.OpenOrCreate);
             using var streamReader = new StreamReader(file, leaveOpen: true);
             SetKnownHosts(await streamReader.ReadToEndAsync());
         }
@@ -91,7 +90,8 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     public async Task UpdateFile()
     {
         if (_isFromServer) return;
-        await using var streamWriter = new StreamWriter(FileOperations.OpenTruncated(_fileKnownHostsPath));
+        await using var file = new FileStream(_fileKnownHostsPath, FileMode.Truncate);
+        await using var streamWriter = new StreamWriter(file);
         var newContent = KnownHosts
             .Where(e => !e.DeleteWholeHost)
             .Aggregate("", (current, host) => current + host.GetAllEntries());

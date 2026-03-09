@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
-using OpenSSH_GUI.Core.Lib.Static;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
 using SshKey = SshNet.Keygen.SshKey;
@@ -64,8 +63,8 @@ public class KeyLocatorService
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
                 privateKeyFilePath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath);
-                await using (var privateStreamWriter =
-                             new StreamWriter(FileOperations.OpenOrCreate(privateKeyFilePath)))
+                await using (var privateFileStream = new FileStream(privateKeyFilePath, FileMode.OpenOrCreate))
+                await using (var privateStreamWriter = new StreamWriter(privateFileStream))
                 {
                     await privateStreamWriter.WriteAsync(createdKey.ToPuttyFormat());
                 }
@@ -75,13 +74,13 @@ public class KeyLocatorService
             default:
                 var pubPath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath);
                 privateKeyFilePath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath, false);
-                await using (var privateStreamWriter =
-                             new StreamWriter(FileOperations.OpenOrCreate(privateKeyFilePath)))
+                await using (var privateFileStream = new FileStream(privateKeyFilePath, FileMode.OpenOrCreate))
+                await using (var privateStreamWriter = new StreamWriter(privateFileStream))
                 {
                     await privateStreamWriter.WriteAsync(createdKey.ToOpenSshFormat());
                 }
-
-                await using (var publicStreamWriter = new StreamWriter(FileOperations.OpenOrCreate(pubPath)))
+                await using (var publicFileStream = new FileStream(pubPath, FileMode.OpenOrCreate))
+                await using (var publicStreamWriter = new StreamWriter(publicFileStream))
                 {
                     await publicStreamWriter.WriteAsync(createdKey.ToOpenSshPublicFormat());
                 }

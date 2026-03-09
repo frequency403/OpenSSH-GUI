@@ -137,14 +137,14 @@ public class ServerConnection : ReactiveObject, IServerConnection
         return command.ExitStatus == 0;
     }
 
-    public IAuthorizedKeysFile GetAuthorizedKeysFromServer()
+    public ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServer(CancellationToken token = default)
     {
-        if (!IsConnected) return new AuthorizedKeysFile("", true);
-        return new AuthorizedKeysFile(
+        if (!IsConnected) return new AuthorizedKeysFile().InitializeAsync("", true, token);
+        return new AuthorizedKeysFile().InitializeAsync(
             ClientConnection
                 .RunCommand(
                     $"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
-                .Result, true);
+                .Result, true, token);
     }
 
     public bool WriteAuthorizedKeysChangesToServer(IAuthorizedKeysFile authorizedKeysFile)

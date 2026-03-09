@@ -83,7 +83,7 @@ public interface IServerConnection : IReactiveObject, IDisposable
     ///     Retrieves the authorized keys file from the server.
     /// </summary>
     /// <returns>The authorized keys file from the server.</returns>
-    IAuthorizedKeysFile GetAuthorizedKeysFromServer();
+    ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServer(CancellationToken token = default);
 
     /// <summary>
     ///     Writes the changes made to the authorized keys file to the server.

@@ -39,6 +39,8 @@ public class MainWindowViewModel(
 {
     private IServerConnection _serverConnection;
 
+    public string WindowTitle => string.Format(StringsAndTexts.MainWindowTitle, Version);
+    
     public string Version
     {
         get;

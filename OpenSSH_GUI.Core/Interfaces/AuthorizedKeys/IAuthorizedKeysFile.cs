@@ -32,7 +32,7 @@ public interface IAuthorizedKeysFile : IReactiveObject
     ///     Persists the changes made to the authorized keys file.
     /// </summary>
     /// <returns>The modified <see cref="IAuthorizedKeysFile" /> object.</returns>
-    IAuthorizedKeysFile PersistChangesInFile();
+    ValueTask<IAuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default);
 
     /// <summary>
     ///     Adds an authorized key asynchronously.

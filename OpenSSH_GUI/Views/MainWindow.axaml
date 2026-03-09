@@ -12,11 +12,9 @@
         x:DataType="viewModels:MainWindowViewModel"
         Width="1150"
         Height="450"
-
-        Title="{x:Static openSshGui:StringsAndTexts.MainWindowTitle}">
+        Title="{Binding WindowTitle}">
     <Window.Resources>
         <converters:PlatformIdConverter x:Key="PlatformIdConverter" />
-
     </Window.Resources>
     <Window.Styles>
         <Style Selector="ToggleButton.Sorter:pressed">

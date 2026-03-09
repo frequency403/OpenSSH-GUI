@@ -223,7 +223,7 @@
         <value>Es wurden</value>
     </data>
     <data name="MainWindowTitle" xml:space="preserve">
-        <value>OpenSSH GUI</value>
+        <value>OpenSSH GUI {0}</value>
     </data>
     <data name="ErrorAction" xml:space="preserve">
         <value>Fehler {0}</value>
