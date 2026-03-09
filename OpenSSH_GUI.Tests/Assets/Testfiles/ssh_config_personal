@@ -1,0 +1,314 @@
+# ============================================================
+# Personal SSH Client Configuration
+# ~/.ssh/config
+# Last modified: 2024-11-03 – max@workstation
+# ============================================================
+
+# ------------------------------------------------------------------
+# DEFAULTS – apply to all hosts unless overridden
+# ------------------------------------------------------------------
+Host *
+    ServerAliveInterval         60
+    ServerAliveCountMax         3
+    TCPKeepAlive                yes
+    Compression                 yes
+    AddKeysToAgent              yes
+    IdentitiesOnly              yes
+    HashKnownHosts              yes
+    StrictHostKeyChecking       ask
+    ControlMaster               auto
+    ControlPath                 ~/.ssh/sockets/%r@%h:%p
+    ControlPersist              10m
+    ConnectTimeout              15
+    LogLevel                    INFO
+    # Global fallback key
+    IdentityFile                ~/.ssh/id_ed25519
+
+# ------------------------------------------------------------------
+# JUMP / BASTION HOSTS
+# ------------------------------------------------------------------
+Host bastion-prod
+    HostName                    jump01.infra.example.com
+    User                        mhofer
+    Port                        22
+    IdentityFile                ~/.ssh/keys/prod_ed25519
+    ForwardAgent                yes
+    StrictHostKeyChecking       yes
+    ControlPersist              30m
+    # No compression on fast internal links
+    Compression                 no
+    Banner                      none
+
+Host bastion-staging
+    HostName                    jump01.staging.example.com
+    User                        mhofer
+    Port                        2222
+    IdentityFile                ~/.ssh/keys/staging_rsa4096
+    ForwardAgent                no
+    StrictHostKeyChecking       accept-new
+
+# ------------------------------------------------------------------
+# PRODUCTION SERVERS (via Bastion)
+# ------------------------------------------------------------------
+Host prod-web-*
+    User                        deploy
+    ProxyJump                   bastion-prod
+    IdentityFile                ~/.ssh/keys/prod_ed25519
+    StrictHostKeyChecking       yes
+    ForwardAgent                no
+    PermitLocalCommand          no
+    # No TTY for automated deployments
+    RequestTTY                  no
+
+Host prod-web-01
+    HostName                    10.10.1.11
+
+Host prod-web-02
+    HostName                    10.10.1.12
+
+Host prod-web-03
+    HostName                    10.10.1.13
+
+Host prod-db-primary
+    HostName                    10.10.2.10
+    User                        dbadmin
+    ProxyJump                   bastion-prod
+    IdentityFile                ~/.ssh/keys/db_ed25519
+    LocalForward                5432 localhost:5432
+    # No shell – port forwarding only
+    RequestTTY                  no
+    SessionType                 none
+    ExitOnForwardFailure        yes
+
+Host prod-db-replica-?
+    HostName                    10.10.2.%n
+    User                        dbadmin
+    ProxyJump                   bastion-prod
+    IdentityFile                ~/.ssh/keys/db_ed25519
+    RequestTTY                  no
+
+# ------------------------------------------------------------------
+# STAGING ENVIRONMENT
+# ------------------------------------------------------------------
+Host staging-*
+    User                        ubuntu
+    ProxyJump                   bastion-staging
+    IdentityFile                ~/.ssh/keys/staging_rsa4096
+    StrictHostKeyChecking       accept-new
+    UserKnownHostsFile          ~/.ssh/known_hosts_staging
+
+Host staging-app-01
+    HostName                    172.16.10.21
+    LocalForward                8080 localhost:80
+
+Host staging-app-02
+    HostName                    172.16.10.22
+
+Host staging-worker-01
+    HostName                    172.16.10.31
+    RemoteForward               9001 localhost:9001
+
+# ------------------------------------------------------------------
+# CI/CD & AUTOMATION
+# ------------------------------------------------------------------
+Host ci-runner-*
+    User                        gitlab-runner
+    IdentityFile                ~/.ssh/keys/ci_ecdsa
+    StrictHostKeyChecking       yes
+    BatchMode                   yes
+    ConnectTimeout              5
+    ServerAliveInterval         30
+    ServerAliveCountMax         2
+    ControlMaster               no
+
+Host ci-runner-01
+    HostName                    ci01.internal.example.com
+    Port                        22
+
+Host ci-runner-02
+    HostName                    ci02.internal.example.com
+    Port                        22
+
+Host deploy-gate
+    HostName                    deploy.example.com
+    User                        deployer
+    Port                        443
+    IdentityFile                ~/.ssh/keys/deploy_ed25519
+    BatchMode                   yes
+    StrictHostKeyChecking       yes
+
+# ------------------------------------------------------------------
+# CLOUD PROVIDERS
+# ------------------------------------------------------------------
+# AWS
+Host aws-ec2-*
+    User                        ec2-user
+    IdentityFile                ~/.ssh/keys/aws_virginia_rsa.pem
+    StrictHostKeyChecking       accept-new
+    UserKnownHostsFile          ~/.ssh/known_hosts_aws
+
+Host aws-ec2-dev
+    HostName                    54.211.100.42
+
+Host aws-ec2-prod-app
+    HostName                    52.90.200.11
+    ProxyJump                   bastion-prod
+
+# GCP
+Host gcp-*
+    User                        maximilianhofer
+    IdentityFile                ~/.ssh/keys/gcp_ed25519
+    StrictHostKeyChecking       accept-new
+
+Host gcp-instance-1
+    HostName                    34.65.10.99
+    # IAP tunnel via ProxyCommand
+    ProxyCommand                gcloud compute start-iap-tunnel gcp-instance-1 22 --listen-on-stdin --project=my-gcp-project --zone=europe-west1-b
+
+# Hetzner
+Host hetzner-*
+    User                        root
+    IdentityFile                ~/.ssh/keys/hetzner_ed25519
+    StrictHostKeyChecking       accept-new
+    UserKnownHostsFile          ~/.ssh/known_hosts_hetzner
+
+Host hetzner-vps-01
+    HostName                    116.203.55.77
+
+Host hetzner-vps-02
+    HostName                    116.203.55.78
+    Port                        2022
+
+# ------------------------------------------------------------------
+# DEVELOPER MACHINES & HOMELAB
+# ------------------------------------------------------------------
+Host devbox
+    HostName                    192.168.1.50
+    User                        max
+    IdentityFile                ~/.ssh/id_ed25519
+    ForwardAgent                yes
+    ForwardX11                  no
+    RemoteForward               52698 localhost:52698
+
+Host nas
+    HostName                    192.168.1.2
+    User                        admin
+    Port                        22
+    IdentityFile                ~/.ssh/id_ed25519
+    # No HashKnownHosts for local hosts
+    HashKnownHosts              no
+    StrictHostKeyChecking       yes
+
+Host pi-*
+    User                        pi
+    IdentityFile                ~/.ssh/id_ed25519
+    StrictHostKeyChecking       no
+    UserKnownHostsFile          /dev/null
+
+Host pi-01
+    HostName                    192.168.1.101
+
+Host pi-02
+    HostName                    192.168.1.102
+    # Low-power device – no compression needed
+    Compression                 no
+
+# ------------------------------------------------------------------
+# GIT SERVICES
+# ------------------------------------------------------------------
+Host github.com
+    HostName                    github.com
+    User                        git
+    IdentityFile                ~/.ssh/keys/github_ed25519
+    IdentitiesOnly              yes
+    AddKeysToAgent              yes
+
+Host gitlab.com
+    HostName                    gitlab.com
+    User                        git
+    IdentityFile                ~/.ssh/keys/gitlab_ed25519
+    IdentitiesOnly              yes
+
+Host gitlab-internal
+    HostName                    git.internal.example.com
+    User                        git
+    Port                        22
+    IdentityFile                ~/.ssh/keys/gitlab_internal_ed25519
+    StrictHostKeyChecking       yes
+
+# ------------------------------------------------------------------
+# SPECIAL CASE: Tunnels & Port-Forwarding-only
+# ------------------------------------------------------------------
+Host tunnel-mysql
+    HostName                    db-forward.example.com
+    User                        tunnel
+    Port                        22
+    IdentityFile                ~/.ssh/keys/tunnel_ed25519
+    LocalForward                3306 db-internal.example.com:3306
+    SessionType                 none
+    RequestTTY                  no
+    ExitOnForwardFailure        yes
+    ServerAliveInterval         30
+    BatchMode                   yes
+
+Host tunnel-redis
+    HostName                    cache-forward.example.com
+    User                        tunnel
+    Port                        22
+    IdentityFile                ~/.ssh/keys/tunnel_ed25519
+    LocalForward                6379 redis-internal.example.com:6379
+    SessionType                 none
+    RequestTTY                  no
+    ExitOnForwardFailure        yes
+
+# ------------------------------------------------------------------
+# LEGACY / OLD SERVERS (weaker crypto permitted)
+# ------------------------------------------------------------------
+Host legacy-*
+    User                        sysadmin
+    IdentityFile                ~/.ssh/keys/legacy_rsa2048
+    # Older servers do not support modern algorithms
+    HostKeyAlgorithms           +ssh-rsa
+    PubkeyAcceptedKeyTypes      +ssh-rsa
+    KexAlgorithms               diffie-hellman-group14-sha256,diffie-hellman-group14-sha1
+    Ciphers                     aes256-ctr,aes128-ctr,3des-cbc
+    MACs                        hmac-sha2-256,hmac-sha1
+    StrictHostKeyChecking       yes
+
+Host legacy-app-01
+    HostName                    old-app.dmz.example.com
+    Port                        22
+
+Host legacy-db-01
+    HostName                    old-db.dmz.example.com
+    Port                        22
+    LocalForward                5433 localhost:5432
+
+# ------------------------------------------------------------------
+# EXTERNAL / PARTNERS
+# ------------------------------------------------------------------
+Host partner-sftp
+    HostName                    sftp.partner-company.de
+    User                        acme_upload
+    Port                        22022
+    IdentityFile                ~/.ssh/keys/partner_rsa4096
+    StrictHostKeyChecking       yes
+    IdentitiesOnly              yes
+    BatchMode                   yes
+    Compression                 yes
+    # SFTP subsystem only, no interactive shell
+    RequestTTY                  no
+
+Host *.partner-company.de
+    StrictHostKeyChecking       yes
+    IdentityFile                ~/.ssh/keys/partner_rsa4096
+    User                        acme_readonly
+
+# ------------------------------------------------------------------
+# CATCH-ALL for unknown hosts on the internal network
+# ------------------------------------------------------------------
+Host 10.* 172.16.* 192.168.*
+    StrictHostKeyChecking       accept-new
+    UserKnownHostsFile          ~/.ssh/known_hosts_internal
+    ConnectTimeout              5
+    LogLevel                    VERBOSE

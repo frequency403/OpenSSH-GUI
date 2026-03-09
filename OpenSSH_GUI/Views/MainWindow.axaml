@@ -90,7 +90,7 @@
             </ToggleButton>
 
             <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-                <ItemsControl ItemsSource="{Binding SshKeys}"
+                <ItemsControl ItemsSource="{Binding LocatorService.SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
                               Name="TheItemsGrid"
@@ -229,7 +229,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                            <Label Content="{Binding SshKeys.Count}" FontWeight="Bold" />
+                            <Label Content="{Binding LocatorService.SshKeys.Count}" FontWeight="Bold" />
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>

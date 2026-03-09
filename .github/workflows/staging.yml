@@ -1,0 +1,96 @@
+name: Staging / Nightly Build
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  BUILD_CONFIGURATION: Release
+  BASE_VERSION: "1.0.0"
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Resolve git metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $hash   = git rev-parse --short HEAD
+          $branch = "${{ github.ref_name }}"
+          $date   = Get-Date -Format "yyyy-MM-dd"
+          $version = "${{ env.BASE_VERSION }}+$hash"
+
+          echo "GIT_HASH=$hash"       >> $env:GITHUB_ENV
+          echo "GIT_BRANCH=$branch"   >> $env:GITHUB_ENV
+          echo "BUILD_DATE=$date"     >> $env:GITHUB_ENV
+          echo "VERSION=$version"     >> $env:GITHUB_ENV
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: >
+          dotnet build
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --no-restore
+          -p:BaseVersion=${{ env.BASE_VERSION }}
+          -p:GitCommitHash=${{ env.GIT_HASH }}
+
+      - name: Test
+        run: >
+          dotnet test
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --no-build
+          --verbosity minimal
+        continue-on-error: true
+
+      - name: Publish
+        run: >
+          dotnet publish
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --no-build
+          --output ./artifacts
+          -p:BaseVersion=${{ env.BASE_VERSION }}
+          -p:GitCommitHash=${{ env.GIT_HASH }}
+
+      - name: Zip artifacts
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./artifacts/* `
+            -DestinationPath ./OpenSSH_GUI-nightly-${{ env.GIT_HASH }}.zip
+
+      # Delete existing nightly release to allow tag re-use
+      - name: Delete existing nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          gh release delete nightly --yes --cleanup-tag 2>$null || true
+
+      - name: Create nightly release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          name: "Nightly (${{ env.BUILD_DATE }}) — ${{ env.VERSION }}"
+          body: |
+            **Branch:** `${{ env.GIT_BRANCH }}`
+            **Commit:** `${{ env.GIT_HASH }}`
+            **Built:** ${{ env.BUILD_DATE }}
+
+            > Automated staging build — not intended for production use.
+          prerelease: true
+          files: OpenSSH_GUI-nightly-${{ env.GIT_HASH }}.zip

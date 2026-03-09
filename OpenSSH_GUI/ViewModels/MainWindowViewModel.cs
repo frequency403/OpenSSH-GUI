@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Material.Icons;
 using Material.Icons.Avalonia;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
@@ -32,6 +33,7 @@ public class MainWindowViewModel(
     KeyLocatorService locatorService,
     IServerConnectionService serverConnectionService,
     IServiceProvider serviceProvider,
+    IConfiguration configuration,
     IDialogHost dialogHost)
     : ViewModelBase<MainWindowViewModel>
 {
@@ -199,7 +201,7 @@ public class MainWindowViewModel(
             var res = await box.ShowAsync();
             if (res != ButtonResult.Yes) return null;
             //u.DeleteKey();
-            SshKeys.Remove(u);
+            LocatorService.SshKeys.Remove(u);
             return u;
         });
 
@@ -220,7 +222,7 @@ public class MainWindowViewModel(
                 string.Format(StringsAndTexts.ErrorAction,
                     string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat)),
                 StringsAndTexts.MainWindowConvertKeyMessageBoxErrorText, ButtonEnum.Ok, Icon.Error);
-            var oldIndex = SshKeys.IndexOf(key);
+            var oldIndex = LocatorService.SshKeys.IndexOf(key);
             var result = await box.ShowAsync();
             if (result is ButtonResult.Abort or ButtonResult.None) return key;
 
@@ -231,7 +233,7 @@ public class MainWindowViewModel(
             //     return key;
             // }
 
-            SshKeys.Remove(key);
+            LocatorService.SshKeys.Remove(key);
             // SshKeys.Insert(oldIndex, formatted);
             // if (result == ButtonResult.Yes) key.DeleteKey();
             return key;
@@ -239,7 +241,6 @@ public class MainWindowViewModel(
 
     public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.Create<bool, bool>(input =>
     {
-        SshKeys.Clear();
         locatorService.RerunSearch();
         return input;
     });
@@ -325,9 +326,9 @@ public class MainWindowViewModel(
                     continue;
                 }
 
-                var index = SshKeys.IndexOf(key);
-                SshKeys.RemoveAt(index);
-                SshKeys.Insert(index, key);
+                var index = LocatorService.SshKeys.IndexOf(key);
+                LocatorService.SshKeys.RemoveAt(index);
+                LocatorService.SshKeys.Insert(index, key);
                 break;
             }
 
@@ -336,7 +337,7 @@ public class MainWindowViewModel(
 
     public IServerConnection? ServerConnection => serverConnectionService.ServerConnection;
 
-    public ObservableCollection<SshKeyFile> SshKeys => locatorService.SshKeys;
+    public KeyLocatorService LocatorService => locatorService;
 
     public bool? KeyTypeSort
     {
@@ -404,17 +405,13 @@ public class MainWindowViewModel(
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = MaterialIconKind.CircleOutline;
 
-    public override ValueTask InitializeAsync(IInitializerParameters<MainWindowViewModel>? parameters = null,
-        CancellationToken cancellationToken = default)
+    public override void Initialize(IInitializerParameters<MainWindowViewModel>? parameters = null)
     {
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
         locatorService.SshKeysCollectionChanged += (sender, args) => EvaluateAppropriateIcon();
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        Version = version is null
-            ? "0.0.0"
-            : string.Format(StringsAndTexts.Version, version?.Major, version?.Minor, version?.Build);
-        return base.InitializeAsync(parameters, cancellationToken);
+        Version = configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
+        base.Initialize(parameters);
     }
 
     private async Task<ExportWindowViewModel?> ShowExportWindowWithText(SshKeyFile key, bool @public)
@@ -454,7 +451,7 @@ public class MainWindowViewModel(
     {
         ItemsCount = new MaterialIcon
         {
-            Kind = SshKeys.Count switch
+            Kind = LocatorService.SshKeys.Count switch
             {
                 1 => MaterialIconKind.NumericOne,
                 2 => MaterialIconKind.NumericTwo,

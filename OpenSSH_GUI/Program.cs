@@ -1,6 +1,8 @@
-﻿using Avalonia;
+﻿using System.Reflection;
+using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core.Extensions;
@@ -14,12 +16,23 @@ using OpenSSH_GUI.Views;
 using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
+#if!DEBUG
+using Serilog.Events;
+#endif
 using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
 internal sealed class Program
 {
+    private static string GetHostVersion()
+    {
+        return Assembly.GetEntryAssembly()
+                   ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                   ?.InformationalVersion
+               ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
+               ?? "0.0.0";
+    }
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
@@ -29,6 +42,13 @@ internal sealed class Program
         using var mainCancellationTokenSource = new CancellationTokenSource();
         var host = Host.CreateDefaultBuilder(args)
             .ConfigureServices(ConfigureServicesInternal)
+            .UseSerilog()
+            .ConfigureAppConfiguration((_, builder) =>
+            {
+                builder.AddInMemoryCollection([
+                    new KeyValuePair<string, string?>("RUNNING_VERSION", GetHostVersion())
+                ]);
+            })
             .Build();
 
         await host.StartAsync(mainCancellationTokenSource.Token);
@@ -96,7 +116,7 @@ internal sealed class Program
             .WithInterFont()
             .LogToTrace()
             .UseReactiveUI(builder => { })
-            .AfterSetup(appBuilder =>
+            .AfterSetup(_ =>
             {
                 if (serviceProvider is not null)
                     App.ServiceProvider = serviceProvider;

@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
         <PackageProjectUrl>https://github.com/frequency403/OpenSSH-GUI</PackageProjectUrl>
+        <BaseVersion>3.0.0</BaseVersion>
     </PropertyGroup>
 
     <ItemGroup>

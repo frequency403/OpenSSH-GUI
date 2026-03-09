@@ -36,8 +36,26 @@ public enum SshMatchCriterionKind
     /// <summary>Matches against a named tag associated with the connection (<c>Match tagged</c>).</summary>
     Tagged,
 
-    /// <summary>Matches when the local machine belongs to the specified network subnet (<c>Match localnetwork</c>).</summary>
-    LocalNetwork
+    /// <summary>Matches against the local machine belongs to the specified network subnet (<c>Match localnetwork</c>).</summary>
+    LocalNetwork,
+
+    /// <summary>Matches against the address of the remote host (<c>Match address</c>).</summary>
+    Address,
+
+    /// <summary>Matches against the group of the remote user (<c>Match group</c>).</summary>
+    Group,
+
+    /// <summary>Matches against the local address the connection was received on (<c>Match localaddress</c>).</summary>
+    LocalAddress,
+
+    /// <summary>Matches against the local port the connection was received on (<c>Match localport</c>).</summary>
+    LocalPort,
+
+    /// <summary>Matches against the remote port (<c>Match port</c>).</summary>
+    Port,
+
+    /// <summary>Matches against the remote host's RDNS (<c>Match rdomain</c>).</summary>
+    RDomain
 }
 
 /// <summary>
@@ -94,6 +112,12 @@ public sealed record SshMatchCriterion(SshMatchCriterionKind Kind, string? Patte
             SshMatchCriterionKind.LocalUser => "localuser",
             SshMatchCriterionKind.Tagged => "tagged",
             SshMatchCriterionKind.LocalNetwork => "localnetwork",
+            SshMatchCriterionKind.Address => "address",
+            SshMatchCriterionKind.Group => "group",
+            SshMatchCriterionKind.LocalAddress => "localaddress",
+            SshMatchCriterionKind.LocalPort => "localport",
+            SshMatchCriterionKind.Port => "port",
+            SshMatchCriterionKind.RDomain => "rdomain",
             _ => Kind.ToString().ToLowerInvariant()
         };
 

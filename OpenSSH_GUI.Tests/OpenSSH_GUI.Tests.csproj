@@ -25,4 +25,12 @@
         <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj"/>
         <ProjectReference Include="..\OpenSSH_GUI.SshConfig\OpenSSH_GUI.SshConfig.csproj"/>
     </ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="Assets/Testfiles/*"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
 </Project>

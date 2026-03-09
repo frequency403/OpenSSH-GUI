@@ -1,0 +1,34 @@
+<Project>
+
+    <Target Name="ResolveGitHash"
+            BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo"
+            Condition="'$(GitCommitHash)' == ''">
+
+        <Exec Command="git rev-parse --short HEAD"
+              ConsoleToMSBuild="true"
+              IgnoreExitCode="true">
+            <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
+        </Exec>
+
+        <PropertyGroup>
+            <GitCommitHash>$([System.String]::Copy('$(GitCommitHash)').Trim())</GitCommitHash>
+            <GitCommitHash Condition="'$(GitCommitHash)' == ''">unknown</GitCommitHash>
+        </PropertyGroup>
+
+    </Target>
+
+    <Target Name="ApplyVersionInfo"
+            BeforeTargets="GetAssemblyVersion;GenerateAssemblyInfo"
+            DependsOnTargets="ResolveGitHash">
+        <PropertyGroup>
+            <BaseVersion Condition="'$(BaseVersion)' == ''">1.0.0</BaseVersion>
+
+            <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+            <SourceRevisionId>$(GitCommitHash)</SourceRevisionId>
+            <Version>$(BaseVersion)</Version>
+            <InformationalVersion>$(BaseVersion)+$(GitCommitHash)</InformationalVersion>
+        </PropertyGroup>
+    </Target>
+
+</Project>

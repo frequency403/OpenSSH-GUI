@@ -50,7 +50,8 @@ public static class SshConfigParser
         FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
             "all", "canonical", "final",
             "exec", "host", "originalhost",
-            "user", "localuser", "tagged", "localnetwork");
+            "user", "localuser", "tagged", "localnetwork",
+            "address", "group", "localaddress", "localport", "port", "rdomain");
 
     private static readonly FrozenSet<string> NoArgMatchKeywords =
         FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
@@ -346,6 +347,12 @@ public static class SshConfigParser
                     "localuser" => SshMatchCriterionKind.LocalUser,
                     "tagged" => SshMatchCriterionKind.Tagged,
                     "localnetwork" => SshMatchCriterionKind.LocalNetwork,
+                    "address" => SshMatchCriterionKind.Address,
+                    "group" => SshMatchCriterionKind.Group,
+                    "localaddress" => SshMatchCriterionKind.LocalAddress,
+                    "localport" => SshMatchCriterionKind.LocalPort,
+                    "port" => SshMatchCriterionKind.Port,
+                    "rdomain" => SshMatchCriterionKind.RDomain,
                     _ => throw new UnreachableException()
                 };
 

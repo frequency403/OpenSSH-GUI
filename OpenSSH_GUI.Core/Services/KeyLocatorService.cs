@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Text;
-using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
@@ -28,7 +27,7 @@ public class KeyLocatorService
         _logger = logger;
         _directoryCrawler = directoryCrawler;
         this.serviceProvider = serviceProvider;
-        SshKeys = new ObservableCollectionExtended<SshKeyFile>();
+        SshKeys = new ObservableCollection<SshKeyFile>();
         _searchingTask = SearchForKeysAndUpdateCollection();
     }
 
