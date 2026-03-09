@@ -69,6 +69,20 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
     public string ToPuttyPublicFormat =>
         _privateKeyFile?.ToPuttyPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
 
+    public async ValueTask DisposeAsync()
+    {
+        if (_privateKeyFile is IAsyncDisposable privateKeyFileAsyncDisposable)
+            await privateKeyFileAsyncDisposable.DisposeAsync();
+        else if (_privateKeyFile != null)
+            _privateKeyFile.Dispose();
+    }
+
+
+    public void Dispose()
+    {
+        _privateKeyFile?.Dispose();
+    }
+
     public static implicit operator PrivateKeyFile?(SshKeyFile sshKeyFile)
     {
         return sshKeyFile._privateKeyFile;
@@ -234,12 +248,12 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
             if (!IsInitialized) return ValueTask.FromResult(false);
             var filesToDelete = new[] { AbsoluteFilePath }
                 .Concat(Directory.EnumerateFiles(Path.GetDirectoryName(AbsoluteFilePath),
-                    $"*{(SshKeyFormat is SshKeyFormat.OpenSSH ? ".pub" : string.Empty)}", SearchOption.TopDirectoryOnly))
+                    $"*{(SshKeyFormat is SshKeyFormat.OpenSSH ? ".pub" : string.Empty)}",
+                    SearchOption.TopDirectoryOnly))
                 .Where(e => string.Equals(Path.GetFileNameWithoutExtension(AbsoluteFilePath),
                     Path.GetFileNameWithoutExtension(e))).ToArray();
             Span<bool> span = stackalloc bool[filesToDelete.Length];
             for (var i = 0; i < span.Length; i++)
-            {
                 try
                 {
                     File.Delete(filesToDelete[i]);
@@ -250,26 +264,12 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
                     Logger.LogError(e, "Failed to delete {filePath}", filesToDelete[i]);
                     span[i] = false;
                 }
-            }
+
             return ValueTask.FromResult(span.CountAny(true) == span.Length);
         }
         catch (Exception exception)
         {
             return ValueTask.FromException<bool>(exception);
         }
-    }
-    
-
-    public void Dispose()
-    {
-        _privateKeyFile?.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_privateKeyFile is IAsyncDisposable privateKeyFileAsyncDisposable)
-            await privateKeyFileAsyncDisposable.DisposeAsync();
-        else if (_privateKeyFile != null)
-            _privateKeyFile.Dispose();
     }
 }

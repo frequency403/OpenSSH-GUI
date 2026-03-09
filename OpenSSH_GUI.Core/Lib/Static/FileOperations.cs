@@ -57,24 +57,4 @@ public static class FileOperations
     {
         return File.Open(filePath, Options(FileMode.Truncate));
     }
-
-    public static string[] ReadAllLines(string filePath)
-    {
-        return File.ReadAllLines(filePath);
-    }
-
-    public static bool Exists(string filePath)
-    {
-        return File.Exists(filePath);
-    }
-
-    public static void Move(string source, string destination, bool overwrite = false)
-    {
-        File.Move(source, destination, overwrite);
-    }
-
-    public static void Delete(string filePath)
-    {
-        if (File.Exists(filePath)) File.Delete(filePath);
-    }
 }

@@ -15,7 +15,8 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService) : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
+public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService)
+    : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
 {
     private static readonly SshKeyType[] _sshKeyTypes = Enum.GetValues<SshKeyType>();
     private bool _createKey;
@@ -66,9 +67,9 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService) :
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
 
-    private async Task<AddKeyWindowViewModel?> OnSubmit(bool createKey)
+    protected override async Task<AddKeyWindowViewModel?> OnBooleanSubmit(bool inputParameter)
     {
-        _createKey = createKey;
+        _createKey = inputParameter;
         if (!_createKey)
         {
             RequestClose();
@@ -107,7 +108,6 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService) :
             name => name is not null && !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, AddKeyWindowViewModel?>(OnSubmit);
         _selectedKeyType = _sshKeyTypes.First();
         base.Initialize(parameters);
     }

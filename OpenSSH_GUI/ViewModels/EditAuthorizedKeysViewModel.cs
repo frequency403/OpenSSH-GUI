@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
@@ -12,7 +11,8 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService) : ViewModelBase<EditAuthorizedKeysViewModel>
+public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
+    : ViewModelBase<EditAuthorizedKeysViewModel>
 {
     private SshKeyFile? _selectedKey;
     private IServerConnection _serverConnection;
@@ -49,6 +49,21 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService) : 
     public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
     public ReactiveCommand<SshKeyFile, SshKeyFile?> AddKey { get; private set; }
 
+    protected override Task<EditAuthorizedKeysViewModel?> OnBooleanSubmit(bool inputParameter)
+    {
+        try
+        {
+            if (!inputParameter) return Task.FromResult<EditAuthorizedKeysViewModel?>(this);
+            AuthorizedKeysFileLocal.PersistChangesInFile();
+            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
+            return Task.FromResult<EditAuthorizedKeysViewModel?>(this);
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException<EditAuthorizedKeysViewModel?>(exception);
+        }
+    }
+
     public override ValueTask InitializeAsync(IInitializerParameters<EditAuthorizedKeysViewModel>? parameters = null,
         CancellationToken cancellationToken = default)
     {
@@ -58,13 +73,6 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService) : 
         AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
         _selectedKey = PublicKeys.FirstOrDefault();
         UpdateAddButton();
-        BooleanSubmit = ReactiveCommand.Create<bool, EditAuthorizedKeysViewModel?>(e =>
-        {
-            if (!e) return this;
-            AuthorizedKeysFileLocal.PersistChangesInFile();
-            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
-            return this;
-        });
         AddKey = ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async e =>
         {
             await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
@@ -84,5 +92,5 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService) : 
 
 public record EditAuthorizedKeysViewModelInitializeParameters : IInitializerParameters<EditAuthorizedKeysViewModel>
 {
-    public IServerConnection ServerConnection { get; set; }
+    public IServerConnection ServerConnection { get; init; }
 }

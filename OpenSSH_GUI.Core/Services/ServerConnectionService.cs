@@ -12,13 +12,15 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
 {
     [MemberNotNullWhen(true, nameof(ServerConnection))]
     public bool IsConnected => ServerConnection?.IsConnected ?? false;
+
     public IServerConnection? ServerConnection
     {
         get => field;
-        set => this.RaiseAndSetIfChanged(ref field, value); 
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public async ValueTask<bool> EstablishConnection(IConnectionCredentials connectionCredentials, CancellationToken token = default)
+    public async ValueTask<bool> EstablishConnection(IConnectionCredentials connectionCredentials,
+        CancellationToken token = default)
     {
         try
         {
@@ -40,5 +42,4 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
             ServerConnection = null;
         return disconnectResult;
     }
-    
 }

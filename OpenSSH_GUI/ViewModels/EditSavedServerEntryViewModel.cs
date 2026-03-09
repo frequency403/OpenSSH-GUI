@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
@@ -33,16 +32,23 @@ public sealed class EditSavedServerEntryViewModel
 
     public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
 
+    protected override Task<EditSavedServerEntryViewModel?> OnBooleanSubmit(bool inputParameter)
+    {
+        try
+        {
+            if (!inputParameter) return Task.FromResult<EditSavedServerEntryViewModel?>(null);
+            if (CredentialsToEdit is IPasswordConnectionCredentials pwcc) pwcc.Password = Password;
+            if (CredentialsToEdit is IKeyConnectionCredentials kcc) kcc.Key = SelectedKey;
+            return Task.FromResult<EditSavedServerEntryViewModel?>(this);
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException<EditSavedServerEntryViewModel?>(exception);
+        }
+    }
+
     public override void Initialize(IInitializerParameters<EditSavedServerEntryViewModel>? parameters = null)
     {
-        BooleanSubmit =
-            ReactiveCommand.Create<bool, EditSavedServerEntryViewModel?>(e =>
-            {
-                if (!e) return null;
-                if (CredentialsToEdit is IPasswordConnectionCredentials pwcc) pwcc.Password = Password;
-                if (CredentialsToEdit is IKeyConnectionCredentials kcc) kcc.Key = SelectedKey;
-                return this;
-            });
         if (parameters is EditSavedServerEntryViewModelInitializeParameters initParams)
         {
             Keys = initParams.Keys;

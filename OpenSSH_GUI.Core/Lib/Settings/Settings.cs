@@ -10,7 +10,7 @@ public record Settings
     /// <summary>
     ///     The current version of the application.
     /// </summary>
-    public string Version { get; set; } =
+    public string Version { get; init; } =
         $"v{(Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()).GetName().Version?.ToString(3)}";
 
     /// <summary>

@@ -36,29 +36,29 @@ public interface IServerConnection : IReactiveObject, IDisposable
     PlatformID ServerOs { get; set; }
 
     /// <summary>
-    /// Establishes a connection to the server using the provided credentials and updates the connection state.
+    ///     Establishes a connection to the server using the provided credentials and updates the connection state.
     /// </summary>
     /// <param name="token">
-    /// A <see cref="CancellationToken" /> that can be used to cancel the connection attempt.
+    ///     A <see cref="CancellationToken" /> that can be used to cancel the connection attempt.
     /// </param>
     /// <returns>
-    /// A <see cref="ValueTask{Boolean}" /> representing the asynchronous connection operation.
-    /// Returns <c>true</c> if the connection is established successfully; otherwise, <c>false</c>.
+    ///     A <see cref="ValueTask{Boolean}" /> representing the asynchronous connection operation.
+    ///     Returns <c>true</c> if the connection is established successfully; otherwise, <c>false</c>.
     /// </returns>
     ValueTask<bool> ConnectToServerAsync(CancellationToken token = default);
 
     /// <summary>
-    /// Disconnects from the server and updates the connection state asynchronously.
+    ///     Disconnects from the server and updates the connection state asynchronously.
     /// </summary>
     /// <param name="token">
-    /// A <see cref="CancellationToken" /> that can be used to cancel the disconnection attempt.
+    ///     A <see cref="CancellationToken" /> that can be used to cancel the disconnection attempt.
     /// </param>
     /// <returns>
-    /// A <see cref="ValueTask{Boolean}" /> representing the asynchronous disconnection operation.
-    /// Returns <c>true</c> if the disconnection is successful; otherwise, <c>false</c>.
+    ///     A <see cref="ValueTask{Boolean}" /> representing the asynchronous disconnection operation.
+    ///     Returns <c>true</c> if the disconnection is successful; otherwise, <c>false</c>.
     /// </returns>
     ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default);
-    
+
     /// <summary>
     ///     Closes the server connection.
     /// </summary>

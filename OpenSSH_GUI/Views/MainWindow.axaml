@@ -210,10 +210,12 @@
                         </ContextMenu>
                     </Border.ContextMenu>
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding ServerConnection.IsConnected, FallbackValue=False}">
+                        <StackPanel Orientation="Horizontal"
+                                    IsVisible="{Binding ServerConnection.IsConnected, FallbackValue=False}">
                             <materialIcons:MaterialIcon Kind="Signal" Foreground="Green" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !ServerConnection.IsConnected, FallbackValue=True}">
+                        <StackPanel Orientation="Horizontal"
+                                    IsVisible="{Binding !ServerConnection.IsConnected, FallbackValue=True}">
                             <materialIcons:MaterialIcon Kind="SignalOff" Foreground="Red" />
                         </StackPanel>
                     </StackPanel>
@@ -265,7 +267,7 @@
                             </MenuItem>
                             <Separator />
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuAppSettings}"
-                                      Command="{Binding OpenAppSettings}">
+                                      Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
                                 </MenuItem.Icon>

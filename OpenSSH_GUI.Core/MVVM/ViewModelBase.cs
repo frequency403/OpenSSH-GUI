@@ -1,14 +1,24 @@
-﻿using System.Reactive;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.MVVM;
 
-public class ViewModelBase<T>(ILogger<T>? logger = null) : ViewModelBase(typeof(T), logger) where T : ViewModelBase
+public class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
 {
-    public ReactiveCommand<bool, T?> BooleanSubmit { get; set; } = ReactiveCommand.Create<bool, T?>(e => null);
+    public ViewModelBase(ILogger<T>? logger = null) : base(typeof(T), logger)
+    {
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, T?>(OnBooleanSubmit);
+    }
+
+    public ReactiveCommand<bool, T?> BooleanSubmit { get; private init; }
 
     public EventHandler Close { get; set; } = delegate { };
+
+    protected virtual Task<T?> OnBooleanSubmit(bool inputParameter)
+    {
+        return Task.FromResult(default(T?));
+    }
+
     protected void RequestClose()
     {
         Close.Invoke(this, EventArgs.Empty);

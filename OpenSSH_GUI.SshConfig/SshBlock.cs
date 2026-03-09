@@ -111,7 +111,7 @@ public sealed record SshHostBlock : SshBlock
     /// <param name="items">Optional initial block contents.</param>
     public static SshHostBlock Create(IEnumerable<string> patterns, IEnumerable<SshLineItem>? items = null)
     {
-        return new SshHostBlock([..patterns], [..(items ?? [])], 0, string.Empty, null);
+        return new SshHostBlock([..patterns], [..items ?? []], 0, string.Empty, null);
     }
 
     /// <inheritdoc />
@@ -156,7 +156,7 @@ public sealed record SshMatchBlock : SshBlock
     /// <param name="items">Optional initial block contents.</param>
     public static SshMatchBlock Create(IEnumerable<SshMatchCriterion> criteria, IEnumerable<SshLineItem>? items = null)
     {
-        return new SshMatchBlock([..criteria], [..(items ?? [])], 0, string.Empty, null);
+        return new SshMatchBlock([..criteria], [..items ?? []], 0, string.Empty, null);
     }
 
     /// <inheritdoc />

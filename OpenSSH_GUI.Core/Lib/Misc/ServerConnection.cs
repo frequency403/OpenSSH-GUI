@@ -95,35 +95,9 @@ public class ServerConnection : ReactiveObject, IServerConnection
             IsConnected = false;
             return ValueTask.FromResult(true);
         }
-        catch(Exception e)
-        {
-            return ValueTask.FromException<bool>(e);
-        }
-    }
-    
-    public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
-    {
-        exception = null;
-        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return TestMulti(mkcc);
-        try
-        {
-            ClientConnection.Connect();
-            IsConnected = ClientConnection.IsConnected;
-            if (IsConnected)
-            {
-                ServerOs = GetServerOs();
-                CheckForFilesAndCreateThemIfTheyNotExist();
-                ConnectionTime = DateTime.Now;
-            }
-
-            if (ServerOs != PlatformID.Other) return IsConnected;
-            exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");
-            return false;
-        }
         catch (Exception e)
         {
-            exception = e;
-            return false;
+            return ValueTask.FromException<bool>(e);
         }
     }
 
@@ -180,6 +154,32 @@ public class ServerConnection : ReactiveObject, IServerConnection
             .RunCommand(
                 $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
             .ExitStatus == 0;
+    }
+
+    public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
+    {
+        exception = null;
+        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return TestMulti(mkcc);
+        try
+        {
+            ClientConnection.Connect();
+            IsConnected = ClientConnection.IsConnected;
+            if (IsConnected)
+            {
+                ServerOs = GetServerOs();
+                CheckForFilesAndCreateThemIfTheyNotExist();
+                ConnectionTime = DateTime.Now;
+            }
+
+            if (ServerOs != PlatformID.Other) return IsConnected;
+            exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");
+            return false;
+        }
+        catch (Exception e)
+        {
+            exception = e;
+            return false;
+        }
     }
 
     private bool TestMulti(IMultiKeyConnectionCredentials mkcc)

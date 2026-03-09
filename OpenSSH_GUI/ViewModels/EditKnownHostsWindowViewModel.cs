@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
@@ -29,6 +28,16 @@ public class EditKnownHostsWindowViewModel
         private set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
+    protected override async Task<EditKnownHostsWindowViewModel?> OnBooleanSubmit(bool inputParameter)
+    {
+        if (!inputParameter) return this;
+        KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
+        if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
+        await KnownHostsFileLocal.UpdateFile();
+        if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
+        return this;
+    }
+
     public override ValueTask InitializeAsync(IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null,
         CancellationToken cancellationToken = default)
     {
@@ -39,15 +48,6 @@ public class EditKnownHostsWindowViewModel
         KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
         KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, EditKnownHostsWindowViewModel?>(async e =>
-        {
-            if (!e) return this;
-            KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
-            if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
-            await KnownHostsFileLocal.UpdateFile();
-            if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
-            return this;
-        });
         return base.InitializeAsync(parameters, cancellationToken);
     }
 }

@@ -1,20 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using System.Reactive;
+﻿using System.Reactive;
 using Avalonia.Media;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Database.DTO;
-using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
-using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
@@ -28,7 +18,7 @@ public sealed class ConnectToServerViewModel(
     private SshKeyFile? _selectedPublicKey;
     public KeyLocatorService KeyLocatorService => keyLocatorService;
     public IServerConnectionService ServerConnectionService => serverConnectionService;
-    
+
     private bool ValidData => SelectedPublicKey is null
         ? Hostname != "" && Username != "" && Password != ""
         : Hostname != "" && Username != "";
@@ -64,7 +54,7 @@ public sealed class ConnectToServerViewModel(
         get => _selectedPublicKey;
         set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
     }
-    
+
     public string Hostname
     {
         get;
@@ -131,26 +121,21 @@ public sealed class ConnectToServerViewModel(
                 if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
                 TryingToConnect = true;
                 if (AuthWithPublicKey)
-                {
                     await serverConnectionService.EstablishConnection(
                         new KeyConnectionCredentials(Hostname, Username, SelectedPublicKey), cancellationToken);
-                }
                 else if (AuthWithAllKeys)
-                {
                     await serverConnectionService.EstablishConnection(
-                        new MultiKeyConnectionCredentials(Hostname, Username, keyLocatorService.SshKeys), cancellationToken);
-                }
+                        new MultiKeyConnectionCredentials(Hostname, Username, keyLocatorService.SshKeys),
+                        cancellationToken);
                 else
-                {
                     await serverConnectionService.EstablishConnection(
                         new PasswordConnectionCredentials(Hostname, Username, Password), cancellationToken);
-                }
             }
             catch (Exception exception)
             {
                 StatusButtonToolTip = exception.Message;
             }
-            
+
             if (!serverConnectionService.IsConnected)
             {
                 StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
@@ -182,9 +167,9 @@ public sealed class ConnectToServerViewModel(
         });
         ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
         {
-            Hostname = "";
-            Username = "";
-            Password = "";
+            Hostname = string.Empty;
+            Username = string.Empty;
+            Password = string.Empty;
             StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusUnknown);
             StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
@@ -193,16 +178,12 @@ public sealed class ConnectToServerViewModel(
             UploadButtonEnabled = !TryingToConnect && serverConnectionService.IsConnected;
             return e;
         });
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ConnectToServerViewModel?>(async e =>
-        {
-            if (!serverConnectionService.IsConnected)
-                return null;
-            serverConnectionService.ServerConnection?.ConnectionCredentials.Id =
-                (await serverConnectionService.ServerConnection.ConnectionCredentials.SaveDtoInDatabase() ?? new ConnectionCredentialsDto())
-                .Id;
-            return this;
-        });
         await base.InitializeAsync(initializerParameters, cancellationToken);
+    }
+
+    protected override Task<ConnectToServerViewModel?> OnBooleanSubmit(bool inputParameter)
+    {
+        return Task.FromResult<ConnectToServerViewModel?>(!serverConnectionService.IsConnected ? null : this);
     }
 
     public void UpdateComboBoxState()
