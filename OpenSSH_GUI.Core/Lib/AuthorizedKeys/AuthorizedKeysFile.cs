@@ -89,12 +89,11 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>
-    ///     A task representing the asynchronous operation. The task result is a boolean value indicating whether the key
-    ///     was added successfully.
+    ///     A <see cref="ValueTask{Boolean}"/> indicating whether the key was added successfully.
     /// </returns>
-    public Task<bool> AddAuthorizedKeyAsync(SshKeyFile key)
+    public ValueTask<bool> AddAuthorizedKeyAsync(SshKeyFile key)
     {
-        return Task.FromResult(AddAuthorizedKey(key));
+        return ValueTask.FromResult(AddAuthorizedKey(key));
     }
 
     /// <summary>

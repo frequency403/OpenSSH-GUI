@@ -105,8 +105,4 @@ public class DirectoryCrawler(
         logger.LogInformation("Found {count} keys", keyFileCount);
     }
 
-    public IEnumerable<SshKeyFile> GetNewFromDisk()
-    {
-        return GetNewFromDiskAsyncEnumerable().ToBlockingEnumerable();
-    }
 }

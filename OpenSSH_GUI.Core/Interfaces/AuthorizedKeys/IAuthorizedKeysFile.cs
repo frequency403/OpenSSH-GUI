@@ -39,10 +39,9 @@ public interface IAuthorizedKeysFile : IReactiveObject
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>
-    ///     A task representing the asynchronous operation. The task result is a boolean value indicating whether the key
-    ///     was added successfully.
+    ///     A <see cref="ValueTask{Boolean}"/> indicating whether the key was added successfully.
     /// </returns>
-    Task<bool> AddAuthorizedKeyAsync(SshKeyFile key);
+    ValueTask<bool> AddAuthorizedKeyAsync(SshKeyFile key);
 
     /// <summary>
     ///     Removes the specified SSH key from the authorized keys list.

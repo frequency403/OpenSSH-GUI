@@ -63,23 +63,4 @@ public static class ServiceCollectionExtensions
         return resolvedView;
     }
 
-    public static TView ResolveView<TView, TViewModel>(this IServiceProvider provider,
-        IInitializerParameters<TViewModel>? initializerParameters = null,
-        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen)
-        where TView : WindowBase<TViewModel>
-        where TViewModel : ViewModelBase<TViewModel>
-    {
-        var viewName = typeof(TView).Name;
-        var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
-        resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
-        var viewModelName = typeof(TViewModel).Name;
-        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
-        viewModel.Initialize(initializerParameters);
-        if (!viewModel.IsInitialized)
-            throw new InvalidOperationException("ViewModel not properly initialized");
-        resolvedView.DataContext = viewModel;
-        resolvedView.WindowStartupLocation = windowStartupLocation;
-        resolvedView.AttachCloseRequest();
-        return resolvedView;
-    }
 }

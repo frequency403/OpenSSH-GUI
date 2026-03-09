@@ -7,16 +7,16 @@ public class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
 {
     public ViewModelBase(ILogger<T>? logger = null) : base(typeof(T), logger)
     {
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, T?>(OnBooleanSubmit);
+        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, T?>(async e => await OnBooleanSubmitAsync(e));
     }
 
     public ReactiveCommand<bool, T?> BooleanSubmit { get; private init; }
 
     public EventHandler Close { get; set; } = delegate { };
 
-    protected virtual Task<T?> OnBooleanSubmit(bool inputParameter)
+    protected virtual ValueTask<T?> OnBooleanSubmitAsync(bool inputParameter)
     {
-        return Task.FromResult(default(T?));
+        return ValueTask.FromResult(default(T?));
     }
 
     protected void RequestClose()
@@ -24,15 +24,10 @@ public class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
         Close.Invoke(this, EventArgs.Empty);
     }
 
-    public virtual void Initialize(IInitializerParameters<T>? parameters = null)
-    {
-        IsInitialized = true;
-    }
-
     public virtual ValueTask InitializeAsync(IInitializerParameters<T>? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        Initialize(parameters);
+        IsInitialized = true;
         return ValueTask.CompletedTask;
     }
 }

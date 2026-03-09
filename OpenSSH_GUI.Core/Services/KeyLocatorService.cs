@@ -92,11 +92,11 @@ public class KeyLocatorService
         SshKeys.Add(keyFile);
     }
 
-    public void RerunSearch()
+    public async ValueTask RerunSearchAsync()
     {
         if (_searching)
-            throw new Exception("Can't rerun search while searching");
-        _searchingTask = SearchForKeysAndUpdateCollection();
+            throw new InvalidOperationException("Can't rerun search while searching");
+        await SearchForKeysAndUpdateCollection();
     }
 
     private async Task SearchForKeysAndUpdateCollection()

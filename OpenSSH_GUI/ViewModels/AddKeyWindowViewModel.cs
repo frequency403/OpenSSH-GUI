@@ -67,7 +67,7 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService)
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
 
-    protected override async Task<AddKeyWindowViewModel?> OnBooleanSubmit(bool inputParameter)
+    protected override async ValueTask<AddKeyWindowViewModel?> OnBooleanSubmitAsync(bool inputParameter)
     {
         _createKey = inputParameter;
         if (!_createKey)
@@ -101,7 +101,7 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService)
         return null;
     }
 
-    public override void Initialize(IInitializerParameters<AddKeyWindowViewModel>? parameters = null)
+    public override ValueTask InitializeAsync(IInitializerParameters<AddKeyWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
     {
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,
@@ -109,6 +109,6 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService)
             StringsAndTexts.AddKeyWindowFilenameError
         );
         _selectedKeyType = _sshKeyTypes.First();
-        base.Initialize(parameters);
+        return base.InitializeAsync(parameters, cancellationToken);
     }
 }

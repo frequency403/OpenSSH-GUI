@@ -8,7 +8,7 @@ public class ExportWindowViewModel(IClipboardService clipboardService) : ViewMod
     public string WindowTitle { get; private set; } = "";
     public string Export { get; private set; } = "";
 
-    public override void Initialize(IInitializerParameters<ExportWindowViewModel>? parameters = null)
+    public override async ValueTask InitializeAsync(IInitializerParameters<ExportWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
     {
         if (parameters is ExportWindowViewModelInitializerParameters initializerParameters)
         {
@@ -16,10 +16,10 @@ public class ExportWindowViewModel(IClipboardService clipboardService) : ViewMod
             Export = initializerParameters.Export;
         }
 
-        base.Initialize(parameters);
+        await base.InitializeAsync(parameters, cancellationToken);
     }
 
-    protected override async Task<ExportWindowViewModel?> OnBooleanSubmit(bool inputParameter)
+    protected override async ValueTask<ExportWindowViewModel?> OnBooleanSubmitAsync(bool inputParameter)
     {
         if (inputParameter)
             await clipboardService.SetTextAsync(Export);

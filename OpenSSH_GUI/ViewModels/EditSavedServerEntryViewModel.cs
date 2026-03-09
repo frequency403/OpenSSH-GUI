@@ -32,22 +32,22 @@ public sealed class EditSavedServerEntryViewModel
 
     public bool IsPasswordKey => CredentialsToEdit is IPasswordConnectionCredentials;
 
-    protected override Task<EditSavedServerEntryViewModel?> OnBooleanSubmit(bool inputParameter)
+    protected override ValueTask<EditSavedServerEntryViewModel?> OnBooleanSubmitAsync(bool inputParameter)
     {
         try
         {
-            if (!inputParameter) return Task.FromResult<EditSavedServerEntryViewModel?>(null);
+            if (!inputParameter) return ValueTask.FromResult<EditSavedServerEntryViewModel?>(null);
             if (CredentialsToEdit is IPasswordConnectionCredentials pwcc) pwcc.Password = Password;
             if (CredentialsToEdit is IKeyConnectionCredentials kcc) kcc.Key = SelectedKey;
-            return Task.FromResult<EditSavedServerEntryViewModel?>(this);
+            return ValueTask.FromResult<EditSavedServerEntryViewModel?>(this);
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            return Task.FromException<EditSavedServerEntryViewModel?>(exception);
+            return ValueTask.FromResult<EditSavedServerEntryViewModel?>(null);
         }
     }
 
-    public override void Initialize(IInitializerParameters<EditSavedServerEntryViewModel>? parameters = null)
+    public override async ValueTask InitializeAsync(IInitializerParameters<EditSavedServerEntryViewModel>? parameters = null, CancellationToken cancellationToken = default)
     {
         if (parameters is EditSavedServerEntryViewModelInitializeParameters initParams)
         {
@@ -60,7 +60,7 @@ public sealed class EditSavedServerEntryViewModel
                 : Keys.FirstOrDefault();
         }
 
-        base.Initialize(parameters);
+        await base.InitializeAsync(parameters, cancellationToken);
     }
 }
 

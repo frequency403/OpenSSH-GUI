@@ -17,7 +17,12 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = ServiceProvider.ResolveView<MainWindow, MainWindowViewModel>();
+            _ = InitializeMainWindowAsync(desktop);
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async Task InitializeMainWindowAsync(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        desktop.MainWindow = await ServiceProvider.ResolveViewAsync<MainWindow, MainWindowViewModel>();
     }
 }

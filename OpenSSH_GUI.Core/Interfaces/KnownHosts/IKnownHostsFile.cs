@@ -25,8 +25,8 @@ public interface IKnownHostsFile : IReactiveObject
     ///     The file stream to read from. If null, the method reads from the file specified in the
     ///     constructor.
     /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task ReadContentAsync(FileStream? stream = null);
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation.</returns>
+    ValueTask ReadContentAsync(FileStream? stream = null);
 
     /// <summary>
     ///     Synchronizes the known hosts with the given list of new known hosts.
@@ -35,10 +35,19 @@ public interface IKnownHostsFile : IReactiveObject
     void SyncKnownHosts(IEnumerable<IKnownHost> newKnownHosts);
 
     /// <summary>
-    ///     Updates the content of the known hosts file.
+    ///     Updates the content of the known hosts file asynchronously.
     /// </summary>
-    /// <returns>A task representing the update operation.</returns>
-    Task UpdateFile();
+    /// <returns>A <see cref="ValueTask"/> representing the update operation.</returns>
+    ValueTask UpdateFileAsync();
+
+    /// <summary>
+    ///     Initializes the known hosts file asynchronously.
+    /// </summary>
+    /// <param name="knownHostsPathOrContent">The path to the known hosts file or its content.</param>
+    /// <param name="fromServer">Indicates whether the content is from a server.</param>
+    /// <param name="token">A cancellation token.</param>
+    /// <returns>A <see cref="ValueTask{IKnownHostsFile}"/> representing the initialized object.</returns>
+    ValueTask<IKnownHostsFile> InitializeAsync(string knownHostsPathOrContent, bool fromServer = false, CancellationToken token = default);
 
     /// <summary>
     ///     Retrieves the updated contents of the known hosts file.

@@ -28,27 +28,27 @@ public class EditKnownHostsWindowViewModel
         private set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
-    protected override async Task<EditKnownHostsWindowViewModel?> OnBooleanSubmit(bool inputParameter)
+    protected override async ValueTask<EditKnownHostsWindowViewModel?> OnBooleanSubmitAsync(bool inputParameter)
     {
         if (!inputParameter) return this;
         KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
         if (ServerConnection.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
-        await KnownHostsFileLocal.UpdateFile();
-        if (ServerConnection.IsConnected) ServerConnection.WriteKnownHostsToServer(KnownHostsFileRemote);
+        await KnownHostsFileLocal.UpdateFileAsync();
+        if (ServerConnection.IsConnected) await ServerConnection.WriteKnownHostsToServerAsync(KnownHostsFileRemote);
         return this;
     }
 
-    public override ValueTask InitializeAsync(IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null,
+    public override async ValueTask InitializeAsync(IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null,
         CancellationToken cancellationToken = default)
     {
         if (parameters is not EditKnownHostWindowViewModelInitializerParameters initializerParameters)
             throw new ArgumentException("invalid parameters", nameof(parameters));
         ServerConnection = initializerParameters.ServerConnection;
-        KnownHostsFileLocal = new KnownHostsFile(SshConfigFiles.Known_Hosts.GetPathOfFile());
-        KnownHostsFileRemote = ServerConnection.GetKnownHostsFromServer();
+        KnownHostsFileLocal = await new KnownHostsFile().InitializeAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(), token: cancellationToken);
+        KnownHostsFileRemote = await ServerConnection.GetKnownHostsFromServerAsync(cancellationToken);
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
         KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
-        return base.InitializeAsync(parameters, cancellationToken);
+        await base.InitializeAsync(parameters, cancellationToken);
     }
 }
 

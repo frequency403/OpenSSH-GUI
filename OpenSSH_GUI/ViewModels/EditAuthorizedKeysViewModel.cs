@@ -48,18 +48,18 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
     public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
     public ReactiveCommand<SshKeyFile, SshKeyFile?> AddKey { get; private set; }
 
-    protected override Task<EditAuthorizedKeysViewModel?> OnBooleanSubmit(bool inputParameter)
+    protected override async ValueTask<EditAuthorizedKeysViewModel?> OnBooleanSubmitAsync(bool inputParameter)
     {
         try
         {
-            if (!inputParameter) return Task.FromResult<EditAuthorizedKeysViewModel?>(this);
-            AuthorizedKeysFileLocal.PersistChangesInFileAsync();
-            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
-            return Task.FromResult<EditAuthorizedKeysViewModel?>(this);
+            if (!inputParameter) return this;
+            await AuthorizedKeysFileLocal.PersistChangesInFileAsync();
+            await ServerConnection.WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFileRemote);
+            return this;
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            return Task.FromException<EditAuthorizedKeysViewModel?>(exception);
+            return this;
         }
     }
 
@@ -70,7 +70,7 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
             throw new ArgumentException("parameters is not valid", nameof(parameters));
         AuthorizedKeysFileLocal = await new AuthorizedKeysFile().InitializeAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(), cancellationToken: cancellationToken);
         _serverConnection = initParams.ServerConnection;
-        AuthorizedKeysFileRemote = await ServerConnection.GetAuthorizedKeysFromServer(cancellationToken);
+        AuthorizedKeysFileRemote = await ServerConnection.GetAuthorizedKeysFromServerAsync(cancellationToken);
         _selectedKey = PublicKeys.FirstOrDefault();
         UpdateAddButton();
         AddKey = ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async e =>

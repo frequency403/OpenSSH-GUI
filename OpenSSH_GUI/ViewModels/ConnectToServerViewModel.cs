@@ -181,9 +181,9 @@ public sealed class ConnectToServerViewModel(
         await base.InitializeAsync(initializerParameters, cancellationToken);
     }
 
-    protected override Task<ConnectToServerViewModel?> OnBooleanSubmit(bool inputParameter)
+    protected override ValueTask<ConnectToServerViewModel?> OnBooleanSubmitAsync(bool inputParameter)
     {
-        return Task.FromResult<ConnectToServerViewModel?>(!serverConnectionService.IsConnected ? null : this);
+        return ValueTask.FromResult<ConnectToServerViewModel?>(!serverConnectionService.IsConnected ? null : this);
     }
 
     public void UpdateComboBoxState()

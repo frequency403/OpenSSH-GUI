@@ -77,119 +77,119 @@ public class ServerConnection : ReactiveObject, IServerConnection
 
     public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
     {
-        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return TestMulti(mkcc);
+        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return await TestMultiAsync(mkcc, token);
         await ClientConnection.ConnectAsync(token);
         IsConnected = ClientConnection.IsConnected;
         if (!IsConnected) return ServerOs != PlatformID.Other && IsConnected;
-        ServerOs = GetServerOs();
-        CheckForFilesAndCreateThemIfTheyNotExist();
+        ServerOs = await GetServerOsAsync(token);
+        await CheckForFilesAndCreateThemIfTheyNotExistAsync(token);
         ConnectionTime = DateTime.Now;
         return ServerOs != PlatformID.Other && IsConnected;
     }
 
-    public ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default)
+    public async ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default)
     {
         try
         {
-            ClientConnection.Disconnect();
-            IsConnected = false;
-            return ValueTask.FromResult(true);
-        }
-        catch (Exception e)
-        {
-            return ValueTask.FromException<bool>(e);
-        }
-    }
-
-    public bool CloseConnection([NotNullWhen(false)] out Exception? ex)
-    {
-        ex = null;
-        try
-        {
-            ClientConnection.Disconnect();
+            await Task.Run(() => ClientConnection.Disconnect(), token);
             IsConnected = false;
             return true;
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            ex = e;
             return false;
         }
     }
 
-    public IKnownHostsFile GetKnownHostsFromServer()
+    public async ValueTask<bool> CloseConnectionAsync(CancellationToken token = default)
     {
-        return !IsConnected
-            ? new KnownHostsFile("", true)
-            : new KnownHostsFile(
-                ClientConnection
-                    .RunCommand(
-                        $"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs))}")
-                    .Result,
-                true);
+        try
+        {
+            await Task.Run(() => ClientConnection.Disconnect(), token);
+            IsConnected = false;
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
-    public bool WriteKnownHostsToServer(IKnownHostsFile knownHostsFile)
+    public async ValueTask<IKnownHostsFile> GetKnownHostsFromServerAsync(CancellationToken token = default)
+    {
+        if (!IsConnected) return new KnownHostsFile("", true);
+
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs), token);
+        var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
+        var result = await Task.Run(() => command.Execute(), token);
+
+        return new KnownHostsFile(result, true);
+    }
+
+    public async ValueTask<bool> WriteKnownHostsToServerAsync(IKnownHostsFile knownHostsFile, CancellationToken token = default)
     {
         if (!IsConnected) return false;
-        var command = ClientConnection.RunCommand(
-            $"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs))}");
+
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs), token);
+        var command = ClientConnection.CreateCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {path}");
+        var result = await Task.Run(() => command.Execute(), token);
+
         return command.ExitStatus == 0;
     }
 
-    public ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServer(CancellationToken token = default)
+    public async ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default)
     {
-        if (!IsConnected) return new AuthorizedKeysFile().InitializeAsync("", true, token);
-        return new AuthorizedKeysFile().InitializeAsync(
-            ClientConnection
-                .RunCommand(
-                    $"{ReadContentsCommand} {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
-                .Result, true, token);
+        if (!IsConnected) return await new AuthorizedKeysFile().InitializeAsync("", true, token);
+
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
+        var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
+        var result = await Task.Run(() => command.Execute(), token);
+
+        return await new AuthorizedKeysFile().InitializeAsync(result, true, token);
     }
 
-    public bool WriteAuthorizedKeysChangesToServer(IAuthorizedKeysFile authorizedKeysFile)
+    public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile, CancellationToken token = default)
     {
         if (!IsConnected) return false;
-        return ClientConnection
-            .RunCommand(
-                $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {ResolveRemoteEnvVariables(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs))}")
-            .ExitStatus == 0;
+
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
+        var command = ClientConnection.CreateCommand($"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {path}");
+        await Task.Run(() => command.Execute(), token);
+
+        return command.ExitStatus == 0;
     }
 
-    public bool TestAndOpenConnection([NotNullWhen(false)] out Exception? exception)
+    public async ValueTask<bool> TestAndOpenConnectionAsync(CancellationToken token = default)
     {
-        exception = null;
-        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return TestMulti(mkcc);
+        if (ConnectionCredentials is IMultiKeyConnectionCredentials mkcc) return await TestMultiAsync(mkcc, token);
         try
         {
-            ClientConnection.Connect();
+            await ClientConnection.ConnectAsync(token);
             IsConnected = ClientConnection.IsConnected;
             if (IsConnected)
             {
-                ServerOs = GetServerOs();
-                CheckForFilesAndCreateThemIfTheyNotExist();
+                ServerOs = await GetServerOsAsync(token);
+                await CheckForFilesAndCreateThemIfTheyNotExistAsync(token);
                 ConnectionTime = DateTime.Now;
             }
 
             if (ServerOs != PlatformID.Other) return IsConnected;
-            exception = new NotSupportedException("No other OS than Windows oder Linux is supported!");
             return false;
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            exception = e;
             return false;
         }
     }
 
-    private bool TestMulti(IMultiKeyConnectionCredentials mkcc)
+    private async ValueTask<bool> TestMultiAsync(IMultiKeyConnectionCredentials mkcc, CancellationToken token = default)
     {
         //var workingKeys = new List<SshKeyFile>();
         foreach (var key in mkcc.Keys!)
             try
             {
                 // using var connection = new SshClient(mkcc.Hostname, mkcc.Username, key.GetSshNetKeyType());
-                // connection.Connect();
+                // await connection.ConnectAsync(token);
                 // if (connection.IsConnected) workingKeys.Add(key);
             }
             catch (Exception)
@@ -200,50 +200,73 @@ public class ServerConnection : ReactiveObject, IServerConnection
         //mkcc.Keys = workingKeys;
         if (mkcc.Keys.Any())
         {
-            ClientConnection.Connect();
+            await ClientConnection.ConnectAsync(token);
             IsConnected = ClientConnection.IsConnected;
         }
 
         if (!IsConnected) return IsConnected;
-        ServerOs = GetServerOs();
-        CheckForFilesAndCreateThemIfTheyNotExist();
+        ServerOs = await GetServerOsAsync(token);
+        await CheckForFilesAndCreateThemIfTheyNotExistAsync(token);
         ConnectionTime = DateTime.Now;
         return ServerOs != PlatformID.Other && IsConnected;
     }
 
-    private string ResolveRemoteEnvVariables(string originalPath)
+    private async ValueTask<string> ResolveRemoteEnvVariablesAsync(string originalPath, CancellationToken token = default)
     {
         if (!IsConnected) return originalPath;
-        return originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries).Aggregate("", (s, s1) =>
+        var parts = originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries);
+        var result = "";
+        foreach (var part in parts)
         {
-            if (s1.Contains('\\') || s1.Contains('/'))
-                s += s1.Trim();
+            if (part.Contains('\\') || part.Contains('/'))
+            {
+                result += part.Trim();
+            }
             else
-                s += ClientConnection
-                    .RunCommand(ServerOs is PlatformID.Unix or PlatformID.MacOSX ? $"echo ${s1}" : $"echo %{s1}%")
-                    .Result.Trim();
-            return s;
-        });
+            {
+                var cmdText = ServerOs is PlatformID.Unix or PlatformID.MacOSX ? $"echo ${part}" : $"echo %{part}%";
+                var command = ClientConnection.CreateCommand(cmdText);
+                var output = await Task.Run(() => command.Execute(), token);
+                result += output.Trim();
+            }
+        }
+
+        return result;
     }
 
-    private void CheckForFilesAndCreateThemIfTheyNotExist()
+    private async ValueTask CheckForFilesAndCreateThemIfTheyNotExistAsync(CancellationToken token = default)
     {
         if (!ClientConnection.IsConnected) return;
-        var authorizedKeysFileCheck =
-            ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
-        var knownHostsFileCheck =
-            ClientConnection.RunCommand($"{ReadContentsCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
+
+        var authKeyPath = SshConfigFiles.Authorized_Keys.GetPathOfFile(false);
+        var knownHostPath = SshConfigFiles.Known_Hosts.GetPathOfFile(false);
+
+        var authorizedKeysFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {authKeyPath}");
+        await Task.Run(() => authorizedKeysFileCheck.Execute(), token);
+
+        var knownHostsFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {knownHostPath}");
+        await Task.Run(() => knownHostsFileCheck.Execute(), token);
+
         if (authorizedKeysFileCheck.ExitStatus != 0)
-            ClientConnection.RunCommand(
-                $"{CreateEmptyFileCommand} {SshConfigFiles.Authorized_Keys.GetPathOfFile(false)}");
+        {
+            var createAuthCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {authKeyPath}");
+            await Task.Run(() => createAuthCmd.Execute(), token);
+        }
+
         if (knownHostsFileCheck.ExitStatus != 0)
-            ClientConnection.RunCommand($"{CreateEmptyFileCommand} {SshConfigFiles.Known_Hosts.GetPathOfFile(false)}");
+        {
+            var createKnownCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {knownHostPath}");
+            await Task.Run(() => createKnownCmd.Execute(), token);
+        }
     }
 
-    private PlatformID GetServerOs()
+    private async ValueTask<PlatformID> GetServerOsAsync(CancellationToken token = default)
     {
-        var linuxCommand = ClientConnection.RunCommand("uname -s");
-        var windowsCommand = ClientConnection.RunCommand("ver");
+        var linuxCommand = ClientConnection.CreateCommand("uname -s");
+        var windowsCommand = ClientConnection.CreateCommand("ver");
+
+        await Task.Run(() => linuxCommand.Execute(), token);
+        await Task.Run(() => windowsCommand.Execute(), token);
 
         var isWindows = windowsCommand.ExitStatus == 0;
         var isLinux = linuxCommand.ExitStatus == 0;

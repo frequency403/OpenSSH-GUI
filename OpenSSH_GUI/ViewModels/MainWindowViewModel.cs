@@ -241,9 +241,9 @@ public class MainWindowViewModel(
             return key;
         });
 
-    public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.Create<bool, bool>(input =>
+    public ReactiveCommand<bool, bool> ReloadKeys => ReactiveCommand.CreateFromTask<bool, bool>(async input =>
     {
-        locatorService.RerunSearch();
+        await locatorService.RerunSearchAsync();
         return input;
     });
 
@@ -407,13 +407,13 @@ public class MainWindowViewModel(
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = MaterialIconKind.CircleOutline;
 
-    public override void Initialize(IInitializerParameters<MainWindowViewModel>? parameters = null)
+    public override async ValueTask InitializeAsync(IInitializerParameters<MainWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
     {
         _serverConnection = new ServerConnection("123", "123", "123");
         EvaluateAppropriateIcon();
         locatorService.SshKeysCollectionChanged += (sender, args) => EvaluateAppropriateIcon();
         Version = configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
-        base.Initialize(parameters);
+        await base.InitializeAsync(parameters, cancellationToken);
     }
 
     private async Task<ExportWindowViewModel?> ShowExportWindowWithText(SshKeyFile key, bool @public)

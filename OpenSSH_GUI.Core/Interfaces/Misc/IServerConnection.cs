@@ -60,35 +60,39 @@ public interface IServerConnection : IReactiveObject, IDisposable
     ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default);
 
     /// <summary>
-    ///     Closes the server connection.
+    ///     Closes the server connection asynchronously.
     /// </summary>
-    /// <param name="ex">An exception that occurred during the closing of the connection, if any.</param>
-    /// <returns>Returns true if the connection was closed successfully, otherwise false.</returns>
-    bool CloseConnection([NotNullWhen(false)] out Exception? ex);
+    /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="ValueTask{Boolean}"/> indicating whether the connection was closed successfully.</returns>
+    ValueTask<bool> CloseConnectionAsync(CancellationToken token = default);
 
     /// <summary>
-    ///     Retrieves the known hosts file from the server.
+    ///     Retrieves the known hosts file from the server asynchronously.
     /// </summary>
-    /// <returns>The known hosts file as an instance of IKnownHostsFile.</returns>
-    IKnownHostsFile GetKnownHostsFromServer();
+    /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="ValueTask{IKnownHostsFile}"/> representing the known hosts file.</returns>
+    ValueTask<IKnownHostsFile> GetKnownHostsFromServerAsync(CancellationToken token = default);
 
     /// <summary>
-    ///     Writes the known hosts file to the server.
+    ///     Writes the known hosts file to the server asynchronously.
     /// </summary>
     /// <param name="knownHostsFile">The known hosts file to write.</param>
-    /// <returns>Returns true if the known hosts file was successfully written to the server, false otherwise.</returns>
-    bool WriteKnownHostsToServer(IKnownHostsFile knownHostsFile);
+    /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="ValueTask{Boolean}"/> indicating whether the known hosts file was successfully written.</returns>
+    ValueTask<bool> WriteKnownHostsToServerAsync(IKnownHostsFile knownHostsFile, CancellationToken token = default);
 
     /// <summary>
-    ///     Retrieves the authorized keys file from the server.
+    ///     Retrieves the authorized keys file from the server asynchronously.
     /// </summary>
-    /// <returns>The authorized keys file from the server.</returns>
-    ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServer(CancellationToken token = default);
+    /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="ValueTask{IAuthorizedKeysFile}"/> representing the authorized keys file.</returns>
+    ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default);
 
     /// <summary>
-    ///     Writes the changes made to the authorized keys file to the server.
+    ///     Writes the changes made to the authorized keys file to the server asynchronously.
     /// </summary>
     /// <param name="authorizedKeysFile">The authorized keys file containing the changes.</param>
-    /// <returns>True if the changes were successfully written to the server; otherwise, false.</returns>
-    bool WriteAuthorizedKeysChangesToServer(IAuthorizedKeysFile authorizedKeysFile);
+    /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
+    /// <returns>A <see cref="ValueTask{Boolean}"/> indicating whether the changes were successfully written.</returns>
+    ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile, CancellationToken token = default);
 }
