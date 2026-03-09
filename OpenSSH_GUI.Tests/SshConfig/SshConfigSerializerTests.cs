@@ -104,4 +104,81 @@ public class SshConfigSerializerTests
         var output = SshConfigSerializer.Serialize(doc);
         output.ShouldContain("Match host example.com user root");
     }
+
+    [Fact]
+    public void Serialize_CleanMode_WithOptions_ShouldFormatCorrectly()
+    {
+        // Arrange
+        var doc = new SshConfigDocument(
+            [],
+            [SshHostBlock.Create(["example"], [SshConfigEntry.Create("User", "alice")])]
+        );
+        var options = new SshSerializerOptions
+        {
+            Indent = "\t",
+            KeyValueSeparator = "=",
+            NewLine = "\n",
+            BlankLineBetweenBlocks = true
+        };
+
+        // Act
+        var output = SshConfigSerializer.Serialize(doc, options);
+
+        // Assert
+        Assert.Equal("Host example\n\tUser=alice\n", output);
+    }
+
+    [Fact]
+    public void Serialize_UnsupportedBlockType_ShouldThrow()
+    {
+        // Arrange
+        var mockBlock = new UnsupportedBlock();
+        var doc = new SshConfigDocument([], [mockBlock]);
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => SshConfigSerializer.Serialize(doc));
+    }
+
+    [Fact]
+    public void Serialize_RoundTrip_WithModifications_ShouldRegenerate()
+    {
+        // Arrange
+        var original = "Host example\n  User alice\n";
+        var doc = SshConfigParser.Parse(original);
+        var block = doc.HostBlocks.First();
+        var entry = block.GetEntries("User").First();
+        
+        // Modify entry and clear RawText to force regeneration
+        var modifiedEntry = entry with { Values = ["bob"], RawText = string.Empty };
+        var modifiedBlock = block with { Items = [modifiedEntry], RawHeaderText = string.Empty };
+        var modifiedDoc = doc with { Blocks = [modifiedBlock] };
+        
+        var options = new SshSerializerOptions { RoundTrip = true };
+
+        // Act
+        var output = SshConfigSerializer.Serialize(modifiedDoc, options);
+
+        // Assert
+        Assert.Contains("Host example", output);
+        Assert.Contains("User bob", output);
+        Assert.DoesNotContain("User alice", output);
+    }
+
+    [Fact]
+    public void QuoteIfNeeded_ShouldQuoteWhitespace()
+    {
+        // Arrange
+        var entry = SshConfigEntry.Create("IdentityFile", "/path/with space/id_rsa");
+        
+        // Act
+        var output = SshConfigSerializer.Serialize(new SshConfigDocument([], [SshHostBlock.Create(["ex"], [entry])]));
+
+        // Assert
+        Assert.Contains("\"/path/with space/id_rsa\"", output);
+    }
+
+    private sealed record UnsupportedBlock : SshBlock
+    {
+        public UnsupportedBlock() : base([], 0, "", null) { }
+    }
 }

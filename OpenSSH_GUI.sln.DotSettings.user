@@ -51,9 +51,7 @@
   &lt;Assembly Path="/home/olli/.nuget/packages/ssh.net/2025.1.0/lib/net9.0/Renci.SshNet.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7ce84f90_002D6ae2_002D4e9e_002D860e_002Deb90f45871f3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Junie Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::ABA9E679-EE6D-8D61-883F-A6C8D394CCFC::net10.0::OpenSSH_GUI.Tests.SshConfig.SshConfigParserTests.GetConnectionEntriesFromConfig_WithPersonalConfig_ShouldReturnCredentials&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+  &lt;ProjectFile&gt;ABA9E679-EE6D-8D61-883F-A6C8D394CCFC/d:SshConfig/f:SshConfigurationBindingTests.cs&lt;/ProjectFile&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=OpenSSH_005FGUI_002FStringsAndTexts/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean></wpf:ResourceDictionary>

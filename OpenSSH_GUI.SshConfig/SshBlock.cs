@@ -8,7 +8,12 @@ namespace OpenSSH_GUI.SshConfig;
 /// </summary>
 public abstract record SshBlock
 {
+#if DEBUG
+    /// <summary>Internal constructor for testing.</summary>
+    protected SshBlock(
+#else
     private protected SshBlock(
+#endif
         ImmutableArray<SshLineItem> items,
         int lineNumber,
         string rawHeaderText,

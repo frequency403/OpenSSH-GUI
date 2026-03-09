@@ -19,6 +19,12 @@ public class SshWildcardMatcherTests
     [InlineData("abc", "*", true)]
     [InlineData("abc", "abcd", false)]
     [InlineData("abc", "ab", false)]
+    [InlineData("", "*", true)]
+    [InlineData("a", "", false)]
+    [InlineData("", "", true)]
+    [InlineData("abc", "***", true)]
+    [InlineData("abc", "*b*", true)]
+    [InlineData("abc", "a**c", true)]
     public void MatchesGlob_Tests(string input, string pattern, bool expected)
     {
         SshWildcardMatcher.MatchesGlob(input.AsSpan(), pattern.AsSpan()).ShouldBe(expected);
@@ -31,6 +37,8 @@ public class SshWildcardMatcherTests
     [InlineData("host1", new[] { "!host1", "host*" }, false)]
     [InlineData("host2", new[] { "!host1", "host*" }, true)]
     [InlineData("host1", new[] { "host*", "!host1" }, false)]
+    [InlineData("host1", new string[] { }, false)]
+    [InlineData("host1", new[] { "" }, false)]
     public void Matches_Tests(string hostname, string[] patterns, bool expected)
     {
         SshWildcardMatcher.Matches(hostname.AsSpan(), patterns).ShouldBe(expected);

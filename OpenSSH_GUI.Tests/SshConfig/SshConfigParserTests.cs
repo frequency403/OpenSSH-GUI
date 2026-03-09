@@ -205,4 +205,122 @@ Host key-host
         var keyHost = credentials.FirstOrDefault(c => c.AuthType == AuthType.Key);
         keyHost.ShouldNotBeNull();
     }
+
+    [Fact]
+    public void Parse_IncludeRecursion_ShouldThrow()
+    {
+        // Arrange
+        var content = "Include recursive.conf";
+        var options = new SshConfigParserOptions { MaxIncludeDepth = 1, IncludeBasePath = Directory.GetCurrentDirectory() };
+        var recursiveFile = Path.Combine(Directory.GetCurrentDirectory(), "recursive.conf");
+        File.WriteAllText(recursiveFile, "Include recursive.conf");
+
+        try
+        {
+            // Act & Assert
+            Assert.Throws<SshConfigParseException>(() => SshConfigParser.Parse(content, options));
+        }
+        finally
+        {
+            if (File.Exists(recursiveFile)) File.Delete(recursiveFile);
+        }
+    }
+
+    [Fact]
+    public void Parse_UnknownKey_WithStrictOptions_ShouldThrow()
+    {
+        // Arrange
+        var content = "UnknownKey value";
+        var options = SshConfigParserOptions.Strict;
+
+        // Act & Assert
+        Assert.Throws<SshConfigParseException>(() => SshConfigParser.Parse(content, options));
+    }
+
+    [Fact]
+    public void Parse_InvalidPort_ShouldBeHandledInSettings()
+    {
+        // Arrange
+        var content = "Host myserver\n  Port invalid";
+        
+        // Act
+        var doc = SshConfigParser.Parse(content);
+        var block = doc.HostBlocks.First();
+        var settings = block.GetSettings();
+
+        // Assert
+        Assert.Null(settings.Port);
+        // Note: In SshHostBlockExtensions.GetSettings, unparseable "Port" is added to otherEntries
+        Assert.Single(settings.OtherEntries);
+        Assert.Equal("Port", settings.OtherEntries[0].Key);
+    }
+
+    [Fact]
+    public void Parse_QuotedValues_ShouldStripDoubleQuotes()
+    {
+        // Arrange
+        var content = "Host \"quoted server\"\n  User alice\n  IdentityFile \"~/.ssh/id rsa\"";
+        
+        // Act
+        var doc = SshConfigParser.Parse(content);
+        var block = doc.HostBlocks.First();
+        var settings = block.GetSettings();
+
+        // Assert
+        Assert.Equal("quoted server", block.Patterns[0]);
+        Assert.Equal("alice", settings.User);
+        Assert.Contains("~/.ssh/id rsa", settings.IdentityFiles);
+    }
+
+    [Fact]
+    public void Parse_EmptyLinesAndComments_ShouldPreserve()
+    {
+        // Arrange
+        var content = "\n# Top comment\nHost myserver\n\n  # Entry comment\n  User alice\n";
+        
+        // Act
+        var doc = SshConfigParser.Parse(content);
+
+        // Assert
+        Assert.Equal(2, doc.GlobalItems.Length);
+        Assert.IsType<SshBlankLine>(doc.GlobalItems[0]);
+        Assert.IsType<SshCommentLine>(doc.GlobalItems[1]);
+        
+        var block = doc.HostBlocks.First();
+        // Items are: BlankLine, CommentLine, ConfigEntry (User alice), BlankLine (from the \n at the end)
+        Assert.Equal(4, block.Items.Length);
+        Assert.IsType<SshBlankLine>(block.Items[0]);
+        Assert.IsType<SshCommentLine>(block.Items[1]);
+        Assert.IsType<SshConfigEntry>(block.Items[2]);
+        Assert.IsType<SshBlankLine>(block.Items[3]);
+    }
+
+    [Fact]
+    public void Parse_MatchCriteria_AllSupported()
+    {
+        // Arrange
+        var content = "Match host h user u port 22 localuser lu address a";
+        
+        // Act
+        var doc = SshConfigParser.Parse(content);
+        var block = (SshMatchBlock)doc.Blocks.First();
+
+        // Assert
+        Assert.Equal(5, block.Criteria.Length);
+        Assert.Contains(block.Criteria, c => c.Kind == SshMatchCriterionKind.Host);
+        Assert.Contains(block.Criteria, c => c.Kind == SshMatchCriterionKind.User);
+        Assert.Contains(block.Criteria, c => c.Kind == SshMatchCriterionKind.Port);
+        Assert.Contains(block.Criteria, c => c.Kind == SshMatchCriterionKind.LocalUser);
+        Assert.Contains(block.Criteria, c => c.Kind == SshMatchCriterionKind.Address);
+    }
+
+    [Fact]
+    public void Parse_MatchCriteria_Invalid_ShouldThrow()
+    {
+        // Arrange
+        var content = "Match unknown criteria";
+        
+        // Act & Assert
+        Assert.Throws<SshConfigParseException>(() => SshConfigParser.Parse(content));
+    }
 }

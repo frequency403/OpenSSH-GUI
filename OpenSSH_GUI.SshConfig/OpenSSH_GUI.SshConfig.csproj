@@ -7,4 +7,9 @@
         <Optimize>true</Optimize>
         <PackageId>OpenSSH_GUI.SshConfig</PackageId>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.3" />
+    </ItemGroup>
 </Project>

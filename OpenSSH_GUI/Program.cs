@@ -5,6 +5,7 @@ using Avalonia.Platform;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Lib.Keys;
@@ -12,6 +13,7 @@ using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
+using OpenSSH_GUI.SshConfig;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using ReactiveUI.Avalonia;
@@ -44,12 +46,7 @@ internal sealed class Program
         var host = Host.CreateDefaultBuilder(args)
             .ConfigureServices(ConfigureServicesInternal)
             .UseSerilog()
-            .ConfigureAppConfiguration((_, builder) =>
-            {
-                builder.AddInMemoryCollection([
-                    new KeyValuePair<string, string?>("RUNNING_VERSION", GetHostVersion())
-                ]);
-            })
+            .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
 
         await host.StartAsync(mainCancellationTokenSource.Token);
@@ -58,6 +55,16 @@ internal sealed class Program
             .StartWithClassicDesktopLifetime(args);
 
         await host.StopAsync(mainCancellationTokenSource.Token);
+    }
+
+    private static void ConfigureAppConfiguration(HostBuilderContext builderContext, IConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.AddSshConfig(SshConfigFiles.Config.GetPathOfFile(), optional: true, reloadOnChange: true);
+        configurationBuilder.AddSshConfig(SshConfigFiles.Sshd_Config.GetPathOfFile(), optional: true, reloadOnChange: true);
+        
+        configurationBuilder.AddInMemoryCollection([
+            new KeyValuePair<string, string?>("RUNNING_VERSION", GetHostVersion())
+        ]);
     }
 
     private static void ConfigureServicesInternal(HostBuilderContext hostBuilderContext, IServiceCollection collection)
