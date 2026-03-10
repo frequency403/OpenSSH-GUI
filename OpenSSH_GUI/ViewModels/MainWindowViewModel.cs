@@ -1,11 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using DynamicData;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.Extensions.Configuration;
@@ -98,16 +100,36 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     public bool KeyContextMenuEnabled { get; } = true;
 
-    public MaterialIcon ItemsCount
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new()
-    {
-        Kind = MaterialIconKind.NumericZero,
-        Width = 20,
-        Height = 20
-    };
+    public MaterialIcon ItemsCount =>
+        new()
+        {
+            Kind = _locatorService.SshKeysCount switch
+            {
+                0 => MaterialIconKind.NumericZero,
+                1 => MaterialIconKind.NumericOne,
+                2 => MaterialIconKind.NumericTwo,
+                3 => MaterialIconKind.NumericThree,
+                4 => MaterialIconKind.NumericFour,
+                5 => MaterialIconKind.NumericFive,
+                6 => MaterialIconKind.NumericSix,
+                7 => MaterialIconKind.NumericSeven,
+                8 => MaterialIconKind.NumericEight,
+                9 => MaterialIconKind.NumericNine,
+                10 => MaterialIconKind.Numeric10,
+                _ => MaterialIconKind.Infinity
+            },
+            Width = 20,
+            Height = 20
+        };
+    // {
+    //     get;
+    //     set => this.RaiseAndSetIfChanged(ref field, value);
+    // } = new()
+    // {
+    //     Kind = MaterialIconKind.NumericZero,
+    //     Width = 20,
+    //     Height = 20
+    // };
 
     private static async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default)
     {
@@ -317,10 +339,6 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                     trys++;
                     continue;
                 }
-
-                var index = _locatorService.SshKeys.IndexOf(key);
-                _locatorService.SshKeys.RemoveAt(index);
-                _locatorService.SshKeys.Insert(index, key);
                 break;
             }
     }
@@ -398,8 +416,6 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     public override async ValueTask InitializeAsync(IInitializerParameters<MainWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
     {
-        EvaluateAppropriateIcon();
-        _locatorService.SshKeysCollectionChanged += (sender, args) => EvaluateAppropriateIcon();
         Version = _configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
         await base.InitializeAsync(parameters, cancellationToken);
     }
@@ -436,63 +452,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             }, token: token);
         await _dialogHost.ShowDialog(view);
     }
-    private async Task<ExportWindowViewModel?> ShowExportWindowWithText(SshKeyFile key, bool @public)
-    {
-        string? keyExport = null;
-        try
-        {
-            keyExport = @public ? key.ToOpenSshPublicFormat() : key.ToOpenSshFormat();
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e, "Error while exporting key to {publicOrNot} format", @public ? "public" : "private");
-        }
 
-        if (keyExport is null)
-        {
-            var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
-                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
-                ButtonEnum.Ok, Icon.Error);
-            await alert.ShowAsync();
-            return null;
-        }
-
-        var view = await _serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel>(
-            new ExportWindowViewModelInitializerParameters
-            {
-                Export = keyExport,
-                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.HashAlgorithmName,
-                    key.FileName)
-            });
-        await _dialogHost.ShowDialog(view);
-        return null;
-    }
-
-
-    private void EvaluateAppropriateIcon()
-    {
-        ItemsCount = new MaterialIcon
-        {
-            Kind = _locatorService.SshKeys.Count switch
-            {
-                1 => MaterialIconKind.NumericOne,
-                2 => MaterialIconKind.NumericTwo,
-                3 => MaterialIconKind.NumericThree,
-                4 => MaterialIconKind.NumericFour,
-                5 => MaterialIconKind.NumericFive,
-                6 => MaterialIconKind.NumericSix,
-                7 => MaterialIconKind.NumericSeven,
-                8 => MaterialIconKind.NumericEight,
-                9 => MaterialIconKind.NumericNine,
-                10 => MaterialIconKind.Numeric10,
-                _ => MaterialIconKind.Infinity
-            },
-            Width = 20,
-            Height = 20
-        };
-    }
-
-    private MaterialIconKind EvaluateSortIconKind(bool? value)
+    private static MaterialIconKind EvaluateSortIconKind(bool? value)
     {
         return value switch
         {

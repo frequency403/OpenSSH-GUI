@@ -34,10 +34,8 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService, IS
     }
     public KeyLocatorService KeyLocatorService => keyLocatorService;
     public IServerConnectionService ServerConnectionService => serverConnectionService;
-
-    public ObservableCollection<SshKeyFile> PublicKeys { get; set; } = keyLocatorService.SshKeys;
-
-    public bool KeyAddPossible => PublicKeys.Count > 0;
+    
+    public bool KeyAddPossible => KeyLocatorService.SshKeys.Count > 0;
     
     public IAuthorizedKeysFile AuthorizedKeysFileLocal { get; private set; }
 

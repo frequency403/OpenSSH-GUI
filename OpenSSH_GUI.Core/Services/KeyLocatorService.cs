@@ -6,14 +6,16 @@ using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
+using ReactiveUI;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
 using SshKey = SshNet.Keygen.SshKey;
 
 namespace OpenSSH_GUI.Core.Services;
 
-public class KeyLocatorService
+public class KeyLocatorService : ReactiveObject
 {
+    private readonly IDisposable _keyCountWatcherDisposable;
     private readonly DirectoryCrawler _directoryCrawler;
     private readonly ILogger<KeyLocatorService> _logger;
     private readonly IServiceProvider serviceProvider;
@@ -28,10 +30,19 @@ public class KeyLocatorService
         this.serviceProvider = serviceProvider;
         SshKeys = [];
         _searchingTask = SearchForKeysAndUpdateCollection();
+        _keyCountWatcherDisposable = SshKeys.ObservableForProperty<ICollection<SshKeyFile>, int>(nameof(SshKeys.Count)).Subscribe(change =>
+        {
+            SshKeysCount = change.Value;
+        });
     }
 
-    public ObservableCollection<SshKeyFile> SshKeys { get; }
-    public NotifyCollectionChangedEventHandler SshKeysCollectionChanged { get; set; }
+    public ICollection<SshKeyFile> SshKeys { get; }
+
+    public int SshKeysCount
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
 
     private SshKeyFile? GenerateKeyFile()
     {
@@ -97,10 +108,8 @@ public class KeyLocatorService
     private async Task SearchForKeysAndUpdateCollection()
     {
         _searching = true;
-        SshKeys.CollectionChanged -= SshKeysCollectionChanged;
         await foreach (var key in _directoryCrawler.GetNewFromDiskAsyncEnumerable())
             SshKeys.Add(key);
-        SshKeys.CollectionChanged += SshKeysCollectionChanged;
         _searching = false;
     }
 }
