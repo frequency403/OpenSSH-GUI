@@ -4,8 +4,8 @@
                     xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
                     xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
                     xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
-                    xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core">
-    <converters:SingleSshKeyTypeConverter x:Key="SingleSshKeyTypeConverter" />
+                    xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
+                    xmlns:keygen="clr-namespace:SshNet.Keygen;assembly=SshNet.Keygen">
     <DataTemplate x:Key="LocksAndType" DataType="keys:SshKeyFile">
         <Grid ColumnDefinitions="* 3*"
               VerticalAlignment="Center" HorizontalAlignment="Stretch">
@@ -96,7 +96,7 @@
                     </Style>
                 </StackPanel.Styles>
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText"
-                           Text="{Binding SshKeyFormat, Converter={StaticResource SingleSshKeyTypeConverter}}" />
+                           Text="{Binding Format, Converter={StaticResource SingleSshKeyTypeConverter}}" />
                 <Separator Margin="0" />
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText" Text="{Binding FileName}" />
             </StackPanel>
@@ -128,7 +128,7 @@
                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyFormatType}"
                                    FontWeight="Bold" />
                             <TextPresenter Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                           Text="{Binding SshKeyFormat}" VerticalAlignment="Center" />
+                                           Text="{Binding Format}" VerticalAlignment="Center" />
                         </Grid>
                     </ToolTip.Tip>
                     <ContentPresenter Grid.Column="0" Content="{Binding .}"
@@ -182,16 +182,46 @@
                             </ToolTip.Tip>
                             <avalonia:MaterialIcon Kind="DeleteOutline" />
                         </Button>
-                        <Button Padding="5" Grid.Column="3" HorizontalAlignment="Center"
-                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ConvertKey}"
-                                CommandParameter="{Binding .}"
-                                Background="DarkCyan">
+                        <SplitButton Padding="5" Grid.Column="3" HorizontalAlignment="Center" Background="DarkCyan"
+                                     Command="{Binding ChangeFormatOfKeyFile}" CommandParameter="{Binding DefaultConversionFormat}">
+                            <SplitButton.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedLeft"
+                                            ItemsSource="{Binding AvailableFormatsForConversion}">
+                                    <MenuFlyout.ItemContainerTheme>
+                                        <ControlTheme TargetType="MenuItem"
+                                                      BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                      x:DataType="keygen:SshKeyFormat">
+                                            <Setter Property="Background" Value="DarkCyan"/>
+                                            <Setter Property="Header"
+                                                    Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}"/>
+                                            <Setter Property="Command"
+                                                    Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}"/>
+                                            <Setter Property="CommandParameter"
+                                                    Value="{Binding}"/>
+                                        </ControlTheme>
+                                    </MenuFlyout.ItemContainerTheme>
+                                </MenuFlyout>
+                            </SplitButton.Flyout>
                             <ToolTip.Tip>
                                 <Label
                                     Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
                             </ToolTip.Tip>
                             <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
-                        </Button>
+                        </SplitButton>
+                        
+                        
+                        <!-- <Button Padding="5" Grid.Column="3" HorizontalAlignment="Center" -->
+                        <!--         Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ConvertKey}" -->
+                        <!--         Background="DarkCyan"> -->
+                        <!--     <Button.CommandParameter> -->
+                        <!--         <Binding Path="."/> -->
+                        <!--     </Button.CommandParameter> -->
+                        <!--     <ToolTip.Tip> -->
+                        <!--         <Label -->
+                        <!--             Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" /> -->
+                        <!--     </ToolTip.Tip> -->
+                        <!--     <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" /> -->
+                        <!-- </Button> -->
                     </Grid>
                 </Grid>
             </Border>

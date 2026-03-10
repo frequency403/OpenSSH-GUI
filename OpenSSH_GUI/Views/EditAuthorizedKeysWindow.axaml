@@ -66,11 +66,11 @@
                 </ToolTip.Tip>
                 <ItemsControl ItemsSource="{Binding AuthorizedKeysFileLocal.AuthorizedKeys}" />
             </TabItem>
-            <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnection.IsConnected}">
+            <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <ToolTip.Tip>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentFrom}" />
-                        <Label Content="{Binding ServerConnection.ConnectionString}" />
+                        <Label Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}" />
                     </StackPanel>
                 </ToolTip.Tip>
                 <Grid RowDefinitions="10* *" ColumnDefinitions="* *">
@@ -79,7 +79,7 @@
                     <ComboBox Grid.Row="1" Grid.Column="0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
-                              ItemsSource="{Binding PublicKeys}"
+                              ItemsSource="{Binding KeyLocatorService.SshKeys}"
                               SelectedItem="{Binding SelectedKey}"
                               IsVisible="{Binding KeyAddPossible}"
                               ItemTemplate="{StaticResource SshKeyComboBoxStyle}"
@@ -95,7 +95,7 @@
                         <ToolTip.Tip>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysAddKeyToFileOf}" />
-                                <Label Content="{Binding ServerConnection.ConnectionString}" />
+                                <Label Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}" />
                             </StackPanel>
                         </ToolTip.Tip>
                         <materialIcons:MaterialIcon Kind="Add" />

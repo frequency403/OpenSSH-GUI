@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
@@ -11,11 +12,10 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
+public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService, IServerConnectionService serverConnectionService)
     : ViewModelBase<EditAuthorizedKeysViewModel>
 {
     private SshKeyFile? _selectedKey;
-    private IServerConnection _serverConnection;
 
     public bool AddButtonEnabled
     {
@@ -32,20 +32,16 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
             UpdateAddButton();
         }
     }
+    public KeyLocatorService KeyLocatorService => keyLocatorService;
+    public IServerConnectionService ServerConnectionService => serverConnectionService;
 
     public ObservableCollection<SshKeyFile> PublicKeys { get; set; } = keyLocatorService.SshKeys;
 
     public bool KeyAddPossible => PublicKeys.Count > 0;
-
-    public IServerConnection ServerConnection
-    {
-        get => _serverConnection;
-        set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
-    }
-
+    
     public IAuthorizedKeysFile AuthorizedKeysFileLocal { get; private set; }
 
-    public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
+    public IAuthorizedKeysFile? AuthorizedKeysFileRemote { get; private set; }
     public ReactiveCommand<SshKeyFile, SshKeyFile?> AddKey { get; private set; }
 
     protected override async ValueTask<EditAuthorizedKeysViewModel?> OnBooleanSubmitAsync(bool inputParameter)
@@ -54,7 +50,7 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
         {
             if (!inputParameter) return this;
             await AuthorizedKeysFileLocal.PersistChangesInFileAsync();
-            await ServerConnection.WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFileRemote);
+            await serverConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFileRemote);
             return this;
         }
         catch (Exception)
@@ -66,12 +62,11 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
     public override async ValueTask InitializeAsync(IInitializerParameters<EditAuthorizedKeysViewModel>? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        if (parameters is not EditAuthorizedKeysViewModelInitializeParameters initParams)
-            throw new ArgumentException("parameters is not valid", nameof(parameters));
-        AuthorizedKeysFileLocal = await new AuthorizedKeysFile().InitializeAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(), cancellationToken: cancellationToken);
-        _serverConnection = initParams.ServerConnection;
-        AuthorizedKeysFileRemote = await ServerConnection.GetAuthorizedKeysFromServerAsync(cancellationToken);
-        _selectedKey = PublicKeys.FirstOrDefault();
+        AuthorizedKeysFileLocal = await AuthorizedKeysFile.OpenAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(), cancellationToken: cancellationToken);
+        if(serverConnectionService.IsConnected)
+            AuthorizedKeysFileRemote = await serverConnectionService.ServerConnection.GetAuthorizedKeysFromServerAsync(cancellationToken);
+        
+        _selectedKey = KeyLocatorService.SshKeys.FirstOrDefault();
         UpdateAddButton();
         AddKey = ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async e =>
         {
@@ -88,9 +83,4 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService)
         AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key =>
             string.Equals(key.Fingerprint, SelectedKey.Fingerprint()));
     }
-}
-
-public record EditAuthorizedKeysViewModelInitializeParameters : IInitializerParameters<EditAuthorizedKeysViewModel>
-{
-    public IServerConnection ServerConnection { get; init; }
 }

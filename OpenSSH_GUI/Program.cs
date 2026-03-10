@@ -28,6 +28,9 @@ namespace OpenSSH_GUI;
 
 internal sealed class Program
 {
+    private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
+    private const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
+    
     private static string GetHostVersion()
     {
         return Assembly.GetEntryAssembly()
@@ -36,9 +39,8 @@ internal sealed class Program
                ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
                ?? "0.0.0";
     }
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
+
+    
     [STAThread]
     public static async Task Main(string[] args)
     {
@@ -116,13 +118,13 @@ internal sealed class Program
         collection.AddTransient<IClipboardService, ClipboardService>();
         collection.AddHostedService<FileSystemAnalyzer>();
         
-        collection.AddKeyedSingleton("ssh_config",
+        collection.AddKeyedSingleton(ConfigFile,
             (_, _) => SshConfigFileService.LoadFromFile(
-                SshConfigFiles.Config.GetPathOfFile()));
-
-        collection.AddKeyedSingleton("sshd_config",
+                ConfigFile.GetPathOfFile()));
+        
+        collection.AddKeyedSingleton(SshdConfig,
             (_, _) => SshConfigFileService.LoadFromFile(
-                SshConfigFiles.Sshd_Config.GetPathOfFile()));
+                SshdConfig.GetPathOfFile()));
 
     }
 

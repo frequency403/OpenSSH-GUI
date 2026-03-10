@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Keys;
 using ReactiveUI;
@@ -18,17 +20,28 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <summary>
     ///     Represents an authorized keys file.
     /// </summary>
-
-
-    public async ValueTask<IAuthorizedKeysFile> InitializeAsync(string fileContentsOrPath, bool fromServer = false, CancellationToken cancellationToken = default)
+    private AuthorizedKeysFile()
     {
-        IsFileFromServer = fromServer;
-        _fileContentsOrPath = fileContentsOrPath;
-        if (IsFileFromServer)
-            LoadFileContents(_fileContentsOrPath);
-        else
-            await ReadAndLoadFileContents(_fileContentsOrPath, cancellationToken);
-        return this;
+        
+    }
+
+    public static async ValueTask<IAuthorizedKeysFile> OpenAsync(string? filePath = null,
+        CancellationToken cancellationToken = default)
+    {
+        filePath ??= SshConfigFiles.Authorized_Keys.GetPathOfFile();
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+            throw new FileNotFoundException("Authorized keyfile was not found", fileInfo.Name);
+        await using var fileStream = File.Open(filePath, FileMode.OpenOrCreate);
+        return await ParseAsync(fileStream, cancellationToken);
+    }
+
+    public static async ValueTask<IAuthorizedKeysFile> ParseAsync(Stream stream,
+        CancellationToken cancellationToken = default)
+    {
+        var authorizedKeyFile = new AuthorizedKeysFile();
+        await authorizedKeyFile.LoadFromStreamAsync(stream, cancellationToken);
+        return authorizedKeyFile;
     }
 
     /// <summary>
@@ -38,7 +51,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
 
     /// <summary>
     ///     Represents the authorized keys file.
-    /// </summary
+    /// </summary>
     public ObservableCollection<IAuthorizedKey> AuthorizedKeys
     {
         get;
@@ -132,6 +145,21 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
                     $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
     }
 
+    /// <summary>
+    /// Asynchronously loads authorized keys from a given stream.
+    /// </summary>
+    /// <param name="stream">The stream containing the authorized keys file content.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async ValueTask LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
+        while ((await streamReader.ReadLineAsync(cancellationToken)) is { } line)
+        {
+            if (string.IsNullOrWhiteSpace(line.Trim())) continue;
+            AuthorizedKeys.Add(new AuthorizedKey(line.Trim()));
+        }
+    }
+    
     /// <summary>
     ///     Loads the contents of a file and parses them into a collection of authorized keys.
     /// </summary>

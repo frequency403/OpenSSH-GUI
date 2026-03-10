@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using ReactiveUI;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using Renci.SshNet.Security;
@@ -12,10 +14,18 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
-public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyncDisposable
+public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 {
+    private readonly ILogger<SshKeyFile> _logger;
+    public SshKeyFile(ILogger<SshKeyFile>? logger = null)
+    {
+        _logger = logger ?? NullLogger<SshKeyFile>.Instance;
+        ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
+    }
+    
+    
     private string _commentField = string.Empty;
-    private FileInfo? _fileInfo;
+    private SshKeyFileInformation? _fileInfo;
 
     private string _fingerPrintField = string.Empty;
 
@@ -25,56 +35,53 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
 
     private string _keyTypeField = string.Empty;
     private PrivateKeyFile? _privateKeyFile;
-
-    public IPrivateKeySource? PrivateKeySource => _privateKeyFile;
+    public IPrivateKeySource PrivateKeySource => _privateKeyFile;
 
     [MemberNotNullWhen(true, nameof(_fileInfo), nameof(_privateKeyFile))]
-    public bool IsInitialized => _privateKeyFile != null && _fileInfo is { Exists: true };
+    public bool IsInitialized => _privateKeyFile is not null && _fileInfo is { Exists: true };
 
-    public bool IsPuttyKey => SshKeyFormat is not SshKeyFormat.OpenSSH;
+    public bool IsPuttyKey => _fileInfo?.CurrentFormat is not SshKeyFormat.OpenSSH;
 
     public bool NeedsPassword { get; set; }
 
     [MemberNotNullWhen(true, nameof(Password))]
     public bool HasPassword => Password is not null && !NeedsPassword;
-
     public ReadOnlyMemory<byte>? Password { get; set; }
 
-    public IReadOnlyCollection<HostAlgorithm> HostKeyAlgorithms =>
-        _privateKeyFile?.HostKeyAlgorithms ?? throw new SshPassPhraseNullOrEmptyException();
-
-    public Key Key => _privateKeyFile?.Key ?? throw new SshPassPhraseNullOrEmptyException();
+    public IReadOnlyCollection<HostAlgorithm>? HostKeyAlgorithms => _privateKeyFile?.HostKeyAlgorithms;
+    public Key? Key => _privateKeyFile?.Key;
+    public string? AbsoluteFilePath => _fileInfo?.FullName;
+    public string? FileName => _fileInfo?.Name;
+    public SshKeyFormat? Format => _fileInfo?.CurrentFormat;
+    public IEnumerable<SshKeyFormat>? AvailableFormatsForConversion => _fileInfo?.AvailableFormatsForConversion;
+    public SshKeyFormat? DefaultConversionFormat => _fileInfo?.DefaultConversionFormat;
+    public ReactiveCommand<SshKeyFormat, Unit> ChangeFormatOfKeyFile { get; }
+    
     public Certificate? Certificate => _privateKeyFile?.Certificate;
-    public string AbsoluteFilePath => _fileInfo?.FullName ?? string.Empty;
-    public string FileName => _fileInfo?.Name ?? string.Empty;
-
-    public SshKeyFormat SshKeyFormat => _fileInfo?.Extension switch
-    {
-        { } extension when extension.EndsWith("ppk") => SshKeyFormat.PuTTYv3,
-        _ => SshKeyFormat.OpenSSH
-    };
-
+    
     public int KeySize => _privateKeyFile?.Key.KeyLength ?? _keySizeField;
-
     public SshKeyHashAlgorithmName HashAlgorithmName =>
         Enum.TryParse<SshKeyHashAlgorithmName>(_privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name,
             out var enumValue)
             ? enumValue
             : _hashAlgorithmNameField;
 
-    public string FingerprintString => _privateKeyFile?.Fingerprint(HashAlgorithmName) ?? _fingerPrintField;
+    public string FingerprintString => _privateKeyFile?.Fingerprint(SshKeyHashAlgorithmName.SHA256)
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Skip(1).FirstOrDefault()
+        ?.Split(':').Skip(1).FirstOrDefault() ?? _fingerPrintField;
+
     public string Comment => _privateKeyFile?.Key.Comment ?? _commentField;
     public string KeyType => _privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? _keyTypeField;
-
-    public string ToPuttyPublicFormat =>
-        _privateKeyFile?.ToPuttyPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
+    
 
     public async ValueTask DisposeAsync()
     {
         if (_privateKeyFile is IAsyncDisposable privateKeyFileAsyncDisposable)
             await privateKeyFileAsyncDisposable.DisposeAsync();
-        else if (_privateKeyFile != null)
-            _privateKeyFile.Dispose();
+        else
+        {
+            _privateKeyFile?.Dispose();
+        }
     }
 
 
@@ -134,7 +141,7 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
     {
         try
         {
-            _fileInfo = new FileInfo(filePath);
+            _fileInfo = new SshKeyFileInformation(filePath);
             _privateKeyFile = passPhrase is not { } memory
                 ? new PrivateKeyFile(_fileInfo.FullName)
                 : new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span));
@@ -142,14 +149,19 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
-            Logger.LogWarning("Missing Password for keyfile {filePath}", filePath);
+            _logger.LogWarning("Missing Password for keyfile {filePath}", filePath);
             await ExtractKeyInformation();
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
+            _logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
             throw;
         }
+    }
+
+    public async Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token = default)
+    {
+        return;
     }
 
     public string ToPublic()
@@ -223,7 +235,7 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
         try
         {
             if (_fileInfo is not { Exists: true })
-                throw new Exception("");
+                throw new FileNotFoundException("SshKeyFile not found", _fileInfo.Name);
             await Load(_fileInfo.FullName, password);
             NeedsPassword = false;
             return true;
@@ -231,45 +243,34 @@ public sealed record SshKeyFile(ILogger<SshKeyFile> Logger) : IDisposable, IAsyn
         catch (SshPassPhraseNullOrEmptyException)
         {
             NeedsPassword = true;
-            Logger.LogWarning("Missing Password for keyfile {filePath}", _fileInfo.FullName);
+            _logger.LogWarning("Missing Password for keyfile {filePath}", _fileInfo.FullName);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
+            _logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
         }
 
         return false;
     }
 
-    public ValueTask<bool> Delete()
+    public bool Delete()
     {
-        try
-        {
-            if (!IsInitialized) return ValueTask.FromResult(false);
-            var filesToDelete = new[] { AbsoluteFilePath }
-                .Concat(Directory.EnumerateFiles(Path.GetDirectoryName(AbsoluteFilePath),
-                    $"*{(SshKeyFormat is SshKeyFormat.OpenSSH ? ".pub" : string.Empty)}",
-                    SearchOption.TopDirectoryOnly))
-                .Where(e => string.Equals(Path.GetFileNameWithoutExtension(AbsoluteFilePath),
-                    Path.GetFileNameWithoutExtension(e))).ToArray();
-            Span<bool> span = stackalloc bool[filesToDelete.Length];
-            for (var i = 0; i < span.Length; i++)
-                try
-                {
-                    File.Delete(filesToDelete[i]);
-                    span[i] = true;
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e, "Failed to delete {filePath}", filesToDelete[i]);
-                    span[i] = false;
-                }
+        if (!IsInitialized)
+            throw new InvalidOperationException("Not initialized.");
 
-            return ValueTask.FromResult(span.CountAny(true) == span.Length);
-        }
-        catch (Exception exception)
+        var allSucceeded = true;
+        foreach (var file in _fileInfo.Files)
         {
-            return ValueTask.FromException<bool>(exception);
+            try
+            {
+                file.Delete();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to delete {FilePath}", file.FullName);
+                allSucceeded = false;
+            }
         }
+        return allSucceeded;
     }
 }

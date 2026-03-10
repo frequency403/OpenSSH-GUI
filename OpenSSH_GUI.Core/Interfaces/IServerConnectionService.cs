@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using ReactiveUI;
@@ -19,6 +20,7 @@ public interface IServerConnectionService : IReactiveNotifyPropertyChanged<IReac
     ///     and is currently active. If the connection is not established or has
     ///     been terminated, it returns <c>false</c>.
     /// </remarks>
+    [MemberNotNullWhen(true, nameof(ServerConnection))]
     bool IsConnected { get; }
 
     /// <summary>

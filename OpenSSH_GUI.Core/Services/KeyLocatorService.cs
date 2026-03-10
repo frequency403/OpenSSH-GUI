@@ -26,7 +26,7 @@ public class KeyLocatorService
         _logger = logger;
         _directoryCrawler = directoryCrawler;
         this.serviceProvider = serviceProvider;
-        SshKeys = new ObservableCollection<SshKeyFile>();
+        SshKeys = [];
         _searchingTask = SearchForKeysAndUpdateCollection();
     }
 
@@ -92,12 +92,7 @@ public class KeyLocatorService
         SshKeys.Add(keyFile);
     }
 
-    public async ValueTask RerunSearchAsync()
-    {
-        if (_searching)
-            throw new InvalidOperationException("Can't rerun search while searching");
-        await SearchForKeysAndUpdateCollection();
-    }
+    public Task RerunSearchAsync() => _searching ? throw new InvalidOperationException("Can't rerun search while searching") : SearchForKeysAndUpdateCollection();
 
     private async Task SearchForKeysAndUpdateCollection()
     {

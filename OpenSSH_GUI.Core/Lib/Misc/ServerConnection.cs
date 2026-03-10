@@ -139,13 +139,13 @@ public class ServerConnection : ReactiveObject, IServerConnection
 
     public async ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default)
     {
-        if (!IsConnected) return await new AuthorizedKeysFile().InitializeAsync("", true, token);
+        if (!IsConnected) 
+            throw new InvalidOperationException("No connection to get authorized keys from");
 
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
         var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
-        var result = await Task.Run(() => command.Execute(), token);
-
-        return await new AuthorizedKeysFile().InitializeAsync(result, true, token);
+        await command.ExecuteAsync(token);
+        return await AuthorizedKeysFile.ParseAsync(command.ExtendedOutputStream, token);
     }
 
     public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile, CancellationToken token = default)
