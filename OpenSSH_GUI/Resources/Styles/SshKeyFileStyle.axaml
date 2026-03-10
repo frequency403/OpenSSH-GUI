@@ -58,7 +58,7 @@
                     <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
                 </Border>
                 <TextBlock Padding="5"
-                           Text="{Binding KeyType}"
+                           Text="{Binding HashAlgorithmName, Converter={x:Static converters:Converter.HashAlgorithmNameToStringConverter}}"
                            HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
@@ -96,7 +96,7 @@
                     </Style>
                 </StackPanel.Styles>
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText"
-                           Text="{Binding Format, Converter={StaticResource SingleSshKeyTypeConverter}}" />
+                           Text="{Binding Format, Converter={x:Static converters:Converter.KeyTypeToStringConverter}}" />
                 <Separator Margin="0" />
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText" Text="{Binding FileName}" />
             </StackPanel>
@@ -208,20 +208,6 @@
                             </ToolTip.Tip>
                             <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
                         </SplitButton>
-                        
-                        
-                        <!-- <Button Padding="5" Grid.Column="3" HorizontalAlignment="Center" -->
-                        <!--         Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ConvertKey}" -->
-                        <!--         Background="DarkCyan"> -->
-                        <!--     <Button.CommandParameter> -->
-                        <!--         <Binding Path="."/> -->
-                        <!--     </Button.CommandParameter> -->
-                        <!--     <ToolTip.Tip> -->
-                        <!--         <Label -->
-                        <!--             Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" /> -->
-                        <!--     </ToolTip.Tip> -->
-                        <!--     <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" /> -->
-                        <!-- </Button> -->
                     </Grid>
                 </Grid>
             </Border>

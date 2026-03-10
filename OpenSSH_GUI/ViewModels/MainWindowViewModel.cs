@@ -431,7 +431,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             new ExportWindowViewModelInitializerParameters
             {
                 Export = keyExport,
-                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.KeyType,
+                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.HashAlgorithmName,
                     key.FileName)
             }, token: token);
         await _dialogHost.ShowDialog(view);
@@ -461,7 +461,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             new ExportWindowViewModelInitializerParameters
             {
                 Export = keyExport,
-                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.KeyType,
+                WindowTitle = string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle, key.HashAlgorithmName,
                     key.FileName)
             });
         await _dialogHost.ShowDialog(view);

@@ -71,8 +71,6 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         ?.Split(':').Skip(1).FirstOrDefault() ?? _fingerPrintField;
 
     public string Comment => _privateKeyFile?.Key.Comment ?? _commentField;
-    public string KeyType => _privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? _keyTypeField;
-    
 
     public async ValueTask DisposeAsync()
     {
