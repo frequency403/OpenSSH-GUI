@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -16,10 +17,12 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 
 public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 {
+    private readonly KeyLocatorService _keyLocatorService;
     private readonly ILogger<SshKeyFile> _logger;
-    public SshKeyFile(ILogger<SshKeyFile>? logger = null)
+    public SshKeyFile(ILogger<SshKeyFile> logger, KeyLocatorService keyLocatorService)
     {
-        _logger = logger ?? NullLogger<SshKeyFile>.Instance;
+        _keyLocatorService = keyLocatorService;
+        _logger = logger;
         ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
     }
     
@@ -106,20 +109,6 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         return sshKeyFile._privateKeyFile;
     }
 
-    internal static async ValueTask<SshKeyFile> FromFile(string filePath)
-    {
-        var keyFile = new SshKeyFile(NullLogger<SshKeyFile>.Instance);
-        await keyFile.Load(filePath);
-        return keyFile;
-    }
-
-    internal static async ValueTask<SshKeyFile> FromFile(string filePath, ReadOnlyMemory<byte> password)
-    {
-        var keyFile = new SshKeyFile(NullLogger<SshKeyFile>.Instance);
-        await keyFile.Load(filePath, password);
-        return keyFile;
-    }
-
     private async ValueTask ExtractKeyInformation()
     {
         if (_fileInfo is not { Exists: true })
@@ -153,10 +142,10 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         try
         {
             _fileInfo = new SshKeyFileInformation(filePath);
-            _privateKeyFile = passPhrase is not { } memory
-                ? new PrivateKeyFile(_fileInfo.FullName)
-                : new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span));
-            Password = passPhrase;
+            _privateKeyFile = passPhrase is { Length: > 0 } memory 
+                ? new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span)) 
+                : new PrivateKeyFile(_fileInfo.FullName);
+            Password = passPhrase is { Length: > 0 } pass ? pass : null;
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
@@ -170,9 +159,10 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         }
     }
 
-    public async Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token = default)
+    private Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token = default)
     {
-        return;
+        _logger.LogInformation("Changing format of keyfile {filePath} to {newFormat}", _fileInfo.FullName, newFormat);
+        return _keyLocatorService.ChangeFormatOfKeyAsync(this, newFormat, token);
     }
 
     public string ToPublic()

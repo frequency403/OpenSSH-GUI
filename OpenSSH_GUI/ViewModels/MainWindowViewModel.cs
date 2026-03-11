@@ -260,11 +260,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         
         // TODO: ConversionLogic
     }
-
     
-
-    
-
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)
     {
         var trys = 0;

@@ -74,7 +74,7 @@ public class DirectoryCrawler(
                     RecurseSubdirectories = false
                 }).Select(e => new FileInfo(e))
                 .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-                .Where(e => string.IsNullOrWhiteSpace(e.Extension))
+                .Where(e => string.IsNullOrWhiteSpace(e.Extension) || e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
                 .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => e.FullName)
         ).ToList();
         
