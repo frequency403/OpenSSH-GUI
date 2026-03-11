@@ -109,8 +109,8 @@ internal sealed class Program
             (_, _) => new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
         collection.AddSingleton<IServerConnectionService, ServerConnectionService>();
         collection.AddTransient<SshKeyFile>();
-        collection.AddTransient<DirectoryCrawler>();
-        collection.AddTransient<KeyLocatorService>();
+        collection.AddSingleton<DirectoryCrawler>();
+        collection.AddSingleton<KeyLocatorService>();
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
             serviceCollection =>
             {
