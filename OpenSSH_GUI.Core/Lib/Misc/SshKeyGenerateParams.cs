@@ -9,7 +9,7 @@ public readonly record struct SshKeyGenerateParams
         SshKeyFormat format,
         string? fileName = null,
         string? filePath = null,
-        string? password = null,
+        ReadOnlyMemory<byte>? password = null,
         string? comment = null,
         int? keyLength = null)
     {
@@ -57,7 +57,7 @@ public readonly record struct SshKeyGenerateParams
     /// <summary>
     ///     Represents the password associated with an SSH key.
     /// </summary>
-    public string? Password { get; }
+    public ReadOnlyMemory<byte>? Password { get; }
 
     public string FullFilePath => Path.Combine(FilePath, FileName);
 }

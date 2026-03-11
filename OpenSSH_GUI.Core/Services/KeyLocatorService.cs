@@ -9,6 +9,7 @@ using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
+using SshNet.Keygen.SshKeyEncryption;
 using SshKey = SshNet.Keygen.SshKey;
 
 namespace OpenSSH_GUI.Core.Services;
@@ -36,12 +37,21 @@ public class KeyLocatorService : ReactiveObject
         });
     }
 
-    public ICollection<SshKeyFile> SshKeys { get; }
+    public ObservableCollection<SshKeyFile> SshKeys
+    {
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    }
 
     public int SshKeysCount
     {
         get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public void ChangeOrder(IOrderedEnumerable<SshKeyFile> collection)
+    {
+        SshKeys = new ObservableCollection<SshKeyFile>(collection);
     }
 
     private SshKeyFile? GenerateKeyFile()
@@ -59,7 +69,7 @@ public class KeyLocatorService : ReactiveObject
         return file;
     }
 
-    public async ValueTask GenerateNewKeyInFile(string fullFilePath, SshKeyGenerateParams generateParams)
+    public async ValueTask GenerateNewKeyInFile(string fullFilePath, SshKeyGenerateInfo generateParamsInfo)
     {
         if (File.Exists(fullFilePath))
             throw new InvalidOperationException("File already exists");
@@ -67,28 +77,28 @@ public class KeyLocatorService : ReactiveObject
             throw new InvalidOperationException("Key file not generated");
 
         await using var privateStream = new MemoryStream();
-        var createdKey = SshKey.Generate(privateStream, generateParams.ToInfo());
+        var createdKey = SshKey.Generate(privateStream, generateParamsInfo);
         var privateKeyFilePath = fullFilePath;
-        switch (generateParams.KeyFormat)
+        switch (generateParamsInfo.KeyFormat)
         {
             case SshKeyFormat.PuTTYv2:
             case SshKeyFormat.PuTTYv3:
-                privateKeyFilePath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath);
+                privateKeyFilePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath);
                 await using (var privateFileStream = new FileStream(privateKeyFilePath, FileMode.OpenOrCreate))
                 await using (var privateStreamWriter = new StreamWriter(privateFileStream))
                 {
-                    await privateStreamWriter.WriteAsync(createdKey.ToPuttyFormat());
+                    await privateStreamWriter.WriteAsync(createdKey.ToPuttyFormat(generateParamsInfo.Encryption, generateParamsInfo.KeyFormat));
                 }
 
                 break;
             case SshKeyFormat.OpenSSH:
             default:
-                var pubPath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath);
-                privateKeyFilePath = generateParams.KeyFormat.ChangeExtension(generateParams.FullFilePath, false);
+                var pubPath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath);
+                privateKeyFilePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath, false);
                 await using (var privateFileStream = new FileStream(privateKeyFilePath, FileMode.OpenOrCreate))
                 await using (var privateStreamWriter = new StreamWriter(privateFileStream))
                 {
-                    await privateStreamWriter.WriteAsync(createdKey.ToOpenSshFormat());
+                    await privateStreamWriter.WriteAsync(createdKey.ToOpenSshFormat(generateParamsInfo.Encryption));
                 }
                 await using (var publicFileStream = new FileStream(pubPath, FileMode.OpenOrCreate))
                 await using (var publicStreamWriter = new StreamWriter(publicFileStream))
@@ -98,8 +108,7 @@ public class KeyLocatorService : ReactiveObject
 
                 break;
         }
-
-        await keyFile.Load(privateKeyFilePath, Encoding.UTF8.GetBytes(generateParams.Password));
+        await keyFile.Load(privateKeyFilePath, Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
         SshKeys.Add(keyFile);
     }
 
@@ -109,7 +118,16 @@ public class KeyLocatorService : ReactiveObject
     {
         _searching = true;
         await foreach (var key in _directoryCrawler.GetNewFromDiskAsyncEnumerable())
+        {
+            key.GotDeleted += SshKeyGotDeleted;
             SshKeys.Add(key);
+        }
         _searching = false;
+    }
+
+    private void SshKeyGotDeleted(object? sender, EventArgs e)
+    {
+        if(sender is SshKeyFile key)
+            SshKeys.Remove(key);
     }
 }

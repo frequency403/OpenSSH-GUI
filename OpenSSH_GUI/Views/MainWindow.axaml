@@ -13,9 +13,6 @@
         Width="1150"
         Height="450"
         Title="{Binding WindowTitle}">
-    <Window.Resources>
-        <converters:PlatformIdConverter x:Key="PlatformIdConverter" />
-    </Window.Resources>
     <Window.Styles>
         <Style Selector="ToggleButton.Sorter:pressed">
             <Setter Property="RenderTransform" Value="{x:Null}" />
@@ -129,7 +126,7 @@
                                    Text="{x:Static openSshGui:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
                                Foreground="OrangeRed"
-                               IsVisible="{Binding !ServerConnection.IsConnected}" />
+                               IsVisible="{Binding !ServerConnectionService.IsConnected}" />
                     </StackPanel>
                 </ToolTip.Tip>
                 <StackPanel Orientation="Horizontal">
@@ -149,7 +146,7 @@
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}" />
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
                                Foreground="OrangeRed"
-                               IsVisible="{Binding !ServerConnection.IsConnected}" />
+                               IsVisible="{Binding !ServerConnectionService.IsConnected}" />
                     </StackPanel>
                 </ToolTip.Tip>
                 <StackPanel Orientation="Horizontal">
@@ -170,21 +167,21 @@
                     <ToolTip.Tip>
                         <StackPanel>
                             <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
-                                  IsVisible="{Binding ServerConnection.IsConnected, FallbackValue=False}">
+                                  IsVisible="{Binding ServerConnectionService.IsConnected, FallbackValue=False}">
                                 <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
-                                       Content="{Binding ServerConnection.ConnectionString}" FontWeight="Bold" />
+                                       Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}" FontWeight="Bold" />
                                 <Label Grid.Row="1" Grid.Column="0"
                                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipServerOs}" />
                                 <Label Grid.Row="1" Grid.Column="1"
-                                       Content="{Binding ServerConnection.ServerOs, Converter={StaticResource PlatformIdConverter}}"
+                                       Content="{Binding ServerConnectionService.ServerConnection.ServerOs, Converter={x:Static converters:Converter.PlatformIdToStringConverter}}"
                                        FontWeight="Bold" />
                                 <Label Grid.Row="2" Grid.Column="0"
                                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipConnectedOn}" />
-                                <Label Grid.Row="2" Grid.Column="1" Content="{Binding ServerConnection.ConnectionTime}" />
+                                <Label Grid.Row="2" Grid.Column="1" Content="{Binding ServerConnectionService.ServerConnection.ConnectionTime}" />
                             </Grid>
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipDisconnected}"
-                                IsVisible="{Binding !ServerConnection.IsConnected}" />
+                                IsVisible="{Binding !ServerConnectionService.IsConnected}" />
                         </StackPanel>
 
 
@@ -192,14 +189,14 @@
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuConnect}"
-                                      IsEnabled="{Binding !ServerConnection.IsConnected, FallbackValue=True}"
+                                      IsEnabled="{Binding !ServerConnectionService.IsConnected, FallbackValue=True}"
                                       Command="{Binding OpenConnectToServerWindow}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanConnect" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuDisconnect}"
-                                      IsEnabled="{Binding ServerConnection.IsConnected, FallbackValue=False}"
+                                      IsEnabled="{Binding ServerConnectionService.IsConnected, FallbackValue=False}"
                                       Command="{Binding DisconnectServer}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanDisconnect" />
@@ -209,11 +206,11 @@
                     </Border.ContextMenu>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal"
-                                    IsVisible="{Binding ServerConnection.IsConnected, FallbackValue=False}">
+                                    IsVisible="{Binding ServerConnectionService.IsConnected, FallbackValue=False}">
                             <materialIcons:MaterialIcon Kind="Signal" Foreground="Green" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
-                                    IsVisible="{Binding !ServerConnection.IsConnected, FallbackValue=True}">
+                                    IsVisible="{Binding !ServerConnectionService.IsConnected, FallbackValue=True}">
                             <materialIcons:MaterialIcon Kind="SignalOff" Foreground="Red" />
                         </StackPanel>
                     </StackPanel>
@@ -227,7 +224,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                            <Label Content="{Binding LocatorService.SshKeys.Count}" FontWeight="Bold" />
+                            <Label Content="{Binding LocatorService.SshKeysCount}" FontWeight="Bold" />
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>
@@ -244,21 +241,8 @@
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                             <MenuItem
-                                Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords}"
-                                Command="{Binding ReloadKeys}">
-                                <MenuItem.CommandParameter>
-                                    <sys:Boolean>True</sys:Boolean>
-                                </MenuItem.CommandParameter>
-                                <MenuItem.Icon>
-                                    <materialIcons:MaterialIcon Kind="Reload" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDisk}"
                                 Command="{Binding ReloadKeys}">
-                                <MenuItem.CommandParameter>
-                                    <sys:Boolean>False</sys:Boolean>
-                                </MenuItem.CommandParameter>
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="Reload" />
                                 </MenuItem.Icon>
@@ -287,7 +271,7 @@
                             <Separator />
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteUserSshConfig}"
-                                IsEnabled="{Binding ServerConnection.IsConnected}"
+                                IsEnabled="{Binding ServerConnectionService.IsConnected}"
                                 Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ServerNetworkOutline" />
@@ -295,7 +279,7 @@
                             </MenuItem>
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteMachineSshdConfig}"
-                                IsEnabled="{Binding ServerConnection.IsConnected}"
+                                IsEnabled="{Binding ServerConnectionService.IsConnected}"
                                 Command="{Binding NotImplementedMessage}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ServerOutline" />

@@ -21,21 +21,12 @@
                         </Style>
                     </Border.Styles>
                     <Border.ContextMenu>
-                        <ContextMenu
-                            IsEnabled="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).KeyContextMenuEnabled, FallbackValue={Binding !HasPassword}}">
+                        <ContextMenu IsEnabled="{Binding !NeedsPassword}">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysShowPassword}"
                                       Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPassword}"
                                       CommandParameter="{Binding .}">
                                 <MenuItem.Icon>
                                     <avalonia:MaterialIcon Kind="KeyArrowRight" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator />
-                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysForgetPassword}"
-                                      Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ForgetPassword}"
-                                      CommandParameter="{Binding .}">
-                                <MenuItem.Icon>
-                                    <avalonia:MaterialIcon Kind="KeyRemove" />
                                 </MenuItem.Icon>
                             </MenuItem>
                         </ContextMenu>

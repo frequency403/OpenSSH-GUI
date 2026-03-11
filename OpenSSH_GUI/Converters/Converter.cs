@@ -1,3 +1,4 @@
+using System.Globalization;
 using Avalonia.Data.Converters;
 using SshNet.Keygen;
 using SshNet.Keygen.SshKeyEncryption;
@@ -6,9 +7,19 @@ namespace OpenSSH_GUI.Converters;
 
 public static class Converter
 {
-    private static string? EnumToString<TEnum>(TEnum value) where TEnum : struct, Enum => Enum.GetName(value);
+    private const string Windows = "Windows";
+    private const string WindowsShort = "Win";
     
+    private static string? EnumToString<TEnum>(TEnum value) where TEnum : struct, Enum => Enum.GetName(value);
     public static FuncValueConverter<SshKeyFormat, string?> FormatToStringConverter { get; } = new(EnumToString);
     public static FuncValueConverter<SshKeyType, string?> KeyTypeToStringConverter { get; } = new(EnumToString);
     public static FuncValueConverter<SshKeyHashAlgorithmName, string?> HashAlgorithmNameToStringConverter { get; } = new(EnumToString);
+    public static FuncValueConverter<PlatformID, string?> PlatformIdToStringConverter { get; } = new(ConvertPlatformId);
+
+    private static string? ConvertPlatformId(PlatformID arg) =>
+        EnumToString(arg) is { } platformId
+            ? platformId.StartsWith(WindowsShort, StringComparison.CurrentCultureIgnoreCase)
+                ? Windows
+                : platformId
+            : null;
 }

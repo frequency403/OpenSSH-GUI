@@ -115,7 +115,7 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnection.IsConnected}">
+            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"

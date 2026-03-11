@@ -182,13 +182,13 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         return _privateKeyFile?.Fingerprint(hashAlgorithmName) ?? throw new SshPassPhraseNullOrEmptyException();
     }
 
-    public string? ToOpenSshFormat()
+    public string ToOpenSshFormat()
     {
         if (NeedsPassword)
             throw new SshPassPhraseNullOrEmptyException();
         if (HasPassword && IsInitialized)
             return _privateKeyFile.ToOpenSshFormat(Encoding.UTF8.GetString(Password.Value.Span));
-        return IsInitialized ? _privateKeyFile.ToOpenSshFormat() : null;
+        return IsInitialized ? _privateKeyFile.ToOpenSshFormat() : string.Empty;
     }
 
     public string ToOpenSshFormat(ISshKeyEncryption keyEncryption)
@@ -250,6 +250,8 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
         return false;
     }
+    
+    public EventHandler GotDeleted { get; set; } = delegate { };
 
     public bool Delete()
     {
@@ -269,6 +271,8 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
                 allSucceeded = false;
             }
         }
+        if(allSucceeded)
+            GotDeleted(this, EventArgs.Empty);
         return allSucceeded;
     }
 }

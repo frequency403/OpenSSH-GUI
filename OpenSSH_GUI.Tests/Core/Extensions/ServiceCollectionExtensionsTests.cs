@@ -1,6 +1,7 @@
 using System;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
@@ -10,9 +11,9 @@ namespace OpenSSH_GUI.Tests.Core.Extensions;
 public class ServiceCollectionExtensionsTests
 {
     private class MockWindow : Window { }
-    private class MockWindowViewModel : ViewModelBase<MockWindowViewModel> { }
+    private class MockWindowViewModel() : ViewModelBase<MockWindowViewModel>(NullLogger<MockWindowViewModel>.Instance) { }
     
-    private class InvalidVM : ViewModelBase<InvalidVM> { }
+    private class InvalidVM() : ViewModelBase<InvalidVM>(NullLogger<InvalidVM>.Instance) { }
 
     [Fact]
     public void RegisterViewWithViewModel_ValidNaming_ShouldRegister()

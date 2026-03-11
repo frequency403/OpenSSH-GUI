@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Media;
+using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSH_GUI.Core.Interfaces;
@@ -12,8 +13,9 @@ using ReactiveUI;
 namespace OpenSSH_GUI.ViewModels;
 
 public sealed class ConnectToServerViewModel(
+    ILogger<ConnectToServerViewModel> logger,
     IServerConnectionService serverConnectionService,
-    KeyLocatorService keyLocatorService) : ViewModelBase<ConnectToServerViewModel>
+    KeyLocatorService keyLocatorService) : ViewModelBase<ConnectToServerViewModel>(logger)
 {
     private SshKeyFile? _selectedPublicKey;
     public KeyLocatorService KeyLocatorService => keyLocatorService;
@@ -181,12 +183,7 @@ public sealed class ConnectToServerViewModel(
         await base.InitializeAsync(initializerParameters, cancellationToken);
     }
 
-    protected override ValueTask<ConnectToServerViewModel?> OnBooleanSubmitAsync(bool inputParameter)
-    {
-        return ValueTask.FromResult<ConnectToServerViewModel?>(!serverConnectionService.IsConnected ? null : this);
-    }
-
-    public void UpdateComboBoxState()
+    private void UpdateComboBoxState()
     {
         KeyComboBoxEnabled = !serverConnectionService.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
     }

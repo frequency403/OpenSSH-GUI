@@ -1,6 +1,7 @@
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
 
@@ -8,16 +9,16 @@ namespace OpenSSH_GUI.Tests.Core.MVVM;
 
 public class ViewModelBaseTests
 {
-    private class TestViewModel : ViewModelBase<TestViewModel>
+    private class TestViewModel() : ViewModelBase<TestViewModel>(NullLogger<TestViewModel>.Instance)
     {
         public bool OnBooleanSubmitCalled { get; private set; }
         public bool InputParam { get; private set; }
 
-        protected override ValueTask<TestViewModel?> OnBooleanSubmitAsync(bool inputParameter)
+        protected override Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
         {
             OnBooleanSubmitCalled = true;
             InputParam = inputParameter;
-            return ValueTask.FromResult<TestViewModel?>(this);
+            return Task.CompletedTask;
         }
 
         public void TriggerClose() => RequestClose();
@@ -30,7 +31,7 @@ public class ViewModelBaseTests
         var vm = new TestViewModel();
 
         // Act
-        await vm.InitializeAsync();
+        await vm.InitializeAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(vm.IsInitialized);
@@ -48,6 +49,7 @@ public class ViewModelBaseTests
         // Assert
         Assert.True(vm.OnBooleanSubmitCalled);
         Assert.True(vm.InputParam);
+        Assert.False(vm.IsInitialized);
     }
 
     [Fact]
@@ -63,5 +65,6 @@ public class ViewModelBaseTests
 
         // Assert
         Assert.True(closeInvoked);
+        Assert.False(vm.IsInitialized);
     }
 }

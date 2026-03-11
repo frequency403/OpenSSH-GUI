@@ -1,15 +1,20 @@
 ﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Dialogs;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
@@ -40,7 +45,7 @@ internal sealed class Program
                ?? "0.0.0";
     }
 
-    
+#pragma warning disable CA1416
     [STAThread]
     public static async Task Main(string[] args)
     {
@@ -52,13 +57,18 @@ internal sealed class Program
             .Build();
 
         await host.StartAsync(mainCancellationTokenSource.Token);
-
-        BuildAvaloniaApp(host.Services)
-            .StartWithClassicDesktopLifetime(args);
+        var appBuilder = AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .UseReactiveUI(builder => { })
+            .AfterSetup(_ => { App.ServiceProvider = host.Services; })
+            .UseManagedSystemDialogs();
+            appBuilder.StartWithClassicDesktopLifetime(args);
 
         await host.StopAsync(mainCancellationTokenSource.Token);
     }
-
+#pragma warning restore CA1416
+    
     private static void ConfigureAppConfiguration(HostBuilderContext builderContext, IConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.AddSshConfig(SshConfigFiles.Config.GetPathOfFile(), optional: true, reloadOnChange: true);
@@ -110,7 +120,6 @@ internal sealed class Program
                     sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
             });
         collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
-        collection.RegisterViewWithViewModel<EditSavedServerEntry, EditSavedServerEntryViewModel>();
         collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
         collection.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
         collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();

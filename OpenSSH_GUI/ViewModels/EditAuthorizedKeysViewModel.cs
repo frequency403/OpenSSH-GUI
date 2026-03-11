@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Reactive;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
@@ -12,8 +14,8 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService, IServerConnectionService serverConnectionService)
-    : ViewModelBase<EditAuthorizedKeysViewModel>
+public class EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> logger, KeyLocatorService keyLocatorService, IServerConnectionService serverConnectionService)
+    : ViewModelBase<EditAuthorizedKeysViewModel>(logger)
 {
     private SshKeyFile? _selectedKey;
 
@@ -38,22 +40,21 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService, IS
     public bool KeyAddPossible => KeyLocatorService.SshKeys.Count > 0;
     
     public IAuthorizedKeysFile AuthorizedKeysFileLocal { get; private set; }
-
     public IAuthorizedKeysFile? AuthorizedKeysFileRemote { get; private set; }
-    public ReactiveCommand<SshKeyFile, SshKeyFile?> AddKey { get; private set; }
+    public ReactiveCommand<SshKeyFile, Unit> AddKey { get; private set; }
 
-    protected override async ValueTask<EditAuthorizedKeysViewModel?> OnBooleanSubmitAsync(bool inputParameter)
+    protected override async Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (!inputParameter) return this;
-            await AuthorizedKeysFileLocal.PersistChangesInFileAsync();
-            await serverConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFileRemote);
-            return this;
+            if (!inputParameter) return;
+            await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
+            if (serverConnectionService.IsConnected && AuthorizedKeysFileRemote is not null)
+                await serverConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFileRemote, cancellationToken);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return this;
+            Logger.LogError(e, "Error while editing authorized keys");
         }
     }
 
@@ -66,13 +67,15 @@ public class EditAuthorizedKeysViewModel(KeyLocatorService keyLocatorService, IS
         
         _selectedKey = KeyLocatorService.SshKeys.FirstOrDefault();
         UpdateAddButton();
-        AddKey = ReactiveCommand.CreateFromTask<SshKeyFile, SshKeyFile?>(async e =>
-        {
-            await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
-            UpdateAddButton();
-            return e;
-        });
+        AddKey = ReactiveCommand.CreateFromTask<SshKeyFile>(OnAddKey);
         await base.InitializeAsync(parameters, cancellationToken);
+    }
+
+    private async Task OnAddKey(SshKeyFile key)
+    {
+        if(AuthorizedKeysFileRemote is null) return;
+        await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(key);
+        UpdateAddButton();
     }
 
     private void UpdateAddButton()

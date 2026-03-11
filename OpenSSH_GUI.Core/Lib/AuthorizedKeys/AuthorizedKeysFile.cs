@@ -152,11 +152,22 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     private async ValueTask LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
     {
+        
         using var streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
         while ((await streamReader.ReadLineAsync(cancellationToken)) is { } line)
         {
             if (string.IsNullOrWhiteSpace(line.Trim())) continue;
             AuthorizedKeys.Add(new AuthorizedKey(line.Trim()));
+        }
+        
+        if (stream is FileStream fileStream)
+        {
+            _fileContentsOrPath = fileStream.Name;
+            IsFileFromServer = false;
+        }
+        else
+        {
+            IsFileFromServer = true;
         }
     }
     
