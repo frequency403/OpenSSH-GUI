@@ -56,9 +56,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
     public IEnumerable<SshKeyFormat>? AvailableFormatsForConversion => _fileInfo?.AvailableFormatsForConversion;
     public SshKeyFormat? DefaultConversionFormat => _fileInfo?.DefaultConversionFormat;
     public ReactiveCommand<SshKeyFormat, Unit> ChangeFormatOfKeyFile { get; }
-    
     public Certificate? Certificate => _privateKeyFile?.Certificate;
-    
     public int KeySize => _privateKeyFile?.Key.KeyLength ?? _keySizeField;
     public SshKeyHashAlgorithmName HashAlgorithmName =>
         Enum.TryParse<SshKeyHashAlgorithmName>(_privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name,
@@ -71,6 +69,21 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         ?.Split(':').Skip(1).FirstOrDefault() ?? _fingerPrintField;
 
     public string Comment => _privateKeyFile?.Key.Comment ?? _commentField;
+
+    public SshKeyType KeyType
+    {
+        get
+        {
+            if (_privateKeyFile is not null)
+                return _privateKeyFile.Key switch
+                {
+                    EcdsaKey => SshKeyType.ECDSA,
+                    ED25519Key => SshKeyType.ED25519,
+                    _ => SshKeyType.RSA
+                };
+            return Enum.TryParse<SshKeyType>(_keyTypeField, true, out var enumValue) ? enumValue : SshKeyType.RSA;
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {

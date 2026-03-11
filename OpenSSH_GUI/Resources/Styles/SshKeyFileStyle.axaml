@@ -48,9 +48,7 @@
                 <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding !IsPuttyKey}">
                     <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
                 </Border>
-                <TextBlock Padding="5"
-                           Text="{Binding HashAlgorithmName, Converter={x:Static converters:Converter.HashAlgorithmNameToStringConverter}}"
-                           HorizontalAlignment="Center" />
+                <TextBlock Padding="5" Text="{Binding KeyType}" HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
     </DataTemplate>

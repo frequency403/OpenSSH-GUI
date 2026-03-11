@@ -235,8 +235,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         var res = await box.ShowAsync();
         if (res != ButtonResult.Yes) 
             return;
-        //u.DeleteKey();
-        LocatorService.SshKeys.Remove(sshKeyFile);
+        sshKeyFile.Delete();
     }
 
     private async Task ConvertKeyAsync(SshKeyFile key, CancellationToken cancellationToken = default)
@@ -347,8 +346,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             LocatorService.ChangeOrder(value switch
             {
                 null => LocatorService.SshKeys.OrderBy(e => e.FileName),
-                true => LocatorService.SshKeys.OrderBy(e => e.HashAlgorithmName),
-                false => LocatorService.SshKeys.OrderByDescending(e => e.HashAlgorithmName)
+                true => LocatorService.SshKeys.OrderBy(e => e.KeyType),
+                false => LocatorService.SshKeys.OrderByDescending(e => e.KeyType)
             });
             this.RaiseAndSetIfChanged(ref field, value);
         }

@@ -30,11 +30,31 @@ public class KeyLocatorService : ReactiveObject
         _directoryCrawler = directoryCrawler;
         this.serviceProvider = serviceProvider;
         SshKeys = [];
+        SshKeys.CollectionChanged += SshKeysOnCollectionChanged;
         _searchingTask = SearchForKeysAndUpdateCollection();
         _keyCountWatcherDisposable = SshKeys.ObservableForProperty<ICollection<SshKeyFile>, int>(nameof(SshKeys.Count)).Subscribe(change =>
         {
             SshKeysCount = change.Value;
         });
+    }
+
+    private void SshKeysOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                foreach (var key in e.NewItems.OfType<SshKeyFile>())
+                {
+                    key.GotDeleted += SshKeyGotDeleted;
+                }
+                break;
+            case NotifyCollectionChangedAction.Remove:
+                foreach (var key in e.OldItems.OfType<SshKeyFile>())
+                {
+                    key.GotDeleted -= SshKeyGotDeleted;
+                }
+                break;
+        }
     }
 
     public ObservableCollection<SshKeyFile> SshKeys
