@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
@@ -7,6 +8,7 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
+using Org.BouncyCastle.Crypto.Engines;
 using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
@@ -20,8 +22,8 @@ namespace OpenSSH_GUI.ViewModels;
 public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, ILogger<AddKeyWindowViewModel> logger)
     : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
-    private bool _createKey;
-    private SshKeyType _selectedKeyType;
+    public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
+    public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
     public ValidationHelper KeyNameValidationHelper
     {
@@ -31,30 +33,58 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
 
     public SshKeyType SelectedKeyType
     {
-        get => _selectedKeyType;
+        get;
         set
         {
             try
             {
+                this.RaiseAndSetIfChanged(ref field, value);
                 KeyName = $"id_{Enum.GetName(value)!.ToLower()}";
-                this.RaiseAndSetIfChanged(ref _selectedKeyType, value);
+                AvaliableKeySizes = value.SupportedKeySizes;
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e);
+                logger.LogError(e, "Error setting key type");
             }
         }
     }
 
-    public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
+    public bool CanChangeKeySize
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public IEnumerable<int> AvaliableKeySizes
+    {
+        get;
+        set
+        {
+            try
+            {
+                this.RaiseAndSetIfChanged(ref field, value.OrderDescending());
+                CanChangeKeySize = value.Count() > 1;
+                SelectedKeySize = value.OrderDescending().First();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error setting avaliable key sizes");
+            }
+        }
+    }
+
+    public int SelectedKeySize
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+    
 
     public SshKeyFormat KeyFormat
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = SshKeyFormat.OpenSSH;
-
-    public SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
 
     public string KeyName
@@ -70,8 +100,7 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
 
     protected override async Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
     {
-        _createKey = inputParameter;
-        if (!_createKey)
+        if (!inputParameter)
         {
             return;
         }
@@ -90,7 +119,7 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
             if (!string.IsNullOrWhiteSpace(Comment))
                 genParm.Comment = Comment;
             
-            await keyLocatorService.GenerateNewKeyInFile(fullNewFilePath, genParm);
+            await keyLocatorService.GenerateNewKey(fullNewFilePath, genParm);
         }
         catch (Exception e)
         {
@@ -108,7 +137,8 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
             name => name is not null && !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
             StringsAndTexts.AddKeyWindowFilenameError
         );
-        _selectedKeyType = SshKeyTypes.First();
+        AvaliableKeySizes = SelectedKeyType.SupportedKeySizes;
+        SelectedKeyType = SshKeyTypes.First();
         return base.InitializeAsync(parameters, cancellationToken);
     }
 }

@@ -33,15 +33,11 @@ public class DirectoryCrawler(
     }
 
     /// <summary>
-    ///     Retrieves new SSH key files from the disk asynchronously and yields them as an async enumerable.
-    ///     Filters out important configuration files and considers only valid SSH key files for processing.
+    /// Asynchronously retrieves a collection of new SSH keys from the disk.
     /// </summary>
-    /// <param name="token">A cancellation token that can be used to monitor for cancellation requests.</param>
-    /// <returns>
-    ///     An asynchronous enumerable of <see cref="SshKeyFile" /> objects representing discovered SSH key files.
-    /// </returns>
-    public async IAsyncEnumerable<SshKeyFile> GetNewFromDiskAsyncEnumerable(
-        [EnumeratorCancellation] CancellationToken token = default)
+    /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation.</param>
+    /// <returns>An asynchronous enumerable containing the file paths of the discovered SSH keys.</returns>
+    public async ValueTask<IEnumerable<string>> GetPossibleKeyFilesOnDisk(CancellationToken token = default)
     {
         var possibleKeyFiles = new List<string>();
 
@@ -81,28 +77,9 @@ public class DirectoryCrawler(
                 .Where(e => string.IsNullOrWhiteSpace(e.Extension))
                 .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => e.FullName)
         ).ToList();
-        var keyFileCount = 0;
-        foreach (var possibleKeyFile in possibleKeyFiles)
-        {
-            SshKeyFile? keyFile = null;
-            try
-            {
-                if (GenerateKeyFile() is not { } keyFileGenerated) continue;
-
-                await keyFileGenerated.Load(possibleKeyFile);
-                keyFile = keyFileGenerated;
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error loading keyfile {filePath}", possibleKeyFile);
-            }
-
-            if (keyFile is null) continue;
-            keyFileCount++;
-            yield return keyFile;
-        }
-
-        logger.LogInformation("Found {count} keys", keyFileCount);
+        
+        logger.LogInformation("Found {count} keys", possibleKeyFiles.Count);
+        return possibleKeyFiles;
     }
 
 }

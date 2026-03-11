@@ -106,7 +106,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public MaterialIcon ItemsCount =>
         new()
         {
-            Kind = LocatorService.SshKeysCount switch
+            Kind = LocatorService.SshKeys.Count switch
             {
                 0 => MaterialIconKind.NumericZero,
                 1 => MaterialIconKind.NumericOne,
@@ -254,21 +254,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             string.Format(StringsAndTexts.ErrorAction,
                 string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat)),
             StringsAndTexts.MainWindowConvertKeyMessageBoxErrorText, ButtonEnum.Ok, Icon.Error);
-        var oldIndex = LocatorService.SshKeys.IndexOf(key);
         var result = await box.ShowAsync();
         if (result is ButtonResult.Abort or ButtonResult.None) 
             return;
-
-        // var formatted = await KeyFactory.ConvertToOppositeFormatAsync(key);
-        // if (formatted is null)
-        // {
-        //     await errorBox.ShowAsync();
-        //     return key;
-        // }
-
-        LocatorService.SshKeys.Remove(key);
-        // SshKeys.Insert(oldIndex, formatted);
-        // if (result == ButtonResult.Yes) key.DeleteKey();
+        
+        // TODO: ConversionLogic
     }
 
     
@@ -345,9 +335,9 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             KeyTypeSortDirectionIcon = EvaluateSortIconKind(value);
             LocatorService.ChangeOrder(value switch
             {
-                null => LocatorService.SshKeys.OrderBy(e => e.FileName),
-                true => LocatorService.SshKeys.OrderBy(e => e.KeyType),
-                false => LocatorService.SshKeys.OrderByDescending(e => e.KeyType)
+                null => key => key.OrderBy(e => e.FileName),
+                true => key => key.OrderBy(e => e.KeyType),
+                false => key => key.OrderByDescending(e => e.KeyType)
             });
             this.RaiseAndSetIfChanged(ref field, value);
         }
@@ -367,9 +357,9 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             CommentSortDirectionIcon = EvaluateSortIconKind(value);
             LocatorService.ChangeOrder(value switch
             {
-                null => LocatorService.SshKeys.OrderBy(e => e.FileName),
-                true => LocatorService.SshKeys.OrderBy(e => e.Comment),
-                false => LocatorService.SshKeys.OrderByDescending(e => e.Comment)
+                null => key => key.OrderBy(e => e.FileName),
+                true => key => key.OrderBy(e => e.Comment),
+                false => key => key.OrderByDescending(e => e.Comment)
             });
             this.RaiseAndSetIfChanged(ref field, value);
         }
@@ -389,9 +379,9 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             FingerPrintSortDirectionIcon = EvaluateSortIconKind(value);
             LocatorService.ChangeOrder(value switch
             {
-                null => LocatorService.SshKeys.OrderBy(e => e.FileName),
-                true => LocatorService.SshKeys.OrderBy(e => e.Fingerprint()),
-                false => LocatorService.SshKeys.OrderByDescending(e => e.Fingerprint())
+                null => key => key.OrderBy(e => e.FileName),
+                true => key => key.OrderBy(e => e.Fingerprint()),
+                false => key => key.OrderByDescending(e => e.Fingerprint())
             });
             this.RaiseAndSetIfChanged(ref field, value);
         }
