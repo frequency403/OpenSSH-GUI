@@ -95,6 +95,10 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/olli/.nuget/packages/ssh.net/2025.1.0/lib/net9.0/Renci.SshNet.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=64913e21_002Db4ba_002D4fd1_002D9989_002D003f999d347d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Solution /&gt;
+&lt;/SessionState&gt;</s:String>
+	
 	
 	
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=OpenSSH_005FGUI_002FStringsAndTexts/@EntryIndexedValue">True</s:Boolean>

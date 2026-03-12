@@ -4,11 +4,11 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.12"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3"/>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.4" />
         <PackageReference Include="ReactiveUI" Version="23.1.8"/>
-        <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.7"/>
+        <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.12" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0"/>
         <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0"/>
         <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
