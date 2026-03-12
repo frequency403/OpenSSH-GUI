@@ -10,7 +10,7 @@ public class SshKeyFileInformation(string filePath)
     private readonly FileInfo _fileInfo = new(filePath);
 
     public string Name => _fileInfo.Name;
-    public string? PublicKeyFileName => IsOpenSshKey ? Path.ChangeExtension(_fileInfo.Name, "pub") : null;
+    public string? PublicKeyFileName => IsOpenSshKey ? Path.ChangeExtension(_fileInfo.FullName, "pub") : null;
     public string FullName => _fileInfo.FullName;
     public bool Exists => _fileInfo.Exists;
     public string? DirectoryName => _fileInfo.DirectoryName;

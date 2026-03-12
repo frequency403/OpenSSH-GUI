@@ -39,6 +39,8 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
     private string _keyTypeField = string.Empty;
     private PrivateKeyFile? _privateKeyFile;
     public IPrivateKeySource PrivateKeySource => _privateKeyFile;
+    
+    internal IEnumerable<FileInfo> KeyFiles => _fileInfo?.Files ?? [];
 
     [MemberNotNullWhen(true, nameof(_fileInfo), nameof(_privateKeyFile))]
     public bool IsInitialized => _privateKeyFile is not null && _fileInfo is { Exists: true };

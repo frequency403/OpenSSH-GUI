@@ -79,17 +79,18 @@ public class KeyLocatorService : ReactiveObject
         if (privateKeyFile is null)
             throw new InvalidOperationException("Key file not found");
 
-        var filePath = Path.GetFullPath(
-            key.AbsoluteFilePath ?? throw new InvalidOperationException("Key file not found"));
+        var filePath = newFormat.ChangeExtension(Path.GetFullPath(
+            key.AbsoluteFilePath ?? throw new InvalidOperationException("Key file not found")), false);
 
         var password = key.Password is { Length: > 0 } memory
             ? Encoding.UTF8.GetString(memory.Span)
             : null;
-
+        
         var backedUpFiles = new List<(string backup, string original)>();
+        var semaphoreAquired = false;
         try
         {
-            foreach (var existingFile in GetRelatedFiles(filePath))
+            foreach (var existingFile in key.KeyFiles.Select(e => e.FullName))
             {
                 var backup = existingFile + BackupFileExtension;
                 File.Copy(existingFile, backup, overwrite: true);
@@ -97,32 +98,39 @@ public class KeyLocatorService : ReactiveObject
             }
 
             key.Delete();
+            semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
+            if(!semaphoreAquired)
+                throw new InvalidOperationException("Another key operation is in progress");
 
-            // TODO: CONVERT FROM OPENSSH TO PUTTY DOES NOT WORK PROPERLY
-            
             switch (newFormat)
             {
                 case SshKeyFormat.OpenSSH:
-                    await using (var privateFileStream = new FileStream(newFormat.ChangeExtension(filePath, false), _fileStreamOptions))
-                        await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
-                            await streamWriter.WriteAsync(password is not null ? privateKeyFile.ToOpenSshFormat(password) : privateKeyFile.ToOpenSshFormat());
-                    
+                    await using (var privateFileStream = new FileStream(filePath, _fileStreamOptions))
+                    await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
+                        await streamWriter.WriteAsync(password is not null
+                            ? privateKeyFile.ToOpenSshFormat(password)
+                            : privateKeyFile.ToOpenSshFormat());
+
                     await using (var publicFileStream = new FileStream(newFormat.ChangeExtension(filePath), _fileStreamOptions))
-                        await using (var streamWriter = new StreamWriter(publicFileStream, Encoding.UTF8))
-                            await streamWriter.WriteAsync(privateKeyFile.ToOpenSshPublicFormat());
+                    await using (var streamWriter = new StreamWriter(publicFileStream, Encoding.UTF8))
+                        await streamWriter.WriteAsync(privateKeyFile.ToOpenSshPublicFormat());
                     break;
 
                 case SshKeyFormat.PuTTYv2:
                 case SshKeyFormat.PuTTYv3:
                 default:
-                    await using (var privateFileStream = new FileStream(newFormat.ChangeExtension(filePath, false), _fileStreamOptions))
-                        await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
-                            await streamWriter.WriteAsync(password is not null ? privateKeyFile.ToPuttyFormat(password, newFormat) : privateKeyFile.ToPuttyFormat(newFormat));
+                    await using (var privateFileStream = new FileStream(filePath, _fileStreamOptions))
+                    await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
+                        await streamWriter.WriteAsync(password is not null
+                            ? privateKeyFile.ToPuttyFormat(password, newFormat)
+                            : privateKeyFile.ToPuttyFormat(newFormat));
                     break;
             }
 
             foreach (var (backup, _) in backedUpFiles)
                 TryDeleteFile(backup);
+            
+            await AddKeyAsync(filePath);
         }
         catch (Exception e)
         {
@@ -141,7 +149,13 @@ public class KeyLocatorService : ReactiveObject
                         original);
                 }
             }
+
             throw;
+        }
+        finally
+        {
+            if(semaphoreAquired)
+                _semaphoreSlim.Release();
         }
     }
 
@@ -378,23 +392,6 @@ public class KeyLocatorService : ReactiveObject
     {
         if (sender is not SshKeyFile key) return;
         SshKeysInternal.Remove(key);
-    }
-    
-    private static IEnumerable<string> GetRelatedFiles(string baseFilePath)
-    {
-        var ppkPath = Path.ChangeExtension(baseFilePath, SshKeyFormatExtension.PuttyKeyFileExtension);
-        if (File.Exists(ppkPath))
-        {
-            yield return ppkPath;
-            yield break;
-        }
-        
-        if (File.Exists(baseFilePath))
-            yield return baseFilePath;
-
-        var pubPath = baseFilePath + SshKeyFormatExtension.OpenSshPublicKeyFileExtension;
-        if (File.Exists(pubPath))
-            yield return pubPath;
     }
 
     private void TryDeleteFile(string path)
