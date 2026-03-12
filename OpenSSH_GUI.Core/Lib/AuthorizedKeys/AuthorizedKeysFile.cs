@@ -22,26 +22,6 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     private AuthorizedKeysFile()
     {
-        
-    }
-
-    public static async ValueTask<IAuthorizedKeysFile> OpenAsync(string? filePath = null,
-        CancellationToken cancellationToken = default)
-    {
-        filePath ??= SshConfigFiles.Authorized_Keys.GetPathOfFile();
-        var fileInfo = new FileInfo(filePath);
-        if (!fileInfo.Exists)
-            throw new FileNotFoundException("Authorized keyfile was not found", fileInfo.Name);
-        await using var fileStream = File.Open(filePath, FileMode.OpenOrCreate);
-        return await ParseAsync(fileStream, cancellationToken);
-    }
-
-    public static async ValueTask<IAuthorizedKeysFile> ParseAsync(Stream stream,
-        CancellationToken cancellationToken = default)
-    {
-        var authorizedKeyFile = new AuthorizedKeysFile();
-        await authorizedKeyFile.LoadFromStreamAsync(stream, cancellationToken);
-        return authorizedKeyFile;
     }
 
     /// <summary>
@@ -102,7 +82,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>
-    ///     A <see cref="ValueTask{Boolean}"/> indicating whether the key was added successfully.
+    ///     A <see cref="ValueTask{Boolean}" /> indicating whether the key was added successfully.
     /// </returns>
     public ValueTask<bool> AddAuthorizedKeyAsync(SshKeyFile key)
     {
@@ -145,21 +125,39 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
                     $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
     }
 
+    public static async ValueTask<IAuthorizedKeysFile> OpenAsync(string? filePath = null,
+        CancellationToken cancellationToken = default)
+    {
+        filePath ??= SshConfigFiles.Authorized_Keys.GetPathOfFile();
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+            throw new FileNotFoundException("Authorized keyfile was not found", fileInfo.Name);
+        await using var fileStream = File.Open(filePath, FileMode.OpenOrCreate);
+        return await ParseAsync(fileStream, cancellationToken);
+    }
+
+    public static async ValueTask<IAuthorizedKeysFile> ParseAsync(Stream stream,
+        CancellationToken cancellationToken = default)
+    {
+        var authorizedKeyFile = new AuthorizedKeysFile();
+        await authorizedKeyFile.LoadFromStreamAsync(stream, cancellationToken);
+        return authorizedKeyFile;
+    }
+
     /// <summary>
-    /// Asynchronously loads authorized keys from a given stream.
+    ///     Asynchronously loads authorized keys from a given stream.
     /// </summary>
     /// <param name="stream">The stream containing the authorized keys file content.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     private async ValueTask LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        
         using var streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
-        while ((await streamReader.ReadLineAsync(cancellationToken)) is { } line)
+        while (await streamReader.ReadLineAsync(cancellationToken) is { } line)
         {
             if (string.IsNullOrWhiteSpace(line.Trim())) continue;
             AuthorizedKeys.Add(new AuthorizedKey(line.Trim()));
         }
-        
+
         if (stream is FileStream fileStream)
         {
             _fileContentsOrPath = fileStream.Name;
@@ -170,7 +168,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
             IsFileFromServer = true;
         }
     }
-    
+
     /// <summary>
     ///     Loads the contents of a file and parses them into a collection of authorized keys.
     /// </summary>

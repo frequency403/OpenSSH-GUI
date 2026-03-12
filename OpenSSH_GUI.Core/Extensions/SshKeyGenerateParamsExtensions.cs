@@ -17,7 +17,9 @@ public static class SshKeyGenerateParamsExtensions
     /// <returns>An <see cref="SshKeyGenerateInfo" /> object.</returns>
     public static SshKeyGenerateInfo ToInfo(this SshKeyGenerateParams generateParams)
     {
-        var password = generateParams.Password is { } paramsPassword ? Encoding.UTF8.GetString(paramsPassword.Span) : null;
+        var password = generateParams.Password is { } paramsPassword
+            ? Encoding.UTF8.GetString(paramsPassword.Span)
+            : null;
         return new SshKeyGenerateInfo
         {
             KeyType = generateParams.KeyType,

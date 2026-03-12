@@ -1,14 +1,9 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.MVVM;
-using OpenSSH_GUI.Core.Services;
-using Org.BouncyCastle.Crypto.Engines;
 using ReactiveUI;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
@@ -19,7 +14,7 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, ILogger<AddKeyWindowViewModel> logger)
+public sealed class AddKeyWindowViewModel(ISshKeyManager sshKeyManager, ILogger<AddKeyWindowViewModel> logger)
     : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
@@ -78,7 +73,7 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
-    
+
 
     public SshKeyFormat KeyFormat
     {
@@ -98,12 +93,10 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+        CancellationToken cancellationToken = default)
     {
-        if (!inputParameter)
-        {
-            return;
-        }
+        if (!inputParameter) return;
 
         var fullNewFilePath = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), KeyName);
         if (File.Exists(fullNewFilePath)) return;
@@ -118,8 +111,8 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
                     genParm.KeyFormat is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null);
             if (!string.IsNullOrWhiteSpace(Comment))
                 genParm.Comment = Comment;
-            
-            await keyLocatorService.GenerateNewKey(fullNewFilePath, genParm);
+
+            await sshKeyManager.GenerateNewKey(fullNewFilePath, genParm);
         }
         catch (Exception e)
         {
@@ -130,7 +123,8 @@ public sealed class AddKeyWindowViewModel(KeyLocatorService keyLocatorService, I
         }
     }
 
-    public override ValueTask InitializeAsync(IInitializerParameters<AddKeyWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
+    public override ValueTask InitializeAsync(IInitializerParameters<AddKeyWindowViewModel>? parameters = null,
+        CancellationToken cancellationToken = default)
     {
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,

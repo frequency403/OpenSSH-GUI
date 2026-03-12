@@ -1,15 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces;
+using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.MVVM;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboardService clipboardService) : ViewModelBase<ExportWindowViewModel>(logger)
+public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboardService clipboardService)
+    : ViewModelBase<ExportWindowViewModel>(logger)
 {
     public string WindowTitle { get; private set; } = "";
     public string Export { get; private set; } = "";
 
-    public override async ValueTask InitializeAsync(IInitializerParameters<ExportWindowViewModel>? parameters = null, CancellationToken cancellationToken = default)
+    public override async ValueTask InitializeAsync(IInitializerParameters<ExportWindowViewModel>? parameters = null,
+        CancellationToken cancellationToken = default)
     {
         if (parameters is ExportWindowViewModelInitializerParameters initializerParameters)
         {
@@ -20,7 +22,8 @@ public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipb
         await base.InitializeAsync(parameters, cancellationToken);
     }
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+        CancellationToken cancellationToken = default)
     {
         if (inputParameter)
             await clipboardService.SetTextAsync(Export);

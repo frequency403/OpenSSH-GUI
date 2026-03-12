@@ -27,16 +27,18 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
         // Use the existing parser to parse the content.
         // We use the file path from the source if available for better error messages.
         var filePath = Source.Path;
-        var document = SshConfigParser.Parse(content, new SshConfigParserOptions { IncludeBasePath = filePath is null ? null : Path.GetDirectoryName(filePath) });
+        var document = SshConfigParser.Parse(content,
+            new SshConfigParserOptions { IncludeBasePath = filePath is null ? null : Path.GetDirectoryName(filePath) });
 
         var data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
         // Map Global items as an object (instead of flat properties)
-        var globalSettings = SshHostBlockExtensions.GetSettingsFromEntries(document.GlobalItems.OfType<SshConfigEntry>());
+        var globalSettings =
+            SshHostBlockExtensions.GetSettingsFromEntries(document.GlobalItems.OfType<SshConfigEntry>());
         MapSettings(data, "SshConfig:Global", globalSettings);
 
         // Map all Blocks in document order (crucial for SSH behavior)
-        for (int i = 0; i < document.Blocks.Length; i++)
+        for (var i = 0; i < document.Blocks.Length; i++)
         {
             var block = document.Blocks[i];
             var prefix = $"SshConfig:Blocks:{i}";
@@ -53,10 +55,8 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
 
         // Map Host Blocks separately as a convenience list for binding to SshHostSettings
         var hostBlocks = document.HostBlocks.ToArray();
-        for (int i = 0; i < hostBlocks.Length; i++)
-        {
+        for (var i = 0; i < hostBlocks.Length; i++)
             MapSettings(data, $"SshConfig:Hosts:{i}", hostBlocks[i].GetSettings());
-        }
 
         Data = data;
     }
@@ -65,12 +65,8 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
     {
         // Map patterns
         if (settings.Patterns != null && settings.Patterns.Length > 0)
-        {
-            for (int i = 0; i < settings.Patterns.Length; i++)
-            {
+            for (var i = 0; i < settings.Patterns.Length; i++)
                 data[$"{prefix}:Patterns:{i}"] = settings.Patterns[i];
-            }
-        }
 
         if (settings.HostName != null) data[$"{prefix}:HostName"] = settings.HostName;
         if (settings.User != null) data[$"{prefix}:User"] = settings.User;
@@ -78,30 +74,20 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
         if (settings.ProxyJump != null) data[$"{prefix}:ProxyJump"] = settings.ProxyJump;
 
         if (settings.IdentityFiles != null && settings.IdentityFiles.Length > 0)
-        {
-            for (int i = 0; i < settings.IdentityFiles.Length; i++)
-            {
+            for (var i = 0; i < settings.IdentityFiles.Length; i++)
                 data[$"{prefix}:IdentityFiles:{i}"] = settings.IdentityFiles[i];
-            }
-        }
 
         if (settings.LocalForwards != null && settings.LocalForwards.Length > 0)
-        {
-            for (int i = 0; i < settings.LocalForwards.Length; i++)
-            {
+            for (var i = 0; i < settings.LocalForwards.Length; i++)
                 data[$"{prefix}:LocalForwards:{i}"] = settings.LocalForwards[i];
-            }
-        }
 
         // Map other entries if any
         if (settings.OtherEntries != null && settings.OtherEntries.Length > 0)
-        {
-            for (int i = 0; i < settings.OtherEntries.Length; i++)
+            for (var i = 0; i < settings.OtherEntries.Length; i++)
             {
                 var entry = settings.OtherEntries[i];
                 data[$"{prefix}:OtherEntries:{i}:Key"] = entry.Key;
                 data[$"{prefix}:OtherEntries:{i}:Value"] = entry.Value;
             }
-        }
     }
 }

@@ -69,9 +69,9 @@ public class SshConfigurationTests
         var builder = new ConfigurationBuilder();
 
         // Act & Assert
-        Should.NotThrow(() => 
+        Should.NotThrow(() =>
         {
-            builder.AddSshConfig("nonexistent_file", optional: true);
+            builder.AddSshConfig("nonexistent_file", true);
             builder.Build();
         });
     }

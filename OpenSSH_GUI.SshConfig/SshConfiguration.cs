@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace OpenSSH_GUI.SshConfig;
 
 /// <summary>

@@ -5,7 +5,6 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:assets="clr-namespace:OpenSSH_GUI"
-        xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"

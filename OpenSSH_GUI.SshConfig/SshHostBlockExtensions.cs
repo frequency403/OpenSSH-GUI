@@ -14,7 +14,8 @@ public static class SshHostBlockExtensions
     /// <returns>A type-safe <see cref="SshHostSettings" /> representation of the block.</returns>
     public static SshHostSettings GetSettings(this SshBlock block)
     {
-        return GetSettingsFromEntries(block.GetEntries(), block is SshHostBlock hostBlock ? hostBlock.Patterns.ToArray() : null);
+        return GetSettingsFromEntries(block.GetEntries(),
+            block is SshHostBlock hostBlock ? hostBlock.Patterns.ToArray() : null);
     }
 
     /// <summary>
@@ -34,7 +35,6 @@ public static class SshHostBlockExtensions
         var otherEntries = new List<SshConfigEntry>();
 
         foreach (var entry in entries)
-        {
             switch (entry.Key.ToLowerInvariant())
             {
                 case "hostname":
@@ -45,13 +45,9 @@ public static class SshHostBlockExtensions
                     break;
                 case "port":
                     if (port == null && int.TryParse(entry.Value, out var p))
-                    {
                         port = p;
-                    }
                     else
-                    {
                         otherEntries.Add(entry);
-                    }
                     break;
                 case "identityfile":
                     if (entry.Value != null)
@@ -68,17 +64,16 @@ public static class SshHostBlockExtensions
                     otherEntries.Add(entry);
                     break;
             }
-        }
 
         return new SshHostSettings(
-            Patterns: patterns ?? Array.Empty<string>(),
-            HostName: hostName,
-            User: user,
-            Port: port,
-            IdentityFiles: identityFiles.ToArray(),
-            ProxyJump: proxyJump,
-            LocalForwards: localForwards.ToArray(),
-            OtherEntries: otherEntries.ToArray()
+            patterns ?? Array.Empty<string>(),
+            hostName,
+            user,
+            port,
+            identityFiles.ToArray(),
+            proxyJump,
+            localForwards.ToArray(),
+            otherEntries.ToArray()
         );
     }
 
@@ -92,26 +87,24 @@ public static class SshHostBlockExtensions
     public static SshHostBlock WithSettings(this SshHostBlock block, SshHostSettings settings)
     {
         var newItems = ImmutableArray.CreateBuilder<SshLineItem>();
-        
+
         // We want to preserve the order and non-entry items (comments, blanks)
         // But we also want to replace existing entries that are now in settings.
-        
+
         var handledKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "HostName", "User", "Port", "IdentityFile", "ProxyJump", "LocalForward"
         };
 
-        bool addedHostName = settings.HostName == null;
-        bool addedUser = settings.User == null;
-        bool addedPort = settings.Port == null;
-        bool addedProxyJump = settings.ProxyJump == null;
-        bool addedIdentityFiles = settings.IdentityFiles == null || settings.IdentityFiles.Length == 0;
-        bool addedLocalForwards = settings.LocalForwards == null || settings.LocalForwards.Length == 0;
+        var addedHostName = settings.HostName == null;
+        var addedUser = settings.User == null;
+        var addedPort = settings.Port == null;
+        var addedProxyJump = settings.ProxyJump == null;
+        var addedIdentityFiles = settings.IdentityFiles == null || settings.IdentityFiles.Length == 0;
+        var addedLocalForwards = settings.LocalForwards == null || settings.LocalForwards.Length == 0;
 
         foreach (var item in block.Items)
-        {
             if (item is SshConfigEntry entry && handledKeys.Contains(entry.Key))
-            {
                 switch (entry.Key.ToLowerInvariant())
                 {
                     case "hostname":
@@ -120,6 +113,7 @@ public static class SshHostBlockExtensions
                             newItems.Add(SshConfigEntry.Create("HostName", settings.HostName!));
                             addedHostName = true;
                         }
+
                         break;
                     case "user":
                         if (!addedUser)
@@ -127,6 +121,7 @@ public static class SshHostBlockExtensions
                             newItems.Add(SshConfigEntry.Create("User", settings.User!));
                             addedUser = true;
                         }
+
                         break;
                     case "port":
                         if (!addedPort)
@@ -134,6 +129,7 @@ public static class SshHostBlockExtensions
                             newItems.Add(SshConfigEntry.Create("Port", settings.Port.ToString()!));
                             addedPort = true;
                         }
+
                         break;
                     case "identityfile":
                         if (!addedIdentityFiles && settings.IdentityFiles != null)
@@ -142,6 +138,7 @@ public static class SshHostBlockExtensions
                                 newItems.Add(SshConfigEntry.Create("IdentityFile", id));
                             addedIdentityFiles = true;
                         }
+
                         break;
                     case "proxyjump":
                         if (!addedProxyJump)
@@ -149,6 +146,7 @@ public static class SshHostBlockExtensions
                             newItems.Add(SshConfigEntry.Create("ProxyJump", settings.ProxyJump!));
                             addedProxyJump = true;
                         }
+
                         break;
                     case "localforward":
                         if (!addedLocalForwards && settings.LocalForwards != null)
@@ -157,18 +155,13 @@ public static class SshHostBlockExtensions
                                 newItems.Add(SshConfigEntry.Create("LocalForward", lf.Split(' ')));
                             addedLocalForwards = true;
                         }
+
                         break;
                 }
-            }
-            else if (item is SshConfigEntry otherEntry && settings.OtherEntries != null && settings.OtherEntries.Length > 0 && settings.OtherEntries.Contains(otherEntry))
-            {
-                 newItems.Add(item);
-            }
-            else if (item is not SshConfigEntry)
-            {
+            else if (item is SshConfigEntry otherEntry && settings.OtherEntries != null &&
+                     settings.OtherEntries.Length > 0 && settings.OtherEntries.Contains(otherEntry))
                 newItems.Add(item);
-            }
-        }
+            else if (item is not SshConfigEntry) newItems.Add(item);
 
         // Add any settings that weren't in the original block
         if (!addedHostName) newItems.Add(SshConfigEntry.Create("HostName", settings.HostName!));
@@ -176,25 +169,17 @@ public static class SshHostBlockExtensions
         if (!addedPort) newItems.Add(SshConfigEntry.Create("Port", settings.Port.ToString()!));
         if (!addedProxyJump) newItems.Add(SshConfigEntry.Create("ProxyJump", settings.ProxyJump!));
         if (!addedIdentityFiles && settings.IdentityFiles != null)
-        {
             foreach (var id in settings.IdentityFiles)
                 newItems.Add(SshConfigEntry.Create("IdentityFile", id));
-        }
         if (!addedLocalForwards && settings.LocalForwards != null)
-        {
             foreach (var lf in settings.LocalForwards)
                 newItems.Add(SshConfigEntry.Create("LocalForward", lf.Split(' ')));
-        }
-        
+
         // Add new other entries that weren't there
         if (settings.OtherEntries != null && settings.OtherEntries.Length > 0)
-        {
             foreach (var oe in settings.OtherEntries)
-            {
                 if (!newItems.Contains(oe))
                     newItems.Add(oe);
-            }
-        }
 
         return block with { Items = newItems.ToImmutable(), RawHeaderText = string.Empty };
     }

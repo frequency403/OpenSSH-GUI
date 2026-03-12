@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace OpenSSH_GUI.SshConfig;
 
 /// <summary>
@@ -28,7 +26,9 @@ public sealed record SshHostSettings(
     ///     Initializes a new instance of the <see cref="SshHostSettings" /> class.
     ///     Required for the configuration binder.
     /// </summary>
-    public SshHostSettings() : this(Array.Empty<string>()) { }
+    public SshHostSettings() : this(Array.Empty<string>())
+    {
+    }
 
     /// <summary>
     ///     Gets an empty <see cref="SshHostSettings" /> instance.
@@ -38,13 +38,13 @@ public sealed record SshHostSettings(
     /// <summary>
     ///     Returns a value indicating whether all properties are null or empty.
     /// </summary>
-    public bool IsEmpty => 
+    public bool IsEmpty =>
         (Patterns == null || Patterns.Length == 0) &&
-        HostName == null && 
-        User == null && 
-        Port == null && 
-        (IdentityFiles == null || IdentityFiles.Length == 0) && 
-        ProxyJump == null && 
-        (LocalForwards == null || LocalForwards.Length == 0) && 
+        HostName == null &&
+        User == null &&
+        Port == null &&
+        (IdentityFiles == null || IdentityFiles.Length == 0) &&
+        ProxyJump == null &&
+        (LocalForwards == null || LocalForwards.Length == 0) &&
         (OtherEntries == null || OtherEntries.Length == 0);
 }

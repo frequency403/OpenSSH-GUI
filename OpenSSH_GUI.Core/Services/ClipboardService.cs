@@ -4,7 +4,8 @@ using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces;
+using OpenSSH_GUI.Core.Interfaces.Hosts;
+using OpenSSH_GUI.Core.Interfaces.Services;
 
 namespace OpenSSH_GUI.Core.Services;
 

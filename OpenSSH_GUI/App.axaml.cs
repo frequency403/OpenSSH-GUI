@@ -11,8 +11,10 @@ public class App : Application
 {
     internal static IServiceProvider ServiceProvider { get; set; } = null!;
 
-    public override void Initialize() 
-        => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {

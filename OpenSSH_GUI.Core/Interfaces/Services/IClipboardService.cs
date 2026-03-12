@@ -3,7 +3,7 @@ using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 
-namespace OpenSSH_GUI.Core.Interfaces;
+namespace OpenSSH_GUI.Core.Interfaces.Services;
 
 public interface IClipboardService
 {

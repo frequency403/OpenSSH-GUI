@@ -7,7 +7,7 @@
         <Exec Command="git rev-parse --short HEAD"
               ConsoleToMSBuild="true"
               IgnoreExitCode="true">
-            <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
+            <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash"/>
         </Exec>
 
         <PropertyGroup>

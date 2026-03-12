@@ -3,7 +3,7 @@ using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using ReactiveUI;
 
-namespace OpenSSH_GUI.Core.Interfaces;
+namespace OpenSSH_GUI.Core.Interfaces.Services;
 
 /// <summary>
 ///     Defines the operations and properties for managing server connections,

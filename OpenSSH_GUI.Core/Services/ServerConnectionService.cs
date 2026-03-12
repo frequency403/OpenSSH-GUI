@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Misc;
+using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 

@@ -1,6 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using ReactiveUI;
 
@@ -20,7 +18,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     private bool _isFromServer;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="KnownHostsFile"/> class.
+    ///     Initializes a new instance of the <see cref="KnownHostsFile" /> class.
     /// </summary>
     public KnownHostsFile()
     {
@@ -35,14 +33,10 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     {
         _isFromServer = fromServer;
         if (_isFromServer)
-        {
             SetKnownHosts(knownHostsPathOrContent);
-        }
         else
-        {
             _fileKnownHostsPath = knownHostsPathOrContent;
-            // Synchronous reading is deprecated. Use InitializeAsync.
-        }
+        // Synchronous reading is deprecated. Use InitializeAsync.
     }
 
     /// <summary>
@@ -51,8 +45,9 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// <param name="knownHostsPathOrContent">The path to the file or its content.</param>
     /// <param name="fromServer">Indicates whether the content is from a server.</param>
     /// <param name="token">A cancellation token.</param>
-    /// <returns>A <see cref="ValueTask{IKnownHostsFile}"/> representing the initialized object.</returns>
-    public async ValueTask<IKnownHostsFile> InitializeAsync(string knownHostsPathOrContent, bool fromServer = false, CancellationToken token = default)
+    /// <returns>A <see cref="ValueTask{IKnownHostsFile}" /> representing the initialized object.</returns>
+    public async ValueTask<IKnownHostsFile> InitializeAsync(string knownHostsPathOrContent, bool fromServer = false,
+        CancellationToken token = default)
     {
         _isFromServer = fromServer;
         if (_isFromServer)
@@ -64,6 +59,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
             _fileKnownHostsPath = knownHostsPathOrContent;
             await ReadContentAsync();
         }
+
         return this;
     }
 
@@ -88,7 +84,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     ///     The file stream to read from. If null, the method reads from the file specified in the
     ///     constructor.
     /// </param>
-    /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation.</returns>
+    /// <returns>A <see cref="ValueTask" /> representing the asynchronous operation.</returns>
     public async ValueTask ReadContentAsync(FileStream? stream = null)
     {
         if (_isFromServer) return;
@@ -118,7 +114,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// <summary>
     ///     Updates the content of the known hosts file asynchronously.
     /// </summary>
-    /// <returns>A <see cref="ValueTask"/> representing the update operation.</returns>
+    /// <returns>A <see cref="ValueTask" /> representing the update operation.</returns>
     public async ValueTask UpdateFileAsync()
     {
         if (_isFromServer) return;
@@ -160,5 +156,4 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
             .GroupBy(e => e.Split(' ')[0])
             .Select(e => new KnownHost(e)));
     }
-
 }

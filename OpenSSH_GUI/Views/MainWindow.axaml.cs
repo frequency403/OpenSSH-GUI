@@ -1,8 +1,7 @@
 using Avalonia.Controls;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces;
+using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.MVVM;
-using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 

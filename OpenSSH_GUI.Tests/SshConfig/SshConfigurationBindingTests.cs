@@ -2,8 +2,6 @@ using Microsoft.Extensions.Configuration;
 using OpenSSH_GUI.SshConfig;
 using Shouldly;
 using Xunit;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace OpenSSH_GUI.Tests.SshConfig;
 
@@ -13,7 +11,8 @@ public class SshConfigurationBindingTests
     public void AddSshConfig_ShouldBeBindableToObjects()
     {
         // Arrange
-        var configContent = "Port 2222\nUser globaluser\n\nHost server1\n    Port 2222\n    User serveruser\n\nHost server2\n    Port 3333";
+        var configContent =
+            "Port 2222\nUser globaluser\n\nHost server1\n    Port 2222\n    User serveruser\n\nHost server2\n    Port 3333";
         var filePath = Path.GetTempFileName();
         File.WriteAllText(filePath, configContent);
 
@@ -34,7 +33,7 @@ public class SshConfigurationBindingTests
 
             sshConfig.Hosts.ShouldNotBeNull();
             sshConfig.Hosts.Count.ShouldBe(2);
-            
+
             sshConfig.Hosts[0].Patterns.ShouldNotBeEmpty();
             sshConfig.Hosts[0].Patterns[0].ShouldBe("server1");
             sshConfig.Hosts[0].Port.ShouldBe(2222);

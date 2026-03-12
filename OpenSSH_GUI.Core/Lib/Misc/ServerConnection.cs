@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using OpenSSH_GUI.Core.Enums;
+﻿using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
@@ -119,19 +118,23 @@ public class ServerConnection : ReactiveObject, IServerConnection
     {
         if (!IsConnected) return new KnownHostsFile("", true);
 
-        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs), token);
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
+            token);
         var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         var result = await Task.Run(() => command.Execute(), token);
 
         return new KnownHostsFile(result, true);
     }
 
-    public async ValueTask<bool> WriteKnownHostsToServerAsync(IKnownHostsFile knownHostsFile, CancellationToken token = default)
+    public async ValueTask<bool> WriteKnownHostsToServerAsync(IKnownHostsFile knownHostsFile,
+        CancellationToken token = default)
     {
         if (!IsConnected) return false;
 
-        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs), token);
-        var command = ClientConnection.CreateCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {path}");
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
+            token);
+        var command =
+            ClientConnection.CreateCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {path}");
         var result = await Task.Run(() => command.Execute(), token);
 
         return command.ExitStatus == 0;
@@ -139,21 +142,26 @@ public class ServerConnection : ReactiveObject, IServerConnection
 
     public async ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default)
     {
-        if (!IsConnected) 
+        if (!IsConnected)
             throw new InvalidOperationException("No connection to get authorized keys from");
 
-        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs),
+            token);
         var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         await command.ExecuteAsync(token);
         return await AuthorizedKeysFile.ParseAsync(command.ExtendedOutputStream, token);
     }
 
-    public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile, CancellationToken token = default)
+    public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile,
+        CancellationToken token = default)
     {
         if (!IsConnected) return false;
 
-        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
-        var command = ClientConnection.CreateCommand($"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {path}");
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs),
+            token);
+        var command =
+            ClientConnection.CreateCommand(
+                $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {path}");
         await Task.Run(() => command.Execute(), token);
 
         return command.ExitStatus == 0;
@@ -211,13 +219,13 @@ public class ServerConnection : ReactiveObject, IServerConnection
         return ServerOs != PlatformID.Other && IsConnected;
     }
 
-    private async ValueTask<string> ResolveRemoteEnvVariablesAsync(string originalPath, CancellationToken token = default)
+    private async ValueTask<string> ResolveRemoteEnvVariablesAsync(string originalPath,
+        CancellationToken token = default)
     {
         if (!IsConnected) return originalPath;
         var parts = originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries);
         var result = "";
         foreach (var part in parts)
-        {
             if (part.Contains('\\') || part.Contains('/'))
             {
                 result += part.Trim();
@@ -229,7 +237,6 @@ public class ServerConnection : ReactiveObject, IServerConnection
                 var output = await Task.Run(() => command.Execute(), token);
                 result += output.Trim();
             }
-        }
 
         return result;
     }

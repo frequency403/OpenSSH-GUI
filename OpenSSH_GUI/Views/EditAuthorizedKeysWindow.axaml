@@ -79,7 +79,7 @@
                     <ComboBox Grid.Row="1" Grid.Column="0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
-                              ItemsSource="{Binding KeyLocatorService.SshKeys}"
+                              ItemsSource="{Binding SshKeyManager.SshKeys}"
                               SelectedItem="{Binding SelectedKey}"
                               IsVisible="{Binding KeyAddPossible}"
                               ItemTemplate="{StaticResource SshKeyComboBoxStyle}"

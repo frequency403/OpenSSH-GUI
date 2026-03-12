@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -10,11 +9,6 @@ namespace OpenSSH_GUI.Tests.Core.Extensions;
 
 public class ServiceCollectionExtensionsTests
 {
-    private class MockWindow : Window { }
-    private class MockWindowViewModel() : ViewModelBase<MockWindowViewModel>(NullLogger<MockWindowViewModel>.Instance) { }
-    
-    private class InvalidVM() : ViewModelBase<InvalidVM>(NullLogger<InvalidVM>.Instance) { }
-
     [Fact]
     public void RegisterViewWithViewModel_ValidNaming_ShouldRegister()
     {
@@ -37,7 +31,7 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => 
+        Assert.Throws<InvalidOperationException>(() =>
             services.RegisterViewWithViewModel<MockWindow, InvalidVM>());
     }
 
@@ -48,12 +42,24 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act
-        services.RegisterViewWithViewModel<MockWindow, MockWindowViewModel>(registerAsSingleton: true);
+        services.RegisterViewWithViewModel<MockWindow, MockWindowViewModel>(true);
         var provider = services.BuildServiceProvider();
 
         // Assert
         var w1 = provider.GetKeyedService<MockWindow>("MockWindow");
         var w2 = provider.GetKeyedService<MockWindow>("MockWindow");
         Assert.Same(w1, w2);
+    }
+
+    private class MockWindow : Window
+    {
+    }
+
+    private class MockWindowViewModel() : ViewModelBase<MockWindowViewModel>(NullLogger<MockWindowViewModel>.Instance)
+    {
+    }
+
+    private class InvalidVM() : ViewModelBase<InvalidVM>(NullLogger<InvalidVM>.Instance)
+    {
     }
 }

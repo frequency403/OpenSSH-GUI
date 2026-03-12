@@ -147,12 +147,12 @@ public class SshConfigSerializerTests
         var doc = SshConfigParser.Parse(original);
         var block = doc.HostBlocks.First();
         var entry = block.GetEntries("User").First();
-        
+
         // Modify entry and clear RawText to force regeneration
         var modifiedEntry = entry with { Values = ["bob"], RawText = string.Empty };
         var modifiedBlock = block with { Items = [modifiedEntry], RawHeaderText = string.Empty };
         var modifiedDoc = doc with { Blocks = [modifiedBlock] };
-        
+
         var options = new SshSerializerOptions { RoundTrip = true };
 
         // Act
@@ -169,7 +169,7 @@ public class SshConfigSerializerTests
     {
         // Arrange
         var entry = SshConfigEntry.Create("IdentityFile", "/path/with space/id_rsa");
-        
+
         // Act
         var output = SshConfigSerializer.Serialize(new SshConfigDocument([], [SshHostBlock.Create(["ex"], [entry])]));
 
@@ -179,6 +179,8 @@ public class SshConfigSerializerTests
 
     private sealed record UnsupportedBlock : SshBlock
     {
-        public UnsupportedBlock() : base([], 0, "", null) { }
+        public UnsupportedBlock() : base([], 0, "", null)
+        {
+        }
     }
 }

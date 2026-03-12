@@ -45,11 +45,11 @@ public class SshHostSettingsTests
         // Arrange
         var block = SshHostBlock.Create(["myserver"]);
         var settings = new SshHostSettings(
-            Patterns: ["myserver"],
-            HostName: "new.example.com",
-            User: "bob",
-            Port: 22,
-            IdentityFiles: ["~/.ssh/id_new"],
+            ["myserver"],
+            "new.example.com",
+            "bob",
+            22,
+            ["~/.ssh/id_new"],
             LocalForwards: ["9000 localhost:90"]
         );
 

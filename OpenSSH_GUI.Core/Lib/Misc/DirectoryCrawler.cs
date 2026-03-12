@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -33,7 +32,7 @@ public class DirectoryCrawler(
     }
 
     /// <summary>
-    /// Asynchronously retrieves a collection of new SSH keys from the disk.
+    ///     Asynchronously retrieves a collection of new SSH keys from the disk.
     /// </summary>
     /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation.</param>
     /// <returns>An asynchronous enumerable containing the file paths of the discovered SSH keys.</returns>
@@ -74,12 +73,12 @@ public class DirectoryCrawler(
                     RecurseSubdirectories = false
                 }).Select(e => new FileInfo(e))
                 .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-                .Where(e => string.IsNullOrWhiteSpace(e.Extension) || e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
+                .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
+                            e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
                 .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => e.FullName)
         ).ToList();
-        
+
         logger.LogInformation("Found {count} keys", possibleKeyFiles.Count);
         return possibleKeyFiles;
     }
-
 }

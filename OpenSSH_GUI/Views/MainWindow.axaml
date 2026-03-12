@@ -85,7 +85,7 @@
             </ToggleButton>
 
             <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-                <ItemsControl ItemsSource="{Binding LocatorService.SshKeys}"
+                <ItemsControl ItemsSource="{Binding Manager.SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
                               Name="TheItemsGrid"
@@ -169,7 +169,8 @@
                             <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
                                   IsVisible="{Binding ServerConnectionService.IsConnected, FallbackValue=False}">
                                 <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center"
-                                       Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}" FontWeight="Bold" />
+                                       Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}"
+                                       FontWeight="Bold" />
                                 <Label Grid.Row="1" Grid.Column="0"
                                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipServerOs}" />
                                 <Label Grid.Row="1" Grid.Column="1"
@@ -177,7 +178,8 @@
                                        FontWeight="Bold" />
                                 <Label Grid.Row="2" Grid.Column="0"
                                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipConnectedOn}" />
-                                <Label Grid.Row="2" Grid.Column="1" Content="{Binding ServerConnectionService.ServerConnection.ConnectionTime}" />
+                                <Label Grid.Row="2" Grid.Column="1"
+                                       Content="{Binding ServerConnectionService.ServerConnection.ConnectionTime}" />
                             </Grid>
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowConnectionTooltipDisconnected}"
@@ -224,7 +226,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                            <Label Content="{Binding LocatorService.SshKeys.Count}" FontWeight="Bold" />
+                            <Label Content="{Binding Manager.SshKeys.Count}" FontWeight="Bold" />
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>

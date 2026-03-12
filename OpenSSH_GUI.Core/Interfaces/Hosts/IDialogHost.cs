@@ -7,6 +7,6 @@ public interface IDialogHost
 {
     public Task ShowDialog<TWindow>(TWindow dialogWindow) where TWindow : Window;
 
-    public Task<TResult?> ShowDialogAsync<TWindow, TResult>(TWindow dialogWindow)
+    public Task<TResult?> ShowDialog<TWindow, TResult>(TWindow dialogWindow)
         where TWindow : Window where TResult : ViewModelBase;
 }

@@ -3,8 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Text;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using OpenSSH_GUI.Core.Services;
+using OpenSSH_GUI.Core.Interfaces.Services;
 using ReactiveUI;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -17,16 +16,10 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 
 public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 {
-    private readonly KeyLocatorService _keyLocatorService;
     private readonly ILogger<SshKeyFile> _logger;
-    public SshKeyFile(ILogger<SshKeyFile> logger, KeyLocatorService keyLocatorService)
-    {
-        _keyLocatorService = keyLocatorService;
-        _logger = logger;
-        ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
-    }
-    
-    
+    private readonly ISshKeyManager _sshKeyManager;
+
+
     private string _commentField = string.Empty;
     private SshKeyFileInformation? _fileInfo;
 
@@ -38,8 +31,16 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
     private string _keyTypeField = string.Empty;
     private PrivateKeyFile? _privateKeyFile;
+
+    public SshKeyFile(ILogger<SshKeyFile> logger, ISshKeyManager sshKeyManager)
+    {
+        _sshKeyManager = sshKeyManager;
+        _logger = logger;
+        ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
+    }
+
     public IPrivateKeySource PrivateKeySource => _privateKeyFile;
-    
+
     internal IEnumerable<FileInfo> KeyFiles => _fileInfo?.Files ?? [];
 
     [MemberNotNullWhen(true, nameof(_fileInfo), nameof(_privateKeyFile))]
@@ -51,6 +52,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
     [MemberNotNullWhen(true, nameof(Password))]
     public bool HasPassword => Password is not null && !NeedsPassword;
+
     public ReadOnlyMemory<byte>? Password { get; set; }
 
     public IReadOnlyCollection<HostAlgorithm>? HostKeyAlgorithms => _privateKeyFile?.HostKeyAlgorithms;
@@ -63,6 +65,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
     public ReactiveCommand<SshKeyFormat, Unit> ChangeFormatOfKeyFile { get; }
     public Certificate? Certificate => _privateKeyFile?.Certificate;
     public int KeySize => _privateKeyFile?.Key.KeyLength ?? _keySizeField;
+
     public SshKeyHashAlgorithmName HashAlgorithmName =>
         Enum.TryParse<SshKeyHashAlgorithmName>(_privateKeyFile?.HostKeyAlgorithms.FirstOrDefault()?.Name,
             out var enumValue)
@@ -90,14 +93,14 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         }
     }
 
+    public EventHandler GotDeleted { get; set; } = delegate { };
+
     public async ValueTask DisposeAsync()
     {
         if (_privateKeyFile is IAsyncDisposable privateKeyFileAsyncDisposable)
             await privateKeyFileAsyncDisposable.DisposeAsync();
         else
-        {
             _privateKeyFile?.Dispose();
-        }
     }
 
 
@@ -144,8 +147,8 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         try
         {
             _fileInfo = new SshKeyFileInformation(filePath);
-            _privateKeyFile = passPhrase is { Length: > 0 } memory 
-                ? new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span)) 
+            _privateKeyFile = passPhrase is { Length: > 0 } memory
+                ? new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span))
                 : new PrivateKeyFile(_fileInfo.FullName);
             Password = passPhrase is { Length: > 0 } pass ? pass : null;
         }
@@ -164,7 +167,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
     private Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token = default)
     {
         _logger.LogInformation("Changing format of keyfile {filePath} to {newFormat}", _fileInfo.FullName, newFormat);
-        return _keyLocatorService.ChangeFormatOfKeyAsync(this, newFormat, token);
+        return _sshKeyManager.ChangeFormatOfKeyAsync(this, newFormat, token);
     }
 
     public string ToPublic()
@@ -255,8 +258,6 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
         return false;
     }
-    
-    public EventHandler GotDeleted { get; set; } = delegate { };
 
     public bool Delete()
     {
@@ -265,7 +266,6 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
         var allSucceeded = true;
         foreach (var file in _fileInfo.Files)
-        {
             try
             {
                 file.Delete();
@@ -275,8 +275,8 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
                 _logger.LogError(e, "Failed to delete {FilePath}", file.FullName);
                 allSucceeded = false;
             }
-        }
-        if(allSucceeded)
+
+        if (allSucceeded)
             GotDeleted(this, EventArgs.Empty);
         return allSucceeded;
     }

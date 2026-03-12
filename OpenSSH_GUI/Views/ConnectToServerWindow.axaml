@@ -66,7 +66,7 @@
                      IsVisible="{Binding !AuthWithPublicKey}" />
             <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
-                      ItemsSource="{Binding KeyLocatorService.SshKeys}"
+                      ItemsSource="{Binding SshKeyManager.SshKeys}"
                       SelectedItem="{Binding SelectedPublicKey}"
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>

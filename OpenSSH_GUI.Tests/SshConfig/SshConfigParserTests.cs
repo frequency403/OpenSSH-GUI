@@ -1,4 +1,3 @@
-using System.Reflection;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.SshConfig;
@@ -15,7 +14,8 @@ public class SshConfigParserTests
         var resourceName = $"OpenSSH_GUI.Tests.Assets.Testfiles.{fileName}";
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
-            throw new Exception($"Resource {resourceName} not found. Available: {string.Join(", ", assembly.GetManifestResourceNames())}");
+            throw new Exception(
+                $"Resource {resourceName} not found. Available: {string.Join(", ", assembly.GetManifestResourceNames())}");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
@@ -25,12 +25,12 @@ public class SshConfigParserTests
     {
         var content = GetEmbeddedResource("ssh_config_global");
         var doc = SshConfigParser.Parse(content);
-        
+
         doc.Blocks.Length.ShouldBeGreaterThan(0);
         // "Host *" sollte vorhanden sein
         var allHosts = doc.Blocks.OfType<SshHostBlock>().ToList();
         allHosts.ShouldContain(b => b.Patterns.Contains("*"));
-        
+
         // Suche nach "ConnectTimeout 20" im globalen Kontext oder im Host * Block
         var globalEntries = doc.GetGlobalEntries().ToArray();
         var hostStar = allHosts.FirstOrDefault(b => b.Patterns.Contains("*"));
@@ -43,10 +43,10 @@ public class SshConfigParserTests
     {
         var content = GetEmbeddedResource("ssh_config_personal");
         var doc = SshConfigParser.Parse(content);
-        
+
         doc.Blocks.Length.ShouldBeGreaterThan(1);
         var allHosts = doc.Blocks.OfType<SshHostBlock>().ToList();
-        
+
         // Host prod-web-01
         var prodWeb01 = allHosts.FirstOrDefault(b => b.Patterns.Contains("prod-web-01"));
         prodWeb01.ShouldNotBeNull();
@@ -58,16 +58,17 @@ public class SshConfigParserTests
     {
         var content = GetEmbeddedResource("sshd_config_server");
         var doc = SshConfigParser.Parse(content);
-        
+
         // sshd_config hat normalerweise keine Host-Blöcke (außer Match)
         var globalEntries = doc.GetGlobalEntries().ToArray();
         globalEntries.ShouldContain(e => e.Key == "Port" && e.Value == "22");
         globalEntries.ShouldContain(e => e.Key == "AddressFamily" && e.Value == "inet");
-        
+
         // Match-Blöcke
         var matchBlocks = doc.Blocks.OfType<SshMatchBlock>().ToList();
         matchBlocks.ShouldNotBeEmpty();
-        var userDeploy = matchBlocks.FirstOrDefault(b => b.Criteria.Any(c => c.Kind == SshMatchCriterionKind.User && c.Pattern == "deploy"));
+        var userDeploy = matchBlocks.FirstOrDefault(b =>
+            b.Criteria.Any(c => c.Kind == SshMatchCriterionKind.User && c.Pattern == "deploy"));
         userDeploy.ShouldNotBeNull();
         userDeploy.GetEntries().ShouldContain(e => e.Key == "AllowTcpForwarding" && e.Value == "no");
     }
@@ -179,29 +180,30 @@ Host key-host
 ";
         var doc = SshConfigParser.Parse(content);
         var credentials = doc.GetConnectionEntriesFromConfig().ToList();
-        
+
         credentials.Count.ShouldBe(2);
-        
+
         var example = credentials.First(c => c.Hostname.Contains("1.2.3.4"));
         example.Username.ShouldBe("alice");
         example.Port.ShouldBe(2222);
         example.AuthType.ShouldBe(AuthType.Password);
-        
+
         var keyHost = credentials.First(c => c.Hostname == "5.6.7.8");
         keyHost.AuthType.ShouldBe(AuthType.Key);
     }
+
     [Fact]
     public void GetConnectionEntriesFromConfig_WithPersonalConfig_ShouldReturnCredentials()
     {
         var content = GetEmbeddedResource("ssh_config_personal");
         var doc = SshConfigParser.Parse(content);
         var credentials = doc.GetConnectionEntriesFromConfig().ToList();
-        
+
         credentials.ShouldNotBeEmpty();
-        
+
         var prodWeb = credentials.FirstOrDefault(c => c.Hostname == "10.10.1.11");
         prodWeb.ShouldNotBeNull();
-        
+
         var keyHost = credentials.FirstOrDefault(c => c.AuthType == AuthType.Key);
         keyHost.ShouldNotBeNull();
     }
@@ -211,7 +213,8 @@ Host key-host
     {
         // Arrange
         var content = "Include recursive.conf";
-        var options = new SshConfigParserOptions { MaxIncludeDepth = 1, IncludeBasePath = Directory.GetCurrentDirectory() };
+        var options = new SshConfigParserOptions
+            { MaxIncludeDepth = 1, IncludeBasePath = Directory.GetCurrentDirectory() };
         var recursiveFile = Path.Combine(Directory.GetCurrentDirectory(), "recursive.conf");
         File.WriteAllText(recursiveFile, "Include recursive.conf");
 
@@ -242,7 +245,7 @@ Host key-host
     {
         // Arrange
         var content = "Host myserver\n  Port invalid";
-        
+
         // Act
         var doc = SshConfigParser.Parse(content);
         var block = doc.HostBlocks.First();
@@ -260,7 +263,7 @@ Host key-host
     {
         // Arrange
         var content = "Host \"quoted server\"\n  User alice\n  IdentityFile \"~/.ssh/id rsa\"";
-        
+
         // Act
         var doc = SshConfigParser.Parse(content);
         var block = doc.HostBlocks.First();
@@ -277,7 +280,7 @@ Host key-host
     {
         // Arrange
         var content = "\n# Top comment\nHost myserver\n\n  # Entry comment\n  User alice\n";
-        
+
         // Act
         var doc = SshConfigParser.Parse(content);
 
@@ -285,7 +288,7 @@ Host key-host
         Assert.Equal(2, doc.GlobalItems.Length);
         Assert.IsType<SshBlankLine>(doc.GlobalItems[0]);
         Assert.IsType<SshCommentLine>(doc.GlobalItems[1]);
-        
+
         var block = doc.HostBlocks.First();
         // Items are: BlankLine, CommentLine, ConfigEntry (User alice), BlankLine (from the \n at the end)
         Assert.Equal(4, block.Items.Length);
@@ -300,7 +303,7 @@ Host key-host
     {
         // Arrange
         var content = "Match host h user u port 22 localuser lu address a";
-        
+
         // Act
         var doc = SshConfigParser.Parse(content);
         var block = (SshMatchBlock)doc.Blocks.First();
@@ -319,7 +322,7 @@ Host key-host
     {
         // Arrange
         var content = "Match unknown criteria";
-        
+
         // Act & Assert
         Assert.Throws<SshConfigParseException>(() => SshConfigParser.Parse(content));
     }

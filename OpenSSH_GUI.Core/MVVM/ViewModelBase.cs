@@ -15,10 +15,11 @@ public abstract class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
                 RequestClose();
         });
     }
-    
+
     protected bool CloseOnBooleanSubmit { get; set; } = true;
-    public ReactiveCommand<bool, Unit> BooleanSubmit { get; private init; }
+    public ReactiveCommand<bool, Unit> BooleanSubmit { get; }
     public EventHandler Close { get; set; } = delegate { };
+
     protected void RequestClose()
     {
         Close.Invoke(this, EventArgs.Empty);
@@ -28,7 +29,7 @@ public abstract class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
     {
         return Task.CompletedTask;
     }
-    
+
     public virtual ValueTask InitializeAsync(IInitializerParameters<T>? parameters = null,
         CancellationToken cancellationToken = default)
     {
@@ -44,7 +45,7 @@ public abstract class ViewModelBase : ReactiveObject
         Logger = logger;
         ThrownExceptions.Subscribe(exception => Logger.LogError(exception, "Viewmodel threw an exception"));
     }
-    
+
     public bool IsInitialized { get; protected set; }
 
     protected ILogger Logger { get; }

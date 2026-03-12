@@ -172,7 +172,8 @@
                             <avalonia:MaterialIcon Kind="DeleteOutline" />
                         </Button>
                         <SplitButton Padding="5" Grid.Column="3" HorizontalAlignment="Center" Background="DarkCyan"
-                                     Command="{Binding ChangeFormatOfKeyFile}" CommandParameter="{Binding DefaultConversionFormat}">
+                                     Command="{Binding ChangeFormatOfKeyFile}"
+                                     CommandParameter="{Binding DefaultConversionFormat}">
                             <SplitButton.Flyout>
                                 <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                             ItemsSource="{Binding AvailableFormatsForConversion}">
@@ -180,13 +181,13 @@
                                         <ControlTheme TargetType="MenuItem"
                                                       BasedOn="{StaticResource {x:Type MenuItem}}"
                                                       x:DataType="keygen:SshKeyFormat">
-                                            <Setter Property="Background" Value="DarkCyan"/>
+                                            <Setter Property="Background" Value="DarkCyan" />
                                             <Setter Property="Header"
-                                                    Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}"/>
+                                                    Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
                                             <Setter Property="Command"
-                                                    Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}"/>
+                                                    Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}" />
                                             <Setter Property="CommandParameter"
-                                                    Value="{Binding}"/>
+                                                    Value="{Binding}" />
                                         </ControlTheme>
                                     </MenuFlyout.ItemContainerTheme>
                                 </MenuFlyout>

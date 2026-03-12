@@ -62,5 +62,4 @@ public static class ServiceCollectionExtensions
         resolvedView.AttachCloseRequest();
         return resolvedView;
     }
-
 }

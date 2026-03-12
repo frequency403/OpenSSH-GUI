@@ -1,21 +1,20 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
+﻿#if!DEBUG
+using Serilog.Events;
+#endif
+using System.Reflection;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Dialogs;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces;
+using OpenSSH_GUI.Core.Interfaces.Hosts;
+using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
-using OpenSSH_GUI.Core.MVVM;
-using OpenSSH_GUI.Core.MVVM.Interfaces;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
 using OpenSSH_GUI.SshConfig;
@@ -24,9 +23,6 @@ using OpenSSH_GUI.Views;
 using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
-#if!DEBUG
-using Serilog.Events;
-#endif
 using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
@@ -35,7 +31,7 @@ internal sealed class Program
 {
     private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
     private const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
-    
+
     private static string GetHostVersion()
     {
         return Assembly.GetEntryAssembly()
@@ -63,17 +59,18 @@ internal sealed class Program
             .UseReactiveUI(builder => { })
             .AfterSetup(_ => { App.ServiceProvider = host.Services; })
             .UseManagedSystemDialogs();
-            appBuilder.StartWithClassicDesktopLifetime(args);
+        appBuilder.StartWithClassicDesktopLifetime(args);
 
         await host.StopAsync(mainCancellationTokenSource.Token);
     }
 #pragma warning restore CA1416
-    
-    private static void ConfigureAppConfiguration(HostBuilderContext builderContext, IConfigurationBuilder configurationBuilder)
+
+    private static void ConfigureAppConfiguration(HostBuilderContext builderContext,
+        IConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.AddSshConfig(SshConfigFiles.Config.GetPathOfFile(), optional: true, reloadOnChange: true);
-        configurationBuilder.AddSshConfig(SshConfigFiles.Sshd_Config.GetPathOfFile(), optional: true, reloadOnChange: true);
-        
+        configurationBuilder.AddSshConfig(SshConfigFiles.Config.GetPathOfFile(), true, true);
+        configurationBuilder.AddSshConfig(SshConfigFiles.Sshd_Config.GetPathOfFile(), true, true);
+
         configurationBuilder.AddInMemoryCollection([
             new KeyValuePair<string, string?>("RUNNING_VERSION", GetHostVersion())
         ]);
@@ -110,7 +107,7 @@ internal sealed class Program
         collection.AddSingleton<IServerConnectionService, ServerConnectionService>();
         collection.AddTransient<SshKeyFile>();
         collection.AddSingleton<DirectoryCrawler>();
-        collection.AddSingleton<KeyLocatorService>();
+        collection.AddSingleton<ISshKeyManager, SshKeyManager>();
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
             serviceCollection =>
             {
@@ -126,15 +123,14 @@ internal sealed class Program
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
         collection.AddTransient<IClipboardService, ClipboardService>();
         collection.AddHostedService<FileSystemAnalyzer>();
-        
+
         collection.AddKeyedSingleton(ConfigFile,
             (_, _) => SshConfigFileService.LoadFromFile(
                 ConfigFile.GetPathOfFile()));
-        
+
         collection.AddKeyedSingleton(SshdConfig,
             (_, _) => SshConfigFileService.LoadFromFile(
                 SshdConfig.GetPathOfFile()));
-
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

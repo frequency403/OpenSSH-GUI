@@ -1,7 +1,7 @@
 namespace OpenSSH_GUI.SshConfig;
 
 /// <summary>
-///     Parses an SSH configuration file directly into an <see cref="SshConfiguration"/> object,
+///     Parses an SSH configuration file directly into an <see cref="SshConfiguration" /> object,
 ///     bypassing the IConfiguration pipeline entirely.
 /// </summary>
 public static class SshConfigFileService
@@ -10,7 +10,7 @@ public static class SshConfigFileService
     ///     Reads and parses the specified SSH configuration file.
     /// </summary>
     /// <param name="filePath">Absolute path to the SSH config file.</param>
-    /// <returns>A fully populated <see cref="SshConfiguration"/>, or an empty one if the file doesn't exist.</returns>
+    /// <returns>A fully populated <see cref="SshConfiguration" />, or an empty one if the file doesn't exist.</returns>
     public static SshConfiguration LoadFromFile(string filePath)
     {
         if (!File.Exists(filePath))
@@ -26,7 +26,7 @@ public static class SshConfigFileService
     }
 
     /// <summary>
-    ///     Maps a parsed <see cref="SshConfigDocument"/> to a bindable <see cref="SshConfiguration"/>.
+    ///     Maps a parsed <see cref="SshConfigDocument" /> to a bindable <see cref="SshConfiguration" />.
     /// </summary>
     public static SshConfiguration MapDocumentToConfiguration(SshConfigDocument document)
     {
@@ -36,15 +36,9 @@ public static class SshConfigFileService
                 document.GlobalItems.OfType<SshConfigEntry>())
         };
 
-        foreach (var block in document.Blocks)
-        {
-            config.Blocks.Add(block.GetSettings());
-        }
+        foreach (var block in document.Blocks) config.Blocks.Add(block.GetSettings());
 
-        foreach (var hostBlock in document.HostBlocks)
-        {
-            config.Hosts.Add(hostBlock.GetSettings());
-        }
+        foreach (var hostBlock in document.HostBlocks) config.Hosts.Add(hostBlock.GetSettings());
 
         return config;
     }

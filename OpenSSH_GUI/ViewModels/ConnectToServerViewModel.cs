@@ -3,11 +3,10 @@ using Avalonia.Media;
 using Microsoft.Extensions.Logging;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using OpenSSH_GUI.Core.Interfaces;
+using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
-using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
@@ -15,10 +14,10 @@ namespace OpenSSH_GUI.ViewModels;
 public sealed class ConnectToServerViewModel(
     ILogger<ConnectToServerViewModel> logger,
     IServerConnectionService serverConnectionService,
-    KeyLocatorService keyLocatorService) : ViewModelBase<ConnectToServerViewModel>(logger)
+    ISshKeyManager sshKeyManager) : ViewModelBase<ConnectToServerViewModel>(logger)
 {
     private SshKeyFile? _selectedPublicKey;
-    public KeyLocatorService KeyLocatorService => keyLocatorService;
+    public ISshKeyManager SshKeyManager => sshKeyManager;
     public IServerConnectionService ServerConnectionService => serverConnectionService;
 
     private bool ValidData => SelectedPublicKey is null
@@ -114,7 +113,7 @@ public sealed class ConnectToServerViewModel(
         IInitializerParameters<ConnectToServerViewModel>? initializerParameters = null,
         CancellationToken cancellationToken = default)
     {
-        _selectedPublicKey = keyLocatorService.SshKeys.FirstOrDefault();
+        _selectedPublicKey = sshKeyManager.SshKeys.FirstOrDefault();
         UploadButtonEnabled = !TryingToConnect && serverConnectionService.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
         {
@@ -127,7 +126,7 @@ public sealed class ConnectToServerViewModel(
                         new KeyConnectionCredentials(Hostname, Username, SelectedPublicKey), cancellationToken);
                 else if (AuthWithAllKeys)
                     await serverConnectionService.EstablishConnection(
-                        new MultiKeyConnectionCredentials(Hostname, Username, keyLocatorService.SshKeys),
+                        new MultiKeyConnectionCredentials(Hostname, Username, sshKeyManager.SshKeys),
                         cancellationToken);
                 else
                     await serverConnectionService.EstablishConnection(

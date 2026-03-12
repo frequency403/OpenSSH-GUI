@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
+﻿using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using ReactiveUI;
@@ -63,14 +62,14 @@ public interface IServerConnection : IReactiveObject, IDisposable
     ///     Closes the server connection asynchronously.
     /// </summary>
     /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{Boolean}"/> indicating whether the connection was closed successfully.</returns>
+    /// <returns>A <see cref="ValueTask{Boolean}" /> indicating whether the connection was closed successfully.</returns>
     ValueTask<bool> CloseConnectionAsync(CancellationToken token = default);
 
     /// <summary>
     ///     Retrieves the known hosts file from the server asynchronously.
     /// </summary>
     /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{IKnownHostsFile}"/> representing the known hosts file.</returns>
+    /// <returns>A <see cref="ValueTask{IKnownHostsFile}" /> representing the known hosts file.</returns>
     ValueTask<IKnownHostsFile> GetKnownHostsFromServerAsync(CancellationToken token = default);
 
     /// <summary>
@@ -78,14 +77,14 @@ public interface IServerConnection : IReactiveObject, IDisposable
     /// </summary>
     /// <param name="knownHostsFile">The known hosts file to write.</param>
     /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{Boolean}"/> indicating whether the known hosts file was successfully written.</returns>
+    /// <returns>A <see cref="ValueTask{Boolean}" /> indicating whether the known hosts file was successfully written.</returns>
     ValueTask<bool> WriteKnownHostsToServerAsync(IKnownHostsFile knownHostsFile, CancellationToken token = default);
 
     /// <summary>
     ///     Retrieves the authorized keys file from the server asynchronously.
     /// </summary>
     /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{IAuthorizedKeysFile}"/> representing the authorized keys file.</returns>
+    /// <returns>A <see cref="ValueTask{IAuthorizedKeysFile}" /> representing the authorized keys file.</returns>
     ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default);
 
     /// <summary>
@@ -93,6 +92,7 @@ public interface IServerConnection : IReactiveObject, IDisposable
     /// </summary>
     /// <param name="authorizedKeysFile">The authorized keys file containing the changes.</param>
     /// <param name="token">A <see cref="CancellationToken" /> that can be used to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{Boolean}"/> indicating whether the changes were successfully written.</returns>
-    ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile, CancellationToken token = default);
+    /// <returns>A <see cref="ValueTask{Boolean}" /> indicating whether the changes were successfully written.</returns>
+    ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile,
+        CancellationToken token = default);
 }
