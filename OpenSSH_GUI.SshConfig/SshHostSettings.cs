@@ -26,20 +26,20 @@ public sealed record SshHostSettings(
     ///     Initializes a new instance of the <see cref="SshHostSettings" /> class.
     ///     Required for the configuration binder.
     /// </summary>
-    public SshHostSettings() : this(Array.Empty<string>())
+    public SshHostSettings() : this([])
     {
     }
 
     /// <summary>
     ///     Gets an empty <see cref="SshHostSettings" /> instance.
     /// </summary>
-    public static SshHostSettings Empty { get; } = new(Array.Empty<string>());
+    public static SshHostSettings Empty { get; } = new([]);
 
     /// <summary>
     ///     Returns a value indicating whether all properties are null or empty.
     /// </summary>
     public bool IsEmpty =>
-        (Patterns == null || Patterns.Length == 0) &&
+        Patterns.Length == 0 &&
         HostName == null &&
         User == null &&
         Port == null &&

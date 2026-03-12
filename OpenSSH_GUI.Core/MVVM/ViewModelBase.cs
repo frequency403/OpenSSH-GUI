@@ -1,12 +1,13 @@
 ﻿using System.Reactive;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.MVVM;
 
 public abstract class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
 {
-    protected ViewModelBase(ILogger<T> logger) : base(logger)
+    protected ViewModelBase(ILogger<T>? logger = null) : base(logger)
     {
         BooleanSubmit = ReactiveCommand.CreateFromTask<bool>(OnBooleanSubmitAsync);
         BooleanSubmit.Subscribe(_ =>
@@ -40,9 +41,9 @@ public abstract class ViewModelBase<T> : ViewModelBase where T : ViewModelBase
 
 public abstract class ViewModelBase : ReactiveObject
 {
-    protected ViewModelBase(ILogger logger)
+    protected ViewModelBase(ILogger? logger)
     {
-        Logger = logger;
+        Logger = logger ?? NullLogger.Instance;
         ThrownExceptions.Subscribe(exception => Logger.LogError(exception, "Viewmodel threw an exception"));
     }
 

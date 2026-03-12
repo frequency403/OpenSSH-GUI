@@ -82,7 +82,7 @@ public static class SshConfigSerializer
 
         foreach (var block in document.Blocks)
         {
-            if (!opts.RoundTrip && opts.BlankLineBetweenBlocks)
+            if (opts is { RoundTrip: false, BlankLineBetweenBlocks: true })
                 if (!isFirstBlock || document.GlobalItems.Length > 0)
                     sb.Append(opts.NewLine);
 

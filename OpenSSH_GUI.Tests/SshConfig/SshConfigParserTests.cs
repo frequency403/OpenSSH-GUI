@@ -68,7 +68,7 @@ public class SshConfigParserTests
         var matchBlocks = doc.Blocks.OfType<SshMatchBlock>().ToList();
         matchBlocks.ShouldNotBeEmpty();
         var userDeploy = matchBlocks.FirstOrDefault(b =>
-            b.Criteria.Any(c => c.Kind == SshMatchCriterionKind.User && c.Pattern == "deploy"));
+            b.Criteria.Any(c => c is { Kind: SshMatchCriterionKind.User, Pattern: "deploy" }));
         userDeploy.ShouldNotBeNull();
         userDeploy.GetEntries().ShouldContain(e => e.Key == "AllowTcpForwarding" && e.Value == "no");
     }

@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Dialogs;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,7 +27,7 @@ using Serilog.Core;
 using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
-
+[UsedImplicitly]
 internal sealed class Program
 {
     private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
@@ -56,7 +57,7 @@ internal sealed class Program
         var appBuilder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .UseReactiveUI(builder => { })
+            .UseReactiveUI(_ => { })
             .AfterSetup(_ => { App.ServiceProvider = host.Services; })
             .UseManagedSystemDialogs();
         appBuilder.StartWithClassicDesktopLifetime(args);
@@ -131,20 +132,5 @@ internal sealed class Program
         collection.AddKeyedSingleton(SshdConfig,
             (_, _) => SshConfigFileService.LoadFromFile(
                 SshdConfig.GetPathOfFile()));
-    }
-
-    // Avalonia configuration, don't remove; also used by visual designer.
-    private static AppBuilder BuildAvaloniaApp(IServiceProvider? serviceProvider = null)
-    {
-        return AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .WithInterFont()
-            .LogToTrace()
-            .UseReactiveUI(builder => { })
-            .AfterSetup(_ =>
-            {
-                if (serviceProvider is not null)
-                    App.ServiceProvider = serviceProvider;
-            });
     }
 }

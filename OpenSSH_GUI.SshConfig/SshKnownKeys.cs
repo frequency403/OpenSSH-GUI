@@ -181,7 +181,7 @@ public static class SshKnownKeys
     /// <param name="key">A configuration keyword in any casing.</param>
     public static string Normalize(string key)
     {
-        return CanonicalKeys.TryGetValue(key, out var canonical) ? canonical : key;
+        return CanonicalKeys.GetValueOrDefault(key, key);
     }
 
     /// <summary>

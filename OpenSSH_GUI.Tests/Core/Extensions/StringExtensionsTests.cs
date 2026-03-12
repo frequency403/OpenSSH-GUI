@@ -37,8 +37,8 @@ public class StringExtensionsTests
     [Fact]
     public void SplitToChunks_Tests()
     {
-        "abcdef".SplitToChunks(2).ShouldBe(new[] { "ab", "cd", "ef" });
-        "abcde".SplitToChunks(2).ShouldBe(new[] { "ab", "cd", "e" });
+        "abcdef".SplitToChunks(2).ShouldBe(["ab", "cd", "ef"]);
+        "abcde".SplitToChunks(2).ShouldBe(["ab", "cd", "e"]);
     }
 
     [Fact]

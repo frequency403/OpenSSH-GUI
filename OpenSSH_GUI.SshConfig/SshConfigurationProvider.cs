@@ -64,7 +64,7 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
     private static void MapSettings(Dictionary<string, string?> data, string prefix, SshHostSettings settings)
     {
         // Map patterns
-        if (settings.Patterns != null && settings.Patterns.Length > 0)
+        if (settings.Patterns is { Length: > 0 })
             for (var i = 0; i < settings.Patterns.Length; i++)
                 data[$"{prefix}:Patterns:{i}"] = settings.Patterns[i];
 
@@ -73,21 +73,23 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
         if (settings.Port.HasValue) data[$"{prefix}:Port"] = settings.Port.Value.ToString();
         if (settings.ProxyJump != null) data[$"{prefix}:ProxyJump"] = settings.ProxyJump;
 
-        if (settings.IdentityFiles != null && settings.IdentityFiles.Length > 0)
+        if (settings.IdentityFiles is { Length: > 0 })
             for (var i = 0; i < settings.IdentityFiles.Length; i++)
                 data[$"{prefix}:IdentityFiles:{i}"] = settings.IdentityFiles[i];
 
-        if (settings.LocalForwards != null && settings.LocalForwards.Length > 0)
+        if (settings.LocalForwards is { Length: > 0 })
             for (var i = 0; i < settings.LocalForwards.Length; i++)
                 data[$"{prefix}:LocalForwards:{i}"] = settings.LocalForwards[i];
 
         // Map other entries if any
-        if (settings.OtherEntries != null && settings.OtherEntries.Length > 0)
+        if (settings.OtherEntries is not { Length: > 0 }) return;
+        {
             for (var i = 0; i < settings.OtherEntries.Length; i++)
             {
                 var entry = settings.OtherEntries[i];
                 data[$"{prefix}:OtherEntries:{i}:Key"] = entry.Key;
                 data[$"{prefix}:OtherEntries:{i}:Value"] = entry.Value;
             }
+        }
     }
 }

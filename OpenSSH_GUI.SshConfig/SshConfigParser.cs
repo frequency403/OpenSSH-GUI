@@ -423,14 +423,11 @@ public static class SshConfigParser
     /// </summary>
     private static string ExpandTilde(string path)
     {
-        if (path == "~" || path.StartsWith("~/", StringComparison.Ordinal)
-                        || path.StartsWith("~\\", StringComparison.Ordinal))
-        {
-            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            return path.Length == 1 ? home : Path.Combine(home, path[2..]);
-        }
+        if (path != "~" && !path.StartsWith("~/", StringComparison.Ordinal)
+                        && !path.StartsWith("~\\", StringComparison.Ordinal)) return path;
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return path.Length == 1 ? home : Path.Combine(home, path[2..]);
 
-        return path;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

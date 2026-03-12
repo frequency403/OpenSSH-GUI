@@ -39,7 +39,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
     }
 
-    public IPrivateKeySource PrivateKeySource => _privateKeyFile;
+    public IPrivateKeySource PrivateKeySource => _privateKeyFile ?? throw new InvalidOperationException("Not initialized.");
 
     internal IEnumerable<FileInfo> KeyFiles => _fileInfo?.Files ?? [];
 
@@ -93,7 +93,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         }
     }
 
-    public EventHandler GotDeleted { get; set; } = delegate { };
+    public EventHandler? GotDeleted { get; set; } = delegate { };
 
     public async ValueTask DisposeAsync()
     {
@@ -166,6 +166,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
     private Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token = default)
     {
+        if(!IsInitialized) throw new InvalidOperationException("Not initialized.");
         _logger.LogInformation("Changing format of keyfile {filePath} to {newFormat}", _fileInfo.FullName, newFormat);
         return _sshKeyManager.ChangeFormatOfKeyAsync(this, newFormat, token);
     }
@@ -241,7 +242,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         try
         {
             if (_fileInfo is not { Exists: true })
-                throw new FileNotFoundException("SshKeyFile not found", _fileInfo.Name);
+                throw new FileNotFoundException("SshKeyFile not found", _fileInfo?.Name);
             await Load(_fileInfo.FullName, password);
             NeedsPassword = false;
             return true;
@@ -249,7 +250,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         catch (SshPassPhraseNullOrEmptyException)
         {
             NeedsPassword = true;
-            _logger.LogWarning("Missing Password for keyfile {filePath}", _fileInfo.FullName);
+            _logger.LogWarning("Missing Password for keyfile {filePath}", _fileInfo?.FullName);
         }
         catch (Exception e)
         {

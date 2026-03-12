@@ -30,13 +30,13 @@ public class SshHostSettingsTests
         Assert.Equal("alice", settings.User);
         Assert.Equal(2222, settings.Port);
         Assert.Equal("jump.example.com", settings.ProxyJump);
-        Assert.Equal(2, settings.IdentityFiles.Length);
-        Assert.Contains("~/.ssh/id_rsa", settings.IdentityFiles);
-        Assert.Contains("~/.ssh/id_ed25519", settings.IdentityFiles);
-        Assert.Single(settings.LocalForwards);
-        Assert.Equal("8080 localhost:80", settings.LocalForwards[0]);
-        Assert.Single(settings.OtherEntries);
-        Assert.Equal("Compression", settings.OtherEntries[0].Key);
+        Assert.Equal(2, settings.IdentityFiles?.Length);
+        Assert.Contains("~/.ssh/id_rsa", settings.IdentityFiles ?? []);
+        Assert.Contains("~/.ssh/id_ed25519", settings.IdentityFiles ?? []);
+        Assert.Single(settings.LocalForwards ?? []);
+        Assert.Equal("8080 localhost:80", settings.LocalForwards?[0]);
+        Assert.Single(settings.OtherEntries ?? []);
+        Assert.Equal("Compression", settings.OtherEntries?[0].Key);
     }
 
     [Fact]

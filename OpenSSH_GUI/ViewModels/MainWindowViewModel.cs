@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using JetBrains.Annotations;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.Extensions.Configuration;
@@ -25,16 +26,14 @@ using ReactiveUI;
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
-
+[UsedImplicitly]
 public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 {
     private static readonly string? ProjectUrl = Assembly.GetExecutingAssembly()
         .GetCustomAttributes<AssemblyMetadataAttribute>()
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
-    private readonly IConfiguration _configuration;
     private readonly IDialogHost _dialogHost;
-
     private readonly IServiceProvider _serviceProvider;
 
     public MainWindowViewModel(
@@ -48,7 +47,6 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         Manager = manager;
         ServerConnectionService = serverConnectionService;
         _serviceProvider = serviceProvider;
-        _configuration = configuration;
         _dialogHost = dialogHost;
 
         DisconnectServer = ReactiveCommand.CreateFromTask(DisconnectFromServerAsync);
@@ -65,11 +63,10 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             ReactiveCommand.CreateFromTask(OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>);
         OpenCreateKeyWindow = ReactiveCommand.CreateFromTask(OpenWindow<AddKeyWindow, AddKeyWindowViewModel>);
         DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
-        ConvertKey = ReactiveCommand.CreateFromTask<SshKeyFile>(ConvertKeyAsync);
         ReloadKeys = ReactiveCommand.CreateFromTask(Manager.RerunSearchAsync);
         ShowPassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ShowPasswordExportWindow);
 
-        Version = _configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
+        Version = configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
     }
 
     public ReactiveCommand<Unit, Unit> DisconnectServer { get; }
@@ -83,7 +80,6 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<Unit, Unit> OpenEditAuthorizedKeysWindow { get; }
     public ReactiveCommand<Unit, Unit> OpenCreateKeyWindow { get; }
     public ReactiveCommand<SshKeyFile, Unit> DeleteKey { get; }
-    public ReactiveCommand<SshKeyFile, Unit> ConvertKey { get; }
     public ReactiveCommand<Unit, Unit> ReloadKeys { get; }
     public ReactiveCommand<SshKeyFile, Unit> ShowPassword { get; }
 
@@ -201,7 +197,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private Task ShowPasswordExportWindow(SshKeyFile key, CancellationToken token = default)
     {
-        return ShowExportWindow(key, Encoding.UTF8.GetString(key.Password.Value.Span),
+        if(key.Password is not { Length: > 0} password) return Task.CompletedTask;
+        return ShowExportWindow(key, Encoding.UTF8.GetString(password.Span),
             string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath), token);
     }
 
@@ -256,7 +253,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             processStartInfo.Arguments = string.Empty;
             processStartInfo.ArgumentList.Add("/c");
             processStartInfo.ArgumentList.Add("start");
-            processStartInfo.ArgumentList.Add(url.Replace("&", "^&"));
+            processStartInfo.ArgumentList.Add(url?.Replace("&", "^&") ?? string.Empty);
             processStartInfo.CreateNoWindow = true;
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -309,7 +306,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
 
-    private async Task DeleteKeyAsync(SshKeyFile sshKeyFile, CancellationToken cancellationToken = default)
+    private static async Task DeleteKeyAsync(SshKeyFile sshKeyFile, CancellationToken cancellationToken = default)
     {
         var box = MessageBoxManager.GetMessageBoxStandard(
             string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName),
@@ -318,29 +315,6 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         if (res != ButtonResult.Yes)
             return;
         sshKeyFile.Delete();
-    }
-
-    private async Task ConvertKeyAsync(SshKeyFile key, CancellationToken cancellationToken = default)
-    {
-        var currentFormat = Enum.GetName(key.Format!.Value);
-        var oppositeFormat = Enum.GetName(key.Format is SshKeyFormat.OpenSSH
-            ? SshKeyFormat.PuTTYv3
-            : SshKeyFormat.OpenSSH);
-
-        var title = string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat,
-            oppositeFormat);
-        var text = string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxText, title);
-
-        var box = MessageBoxManager.GetMessageBoxStandard(title, text, ButtonEnum.YesNoAbort, Icon.Warning);
-        var errorBox = MessageBoxManager.GetMessageBoxStandard(
-            string.Format(StringsAndTexts.ErrorAction,
-                string.Format(StringsAndTexts.MainWindowConvertKeyMessageBoxTitle, currentFormat, oppositeFormat)),
-            StringsAndTexts.MainWindowConvertKeyMessageBoxErrorText, ButtonEnum.Ok, Icon.Error);
-        var result = await box.ShowAsync();
-        if (result is ButtonResult.Abort or ButtonResult.None)
-            return;
-
-        // TODO: ConversionLogic
     }
 
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)

@@ -13,10 +13,10 @@ public sealed class SshConfiguration
     /// <summary>
     ///     Gets or sets the list of host-specific SSH settings.
     /// </summary>
-    public List<SshHostSettings> Hosts { get; set; } = new();
+    public List<SshHostSettings> Hosts { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets all blocks (Host and Match) in document order.
     /// </summary>
-    public List<SshHostSettings> Blocks { get; set; } = new();
+    public List<SshHostSettings> Blocks { get; set; } = [];
 }

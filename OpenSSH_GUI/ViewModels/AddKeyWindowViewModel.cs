@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -14,9 +15,13 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel(ISshKeyManager sshKeyManager, ILogger<AddKeyWindowViewModel> logger)
+public sealed class AddKeyWindowViewModel(ISshKeyManager? sshKeyManager, ILogger<AddKeyWindowViewModel>? logger)
     : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
+    private readonly ILogger<AddKeyWindowViewModel> _logger = logger ?? NullLogger<AddKeyWindowViewModel>.Instance;
+
+    public AddKeyWindowViewModel() : this(null, null) { }
+
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
@@ -39,7 +44,7 @@ public sealed class AddKeyWindowViewModel(ISshKeyManager sshKeyManager, ILogger<
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error setting key type");
+                _logger.LogError(e, "Error setting key type");
             }
         }
     }
@@ -63,10 +68,10 @@ public sealed class AddKeyWindowViewModel(ISshKeyManager sshKeyManager, ILogger<
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error setting avaliable key sizes");
+                _logger.LogError(e, "Error setting avaliable key sizes");
             }
         }
-    }
+    } = [];
 
     public int SelectedKeySize
     {
@@ -96,6 +101,7 @@ public sealed class AddKeyWindowViewModel(ISshKeyManager sshKeyManager, ILogger<
     protected override async Task OnBooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(sshKeyManager);
         if (!inputParameter) return;
 
         var fullNewFilePath = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), KeyName);

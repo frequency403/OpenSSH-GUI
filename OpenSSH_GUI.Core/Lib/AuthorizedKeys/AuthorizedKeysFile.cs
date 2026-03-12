@@ -15,7 +15,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <summary>
     ///     The contents of the authorized keys file or the path to the file.
     /// </summary>
-    private string _fileContentsOrPath;
+    private string _fileContentsOrPath = string.Empty;
 
     /// <summary>
     ///     Represents an authorized keys file.

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -9,14 +10,14 @@ using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
-
+[UsedImplicitly]
 public class EditKnownHostsWindowViewModel(
     ILogger<EditKnownHostsWindowViewModel> logger,
     IServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
     public IServerConnectionService ServerConnectionService => serverConnectionService;
-    private IKnownHostsFile KnownHostsFileLocal { get; set; }
-    private IKnownHostsFile KnownHostsFileRemote { get; set; }
+    private IKnownHostsFile? KnownHostsFileLocal { get; set; }
+    private IKnownHostsFile? KnownHostsFileRemote { get; set; }
 
     public ObservableCollection<IKnownHost> KnownHostsRemote
     {
@@ -34,12 +35,14 @@ public class EditKnownHostsWindowViewModel(
         CancellationToken cancellationToken = default)
     {
         if (!inputParameter) return;
+        ArgumentNullException.ThrowIfNull(KnownHostsFileLocal);
         KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
-        if (serverConnectionService.IsConnected) KnownHostsFileRemote.SyncKnownHosts(KnownHostsRemote);
-        await KnownHostsFileLocal.UpdateFileAsync();
         if (serverConnectionService.IsConnected)
-            await serverConnectionService.ServerConnection.WriteKnownHostsToServerAsync(KnownHostsFileRemote,
-                cancellationToken);
+            KnownHostsFileRemote?.SyncKnownHosts(KnownHostsRemote);
+        await KnownHostsFileLocal.UpdateFileAsync();
+        if (!serverConnectionService.IsConnected) return;
+        ArgumentNullException.ThrowIfNull(KnownHostsFileRemote);
+        await serverConnectionService.ServerConnection.WriteKnownHostsToServerAsync(KnownHostsFileRemote, cancellationToken);
     }
 
     public override async ValueTask InitializeAsync(

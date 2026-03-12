@@ -66,7 +66,7 @@ public static class SshHostBlockExtensions
             }
 
         return new SshHostSettings(
-            patterns ?? Array.Empty<string>(),
+            patterns ?? [],
             hostName,
             user,
             port,
@@ -158,10 +158,8 @@ public static class SshHostBlockExtensions
 
                         break;
                 }
-            else if (item is SshConfigEntry otherEntry && settings.OtherEntries != null &&
-                     settings.OtherEntries.Length > 0 && settings.OtherEntries.Contains(otherEntry))
+            else if (item is SshConfigEntry otherEntry && settings.OtherEntries is { Length: > 0 } && settings.OtherEntries.Contains(otherEntry) || item is not SshConfigEntry)
                 newItems.Add(item);
-            else if (item is not SshConfigEntry) newItems.Add(item);
 
         // Add any settings that weren't in the original block
         if (!addedHostName) newItems.Add(SshConfigEntry.Create("HostName", settings.HostName!));
@@ -176,10 +174,11 @@ public static class SshHostBlockExtensions
                 newItems.Add(SshConfigEntry.Create("LocalForward", lf.Split(' ')));
 
         // Add new other entries that weren't there
-        if (settings.OtherEntries != null && settings.OtherEntries.Length > 0)
-            foreach (var oe in settings.OtherEntries)
-                if (!newItems.Contains(oe))
-                    newItems.Add(oe);
+        if (settings.OtherEntries is not { Length: > 0 })
+            return block with { Items = newItems.ToImmutable(), RawHeaderText = string.Empty };
+        foreach (var oe in settings.OtherEntries)
+            if (!newItems.Contains(oe))
+                newItems.Add(oe);
 
         return block with { Items = newItems.ToImmutable(), RawHeaderText = string.Empty };
     }

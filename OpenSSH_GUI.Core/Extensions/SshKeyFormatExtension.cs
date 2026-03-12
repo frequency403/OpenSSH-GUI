@@ -17,35 +17,37 @@ public static class SshKeyFormatExtension
     /// </summary>
     public const string PuttyKeyFileExtension = ".ppk";
 
-    /// <summary>
-    ///     Returns the file extension associated with the specified SSH key format.
-    /// </summary>
     /// <param name="format">The SSH key format.</param>
-    /// <param name="usePublicFormat">True if the extension is for a public key; otherwise, false. Defaults to true.</param>
-    /// <returns>
-    ///     The file extension associated with the specified SSH key format. Returns null if the format is not supported
-    ///     or the extension is not applicable.
-    /// </returns>
-    public static string? GetExtension(this SshKeyFormat format, bool usePublicFormat = true)
+    extension(SshKeyFormat format)
     {
-        return format switch
+        /// <summary>
+        ///     Returns the file extension associated with the specified SSH key format.
+        /// </summary>
+        /// <param name="usePublicFormat">True if the extension is for a public key; otherwise, false. Defaults to true.</param>
+        /// <returns>
+        ///     The file extension associated with the specified SSH key format. Returns null if the format is not supported
+        ///     or the extension is not applicable.
+        /// </returns>
+        public string? GetExtension(bool usePublicFormat = true)
         {
-            SshKeyFormat.OpenSSH when usePublicFormat => OpenSshPublicKeyFileExtension,
-            SshKeyFormat.OpenSSH => null,
-            SshKeyFormat.PuTTYv2 or SshKeyFormat.PuTTYv3 => PuttyKeyFileExtension,
-            _ => null
-        };
-    }
+            return format switch
+            {
+                SshKeyFormat.OpenSSH when usePublicFormat => OpenSshPublicKeyFileExtension,
+                SshKeyFormat.OpenSSH => null,
+                SshKeyFormat.PuTTYv2 or SshKeyFormat.PuTTYv3 => PuttyKeyFileExtension,
+                _ => null
+            };
+        }
 
-    /// <summary>
-    ///     Changes the file extension of the given path to match the specified SSH key format.
-    /// </summary>
-    /// <param name="format">The SSH key format.</param>
-    /// <param name="path">The path to the file.</param>
-    /// <param name="usePublicFormat">Indicates whether the key is public. Default is true.</param>
-    /// <returns>The modified file path with the updated extension.</returns>
-    public static string ChangeExtension(this SshKeyFormat format, string path, bool usePublicFormat = true)
-    {
-        return Path.ChangeExtension(path, format.GetExtension(usePublicFormat));
+        /// <summary>
+        ///     Changes the file extension of the given path to match the specified SSH key format.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <param name="usePublicFormat">Indicates whether the key is public. Default is true.</param>
+        /// <returns>The modified file path with the updated extension.</returns>
+        public string ChangeExtension(string path, bool usePublicFormat = true)
+        {
+            return Path.ChangeExtension(path, format.GetExtension(usePublicFormat));
+        }
     }
 }

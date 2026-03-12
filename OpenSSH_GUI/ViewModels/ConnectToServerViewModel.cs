@@ -11,14 +11,26 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ConnectToServerViewModel(
-    ILogger<ConnectToServerViewModel> logger,
-    IServerConnectionService serverConnectionService,
-    ISshKeyManager sshKeyManager) : ViewModelBase<ConnectToServerViewModel>(logger)
+public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
-    private SshKeyFile? _selectedPublicKey;
-    public ISshKeyManager SshKeyManager => sshKeyManager;
-    public IServerConnectionService ServerConnectionService => serverConnectionService;
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel>? logger,
+        IServerConnectionService? serverConnectionService,
+        ISshKeyManager? sshKeyManager) : base(logger)
+    {
+        ServerConnectionService = serverConnectionService;
+        SshKeyManager = sshKeyManager;
+        SelectedPublicKey = SshKeyManager.SshKeys.FirstOrDefault();
+        UploadButtonEnabled = !TryingToConnect && ServerConnectionService.IsConnected;
+        TestConnection = ReactiveCommand.CreateFromTask(TestConnectionAsync);
+        ResetCommand = ReactiveCommand.Create(Reset);
+    }
+
+    public ConnectToServerViewModel() : this(null, null, null) { }
+
+    public ReactiveCommand<Unit, Unit> TestConnection { get; }
+    public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+    public ISshKeyManager SshKeyManager { get; }
+    public IServerConnectionService ServerConnectionService { get; }
 
     private bool ValidData => SelectedPublicKey is null
         ? Hostname != "" && Username != "" && Password != ""
@@ -52,8 +64,8 @@ public sealed class ConnectToServerViewModel(
 
     public SshKeyFile? SelectedPublicKey
     {
-        get => _selectedPublicKey;
-        set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public string Hostname
@@ -106,84 +118,71 @@ public sealed class ConnectToServerViewModel(
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public ReactiveCommand<Unit, Unit> TestConnection { get; private set; }
-    public ReactiveCommand<Unit, Unit> ResetCommand { get; private set; }
-
-    public override async ValueTask InitializeAsync(
-        IInitializerParameters<ConnectToServerViewModel>? initializerParameters = null,
-        CancellationToken cancellationToken = default)
+    private async Task TestConnectionAsync(CancellationToken cancellationToken = default)
     {
-        _selectedPublicKey = sshKeyManager.SshKeys.FirstOrDefault();
-        UploadButtonEnabled = !TryingToConnect && serverConnectionService.IsConnected;
-        TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
+        try
         {
-            try
-            {
-                if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
-                TryingToConnect = true;
-                if (AuthWithPublicKey)
-                    await serverConnectionService.EstablishConnection(
-                        new KeyConnectionCredentials(Hostname, Username, SelectedPublicKey), cancellationToken);
-                else if (AuthWithAllKeys)
-                    await serverConnectionService.EstablishConnection(
-                        new MultiKeyConnectionCredentials(Hostname, Username, sshKeyManager.SshKeys),
-                        cancellationToken);
-                else
-                    await serverConnectionService.EstablishConnection(
-                        new PasswordConnectionCredentials(Hostname, Username, Password), cancellationToken);
-            }
-            catch (Exception exception)
-            {
-                StatusButtonToolTip = exception.Message;
-            }
-
-            if (!serverConnectionService.IsConnected)
-            {
-                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                    StringsAndTexts.ConnectToServerStatusSuccess);
-                StatusButtonToolTip =
-                    string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
-                StatusButtonBackground = Brushes.Green;
-            }
+            if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
+            TryingToConnect = true;
+            if (AuthWithPublicKey)
+                await ServerConnectionService.EstablishConnection(
+                    new KeyConnectionCredentials(Hostname, Username, SelectedPublicKey), cancellationToken);
+            else if (AuthWithAllKeys)
+                await ServerConnectionService.EstablishConnection(
+                    new MultiKeyConnectionCredentials(Hostname, Username, SshKeyManager.SshKeys),
+                    cancellationToken);
             else
-            {
-                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                    StringsAndTexts.ConnectToServerStatusFailed);
-                StatusButtonBackground = Brushes.Red;
-            }
-
-            TryingToConnect = false;
-
-            if (serverConnectionService.IsConnected)
-            {
-                UploadButtonEnabled = !TryingToConnect && serverConnectionService.IsConnected;
-                return e;
-            }
-
-            var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
-                ButtonEnum.Ok, Icon.Error);
-            await messageBox.ShowAsync();
-
-            return e;
-        });
-        ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
+                await ServerConnectionService.EstablishConnection(
+                    new PasswordConnectionCredentials(Hostname, Username, Password), cancellationToken);
+        }
+        catch (Exception exception)
         {
-            Hostname = string.Empty;
-            Username = string.Empty;
-            Password = string.Empty;
+            StatusButtonToolTip = exception.Message;
+        }
+
+        if (!ServerConnectionService.IsConnected)
+        {
             StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                StringsAndTexts.ConnectToServerStatusUnknown);
-            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                StringsAndTexts.ConnectToServerStatusUntested);
-            StatusButtonBackground = Brushes.Gray;
-            UploadButtonEnabled = !TryingToConnect && serverConnectionService.IsConnected;
-            return e;
-        });
-        await base.InitializeAsync(initializerParameters, cancellationToken);
+                StringsAndTexts.ConnectToServerStatusSuccess);
+            StatusButtonToolTip =
+                string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
+            StatusButtonBackground = Brushes.Green;
+        }
+        else
+        {
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                StringsAndTexts.ConnectToServerStatusFailed);
+            StatusButtonBackground = Brushes.Red;
+        }
+
+        TryingToConnect = false;
+
+        if (ServerConnectionService.IsConnected)
+        {
+            UploadButtonEnabled = !TryingToConnect && ServerConnectionService.IsConnected;
+            return;
+        }
+
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
+            ButtonEnum.Ok, Icon.Error);
+        await messageBox.ShowAsync();
+    }
+
+    private void Reset()
+    {
+        Hostname = string.Empty;
+        Username = string.Empty;
+        Password = string.Empty;
+        StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StringsAndTexts.ConnectToServerStatusUnknown);
+        StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StringsAndTexts.ConnectToServerStatusUntested);
+        StatusButtonBackground = Brushes.Gray;
+        UploadButtonEnabled = !TryingToConnect && ServerConnectionService.IsConnected;
     }
 
     private void UpdateComboBoxState()
     {
-        KeyComboBoxEnabled = !serverConnectionService.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
+        KeyComboBoxEnabled = !ServerConnectionService.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
     }
 }

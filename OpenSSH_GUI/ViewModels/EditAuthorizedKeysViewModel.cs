@@ -40,9 +40,9 @@ public class EditAuthorizedKeysViewModel(
 
     public bool KeyAddPossible => SshKeyManager.SshKeys.Count > 0;
 
-    public IAuthorizedKeysFile AuthorizedKeysFileLocal { get; private set; }
+    public IAuthorizedKeysFile? AuthorizedKeysFileLocal { get; private set; }
     public IAuthorizedKeysFile? AuthorizedKeysFileRemote { get; private set; }
-    public ReactiveCommand<SshKeyFile, Unit> AddKey { get; private set; }
+    public ReactiveCommand<SshKeyFile, Unit>? AddKey { get; private set; }
 
     protected override async Task OnBooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
@@ -50,6 +50,7 @@ public class EditAuthorizedKeysViewModel(
         try
         {
             if (!inputParameter) return;
+            ArgumentNullException.ThrowIfNull(AuthorizedKeysFileLocal);
             await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
             if (serverConnectionService.IsConnected && AuthorizedKeysFileRemote is not null)
                 await serverConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(
@@ -87,6 +88,7 @@ public class EditAuthorizedKeysViewModel(
     private void UpdateAddButton()
     {
         if (SelectedKey is null) return;
+        if (AuthorizedKeysFileRemote is null) return;
         AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key =>
             string.Equals(key.Fingerprint, SelectedKey.Fingerprint()));
     }

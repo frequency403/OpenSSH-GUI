@@ -18,7 +18,13 @@ namespace OpenSSH_GUI.Core.Services;
 public class SshKeyManager : ReactiveObject, ISshKeyManager
 {
     private const string BackupFileExtension = ".bak";
-    private static FileStreamOptions _fileStreamOptions;
+    private static readonly FileStreamOptions FileStreamOptions = new()
+    {
+        BufferSize = 0,
+        Access = FileAccess.ReadWrite,
+        Mode = FileMode.OpenOrCreate,
+        Share = FileShare.ReadWrite
+    };
 
     private readonly DirectoryCrawler _directoryCrawler;
     private readonly ILogger<SshKeyManager> _logger;
@@ -36,15 +42,9 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
         _logger = logger;
         _directoryCrawler = directoryCrawler;
         _serviceProvider = serviceProvider;
-        _fileStreamOptions = new FileStreamOptions
-        {
-            BufferSize = 0,
-            Access = FileAccess.ReadWrite,
-            Mode = FileMode.OpenOrCreate,
-            Share = FileShare.ReadWrite
-        };
 
-        if (!OperatingSystem.IsWindows()) _fileStreamOptions.UnixCreateMode = (UnixFileMode)Convert.ToInt32("600", 8);
+        if (!OperatingSystem.IsWindows()) 
+            FileStreamOptions.UnixCreateMode = (UnixFileMode)Convert.ToInt32("600", 8);
 
         _watcher = new FileSystemWatcher
         {
@@ -76,12 +76,11 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
         if (!key.IsInitialized)
             throw new InvalidOperationException("Key file not initialized");
 
-        PrivateKeyFile privateKeyFile = key;
-        if (privateKeyFile is null)
-            throw new InvalidOperationException("Key file not found");
+        PrivateKeyFile? privateKeyFile = key;
+        ArgumentNullException.ThrowIfNull(privateKeyFile);
+        ArgumentException.ThrowIfNullOrWhiteSpace(key.AbsoluteFilePath);
 
-        var filePath = newFormat.ChangeExtension(Path.GetFullPath(
-            key.AbsoluteFilePath ?? throw new InvalidOperationException("Key file not found")), false);
+        var filePath = newFormat.ChangeExtension(Path.GetFullPath(key.AbsoluteFilePath), false);
 
         var password = key.Password is { Length: > 0 } memory
             ? Encoding.UTF8.GetString(memory.Span)
@@ -106,7 +105,7 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
             switch (newFormat)
             {
                 case SshKeyFormat.OpenSSH:
-                    await using (var privateFileStream = new FileStream(filePath, _fileStreamOptions))
+                    await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
                     {
                         await streamWriter.WriteAsync(password is not null
@@ -115,7 +114,7 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
                     }
 
                     await using (var publicFileStream =
-                                 new FileStream(newFormat.ChangeExtension(filePath), _fileStreamOptions))
+                                 new FileStream(newFormat.ChangeExtension(filePath), FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(publicFileStream, Encoding.UTF8))
                     {
                         await streamWriter.WriteAsync(privateKeyFile.ToOpenSshPublicFormat());
@@ -126,7 +125,7 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
                 case SshKeyFormat.PuTTYv2:
                 case SshKeyFormat.PuTTYv3:
                 default:
-                    await using (var privateFileStream = new FileStream(filePath, _fileStreamOptions))
+                    await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
                     {
                         await streamWriter.WriteAsync(password is not null
@@ -201,7 +200,7 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
                 case SshKeyFormat.PuTTYv2:
                 case SshKeyFormat.PuTTYv3:
                     var puttyPath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath);
-                    await using (var fs = new FileStream(puttyPath, _fileStreamOptions))
+                    await using (var fs = new FileStream(puttyPath, FileStreamOptions))
                     await using (var sw = new StreamWriter(fs))
                     {
                         await sw.WriteAsync(createdKey.ToPuttyFormat(
@@ -216,14 +215,14 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
                 default:
                     var pubPath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath);
                     var privatePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath, false);
-                    await using (var fs = new FileStream(privatePath, _fileStreamOptions))
+                    await using (var fs = new FileStream(privatePath, FileStreamOptions))
                     await using (var sw = new StreamWriter(fs))
                     {
                         await sw.WriteAsync(
                             createdKey.ToOpenSshFormat(generateParamsInfo.Encryption));
                     }
 
-                    await using (var fs = new FileStream(pubPath, _fileStreamOptions))
+                    await using (var fs = new FileStream(pubPath, FileStreamOptions))
                     await using (var sw = new StreamWriter(fs))
                     {
                         await sw.WriteAsync(createdKey.ToOpenSshPublicFormat());

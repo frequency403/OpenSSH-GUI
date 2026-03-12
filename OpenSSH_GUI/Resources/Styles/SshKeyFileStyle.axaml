@@ -178,8 +178,7 @@
                                 <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                             ItemsSource="{Binding AvailableFormatsForConversion}">
                                     <MenuFlyout.ItemContainerTheme>
-                                        <ControlTheme TargetType="MenuItem"
-                                                      BasedOn="{StaticResource {x:Type MenuItem}}"
+                                        <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"
                                                       x:DataType="keygen:SshKeyFormat">
                                             <Setter Property="Background" Value="DarkCyan" />
                                             <Setter Property="Header"

@@ -23,7 +23,7 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private async Task InitializeMainWindowAsync(IClassicDesktopStyleApplicationLifetime desktop)
+    private static async Task InitializeMainWindowAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
         desktop.MainWindow = await ServiceProvider.ResolveViewAsync<MainWindow, MainWindowViewModel>();
     }

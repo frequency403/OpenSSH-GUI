@@ -11,10 +11,10 @@ public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
     public AddKeyWindow(ILogger<AddKeyWindow> logger) : base(logger)
     {
         InitializeComponent();
-        this.WhenActivated(d =>
+        this.WhenActivated(_ =>
         {
             this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(ViewModel, model => model.KeyName,
-                window => window.KeyFileNameValidation.Text);
+                window => window.KeyFileNameValidation.Text ?? string.Empty);
         });
     }
 }

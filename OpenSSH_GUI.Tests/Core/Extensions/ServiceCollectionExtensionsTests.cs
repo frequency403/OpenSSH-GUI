@@ -32,7 +32,7 @@ public class ServiceCollectionExtensionsTests
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() =>
-            services.RegisterViewWithViewModel<MockWindow, InvalidVM>());
+            services.RegisterViewWithViewModel<MockWindow, InvalidVm>());
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class ServiceCollectionExtensionsTests
     {
     }
 
-    private class InvalidVM() : ViewModelBase<InvalidVM>(NullLogger<InvalidVM>.Instance)
+    private class InvalidVm() : ViewModelBase<InvalidVm>(NullLogger<InvalidVm>.Instance)
     {
     }
 }
