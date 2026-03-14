@@ -93,6 +93,28 @@
     </DataTemplate>
     <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:SshKeyFile">
         <StackPanel>
+            <StackPanel.Styles>
+                <Style Selector="MenuFlyoutPresenter">
+                    <Setter Property="Background" Value="DarkCyan" />
+                    <Setter Property="BorderBrush" Value="#006064" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="4" />
+                    <Setter Property="MinWidth" Value="120" />
+                </Style>
+                <Style Selector="SplitButton">
+                    <Setter Property="MinHeight" Value="0" />
+                </Style>
+                <Style Selector="SplitButton /template/ Button#PART_PrimaryButton">
+                    <Setter Property="MinHeight" Value="0" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                </Style>
+                <Style Selector="SplitButton /template/ Button#PART_SecondaryButton">
+                    <Setter Property="MinHeight" Value="0" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="2 0" />
+                </Style>
+            </StackPanel.Styles>
             <Border CornerRadius="25" Padding="5" Classes="MainDisplay">
                 <Border.Styles>
                     <Style Selector="Border.MainDisplay:pointerover">
@@ -133,7 +155,7 @@
                     </Button>
                     <TextBlock Padding="5" Grid.Column="2" Text="{Binding Comment}" Margin="5"
                                HorizontalAlignment="Center" IsEnabled="{Binding !NeedsPassword}" />
-                    <Grid Grid.Column="3" ColumnDefinitions="* * * *" HorizontalAlignment="Center"
+                    <Grid Grid.Column="3" ColumnDefinitions="* * * 2*" HorizontalAlignment="Center"
                           IsEnabled="{Binding !NeedsPassword}">
                         <Button Padding="5" Grid.Column="0" HorizontalAlignment="Center"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenExportKeyWindowPublic}"
@@ -171,39 +193,67 @@
                             </ToolTip.Tip>
                             <avalonia:MaterialIcon Kind="DeleteOutline" />
                         </Button>
-                        <SplitButton Padding="5" Grid.Column="3" HorizontalAlignment="Center" Background="DarkCyan"
+                        <SplitButton Padding="5" Grid.Column="3"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Center"
+                                     MinHeight="0"
                                      Command="{Binding ChangeFormatOfKeyFile}"
                                      CommandParameter="{Binding DefaultConversionFormat}">
+
+                            <SplitButton.Resources>
+                                <SolidColorBrush x:Key="SplitButtonBackground">DarkCyan</SolidColorBrush>
+                                <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver">#00838F</SolidColorBrush>
+                                <SolidColorBrush x:Key="SplitButtonBackgroundPressed">#006064</SolidColorBrush>
+                                <SolidColorBrush x:Key="SplitButtonBackgroundDisabled">#004F4F</SolidColorBrush>
+
+                                <SolidColorBrush x:Key="SplitButtonDividerBackground">#006064</SolidColorBrush>
+
+                                <SolidColorBrush x:Key="SplitButtonForeground">White</SolidColorBrush>
+                                <SolidColorBrush x:Key="SplitButtonForegroundPointerOver">White</SolidColorBrush>
+                                <SolidColorBrush x:Key="SplitButtonForegroundPressed">White</SolidColorBrush>
+                            </SplitButton.Resources>
+
                             <SplitButton.Flyout>
                                 <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                             ItemsSource="{Binding AvailableFormatsForConversion}">
                                     <MenuFlyout.ItemContainerTheme>
-                                        <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" x:DataType="keygen:SshKeyFormat">
-                                            <ControlTheme.Setters>
-                                                <Setter Property="Background" Value="DarkCyan" />
-                                                <Setter Property=""/>
-                                                <Setter Property="Header"
-                                                        Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
-                                                <Setter Property="Command"
-                                                        Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}" />
-                                                <Setter Property="CommandParameter"
-                                                        Value="{Binding}" />
-                                            </ControlTheme.Setters>
+                                        <ControlTheme TargetType="MenuItem"
+                                                      BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                      x:DataType="keygen:SshKeyFormat">
+
+                                            <Setter Property="Background" Value="DarkCyan" />
+                                            <Setter Property="Foreground" Value="White" />
+                                            <Setter Property="Padding" Value="12,8" />
+                                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                            <Setter Property="Header"
+                                                    Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
+                                            <Setter Property="Command"
+                                                    Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}" />
+                                            <Setter Property="CommandParameter"
+                                                    Value="{Binding}" />
+
+                                            <Style Selector="^:pointerover /template/ Border#PART_LayoutRoot">
+                                                <Setter Property="Background" Value="#00838F" />
+                                            </Style>
+                                            <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
+                                                <Setter Property="Background" Value="#006064" />
+                                            </Style>
+
                                         </ControlTheme>
                                     </MenuFlyout.ItemContainerTheme>
                                 </MenuFlyout>
                             </SplitButton.Flyout>
+
                             <ToolTip.Tip>
-                                <Label
-                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
+                                <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
                             </ToolTip.Tip>
                             <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
+
                         </SplitButton>
                     </Grid>
                 </Grid>
             </Border>
             <Separator Padding="5" />
         </StackPanel>
-
     </DataTemplate>
 </ResourceDictionary>
