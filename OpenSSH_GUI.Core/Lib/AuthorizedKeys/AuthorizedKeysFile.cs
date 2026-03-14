@@ -45,7 +45,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <returns>True if the key was successfully added, otherwise false.</returns>
     public bool AddAuthorizedKey(SshKeyFile key)
     {
-        if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint())) return false;
+        if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
         // var export = key.ExportAuthorizedKeyEntry();
         // AuthorizedKeys.Add(new AuthorizedKey(export)); @TODO
         return true;
@@ -99,9 +99,9 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </returns>
     public bool RemoveAuthorizedKey(SshKeyFile key)
     {
-        if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint())) return false;
+        if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint)) return false;
         {
-            AuthorizedKeys.Remove(AuthorizedKeys.First(e => e.Fingerprint == key.Fingerprint()));
+            AuthorizedKeys.Remove(AuthorizedKeys.First(e => e.Fingerprint == key.Fingerprint));
             return true;
         }
     }

@@ -82,8 +82,8 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
 
         var filePath = newFormat.ChangeExtension(Path.GetFullPath(key.AbsoluteFilePath), false);
 
-        var password = key.Password is { Length: > 0 } memory
-            ? Encoding.UTF8.GetString(memory.Span)
+        var password = key.Password.IsValid
+            ? key.Password.GetPasswordString()
             : null;
 
         var backedUpFiles = new List<(string backup, string original)>();
@@ -108,8 +108,8 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
                     await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
                     {
-                        await streamWriter.WriteAsync(password is not null
-                            ? privateKeyFile.ToOpenSshFormat(password)
+                        await streamWriter.WriteAsync(key.Password.IsValid
+                            ? privateKeyFile.ToOpenSshFormat(key.Password.GetPasswordString())
                             : privateKeyFile.ToOpenSshFormat());
                     }
 

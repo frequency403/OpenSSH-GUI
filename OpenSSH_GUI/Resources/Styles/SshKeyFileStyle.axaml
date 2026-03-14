@@ -9,7 +9,7 @@
     <DataTemplate x:Key="LocksAndType" DataType="keys:SshKeyFile">
         <Grid ColumnDefinitions="* 3*"
               VerticalAlignment="Center" HorizontalAlignment="Stretch">
-            <StackPanel Grid.Column="0" IsVisible="{Binding HasPassword}" HorizontalAlignment="Left">
+            <StackPanel Grid.Column="0" IsVisible="{Binding Password.IsValid}" HorizontalAlignment="Left">
                 <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding NeedsPassword}">
                     <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" />
                 </Border>
@@ -55,7 +55,7 @@
     <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="keys:SshKeyFile">
         <StackPanel Orientation="Horizontal" Spacing="15">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="5">
-                <Panel Margin="0" IsVisible="{Binding HasPassword}">
+                <Panel Margin="0" IsVisible="{Binding Password.IsValid}">
                     <Border BorderBrush="Transparent" IsVisible="{Binding NeedsPassword}">
                         <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" />
                     </Border>
@@ -65,7 +65,7 @@
                 </Panel>
                 <Border
                     BorderBrush="Transparent"
-                    IsVisible="{Binding !HasPassword}"
+                    IsVisible="{Binding !Password.IsValid}"
                     IsEnabled="False">
                     <avalonia:MaterialIcon Kind="LockOffOutline" Foreground="DimGray" />
                 </Border>
@@ -178,15 +178,17 @@
                                 <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                             ItemsSource="{Binding AvailableFormatsForConversion}">
                                     <MenuFlyout.ItemContainerTheme>
-                                        <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"
-                                                      x:DataType="keygen:SshKeyFormat">
-                                            <Setter Property="Background" Value="DarkCyan" />
-                                            <Setter Property="Header"
-                                                    Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
-                                            <Setter Property="Command"
-                                                    Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}" />
-                                            <Setter Property="CommandParameter"
-                                                    Value="{Binding}" />
+                                        <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}" x:DataType="keygen:SshKeyFormat">
+                                            <ControlTheme.Setters>
+                                                <Setter Property="Background" Value="DarkCyan" />
+                                                <Setter Property=""/>
+                                                <Setter Property="Header"
+                                                        Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
+                                                <Setter Property="Command"
+                                                        Value="{Binding $parent[SplitButton].((keys:SshKeyFile)DataContext).ChangeFormatOfKeyFile}" />
+                                                <Setter Property="CommandParameter"
+                                                        Value="{Binding}" />
+                                            </ControlTheme.Setters>
                                         </ControlTheme>
                                     </MenuFlyout.ItemContainerTheme>
                                 </MenuFlyout>

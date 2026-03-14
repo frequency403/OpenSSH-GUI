@@ -23,7 +23,9 @@ using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
+using Renci.SshNet;
 using SshNet.Keygen;
+using SshNet.Keygen.Extensions;
 
 namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
@@ -172,8 +174,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             Manager.ChangeOrder(value switch
             {
                 null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.Fingerprint()),
-                false => key => key.OrderByDescending(e => e.Fingerprint())
+                true => key => key.OrderBy(e => e.Fingerprint),
+                false => key => key.OrderByDescending(e => e.Fingerprint)
             });
             this.RaiseAndSetIfChanged(ref field, value);
         }
@@ -187,18 +189,41 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private Task ShowPrivateKeyExportWindow(SshKeyFile key, CancellationToken token = default)
     {
-        return ShowExportWindow(key, key.ToOpenSshFormat(), null, token);
+        PrivateKeyFile? keyFile = key;
+        var content = string.Empty;
+        switch (key)
+        {
+            case null or { NeedsPassword: true, Password.IsValid: false }:
+                Logger.LogError("Keyfile is null");
+                return Task.CompletedTask;
+            case { NeedsPassword: false, Password.IsValid: true } passwordProtectedKeyFile:
+            {
+                keyFile = passwordProtectedKeyFile;
+                if(keyFile is not null)
+                    content = keyFile.ToOpenSshFormat(passwordProtectedKeyFile.Password.GetPasswordString());
+                break;
+            }
+            default:
+            {
+                if(keyFile is not null)
+                    content = keyFile.ToOpenSshFormat();
+                break;
+            }
+        }
+        return ShowExportWindow(key, content, null, token);
     }
 
     private Task ShowPublicKeyExportWindow(SshKeyFile key, CancellationToken token = default)
     {
-        return ShowExportWindow(key, key.ToOpenSshPublicFormat(), null, token);
+        PrivateKeyFile? keyFile = key;
+        var content = keyFile is not null ? keyFile.ToOpenSshPublicFormat() : string.Empty;
+        return ShowExportWindow(key, content, null, token);
     }
 
     private Task ShowPasswordExportWindow(SshKeyFile key, CancellationToken token = default)
     {
-        if(key.Password is not { Length: > 0} password) return Task.CompletedTask;
-        return ShowExportWindow(key, Encoding.UTF8.GetString(password.Span),
+        if(!key.Password.IsValid) return Task.CompletedTask;
+        return ShowExportWindow(key, key.Password.GetPasswordString(),
             string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath), token);
     }
 

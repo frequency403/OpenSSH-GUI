@@ -90,6 +90,6 @@ public class EditAuthorizedKeysViewModel(
         if (SelectedKey is null) return;
         if (AuthorizedKeysFileRemote is null) return;
         AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key =>
-            string.Equals(key.Fingerprint, SelectedKey.Fingerprint()));
+            string.Equals(key.Fingerprint, SelectedKey.Fingerprint));
     }
 }

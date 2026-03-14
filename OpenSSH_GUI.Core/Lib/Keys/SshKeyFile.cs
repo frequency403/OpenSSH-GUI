@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Services;
 using ReactiveUI;
 using Renci.SshNet;
@@ -49,12 +50,11 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
     public bool IsPuttyKey => _fileInfo?.CurrentFormat is not SshKeyFormat.OpenSSH;
 
     public bool NeedsPassword { get; set; }
+    
+    public SshKeyFilePassword Password { get; } = new ();
 
-    [MemberNotNullWhen(true, nameof(Password))]
-    public bool HasPassword => Password is not null && !NeedsPassword;
-
-    public ReadOnlyMemory<byte>? Password { get; set; }
-
+    public string Fingerprint => _privateKeyFile?.FingerprintHash() ?? _fingerPrintField;
+    
     public IReadOnlyCollection<HostAlgorithm>? HostKeyAlgorithms => _privateKeyFile?.HostKeyAlgorithms;
     public Key? Key => _privateKeyFile?.Key;
     public string? AbsoluteFilePath => _fileInfo?.FullName;
@@ -103,7 +103,6 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
             _privateKeyFile?.Dispose();
     }
 
-
     public void Dispose()
     {
         _privateKeyFile?.Dispose();
@@ -147,10 +146,12 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         try
         {
             _fileInfo = new SshKeyFileInformation(filePath);
-            _privateKeyFile = passPhrase is { Length: > 0 } memory
-                ? new PrivateKeyFile(_fileInfo.FullName, Encoding.UTF8.GetString(memory.Span))
+            if(passPhrase is { Length: > 0 } pass)
+                Password.Set(pass);
+            _privateKeyFile = Password.IsValid
+                ? new PrivateKeyFile(_fileInfo.FullName, Password.GetPasswordString())
                 : new PrivateKeyFile(_fileInfo.FullName);
-            Password = passPhrase is { Length: > 0 } pass ? pass : null;
+             
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
@@ -170,72 +171,6 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         _logger.LogInformation("Changing format of keyfile {filePath} to {newFormat}", _fileInfo.FullName, newFormat);
         return _sshKeyManager.ChangeFormatOfKeyAsync(this, newFormat, token);
     }
-
-    public string ToPublic()
-    {
-        return _privateKeyFile?.ToPublic() ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToPublic(SshKeyFormat format)
-    {
-        return _privateKeyFile?.ToPublic(format) ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string Fingerprint()
-    {
-        return _privateKeyFile?.Fingerprint() ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string Fingerprint(SshKeyHashAlgorithmName hashAlgorithmName)
-    {
-        return _privateKeyFile?.Fingerprint(hashAlgorithmName) ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToOpenSshFormat()
-    {
-        if (NeedsPassword)
-            throw new SshPassPhraseNullOrEmptyException();
-        if (HasPassword && IsInitialized)
-            return _privateKeyFile.ToOpenSshFormat(Encoding.UTF8.GetString(Password.Value.Span));
-        return IsInitialized ? _privateKeyFile.ToOpenSshFormat() : string.Empty;
-    }
-
-    public string ToOpenSshFormat(ISshKeyEncryption keyEncryption)
-    {
-        return _privateKeyFile?.ToOpenSshFormat(keyEncryption) ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToPuttyFormat()
-    {
-        return _privateKeyFile?.ToPuttyFormat() ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToPuttyFormat(string passphrase)
-    {
-        return _privateKeyFile?.ToPuttyFormat(passphrase) ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToPuttyFormat(string passphrase, SshKeyFormat keyFormat)
-    {
-        return _privateKeyFile?.ToPuttyFormat(passphrase, keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToPuttyFormat(ISshKeyEncryption keyEncryption, SshKeyFormat keyFormat)
-    {
-        return _privateKeyFile?.ToPuttyFormat(keyEncryption, keyFormat) ??
-               throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToPuttyFormat(SshKeyFormat keyFormat)
-    {
-        return _privateKeyFile?.ToPuttyFormat(keyFormat) ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
-    public string ToOpenSshPublicFormat()
-    {
-        return _privateKeyFile?.ToOpenSshPublicFormat() ?? throw new SshPassPhraseNullOrEmptyException();
-    }
-
 
     public async ValueTask<bool> SetPassword(ReadOnlyMemory<byte> password)
     {
