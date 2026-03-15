@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
@@ -32,7 +33,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <summary>
     ///     Represents the authorized keys file.
     /// </summary>
-    public ObservableCollection<IAuthorizedKey> AuthorizedKeys
+    public ObservableCollection<AuthorizedKey> AuthorizedKeys
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
@@ -45,9 +46,8 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// <returns>True if the key was successfully added, otherwise false.</returns>
     public bool AddAuthorizedKey(SshKeyFile key)
     {
-        if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
-        // var export = key.ExportAuthorizedKeyEntry();
-        // AuthorizedKeys.Add(new AuthorizedKey(export)); @TODO
+        if (AuthorizedKeys.Any(e => e.Equals(key.AuthorizedKey))) return false;
+        AuthorizedKeys.Add(key.AuthorizedKey);
         return true;
     }
 
@@ -56,10 +56,10 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     /// <param name="keys">The collection of keys to be applied as changes.</param>
     /// <returns>True if any changes were made to the authorized keys file; otherwise, false.</returns>
-    public bool ApplyChanges(IEnumerable<IAuthorizedKey> keys)
+    public bool ApplyChanges(IEnumerable<AuthorizedKey> keys)
     {
         var countBefore = AuthorizedKeys.Count;
-        AuthorizedKeys = new ObservableCollection<IAuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
+        AuthorizedKeys = new ObservableCollection<AuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
         return countBefore != AuthorizedKeys.Count;
     }
 
@@ -152,12 +152,11 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     private async ValueTask LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         using var streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
-        while (await streamReader.ReadLineAsync(cancellationToken) is { } line)
+        if (await streamReader.ReadToEndAsync(cancellationToken) is { } fileContents && !string.IsNullOrWhiteSpace(fileContents))
         {
-            if (string.IsNullOrWhiteSpace(line.Trim())) continue;
-            AuthorizedKeys.Add(new AuthorizedKey(line.Trim()));
+            LoadFileContents(fileContents);
         }
-
+        
         if (stream is FileStream fileStream)
         {
             _fileContentsOrPath = fileStream.Name;
@@ -179,7 +178,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
             .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
             .Where(e => !string.IsNullOrWhiteSpace(e.Trim()));
         AuthorizedKeys =
-            new ObservableCollection<IAuthorizedKey>(splittedContents.Select(e => new AuthorizedKey(e.Trim())));
+            new ObservableCollection<AuthorizedKey>(splittedContents.Select(e => AuthorizedKey.Parse(e.Trim())));
     }
 
     /// <summary>

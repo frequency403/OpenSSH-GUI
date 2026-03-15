@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Keys;
 using ReactiveUI;
 
@@ -12,7 +13,7 @@ public interface IAuthorizedKeysFile : IReactiveObject
     /// <summary>
     ///     Represents the authorized keys file.
     /// </summary>
-    ObservableCollection<IAuthorizedKey> AuthorizedKeys { get; set; }
+    ObservableCollection<AuthorizedKey> AuthorizedKeys { get; set; }
 
     /// <summary>
     ///     Adds an authorized key to the authorized keys file.
@@ -26,7 +27,7 @@ public interface IAuthorizedKeysFile : IReactiveObject
     /// </summary>
     /// <param name="keys">The collection of keys to be applied as changes.</param>
     /// <returns>True if any changes were made to the authorized keys file; otherwise, false.</returns>
-    bool ApplyChanges(IEnumerable<IAuthorizedKey> keys);
+    bool ApplyChanges(IEnumerable<AuthorizedKey> keys);
 
     /// <summary>
     ///     Persists the changes made to the authorized keys file.

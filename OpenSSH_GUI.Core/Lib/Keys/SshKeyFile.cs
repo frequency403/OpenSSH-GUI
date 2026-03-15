@@ -4,7 +4,9 @@ using System.Reactive;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Services;
+using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using ReactiveUI;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -46,6 +48,16 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
     [MemberNotNullWhen(true, nameof(_fileInfo), nameof(_privateKeyFile))]
     public bool IsInitialized => _privateKeyFile is not null && _fileInfo is { Exists: true };
+
+    public AuthorizedKey AuthorizedKey
+    {
+        get
+        {
+            if(!IsInitialized)
+                throw new InvalidOperationException("Not initialized.");
+            return AuthorizedKey.Parse(_privateKeyFile.ToOpenSshPublicFormat());
+        }
+    }
 
     public bool IsPuttyKey => _fileInfo?.CurrentFormat is not SshKeyFormat.OpenSSH;
 

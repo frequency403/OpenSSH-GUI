@@ -25,21 +25,6 @@ public class ServerConnection : ReactiveObject, IServerConnection
         ConnectionTime = DateTime.Now;
     }
 
-    public ServerConnection(string hostname, string user, string password) : this(
-        new PasswordConnectionCredentials(hostname.Trim(), user.Trim(), password.Trim()))
-    {
-    }
-
-    public ServerConnection(string hostname, string user, SshKeyFile key) : this(
-        new KeyConnectionCredentials(hostname.Trim(), user.Trim(), key))
-    {
-    }
-
-    public ServerConnection(string hostname, string user, IEnumerable<SshKeyFile> keys) : this(
-        new MultiKeyConnectionCredentials(hostname.Trim(), user.Trim(), keys))
-    {
-    }
-
     private SshClient ClientConnection
     {
         get => _sshClient;
@@ -149,7 +134,7 @@ public class ServerConnection : ReactiveObject, IServerConnection
             token);
         var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         await command.ExecuteAsync(token);
-        return await AuthorizedKeysFile.ParseAsync(command.ExtendedOutputStream, token);
+        return await AuthorizedKeysFile.ParseAsync(command.OutputStream, token);
     }
 
     public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile,

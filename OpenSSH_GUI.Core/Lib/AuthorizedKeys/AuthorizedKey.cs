@@ -6,14 +6,14 @@ namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 /// <summary>
 ///     Represents an authorized key entry in an authorized keys file.
 /// </summary>
-public class AuthorizedKey : IAuthorizedKey
+public record AuthorizedKey
 {
     /// <summary>
     ///     Represents an authorized key entry in the authorized_keys file.
     /// </summary>
-    public AuthorizedKey(string keyEntry)
+    private AuthorizedKey(string keyEntry)
     {
-        var split = keyEntry.Split(' ');
+        var split = keyEntry.Trim().Split(' ');
         if (split.Length != 3)
             throw new IndexOutOfRangeException("Authorized Keys must contain TYPE FINGERPRINT COMMENT");
 
@@ -25,6 +25,9 @@ public class AuthorizedKey : IAuthorizedKey
         Fingerprint = split[1];
         Comment = split[2];
     }
+    
+    internal static AuthorizedKey Parse(string keyEntry) 
+        => new(keyEntry);
 
     /// <summary>
     ///     Represents the key type declaration in the authorized key file.
