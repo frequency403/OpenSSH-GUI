@@ -140,7 +140,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
             StatusButtonToolTip = exception.Message;
         }
 
-        if (!ServerConnectionService.IsConnected)
+        if (ServerConnectionService.IsConnected)
         {
             StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusSuccess);
