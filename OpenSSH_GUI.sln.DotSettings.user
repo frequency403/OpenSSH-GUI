@@ -105,6 +105,9 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/olli/.nuget/packages/ssh.net/2025.1.0/lib/net9.0/Renci.SshNet.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=7ce84f90_002D6ae2_002D4e9e_002D860e_002Deb90f45871f3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Junie Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/development/OpenSSH-GUI/OpenSSH_GUI.Tests" Presentation="&amp;lt;OpenSSH_GUI.Tests&amp;gt;" /&gt;
+&lt;/SessionState&gt;</s:String>
 	
 	
 	

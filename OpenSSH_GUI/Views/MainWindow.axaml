@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"

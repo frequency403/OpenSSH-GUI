@@ -1,4 +1,7 @@
-using OpenSSH_GUI.SshConfig;
+using OpenSSH_GUI.SshConfig.Models;
+using OpenSSH_GUI.SshConfig.Options;
+using OpenSSH_GUI.SshConfig.Parsers;
+using OpenSSH_GUI.SshConfig.Serializers;
 using Shouldly;
 using Xunit;
 

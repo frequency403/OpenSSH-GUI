@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using OpenSSH_GUI.SshConfig;
+using OpenSSH_GUI.SshConfig.Extensions;
+using OpenSSH_GUI.SshConfig.Models;
 using Shouldly;
 using Xunit;
 

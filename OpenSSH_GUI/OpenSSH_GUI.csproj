@@ -39,17 +39,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Update="StringsAndTexts.resx">
+        <EmbeddedResource Update="Resources/StringsAndTexts.resx">
             <Generator>PublicResXFileCodeGenerator</Generator>
-            <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
+            <LastGenOutput>Resources/StringsAndTexts.Designer.cs</LastGenOutput>
         </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Update="StringsAndTexts.Designer.cs">
+        <Compile Update="Resources/StringsAndTexts.Designer.cs">
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
-            <DependentUpon>StringsAndTexts.resx</DependentUpon>
+            <DependentUpon>Resources/StringsAndTexts.resx</DependentUpon>
         </Compile>
     </ItemGroup>
 

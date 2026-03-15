@@ -1,6 +1,6 @@
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Credentials;
-using OpenSSH_GUI.SshConfig;
+using OpenSSH_GUI.SshConfig.Models;
 
 namespace OpenSSH_GUI.Core.Extensions;
 

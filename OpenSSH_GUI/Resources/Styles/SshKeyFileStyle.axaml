@@ -1,7 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-                    xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+                    xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
                     xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
                     xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
                     xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"

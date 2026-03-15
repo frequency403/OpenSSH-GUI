@@ -1,4 +1,4 @@
-using OpenSSH_GUI.SshConfig;
+using OpenSSH_GUI.SshConfig.Models;
 using Shouldly;
 using Xunit;
 

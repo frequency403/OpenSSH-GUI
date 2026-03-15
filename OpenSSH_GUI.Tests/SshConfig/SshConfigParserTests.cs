@@ -1,6 +1,10 @@
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.SshConfig;
+using OpenSSH_GUI.SshConfig.Exceptions;
+using OpenSSH_GUI.SshConfig.Extensions;
+using OpenSSH_GUI.SshConfig.Models;
+using OpenSSH_GUI.SshConfig.Options;
+using OpenSSH_GUI.SshConfig.Parsers;
 using Shouldly;
 using Xunit;
 

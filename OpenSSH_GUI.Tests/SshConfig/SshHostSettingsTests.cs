@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
-using OpenSSH_GUI.SshConfig;
+using OpenSSH_GUI.SshConfig.Extensions;
+using OpenSSH_GUI.SshConfig.Models;
 using Xunit;
 
 namespace OpenSSH_GUI.Tests.SshConfig;

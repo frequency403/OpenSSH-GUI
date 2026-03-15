@@ -5,7 +5,9 @@ using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
-using OpenSSH_GUI.Dialogs;
+using OpenSSH_GUI.Dialogs.Enums;
+using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Resources;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
