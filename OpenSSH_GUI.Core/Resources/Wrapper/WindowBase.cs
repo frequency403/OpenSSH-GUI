@@ -1,16 +1,19 @@
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI.Avalonia;
 
 namespace OpenSSH_GUI.Core.Resources.Wrapper;
 
-public class WindowBase<T>(ILogger<WindowBase<T>> logger) : ReactiveWindow<T> where T : ViewModelBase<T>
+public abstract class WindowBase<T> : ReactiveWindow<T> where T : ViewModelBase<T>
 {
-    public void AddBitmap(Bitmap bitmap)
+    private readonly ILogger<WindowBase<T>> _logger;
+    protected WindowBase(ILogger<WindowBase<T>> logger, Bitmap icon)
     {
-        Icon = new WindowIcon(bitmap);
+        _logger = logger;
+        Icon = new WindowIcon(icon);
     }
 
     public void AttachCloseRequest()
@@ -22,7 +25,7 @@ public class WindowBase<T>(ILogger<WindowBase<T>> logger) : ReactiveWindow<T> wh
 
     private void RequestClose(object? sender, EventArgs e)
     {
-        logger.LogDebug("RequestClose from {sender}", sender);
+        _logger.LogDebug("RequestClose from {sender}", sender);
         Close();
     }
 }

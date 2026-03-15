@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Avalonia.Media.Imaging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
@@ -8,7 +10,7 @@ namespace OpenSSH_GUI.Views;
 
 public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
 {
-    public AddKeyWindow(ILogger<AddKeyWindow> logger) : base(logger)
+    public AddKeyWindow(ILogger<AddKeyWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
     {
         InitializeComponent();
         this.WhenActivated(_ =>

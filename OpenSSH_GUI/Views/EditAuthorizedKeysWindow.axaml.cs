@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Avalonia.Media.Imaging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 
@@ -6,7 +8,7 @@ namespace OpenSSH_GUI.Views;
 
 public partial class EditAuthorizedKeysWindow : WindowBase<EditAuthorizedKeysViewModel>
 {
-    public EditAuthorizedKeysWindow(ILogger<EditAuthorizedKeysWindow> logger) : base(logger)
+    public EditAuthorizedKeysWindow(ILogger<EditAuthorizedKeysWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
     {
         InitializeComponent();
     }

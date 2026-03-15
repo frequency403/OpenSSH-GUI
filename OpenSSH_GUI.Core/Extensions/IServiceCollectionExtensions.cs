@@ -51,7 +51,6 @@ public static class ServiceCollectionExtensions
     {
         var viewName = typeof(TView).Name;
         var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
-        resolvedView.AddBitmap(provider.GetRequiredKeyedService<Bitmap>("AppIcon"));
         var viewModelName = typeof(TViewModel).Name;
         var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
         await viewModel.InitializeAsync(initializerParameters, token);

@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.MVVM;
@@ -11,7 +13,7 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost, 
 {
     private readonly ILogger<MainWindow> _logger;
 
-    public MainWindow(ILogger<MainWindow> logger) : base(logger)
+    public MainWindow(ILogger<MainWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
     {
         _logger = logger;
         InitializeComponent();
