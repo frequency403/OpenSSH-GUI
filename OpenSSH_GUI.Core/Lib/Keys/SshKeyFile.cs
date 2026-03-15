@@ -61,7 +61,11 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 
     public bool IsPuttyKey => _fileInfo?.CurrentFormat is not SshKeyFormat.OpenSSH;
 
-    public bool NeedsPassword { get; set; }
+    public bool NeedsPassword
+    {
+        get; 
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
     
     public SshKeyFilePassword Password { get; } = new ();
 
@@ -168,6 +172,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
         catch (SshPassPhraseNullOrEmptyException)
         {
             _logger.LogWarning("Missing Password for keyfile {filePath}", filePath);
+            NeedsPassword = true;
             await ExtractKeyInformation();
         }
         catch (Exception e)

@@ -3,6 +3,7 @@ using Serilog.Events;
 #endif
 using System.Reflection;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Dialogs;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -18,6 +19,7 @@ using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
+using OpenSSH_GUI.Dialogs;
 using OpenSSH_GUI.SshConfig;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
@@ -116,6 +118,8 @@ internal sealed class Program
                     sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 serviceCollection.AddSingleton<IDialogHost>(sp =>
                     sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                serviceCollection.AddSingleton<Window>(sp =>
+                    sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
             });
         collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
         collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
@@ -123,6 +127,7 @@ internal sealed class Program
         collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
         collection.AddTransient<IClipboardService, ClipboardService>();
+        collection.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
         collection.AddHostedService<FileSystemAnalyzer>();
 
         collection.AddKeyedSingleton(ConfigFile,

@@ -21,6 +21,7 @@ using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
+using OpenSSH_GUI.Dialogs;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
 using Renci.SshNet;
@@ -37,6 +38,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private readonly IDialogHost _dialogHost;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IMessageBoxProvider _messageBoxProvider;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
@@ -44,11 +46,13 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         IServerConnectionService serverConnectionService,
         IServiceProvider serviceProvider,
         IConfiguration configuration,
+        IMessageBoxProvider messageBoxProvider,
         IDialogHost dialogHost) : base(logger)
     {
         Manager = manager;
         ServerConnectionService = serverConnectionService;
         _serviceProvider = serviceProvider;
+        _messageBoxProvider = messageBoxProvider;
         _dialogHost = dialogHost;
 
         DisconnectServer = ReactiveCommand.CreateFromTask(DisconnectFromServerAsync);
@@ -348,59 +352,20 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
         while (key.NeedsPassword && trys < 3)
         {
-            var bitmap = new WindowIcon(_serviceProvider.GetRequiredKeyedService<Bitmap>("AppIcon"));
-            var passwordDialog = MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams
-            {
-                ContentTitle = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
-                ContentHeader = string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
-                    Path.GetFileName(key.AbsoluteFilePath)),
-                InputParams = new InputParams
-                {
-                    Label = StringsAndTexts.MainWindowViewModelProvidePasswordPasswordLabel,
-                    Multiline = false
-                },
-                Topmost = true,
-                Icon = Icon.Question,
-                WindowIcon = bitmap,
-                ButtonDefinitions =
-                [
-                    new ButtonDefinition
-                    {
-                        IsCancel = true, IsDefault = false,
-                        Name = StringsAndTexts.MainWindowViewModelProvidePasswordButtonAbort
-                    },
-                    new ButtonDefinition
-                    {
-                        IsCancel = false, IsDefault = true,
-                        Name = StringsAndTexts.MainWindowViewModelProvidePasswordButtonSubmit
-                    }
-                ]
-            });
-            var result = await passwordDialog.ShowAsync();
-            if (result != StringsAndTexts.MainWindowViewModelProvidePasswordButtonSubmit)
+            using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
+                string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
+                    Path.GetFileName(key.AbsoluteFilePath)));
+            if(secureInputResult != null && await key.SetPassword(secureInputResult.Value))
                 return;
-            var setPasswordResult = await key.SetPassword(Encoding.UTF8.GetBytes(result));
-            if (!setPasswordResult)
-            {
-                var msgBox = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams
-                {
-                    ContentTitle = StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
-                    ContentMessage = string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
-                        trys + 1, 3),
-                    Icon = Icon.Warning,
-                    WindowIcon = bitmap,
-                    ButtonDefinitions = ButtonEnum.OkAbort,
-                    EnterDefaultButton = ClickEnum.Ok,
-                    EscDefaultButton = ClickEnum.Abort
-                });
-                var res = await msgBox.ShowAsync();
-                if (res is ButtonResult.Abort)
-                    return;
-                trys++;
-                continue;
-            }
 
-            break;
+
+            if (await _messageBoxProvider.ShowMessageBoxAsync(
+                    StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading, string.Format(
+                        StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
+                        trys + 1, 3), MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning) is MessageBoxResult
+                    .Cancel)
+                break;
+            trys++;
         }
     }
 
