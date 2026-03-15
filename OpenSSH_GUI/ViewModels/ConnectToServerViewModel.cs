@@ -1,22 +1,25 @@
 ﻿using System.Reactive;
 using Avalonia.Media;
 using Microsoft.Extensions.Logging;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Dialogs;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
 public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
+    private readonly IMessageBoxProvider? _messageBoxProvider;
+
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel>? logger,
         IServerConnectionService? serverConnectionService,
+        IMessageBoxProvider? messageBoxProvider,
         ISshKeyManager? sshKeyManager) : base(logger)
     {
+        _messageBoxProvider = messageBoxProvider;
         ServerConnectionService = serverConnectionService;
         SshKeyManager = sshKeyManager;
         SelectedPublicKey = SshKeyManager.SshKeys.FirstOrDefault();
@@ -25,7 +28,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         ResetCommand = ReactiveCommand.Create(Reset);
     }
 
-    public ConnectToServerViewModel() : this(null, null, null) { }
+    public ConnectToServerViewModel() : this(null, null, null, null) { }
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
@@ -163,9 +166,8 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
             return;
         }
 
-        var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
-            ButtonEnum.Ok, Icon.Error);
-        await messageBox.ShowAsync();
+        await _messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, StatusButtonToolTip, MessageBoxButtons.Ok,
+            MessageBoxIcon.Error);
     }
 
     private void Reset()

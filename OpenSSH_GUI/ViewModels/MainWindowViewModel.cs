@@ -2,19 +2,11 @@
 using System.Reactive;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using Avalonia.Controls;
-using Avalonia.Media.Imaging;
 using JetBrains.Annotations;
 using Material.Icons;
 using Material.Icons.Avalonia;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Dto;
-using MsBox.Avalonia.Enums;
-using MsBox.Avalonia.Models;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.Interfaces.Services;
@@ -238,10 +230,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             key.HashAlgorithmName, key.FileName);
         if (string.IsNullOrWhiteSpace(content))
         {
-            var alert = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error,
-                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage,
-                ButtonEnum.Ok, Icon.Error);
-            await alert.ShowAsync();
+            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage, MessageBoxButtons.Ok, MessageBoxIcon.Error);
             return;
         }
 
@@ -254,11 +244,10 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         await _dialogHost.ShowDialog(view);
     }
 
-    private static async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default)
+    private async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default)
     {
-        var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.NotImplementedBoxTitle,
-            StringsAndTexts.NotImplementedBoxText, ButtonEnum.Ok, Icon.Info);
-        await msgBox.ShowAsync();
+        await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.NotImplementedBoxTitle,
+            StringsAndTexts.NotImplementedBoxText, MessageBoxButtons.Ok, MessageBoxIcon.Information);
     }
 
     private static async Task OpenBrowserAsync(int commandTypeParameter, CancellationToken cancellationToken = default)
@@ -302,7 +291,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private async Task DisconnectFromServerAsync(CancellationToken cancellationToken)
     {
         var messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextSuccess;
-        var messageBoxIcon = Icon.Success;
+        var messageBoxIcon = MessageBoxIcon.Information;
         if (ServerConnectionService.IsConnected)
         {
             try
@@ -312,19 +301,17 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             catch (Exception exception)
             {
                 messageBoxText = exception.Message;
-                messageBoxIcon = Icon.Error;
+                messageBoxIcon = MessageBoxIcon.Error;
             }
         }
         else
         {
             messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextNone;
-            messageBoxIcon = Icon.Error;
+            messageBoxIcon = MessageBoxIcon.Error;
         }
 
-        var msgBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.MainWindowDisconnectBoxTitle,
-            messageBoxText,
-            ButtonEnum.Ok, messageBoxIcon);
-        await msgBox.ShowAsync();
+        await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.MainWindowDisconnectBoxTitle, messageBoxText,
+            MessageBoxButtons.Ok, messageBoxIcon);
     }
 
     private async Task OpenWindow<TWindow, TViewModel>(CancellationToken token = default)
@@ -335,15 +322,13 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
 
-    private static async Task DeleteKeyAsync(SshKeyFile sshKeyFile, CancellationToken cancellationToken = default)
+    private async Task DeleteKeyAsync(SshKeyFile sshKeyFile, CancellationToken cancellationToken = default)
     {
-        var box = MessageBoxManager.GetMessageBoxStandard(
-            string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName),
-            StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, ButtonEnum.YesNo, Icon.Question);
-        var res = await box.ShowAsync();
-        if (res != ButtonResult.Yes)
-            return;
-        sshKeyFile.Delete();
+        if (await _messageBoxProvider.ShowMessageBoxAsync(
+                string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName),
+                StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) is MessageBoxResult.Yes)
+            sshKeyFile.Delete();
     }
 
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)
