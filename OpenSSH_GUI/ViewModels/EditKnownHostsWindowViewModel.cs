@@ -7,15 +7,16 @@ using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public class EditKnownHostsWindowViewModel(
     ILogger<EditKnownHostsWindowViewModel> logger,
-    IServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
+    ServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
-    public IServerConnectionService ServerConnectionService => serverConnectionService;
+    public ServerConnectionService ServerConnectionService => serverConnectionService;
     private IKnownHostsFile? KnownHostsFileLocal { get; set; }
     private IKnownHostsFile? KnownHostsFileRemote { get; set; }
 

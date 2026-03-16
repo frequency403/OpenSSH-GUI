@@ -40,7 +40,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
         SshKeyManager sshKeyManager,
-        IServerConnectionService serverConnectionService,
+        ServerConnectionService serverConnectionService,
         IServiceProvider serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
@@ -92,7 +92,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<SshKeyFile, Unit> ChangeFilename { get; }
 
 
-    public IServerConnectionService ServerConnectionService { get; }
+    public ServerConnectionService ServerConnectionService { get; }
     public SshKeyManager SshKeyManager { get; }
 
 

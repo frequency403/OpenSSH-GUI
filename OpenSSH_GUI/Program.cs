@@ -117,7 +117,7 @@ internal sealed class Program
         collection.AddLogging(e => e.AddSerilog());
         collection.AddKeyedSingleton<Bitmap>("AppIcon",
             (_, _) => new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
-        collection.AddSingleton<IServerConnectionService, ServerConnectionService>();
+        collection.AddSingleton<ServerConnectionService>();
         collection.AddTransient<SshKeyFile>();
         collection.AddSingleton<DirectoryCrawler>();
         collection.AddSingleton<SshKeyManager>();

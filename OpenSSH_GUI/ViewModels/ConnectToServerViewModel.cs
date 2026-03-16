@@ -18,7 +18,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
     private readonly IMessageBoxProvider? _messageBoxProvider;
 
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel>? logger,
-        IServerConnectionService? serverConnectionService,
+        ServerConnectionService? serverConnectionService,
         IMessageBoxProvider? messageBoxProvider,
         SshKeyManager? sshKeyManager) : base(logger)
     {
@@ -36,7 +36,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
     public SshKeyManager SshKeyManager { get; }
-    public IServerConnectionService ServerConnectionService { get; }
+    public ServerConnectionService ServerConnectionService { get; }
 
     private bool ValidData => SelectedPublicKey is null
         ? Hostname != "" && Username != "" && Password != ""

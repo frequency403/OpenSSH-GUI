@@ -15,7 +15,7 @@ namespace OpenSSH_GUI.ViewModels;
 public class EditAuthorizedKeysViewModel(
     ILogger<EditAuthorizedKeysViewModel> logger,
     SshKeyManager sshKeyManager,
-    IServerConnectionService serverConnectionService)
+    ServerConnectionService serverConnectionService)
     : ViewModelBase<EditAuthorizedKeysViewModel>(logger)
 {
     private SshKeyFile? _selectedKey;
@@ -37,7 +37,7 @@ public class EditAuthorizedKeysViewModel(
     }
 
     public SshKeyManager SshKeyManager => sshKeyManager;
-    public IServerConnectionService ServerConnectionService => serverConnectionService;
+    public ServerConnectionService ServerConnectionService => serverConnectionService;
 
     public bool KeyAddPossible => SshKeyManager.SshKeysCount > 0;
 
