@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
@@ -16,7 +17,7 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel>? logger, ISshKeyManager? sshKeyManager, IMessageBoxProvider? messageBoxProvider)
+public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel>? logger, SshKeyManager? sshKeyManager, IMessageBoxProvider? messageBoxProvider)
     : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
     private readonly ILogger<AddKeyWindowViewModel> _logger = logger ?? NullLogger<AddKeyWindowViewModel>.Instance;

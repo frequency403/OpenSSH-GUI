@@ -85,7 +85,7 @@
             </ToggleButton>
 
             <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-                <ItemsControl ItemsSource="{Binding Manager.SshKeys}"
+                <ItemsControl ItemsSource="{Binding SshKeyManager.SshKeys}"
                               Margin="5"
                               VerticalAlignment="Stretch"
                               Name="TheItemsGrid"
@@ -221,12 +221,12 @@
                 <!-- Item Count -->
 
                 <Border Grid.Column="1" Background="Gray" Margin="10 5" Padding="5" HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" CornerRadius="5" Child="{Binding ItemsCount}">
+                        VerticalAlignment="Stretch" CornerRadius="5" Child="{Binding ItemsCountIcon}">
                     <ToolTip.Tip>
                         <StackPanel Orientation="Horizontal">
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                            <Label Content="{Binding Manager.SshKeys.Count}" FontWeight="Bold" />
+                            <Label Content="{Binding SshKeyManager.SshKeysCount}" FontWeight="Bold" />
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>

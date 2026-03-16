@@ -13,6 +13,7 @@ using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
+using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
@@ -30,24 +31,26 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         .GetCustomAttributes<AssemblyMetadataAttribute>()
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
+    private readonly IDisposable _keyCountObservable;
     private readonly IDialogHost _dialogHost;
     private readonly IServiceProvider _serviceProvider;
     private readonly IMessageBoxProvider _messageBoxProvider;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
-        ISshKeyManager manager,
+        SshKeyManager sshKeyManager,
         IServerConnectionService serverConnectionService,
         IServiceProvider serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
         IDialogHost dialogHost) : base(logger)
     {
-        Manager = manager;
+        SshKeyManager = sshKeyManager;
         ServerConnectionService = serverConnectionService;
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
         _dialogHost = dialogHost;
+        _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount).Subscribe(OnKeyCountChanged);
 
         DisconnectServer = ReactiveCommand.CreateFromTask(DisconnectFromServerAsync);
         ProvidePassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ProvidePasswordAsync);
@@ -63,10 +66,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             ReactiveCommand.CreateFromTask(OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>);
         OpenCreateKeyWindow = ReactiveCommand.CreateFromTask(OpenWindow<AddKeyWindow, AddKeyWindowViewModel>);
         DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
-        ReloadKeys = ReactiveCommand.CreateFromTask(Manager.RerunSearchAsync);
+        ReloadKeys = ReactiveCommand.CreateFromTask(SshKeyManager.RerunSearchAsync);
         ShowPassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ShowPasswordExportWindow);
 
         Version = configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
+        
     }
 
     public ReactiveCommand<Unit, Unit> DisconnectServer { get; }
@@ -85,7 +89,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
 
     public IServerConnectionService ServerConnectionService { get; }
-    public ISshKeyManager Manager { get; }
+    public SshKeyManager SshKeyManager { get; }
 
 
     public string WindowTitle => string.Format(StringsAndTexts.MainWindowTitle, Version);
@@ -96,27 +100,16 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public MaterialIcon ItemsCount =>
-        new()
-        {
-            Kind = Manager.SshKeys.Count switch
-            {
-                0 => MaterialIconKind.NumericZero,
-                1 => MaterialIconKind.NumericOne,
-                2 => MaterialIconKind.NumericTwo,
-                3 => MaterialIconKind.NumericThree,
-                4 => MaterialIconKind.NumericFour,
-                5 => MaterialIconKind.NumericFive,
-                6 => MaterialIconKind.NumericSix,
-                7 => MaterialIconKind.NumericSeven,
-                8 => MaterialIconKind.NumericEight,
-                9 => MaterialIconKind.NumericNine,
-                10 => MaterialIconKind.Numeric10,
-                _ => MaterialIconKind.Infinity
-            },
-            Width = 20,
-            Height = 20
-        };
+    public MaterialIcon ItemsCountIcon
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    } = new()
+    {
+        Kind = MaterialIconKind.ErrorOutline,
+        Width = 20,
+        Height = 20
+    };
 
 
     public bool? KeyTypeSort
@@ -125,7 +118,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set
         {
             KeyTypeSortDirectionIcon = EvaluateSortIconKind(value);
-            Manager.ChangeOrder(value switch
+            SshKeyManager.ChangeOrder(value switch
             {
                 null => key => key.OrderBy(e => e.FileName),
                 true => key => key.OrderBy(e => e.KeyType),
@@ -147,7 +140,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set
         {
             CommentSortDirectionIcon = EvaluateSortIconKind(value);
-            Manager.ChangeOrder(value switch
+            SshKeyManager.ChangeOrder(value switch
             {
                 null => key => key.OrderBy(e => e.FileName),
                 true => key => key.OrderBy(e => e.Comment),
@@ -169,7 +162,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set
         {
             FingerPrintSortDirectionIcon = EvaluateSortIconKind(value);
-            Manager.ChangeOrder(value switch
+            SshKeyManager.ChangeOrder(value switch
             {
                 null => key => key.OrderBy(e => e.FileName),
                 true => key => key.OrderBy(e => e.Fingerprint),
@@ -357,13 +350,35 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
 
-    private static MaterialIconKind EvaluateSortIconKind(bool? value)
-    {
-        return value switch
+    private static MaterialIconKind EvaluateSortIconKind(bool? value) =>
+        value switch
         {
             null => MaterialIconKind.CircleOutline,
             true => MaterialIconKind.ChevronDownCircleOutline,
             false => MaterialIconKind.ChevronUpCircleOutline
+        };
+
+    private void OnKeyCountChanged(IObservedChange<SshKeyManager, int> obj)
+    {
+        ItemsCountIcon = new MaterialIcon
+        {
+            Kind = obj.Value switch
+            {
+                0 => MaterialIconKind.NumericZero,
+                1 => MaterialIconKind.NumericOne,
+                2 => MaterialIconKind.NumericTwo,
+                3 => MaterialIconKind.NumericThree,
+                4 => MaterialIconKind.NumericFour,
+                5 => MaterialIconKind.NumericFive,
+                6 => MaterialIconKind.NumericSix,
+                7 => MaterialIconKind.NumericSeven,
+                8 => MaterialIconKind.NumericEight,
+                9 => MaterialIconKind.NumericNine,
+                10 => MaterialIconKind.Numeric10,
+                _ => MaterialIconKind.Infinity
+            },
+            Width = 20,
+            Height = 20
         };
     }
 }

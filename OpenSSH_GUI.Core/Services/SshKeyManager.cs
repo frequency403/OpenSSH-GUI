@@ -15,7 +15,11 @@ using SshKey = SshNet.Keygen.SshKey;
 
 namespace OpenSSH_GUI.Core.Services;
 
-public class SshKeyManager : ReactiveObject, ISshKeyManager
+/// <summary>
+///     Manager for SSH keys on the local machine.
+///     Provides functionality for searching, generating, and changing formats of SSH keys.
+/// </summary>
+public class SshKeyManager : ReactiveObject
 {
     private const string BackupFileExtension = ".bak";
     private static readonly FileStreamOptions FileStreamOptions = new()
@@ -67,7 +71,13 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
 
     private ObservableCollection<SshKeyFile> SshKeysInternal { get; }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Changes the format of an existing SSH key.
+    /// </summary>
+    /// <param name="key">The SSH key file to change.</param>
+    /// <param name="newFormat">The target SSH key format.</param>
+    /// <param name="token">A cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ChangeFormatOfKeyAsync(
         SshKeyFile key,
         SshKeyFormat newFormat,
@@ -166,10 +176,21 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Gets the collection of detected SSH keys.
+    /// </summary>
     public IReadOnlyCollection<SshKeyFile> SshKeys => SshKeysInternal;
 
-    /// <inheritdoc />
+    public int SshKeysCount
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    /// <summary>
+    ///     Changes the order of the SSH keys in the collection.
+    /// </summary>
+    /// <param name="orderFunc">Function to reorder the keys.</param>
     public void ChangeOrder(Func<IEnumerable<SshKeyFile>, IEnumerable<SshKeyFile>> orderFunc)
     {
         var reordered = orderFunc(SshKeys).ToList();
@@ -181,7 +202,12 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Generates a new SSH key.
+    /// </summary>
+    /// <param name="fullFilePath">The full path where the new key should be stored.</param>
+    /// <param name="generateParamsInfo">Parameters for key generation.</param>
+    /// <returns>A value task representing the asynchronous operation.</returns>
     public async ValueTask GenerateNewKey(string fullFilePath, SshKeyGenerateInfo generateParamsInfo)
     {
         if (File.Exists(fullFilePath))
@@ -246,7 +272,10 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Triggers a re-search for SSH keys on the disk.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RerunSearchAsync()
     {
         if (_searching)
@@ -350,6 +379,7 @@ public class SshKeyManager : ReactiveObject, ISshKeyManager
 
                 break;
         }
+        SshKeysCount = SshKeysInternal.Count;
     }
 
     private SshKeyFile? GenerateKeyFile()

@@ -5,6 +5,7 @@ using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
@@ -19,7 +20,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel>? logger,
         IServerConnectionService? serverConnectionService,
         IMessageBoxProvider? messageBoxProvider,
-        ISshKeyManager? sshKeyManager) : base(logger)
+        SshKeyManager? sshKeyManager) : base(logger)
     {
         _messageBoxProvider = messageBoxProvider;
         ServerConnectionService = serverConnectionService;
@@ -34,7 +35,7 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
-    public ISshKeyManager SshKeyManager { get; }
+    public SshKeyManager SshKeyManager { get; }
     public IServerConnectionService ServerConnectionService { get; }
 
     private bool ValidData => SelectedPublicKey is null

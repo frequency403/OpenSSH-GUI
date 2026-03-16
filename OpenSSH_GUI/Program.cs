@@ -120,7 +120,7 @@ internal sealed class Program
         collection.AddSingleton<IServerConnectionService, ServerConnectionService>();
         collection.AddTransient<SshKeyFile>();
         collection.AddSingleton<DirectoryCrawler>();
-        collection.AddSingleton<ISshKeyManager, SshKeyManager>();
+        collection.AddSingleton<SshKeyManager>();
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
             serviceCollection =>
             {

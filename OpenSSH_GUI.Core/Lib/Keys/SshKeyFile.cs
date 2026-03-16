@@ -7,6 +7,7 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -20,7 +21,7 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 {
     private readonly ILogger<SshKeyFile> _logger;
-    private readonly ISshKeyManager _sshKeyManager;
+    private readonly SshKeyManager _sshKeyManager;
 
 
     private string _commentField = string.Empty;
@@ -35,7 +36,7 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
     private string _keyTypeField = string.Empty;
     private PrivateKeyFile? _privateKeyFile;
 
-    public SshKeyFile(ILogger<SshKeyFile> logger, ISshKeyManager sshKeyManager)
+    public SshKeyFile(ILogger<SshKeyFile> logger, SshKeyManager sshKeyManager)
     {
         _sshKeyManager = sshKeyManager;
         _logger = logger;

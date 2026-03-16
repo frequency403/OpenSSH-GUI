@@ -7,13 +7,14 @@ using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
 public class EditAuthorizedKeysViewModel(
     ILogger<EditAuthorizedKeysViewModel> logger,
-    ISshKeyManager sshKeyManager,
+    SshKeyManager sshKeyManager,
     IServerConnectionService serverConnectionService)
     : ViewModelBase<EditAuthorizedKeysViewModel>(logger)
 {
@@ -35,10 +36,10 @@ public class EditAuthorizedKeysViewModel(
         }
     }
 
-    public ISshKeyManager SshKeyManager => sshKeyManager;
+    public SshKeyManager SshKeyManager => sshKeyManager;
     public IServerConnectionService ServerConnectionService => serverConnectionService;
 
-    public bool KeyAddPossible => SshKeyManager.SshKeys.Count > 0;
+    public bool KeyAddPossible => SshKeyManager.SshKeysCount > 0;
 
     public IAuthorizedKeysFile? AuthorizedKeysFileLocal { get; private set; }
     public IAuthorizedKeysFile? AuthorizedKeysFileRemote { get; private set; }
