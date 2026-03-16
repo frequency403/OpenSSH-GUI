@@ -7,43 +7,46 @@ using System.Text;
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
 /// <summary>
-/// Provides secure, pinned-memory storage for an SSH key file passphrase.
-/// All sensitive data is kept in a single pinned buffer and wiped on <see cref="Clear"/> or <see cref="Dispose"/>.
+///     Provides secure, pinned-memory storage for an SSH key file passphrase.
+///     All sensitive data is kept in a single pinned buffer and wiped on <see cref="Clear" /> or <see cref="Dispose" />.
 /// </summary>
 /// <remarks>
-/// <para>
-/// <b>Security contract:</b> This class never allocates the passphrase on the managed heap
-/// (beyond what callers pass in as <see cref="string"/>). Callers who need the passphrase as
-/// text should use <see cref="GetChars"/> with a stack-allocated <c>Span&lt;char&gt;</c> and
-/// wipe it immediately after use.
-/// </para>
-/// <para>This class is <b>not</b> thread-safe.</para>
+///     <para>
+///         <b>Security contract:</b> This class never allocates the passphrase on the managed heap
+///         (beyond what callers pass in as <see cref="string" />). Callers who need the passphrase as
+///         text should use <see cref="GetChars" /> with a stack-allocated <c>Span&lt;char&gt;</c> and
+///         wipe it immediately after use.
+///     </para>
+///     <para>This class is <b>not</b> thread-safe.</para>
 /// </remarks>
 public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
 {
     /// <summary>
-    /// Maximum passphrase size in bytes. Sufficient for any reasonable SSH passphrase.
+    ///     Maximum passphrase size in bytes. Sufficient for any reasonable SSH passphrase.
     /// </summary>
     public const int MaxPasswordBytes = 1024;
 
     /// <summary>
-    /// Pinned buffer that holds the passphrase bytes. Pinning prevents the GC from
-    /// relocating the data, so <see cref="CryptographicOperations.ZeroMemory"/>
-    /// can reliably wipe the only copy.
+    ///     Pinned buffer that holds the passphrase bytes. Pinning prevents the GC from
+    ///     relocating the data, so <see cref="CryptographicOperations.ZeroMemory" />
+    ///     can reliably wipe the only copy.
     /// </summary>
-    private readonly byte[] _buffer = GC.AllocateArray<byte>(MaxPasswordBytes, pinned: true);
+    private readonly byte[] _buffer = GC.AllocateArray<byte>(MaxPasswordBytes, true);
+
+    private bool _disposed;
+    private Encoding _encoding = Encoding.UTF8;
 
     private int _writtenCount;
-    private Encoding _encoding = Encoding.UTF8;
-    private bool _disposed;
 
     /// <summary>
-    /// Creates an empty instance. Use <see cref="Set(ReadOnlySpan{byte},Encoding?)"/> to populate.
+    ///     Creates an empty instance. Use <see cref="Set(ReadOnlySpan{byte},Encoding?)" /> to populate.
     /// </summary>
-    internal SshKeyFilePassword() { }
+    internal SshKeyFilePassword()
+    {
+    }
 
     /// <summary>
-    /// Initializes a new instance with an optional passphrase provided as raw bytes.
+    ///     Initializes a new instance with an optional passphrase provided as raw bytes.
     /// </summary>
     /// <param name="password">The passphrase bytes, or <c>null</c> to create an empty instance.</param>
     /// <param name="encoding">Encoding used for byte↔char conversions. Defaults to UTF-8.</param>
@@ -56,16 +59,16 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     }
 
     /// <summary>
-    /// Initializes a new instance from a managed string.
+    ///     Initializes a new instance from a managed string.
     /// </summary>
     /// <param name="password">
-    /// The passphrase string. Note: the caller-provided <see cref="string"/> is inherently
-    /// on the managed heap and cannot be wiped. Prefer the <c>ReadOnlyMemory&lt;byte&gt;</c>
-    /// overload where possible.
+    ///     The passphrase string. Note: the caller-provided <see cref="string" /> is inherently
+    ///     on the managed heap and cannot be wiped. Prefer the <c>ReadOnlyMemory&lt;byte&gt;</c>
+    ///     overload where possible.
     /// </param>
     /// <param name="encoding">Encoding used for byte↔char conversions. Defaults to UTF-8.</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the encoded passphrase exceeds <see cref="MaxPasswordBytes"/>.
+    ///     Thrown when the encoded passphrase exceeds <see cref="MaxPasswordBytes" />.
     /// </exception>
     public SshKeyFilePassword(string? password = null, Encoding? encoding = null)
     {
@@ -87,7 +90,7 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     // ── Public API ──────────────────────────────────────────────────────
 
     /// <summary>
-    /// Gets a value indicating whether the buffer contains a passphrase.
+    ///     Gets a value indicating whether the buffer contains a passphrase.
     /// </summary>
     [MemberNotNullWhen(true, nameof(WrittenSpan))]
     public bool IsValid
@@ -100,7 +103,7 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     }
 
     /// <summary>
-    /// Gets the number of passphrase bytes currently stored.
+    ///     Gets the number of passphrase bytes currently stored.
     /// </summary>
     public int Length
     {
@@ -112,10 +115,10 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     }
 
     /// <summary>
-    /// Gets a read-only span over the stored passphrase bytes.
-    /// This is the <b>primary</b> way to consume the passphrase without heap allocation.
+    ///     Gets a read-only span over the stored passphrase bytes.
+    ///     This is the <b>primary</b> way to consume the passphrase without heap allocation.
     /// </summary>
-    /// <exception cref="ObjectDisposedException"/>
+    /// <exception cref="ObjectDisposedException" />
     public ReadOnlySpan<byte> WrittenSpan
     {
         get
@@ -125,14 +128,32 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
         }
     }
 
+    // ── IDisposable ─────────────────────────────────────────────────────
+
     /// <summary>
-    /// Decodes the stored passphrase into the caller-provided character buffer.
-    /// The caller should wipe <paramref name="destination"/> after use.
+    ///     Securely wipes the internal buffer and marks the instance as disposed.
+    ///     Subsequent calls are no-ops.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        SecureClearBuffer();
+    }
+
+    // ── INotifyPropertyChanged ──────────────────────────────────────────
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    ///     Decodes the stored passphrase into the caller-provided character buffer.
+    ///     The caller should wipe <paramref name="destination" /> after use.
     /// </summary>
     /// <param name="destination">Target buffer (ideally <c>stackalloc</c>).</param>
     /// <returns>The number of characters written.</returns>
-    /// <exception cref="ObjectDisposedException"/>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="destination"/> is too small.</exception>
+    /// <exception cref="ObjectDisposedException" />
+    /// <exception cref="ArgumentException">Thrown when <paramref name="destination" /> is too small.</exception>
     public int GetChars(Span<char> destination)
     {
         ThrowIfDisposed();
@@ -141,8 +162,8 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     }
 
     /// <summary>
-    /// Returns the maximum number of characters that <see cref="GetChars"/> could write
-    /// for the currently stored passphrase. Useful for sizing a <c>stackalloc</c> buffer.
+    ///     Returns the maximum number of characters that <see cref="GetChars" /> could write
+    ///     for the currently stored passphrase. Useful for sizing a <c>stackalloc</c> buffer.
     /// </summary>
     public int GetMaxCharCount()
     {
@@ -151,10 +172,10 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     }
 
     /// <summary>
-    /// Replaces the stored passphrase with the UTF-8 encoding of <paramref name="password"/>.
+    ///     Replaces the stored passphrase with the UTF-8 encoding of <paramref name="password" />.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    /// <exception cref="ObjectDisposedException"/>
+    /// <exception cref="ArgumentOutOfRangeException" />
+    /// <exception cref="ObjectDisposedException" />
     public void Set(string password, Encoding? encoding = null)
     {
         ThrowIfDisposed();
@@ -169,10 +190,10 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     }
 
     /// <summary>
-    /// Replaces the stored passphrase with the given raw bytes.
+    ///     Replaces the stored passphrase with the given raw bytes.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException"/>
-    /// <exception cref="ObjectDisposedException"/>
+    /// <exception cref="ArgumentOutOfRangeException" />
+    /// <exception cref="ObjectDisposedException" />
     public void Set(ReadOnlySpan<byte> password, Encoding? encoding = null)
     {
         ThrowIfDisposed();
@@ -181,41 +202,23 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
         WriteToBuffer(password);
     }
 
-    /// <inheritdoc cref="Set(ReadOnlySpan{byte},Encoding?)"/>
+    /// <inheritdoc cref="Set(ReadOnlySpan{byte},Encoding?)" />
     public void Set(ReadOnlyMemory<byte> password, Encoding? encoding = null)
     {
         Set(password.Span, encoding);
     }
 
     /// <summary>
-    /// Securely wipes the passphrase buffer without disposing the instance,
-    /// allowing it to be reused with <see cref="Set(ReadOnlySpan{byte},Encoding?)"/>.
+    ///     Securely wipes the passphrase buffer without disposing the instance,
+    ///     allowing it to be reused with <see cref="Set(ReadOnlySpan{byte},Encoding?)" />.
     /// </summary>
-    /// <exception cref="ObjectDisposedException"/>
+    /// <exception cref="ObjectDisposedException" />
     public void Clear()
     {
         ThrowIfDisposed();
         SecureClearBuffer();
         OnPropertyChanged(nameof(IsValid));
         OnPropertyChanged(nameof(Length));
-    }
-
-    // ── INotifyPropertyChanged ──────────────────────────────────────────
-
-    /// <inheritdoc />
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    // ── IDisposable ─────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Securely wipes the internal buffer and marks the instance as disposed.
-    /// Subsequent calls are no-ops.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-        SecureClearBuffer();
     }
 
     // ── Private helpers ─────────────────────────────────────────────────
@@ -248,10 +251,10 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-    
+
     /// <summary>
-    /// Converts the stored password bytes to a string on the heap.
-    /// The resulting string cannot be wiped and will live until GC collection.
+    ///     Converts the stored password bytes to a string on the heap.
+    ///     The resulting string cannot be wiped and will live until GC collection.
     /// </summary>
     public string GetPasswordString()
     {
