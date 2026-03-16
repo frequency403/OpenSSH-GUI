@@ -10,9 +10,26 @@ env:
   BUILD_CONFIGURATION: Release
   BASE_VERSION: "1.0.0"
 
+permissions:
+  contents: write
+
 jobs:
-  build-and-release:
-    runs-on: windows-latest
+  # --- JOB 1: BUILD ---
+  build:
+    name: Build for ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: linux-x64
+            asset_name: OpenSSH-GUI-nightly-linux-x64
+            asset_extension: ""
+          - target: win-x64
+            asset_name: OpenSSH-GUI-nightly-win-x64
+            asset_extension: ".exe"
+          - target: osx-x64
+            asset_name: OpenSSH-GUI-nightly-osx-x64
+            asset_extension: ""
 
     steps:
       - name: Checkout
@@ -25,61 +42,78 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+
       - name: Resolve git metadata
         id: meta
-        shell: pwsh
         run: |
-          $hash   = git rev-parse --short HEAD
-          $branch = "${{ github.ref_name }}"
-          $date   = Get-Date -Format "yyyy-MM-dd"
-          $version = "${{ env.BASE_VERSION }}+$hash"
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y-%m-%d)
+          VERSION="${{ env.BASE_VERSION }}+${HASH}"
+          echo "GIT_HASH=$HASH" >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$DATE" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
-          echo "GIT_HASH=$hash"       >> $env:GITHUB_ENV
-          echo "GIT_BRANCH=$branch"   >> $env:GITHUB_ENV
-          echo "BUILD_DATE=$date"     >> $env:GITHUB_ENV
-          echo "VERSION=$version"     >> $env:GITHUB_ENV
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Build
-        run: >
-          dotnet build
-          --configuration ${{ env.BUILD_CONFIGURATION }}
-          --no-restore
-          -p:BaseVersion=${{ env.BASE_VERSION }}
-          -p:GitCommitHash=${{ env.GIT_HASH }}
-
-      - name: Test
-        run: >
-          dotnet test
-          --configuration ${{ env.BUILD_CONFIGURATION }}
-          --no-build
-          --verbosity minimal
-        continue-on-error: true
-
-      - name: Publish
-        run: >
-          dotnet publish
-          --configuration ${{ env.BUILD_CONFIGURATION }}
-          --no-build
-          --output ./artifacts
-          -p:BaseVersion=${{ env.BASE_VERSION }}
-          -p:GitCommitHash=${{ env.GIT_HASH }}
-
-      - name: Zip artifacts
-        shell: pwsh
+      - name: Publish application
         run: |
-          Compress-Archive -Path ./artifacts/* `
-            -DestinationPath ./OpenSSH_GUI-nightly-${{ env.GIT_HASH }}.zip
+          dotnet publish OpenSSH_GUI/OpenSSH_GUI.csproj \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --runtime ${{ matrix.target }} \
+            --output "./publish" \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Rename artifact
+        run: mv ./publish/OpenSSH_GUI${{ matrix.asset_extension }} ./publish/${{ matrix.asset_name }}${{ matrix.asset_extension }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}${{ matrix.asset_extension }}
+          path: ./publish/${{ matrix.asset_name }}${{ matrix.asset_extension }}
+
+  # --- JOB 2: NIGHTLY RELEASE ---
+  nightly-release:
+    name: Create Nightly Release
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve git metadata
+        id: meta
+        run: |
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y-%m-%d)
+          VERSION="${{ env.BASE_VERSION }}+${HASH}"
+          echo "GIT_HASH=$HASH" >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$DATE" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
 
       # Delete existing nightly release to allow tag re-use
       - name: Delete existing nightly release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
-        run: |
-          gh release delete nightly --yes --cleanup-tag 2>$null || true
+        run: gh release delete nightly --yes --cleanup-tag 2>/dev/null || true
 
       - name: Create nightly release
         uses: softprops/action-gh-release@v2
@@ -87,10 +121,52 @@ jobs:
           tag_name: nightly
           name: "Nightly (${{ env.BUILD_DATE }}) — ${{ env.VERSION }}"
           body: |
-            **Branch:** `${{ env.GIT_BRANCH }}`
+            **Branch:** `develop`
             **Commit:** `${{ env.GIT_HASH }}`
             **Built:** ${{ env.BUILD_DATE }}
 
-            > Automated staging build — not intended for production use.
+            > Automated nightly build — not intended for production use.
           prerelease: true
-          files: OpenSSH_GUI-nightly-${{ env.GIT_HASH }}.zip
+          files: "artifacts/**/*"
+
+  # --- JOB 3: AUR NIGHTLY ---
+  deploy-aur-nightly:
+    name: Update AUR Nightly Package
+    runs-on: ubuntu-latest
+    needs: nightly-release
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: OpenSSH-GUI-nightly-linux-x64
+          path: ./
+
+      - name: Update PKGBUILD for openssh-gui-nightly
+        run: |
+          HASH=$(git rev-parse --short HEAD)
+          DATE=$(date +%Y%m%d)
+          VERSION="${{ env.BASE_VERSION }}.${DATE}.${HASH}"
+
+          SHA_BIN=$(sha256sum OpenSSH-GUI-nightly-linux-x64 | cut -d' ' -f1)
+          SHA_ICON=$(sha256sum OpenSSH_GUI/Assets/appicon.png | cut -d' ' -f1)
+          SHA_DESKTOP=$(sha256sum openssh-gui.desktop | cut -d' ' -f1)
+          SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
+
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-nightly/PKGBUILD
+          sed -i "s/sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-nightly/PKGBUILD
+
+      - name: Update AUR (openssh-gui-nightly)
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: openssh-gui-nightly
+          pkgbuild: ./openssh-gui-nightly/PKGBUILD
+          commit_username: ${{ github.repository_owner }}
+          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Nightly update ${{ env.VERSION }}"
