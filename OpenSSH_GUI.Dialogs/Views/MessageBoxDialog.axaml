@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="OpenSSH_GUI.Dialogs.Views.MessageBoxDialog"
         Title="Message"
         Width="440"
@@ -20,7 +21,14 @@
                         Spacing="16"
                         VerticalAlignment="Top">
 
-                <!-- Icon label – visibility and content set from code-behind -->
+                <!-- Material Icon – visibility and kind set from code-behind -->
+                <avalonia:MaterialIcon x:Name="PART_MaterialIcon"
+                                       Width="32"
+                                       Height="32"
+                                       VerticalAlignment="Top"
+                                       IsVisible="False" />
+
+                <!-- Legacy Icon label – kept for backward compatibility if needed -->
                 <TextBlock x:Name="PART_Icon"
                            FontSize="28"
                            VerticalAlignment="Top"

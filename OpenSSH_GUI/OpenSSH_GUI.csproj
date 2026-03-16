@@ -41,7 +41,7 @@
     <ItemGroup>
         <EmbeddedResource Update="Resources/StringsAndTexts.resx">
             <Generator>PublicResXFileCodeGenerator</Generator>
-            <LastGenOutput>Resources/StringsAndTexts.Designer.cs</LastGenOutput>
+            <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
         </EmbeddedResource>
     </ItemGroup>
 
@@ -49,7 +49,7 @@
         <Compile Update="Resources/StringsAndTexts.Designer.cs">
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
-            <DependentUpon>Resources/StringsAndTexts.resx</DependentUpon>
+            <DependentUpon>StringsAndTexts.resx</DependentUpon>
         </Compile>
     </ItemGroup>
 

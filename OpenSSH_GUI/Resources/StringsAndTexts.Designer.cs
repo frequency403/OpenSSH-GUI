@@ -722,5 +722,11 @@ namespace OpenSSH_GUI.Resources {
                 return ResourceManager.GetString("Version", resourceCulture);
             }
         }
+        
+        public static string MainWindowViewModelChangeFilename {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelChangeFilename", resourceCulture);
+            }
+        }
     }
 }

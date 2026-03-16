@@ -234,4 +234,9 @@ public sealed class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
             GotDeleted(this, EventArgs.Empty);
         return allSucceeded;
     }
+
+    public void ChangeFilenameOnDisk(string newFilename)
+    {
+        
+    }
 }

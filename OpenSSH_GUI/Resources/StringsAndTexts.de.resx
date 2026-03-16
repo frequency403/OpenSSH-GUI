@@ -351,4 +351,7 @@
     <data name="MainWindowViewModelProvidePasswordButtonSubmit" xml:space="preserve">
         <value>Speichern</value>
     </data>
+    <data name="MainWindowViewModelChangeFilename" xml:space="preserve">
+        <value>Dateinamen ändern</value>
+    </data>
 </root>

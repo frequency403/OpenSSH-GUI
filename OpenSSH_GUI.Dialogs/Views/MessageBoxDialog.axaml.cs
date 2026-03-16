@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Material.Icons;
 using OpenSSH_GUI.Dialogs.Enums;
+using OpenSSH_GUI.Dialogs.Models;
 
 namespace OpenSSH_GUI.Dialogs.Views;
 
@@ -31,6 +33,25 @@ public partial class MessageBoxDialog : Window
 
         ApplyButtons(buttons);
         ApplyIcon(icon);
+    }
+
+    /// <summary>
+    /// Initialises a new <see cref="MessageBoxDialog"/> with the provided <see cref="MessageBoxParams"/>.
+    /// </summary>
+    /// <param name="params">The parameters for the message box.</param>
+    public MessageBoxDialog(MessageBoxParams @params)
+    {
+        InitializeComponent();
+
+        Title = @params.Title;
+        PART_Message.Text = @params.Message;
+
+        ApplyButtons(@params.Buttons);
+        
+        if (@params.Icon.HasValue)
+            ApplyIcon(@params.Icon);
+        else
+            ApplyIcon(@params.LegacyIcon);
     }
 
     // -------------------------------------------------------------------------
@@ -84,6 +105,18 @@ public partial class MessageBoxDialog : Window
             MessageBoxIcon.Question    => ("?", Avalonia.Media.Brushes.MediumSlateBlue),
             _                          => (string.Empty, Avalonia.Media.Brushes.Transparent)
         };
+    }
+
+    /// <summary>
+    /// Applies the <see cref="MaterialIconKind"/> to the dialog.
+    /// </summary>
+    /// <param name="icon">The icon kind to display.</param>
+    private void ApplyIcon(MaterialIconKind? icon)
+    {
+        if (icon == null) return;
+
+        PART_MaterialIcon.IsVisible = true;
+        PART_MaterialIcon.Kind = icon.Value;
     }
 
     // -------------------------------------------------------------------------

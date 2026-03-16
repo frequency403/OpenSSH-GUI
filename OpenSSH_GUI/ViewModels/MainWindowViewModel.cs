@@ -16,6 +16,7 @@ using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
@@ -46,11 +47,12 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         IDialogHost dialogHost) : base(logger)
     {
         SshKeyManager = sshKeyManager;
+        SetKeyCountIcon(sshKeyManager.SshKeysCount);
         ServerConnectionService = serverConnectionService;
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
         _dialogHost = dialogHost;
-        _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount).Subscribe(OnKeyCountChanged);
+        _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount).Subscribe(obs => SetKeyCountIcon(obs.Value));
 
         DisconnectServer = ReactiveCommand.CreateFromTask(DisconnectFromServerAsync);
         ProvidePassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ProvidePasswordAsync);
@@ -68,6 +70,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
         ReloadKeys = ReactiveCommand.CreateFromTask(SshKeyManager.RerunSearchAsync);
         ShowPassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ShowPasswordExportWindow);
+        ChangeFilename = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFilenameAsync);
 
         Version = configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
         
@@ -86,6 +89,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<SshKeyFile, Unit> DeleteKey { get; }
     public ReactiveCommand<Unit, Unit> ReloadKeys { get; }
     public ReactiveCommand<SshKeyFile, Unit> ShowPassword { get; }
+    public ReactiveCommand<SshKeyFile, Unit> ChangeFilename { get; }
 
 
     public IServerConnectionService ServerConnectionService { get; }
@@ -177,6 +181,28 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = MaterialIconKind.CircleOutline;
+
+    private async Task ChangeFilenameAsync(SshKeyFile key, CancellationToken token = default)
+    {
+        var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(new ValidatedInputParams
+        {
+            Buttons = MessageBoxButtons.OkCancel,
+            Icon = MaterialIconKind.FileEditOutline,
+            InitialValue = key.FileName,
+            Message = "ChangeMe",
+            Prompt = "EnterNewFilename",
+            Watermark = "Enter new filename",
+            Validator = filename =>
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(filename);
+
+                return SshKeyManager.SshKeys.Any(k => k.FileName == filename) ? "Filename already exists" : null;
+            }
+        });
+        if(validatedInputResult is { IsConfirmed: true, Value: { Length: > 0} filename })
+            key.ChangeFilenameOnDisk(filename);
+            
+    }
 
     private Task ShowPrivateKeyExportWindow(SshKeyFile key, CancellationToken token = default)
     {
@@ -358,11 +384,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             false => MaterialIconKind.ChevronUpCircleOutline
         };
 
-    private void OnKeyCountChanged(IObservedChange<SshKeyManager, int> obj)
+    private void SetKeyCountIcon(int count)
     {
         ItemsCountIcon = new MaterialIcon
         {
-            Kind = obj.Value switch
+            Kind = count switch
             {
                 0 => MaterialIconKind.NumericZero,
                 1 => MaterialIconKind.NumericOne,

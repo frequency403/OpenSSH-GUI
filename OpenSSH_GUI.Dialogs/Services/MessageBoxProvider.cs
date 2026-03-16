@@ -13,52 +13,74 @@ namespace OpenSSH_GUI.Dialogs.Services;
 /// </summary>
 public class MessageBoxProvider(Window owner) : IMessageBoxProvider
 {
-    /// <summary>
-    /// Shows a modal message box and returns the button the user clicked.
-    /// </summary>
-    /// <param name="title">The dialog title bar text.</param>
-    /// <param name="message">The message body.</param>
-    /// <param name="buttons">Which button set to display.</param>
-    /// <param name="icon">Optional icon shown beside the message.</param>
-    /// <returns>
-    /// A <see cref="MessageBoxResult"/> indicating which button was clicked,
-    /// or <see cref="MessageBoxResult.None"/> if the window was closed via the
-    /// title-bar chrome.
-    /// </returns>
+    /// <inheritdoc />
     public async Task<MessageBoxResult> ShowMessageBoxAsync(
         string title,
         string message,
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
         MessageBoxIcon icon = MessageBoxIcon.None)
     {
-        var dialog = new MessageBoxDialog(title, message, buttons, icon);
+        return await ShowMessageBoxAsync(new MessageBoxParams
+        {
+            Title = title,
+            Message = message,
+            Buttons = buttons,
+            LegacyIcon = icon
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task<MessageBoxResult> ShowMessageBoxAsync(MessageBoxParams @params)
+    {
+        var dialog = new MessageBoxDialog(@params);
         return await dialog.ShowDialog<MessageBoxResult>(owner);
     }
 
-    /// <summary>
-    /// Shows a modal secure-input (password) prompt and returns the result.
-    /// </summary>
-    /// <param name="title">The dialog title bar text.</param>
-    /// <param name="prompt">Descriptive label shown above the input field.</param>
-    /// <param name="minLength">
-    /// Minimum character count; defaults to <c>1</c>.
-    /// Pass <c>0</c> to allow an empty input.
-    /// </param>
-    /// <param name="maxLength">
-    /// Maximum character count; defaults to <c>0</c> (unlimited).
-    /// </param>
-    /// <returns>
-    /// A <see cref="SecureInputResult"/> whose <see cref="SecureInputResult.Value"/>
-    /// contains the UTF-8 encoded password, or <c>null</c> when the user cancels.
-    /// The caller is responsible for disposing the result to zero the buffer.
-    /// </returns>
+    /// <inheritdoc />
     public async Task<SecureInputResult?> ShowSecureInputAsync(
         string title,
         string prompt,
         int minLength = 1,
         int maxLength = 0)
     {
-        var dialog = new SecureInputDialog(title, prompt, minLength, maxLength);
+        return await ShowSecureInputAsync(new SecureInputParams
+        {
+            Title = title,
+            Prompt = prompt,
+            MinLength = minLength,
+            MaxLength = maxLength
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params)
+    {
+        var dialog = new SecureInputDialog(@params);
         return await dialog.ShowDialog<SecureInputResult?>(owner);
+    }
+    
+    /// <inheritdoc />
+    public async Task<ValidatedInputResult?> ShowValidatedInputAsync(
+        string title,
+        string prompt,
+        Func<string, string?> validator,
+        string initialValue = "",
+        string watermark = "Enter value…")
+    {
+        return await ShowValidatedInputAsync(new ValidatedInputParams
+        {
+            Title = title,
+            Prompt = prompt,
+            Validator = validator,
+            InitialValue = initialValue,
+            Watermark = watermark
+        });
+    }
+
+    /// <inheritdoc />
+    public async Task<ValidatedInputResult?> ShowValidatedInputAsync(ValidatedInputParams @params)
+    {
+        var dialog = new ValidatedInputDialog(@params);
+        return await dialog.ShowDialog<ValidatedInputResult?>(owner);
     }
 }

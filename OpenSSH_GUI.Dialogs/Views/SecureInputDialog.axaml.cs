@@ -2,6 +2,7 @@ using System.Text;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Material.Icons;
 using OpenSSH_GUI.Dialogs.Models;
 
 namespace OpenSSH_GUI.Dialogs.Views;
@@ -69,6 +70,35 @@ public partial class SecureInputDialog : Window
 
         _minLength = minLength;
         _maxLength = maxLength;
+
+        // Intercept at tunnel phase so the event is handled before the TextBox
+        // appends the character to its own internal string buffer.
+        PART_Input.AddHandler(
+            TextInputEvent,
+            OnInputTextInput,
+            RoutingStrategies.Tunnel);
+    }
+
+    /// <summary>
+    /// Initialises a new <see cref="SecureInputDialog"/> with the provided <see cref="SecureInputParams"/>.
+    /// </summary>
+    /// <param name="params">The parameters for the secure-input prompt.</param>
+    public SecureInputDialog(SecureInputParams @params)
+    {
+        InitializeComponent();
+
+        Title = @params.Title;
+        PART_Prompt.Text = @params.Prompt;
+        PART_Prompt.IsVisible = !string.IsNullOrWhiteSpace(@params.Prompt);
+
+        if (@params.Icon.HasValue)
+        {
+            PART_MaterialIcon.IsVisible = true;
+            PART_MaterialIcon.Kind = @params.Icon.Value;
+        }
+
+        _minLength = @params.MinLength;
+        _maxLength = @params.MaxLength;
 
         // Intercept at tunnel phase so the event is handled before the TextBox
         // appends the character to its own internal string buffer.

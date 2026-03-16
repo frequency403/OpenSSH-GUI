@@ -122,6 +122,13 @@
                         <Setter Property="Background" Value="#20adadad" />
                     </Style>
                 </Border.Styles>
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"
+                                  Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ChangeFilename}"
+                                  CommandParameter="{Binding .}" />
+                    </ContextMenu>
+                </Border.ContextMenu>
                 <Grid ColumnDefinitions="* 3* * *">
                     <ToolTip.Tip>
                         <Grid ColumnDefinitions="* * *" RowDefinitions="* * *">

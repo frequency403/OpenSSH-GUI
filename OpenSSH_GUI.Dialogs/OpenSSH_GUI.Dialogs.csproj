@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Avalonia" Version="11.3.12" />
+      <PackageReference Include="Material.Icons.Avalonia" Version="3.0.0" />
     </ItemGroup>
 
     <ItemGroup>

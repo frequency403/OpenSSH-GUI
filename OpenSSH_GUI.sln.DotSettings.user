@@ -106,10 +106,12 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/home/olli/.nuget/packages/ssh.net/2025.1.0/lib/net9.0/Renci.SshNet.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=OpenSSH_005FGUI_002FResources_002FStringsAndTexts/@EntryIndexedValue">True</s:Boolean>
 	
 	
 	
 	
 	
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=OpenSSH_005FGUI_002FStringsAndTexts/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
+	</wpf:ResourceDictionary>
