@@ -59,6 +59,7 @@ public class SshKeyManager : ReactiveObject
         _watcher.Filters.Add("*.ppk");
         _watcher.Created += async (_, eventArgs) => await WatcherOnCreated(eventArgs);
         _watcher.Deleted += WatcherOnDeleted;
+        _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
 
         SshKeysInternal = [];
         SshKeysInternal.CollectionChanged += SshKeysOnCollectionChanged;
@@ -285,6 +286,26 @@ public class SshKeyManager : ReactiveObject
             .ContinueWith(t =>
                     _logger.LogError(t.Exception, "Unhandled error during key re-search"),
                 TaskContinuationOptions.OnlyOnFaulted);
+    }
+    
+    private async Task WatcherOnRenamed(RenamedEventArgs e)
+    {
+        if (!await _semaphoreSlim.WaitAsync(100))
+            return;
+        try
+        {
+            if(SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == e.OldFullPath) is { } oldKey)
+                SshKeyGotDeleted(oldKey, EventArgs.Empty);
+            await AddKeyAsync(Path.ChangeExtension(e.FullPath, null));
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Error handling renamed key");
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     private void WatcherOnDeleted(object? sender, FileSystemEventArgs eventArgs)

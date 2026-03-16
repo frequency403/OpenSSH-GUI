@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Avalonia.Threading;
 using JetBrains.Annotations;
 using Material.Icons;
 using Material.Icons.Avalonia;
@@ -20,6 +22,7 @@ using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using Renci.SshNet;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
@@ -386,25 +389,28 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private void SetKeyCountIcon(int count)
     {
-        ItemsCountIcon = new MaterialIcon
+        Dispatcher.UIThread.Invoke(() =>
         {
-            Kind = count switch
+            ItemsCountIcon = new MaterialIcon
             {
-                0 => MaterialIconKind.NumericZero,
-                1 => MaterialIconKind.NumericOne,
-                2 => MaterialIconKind.NumericTwo,
-                3 => MaterialIconKind.NumericThree,
-                4 => MaterialIconKind.NumericFour,
-                5 => MaterialIconKind.NumericFive,
-                6 => MaterialIconKind.NumericSix,
-                7 => MaterialIconKind.NumericSeven,
-                8 => MaterialIconKind.NumericEight,
-                9 => MaterialIconKind.NumericNine,
-                10 => MaterialIconKind.Numeric10,
-                _ => MaterialIconKind.Infinity
-            },
-            Width = 20,
-            Height = 20
-        };
+                Kind = count switch
+                {
+                    0 => MaterialIconKind.NumericZero,
+                    1 => MaterialIconKind.NumericOne,
+                    2 => MaterialIconKind.NumericTwo,
+                    3 => MaterialIconKind.NumericThree,
+                    4 => MaterialIconKind.NumericFour,
+                    5 => MaterialIconKind.NumericFive,
+                    6 => MaterialIconKind.NumericSix,
+                    7 => MaterialIconKind.NumericSeven,
+                    8 => MaterialIconKind.NumericEight,
+                    9 => MaterialIconKind.NumericNine,
+                    10 => MaterialIconKind.Numeric10,
+                    _ => MaterialIconKind.Infinity
+                },
+                Width = 20,
+                Height = 20
+            };
+        }, DispatcherPriority.MaxValue);
     }
 }
