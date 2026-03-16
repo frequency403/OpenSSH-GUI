@@ -29,10 +29,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
+      - name: Determine .NET version from project
+        id: dotnet-version
+        run: |
+          TFM=$(grep -oPm1 '(?<=<TargetFramework>net)[0-9.]+' Directory.Build.props)
+          echo "version=${TFM}.x" >> "$GITHUB_OUTPUT"
+          echo "Detected TargetFramework: net${TFM} → installing SDK ${TFM}.x"
+
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: ${{ steps.dotnet-version.outputs.version }}
 
       - name: Cache dependencies
         uses: actions/cache@v4

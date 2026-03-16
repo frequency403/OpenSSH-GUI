@@ -6,9 +6,7 @@ on:
       - develop
 
 env:
-  DOTNET_VERSION: "10.0.x"
   BUILD_CONFIGURATION: Release
-  BASE_VERSION: "1.0.0"
 
 permissions:
   contents: write
@@ -37,10 +35,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Determine .NET version from project
+        id: dotnet-version
+        run: |
+          TFM=$(grep -oPm1 '(?<=<TargetFramework>net)[0-9.]+' Directory.Build.props)
+          echo "version=${TFM}.x" >> "$GITHUB_OUTPUT"
+          echo "Detected TargetFramework: net${TFM} → installing SDK ${TFM}.x"
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: ${{ steps.dotnet-version.outputs.version }}
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -55,10 +60,12 @@ jobs:
         run: |
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y-%m-%d)
-          VERSION="${{ env.BASE_VERSION }}+${HASH}"
+          BASE_VERSION=$(grep -oPm1 '(?<=<BaseVersion>)[^<]+' Directory.Build.props)
+          VERSION="${BASE_VERSION}+${HASH}"
           echo "GIT_HASH=$HASH" >> "$GITHUB_ENV"
           echo "BUILD_DATE=$DATE" >> "$GITHUB_ENV"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "BASE_VERSION=$BASE_VERSION" >> "$GITHUB_ENV"
 
       - name: Publish application
         run: |
