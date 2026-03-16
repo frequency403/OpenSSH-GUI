@@ -1,16 +1,15 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using OpenSSH_GUI.Core.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 
 namespace OpenSSH_GUI;
 
-public class App : Application
+public class App(ILogger<App> logger, IServiceProvider serviceProvider) : Application
 {
-    internal static IServiceProvider ServiceProvider { get; set; } = null!;
-
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -18,13 +17,10 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            _ = InitializeMainWindowAsync(desktop);
-        base.OnFrameworkInitializationCompleted();
-    }
-
-    private static async Task InitializeMainWindowAsync(IClassicDesktopStyleApplicationLifetime desktop)
-    {
-        desktop.MainWindow = await ServiceProvider.ResolveViewAsync<MainWindow, MainWindowViewModel>();
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        desktop.MainWindow = serviceProvider.GetRequiredKeyedService<MainWindow>("MainWindow");
+        logger.LogInformation("MainWindow created");
+        desktop.MainWindow.DataContext = serviceProvider.GetRequiredKeyedService<MainWindowViewModel>("MainWindowViewModel");
+        logger.LogInformation("MainWindowViewModel set");
     }
 }

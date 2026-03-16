@@ -1,6 +1,7 @@
 ﻿#if!DEBUG
 using Serilog.Events;
 #endif
+using System.Reactive.Concurrency;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
@@ -11,6 +12,8 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
@@ -28,6 +31,7 @@ using OpenSSH_GUI.Views;
 using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
@@ -56,14 +60,17 @@ internal sealed class Program
             .UseSerilog()
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
-
+        
         await host.StartAsync(mainCancellationTokenSource.Token);
-        var appBuilder = AppBuilder.Configure<App>()
+        var appBuilder = AppBuilder.Configure(() => host.Services.GetRequiredService<App>())
             .UsePlatformDetect()
             .WithInterFont()
-            .UseReactiveUI(_ => { })
-            .AfterSetup(_ => { App.ServiceProvider = host.Services; })
-            .UseManagedSystemDialogs();
+            .UseReactiveUI(configure =>
+            {
+                configure.WithPlatformServices();
+                configure.WithAvalonia();
+                configure.WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
+            });
         appBuilder.StartWithClassicDesktopLifetime(args);
 
         await host.StopAsync(mainCancellationTokenSource.Token);
@@ -83,8 +90,10 @@ internal sealed class Program
 
     private static void ConfigureServicesInternal(HostBuilderContext hostBuilderContext, IServiceCollection collection)
     {
+        collection.AddSingleton<App>();
+        collection.AddSingleton<ExceptionHandler>();
         var loggingLevelSwitch = new LoggingLevelSwitch(
-#if!DEBUG
+#if DEBUG
             LogEventLevel.Verbose
 #endif
         );
@@ -105,7 +114,6 @@ internal sealed class Program
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
         // AddServices
-
         collection.AddLogging(e => e.AddSerilog());
         collection.AddKeyedSingleton<Bitmap>("AppIcon",
             (_, _) => new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
