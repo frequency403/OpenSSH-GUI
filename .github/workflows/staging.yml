@@ -73,6 +73,37 @@ jobs:
       - name: Rename artifact
         run: mv ./publish/OpenSSH_GUI${{ matrix.asset_extension }} ./publish/${{ matrix.asset_name }}${{ matrix.asset_extension }}
 
+      # --- AppImage (Linux only) ---
+      - name: Build AppImage
+        if: matrix.target == 'linux-x64'
+        run: |
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          mkdir -p AppDir/usr/share/applications
+
+          cp ./publish/${{ matrix.asset_name }} AppDir/usr/bin/openssh-gui
+          chmod +x AppDir/usr/bin/openssh-gui
+
+          cp OpenSSH_GUI/Assets/appicon.png AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
+          cp OpenSSH_GUI/Assets/appicon.png AppDir/openssh-gui.png
+          cp openssh-gui.desktop AppDir/openssh-gui.desktop
+          cp openssh-gui.desktop AppDir/usr/share/applications/openssh-gui.desktop
+
+          cp appimage/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir OpenSSH-GUI-nightly-x86_64.AppImage
+
+      - name: Upload AppImage artifact
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenSSH-GUI-nightly-x86_64.AppImage
+          path: OpenSSH-GUI-nightly-x86_64.AppImage
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
