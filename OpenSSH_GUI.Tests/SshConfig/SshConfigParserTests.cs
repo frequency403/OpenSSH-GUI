@@ -59,10 +59,13 @@ public class SshConfigParserTests
 
         var configurationRoot = sc.Build();
 
-        var ss = configurationRoot.AsEnumerable().Where(e => e.Key.Contains("IdentityFile")).ToArray();
-        
-        var ifs = ss.Select(e => e.Value).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToArray();
-        ifs.ShouldNotBeEmpty();
+        var ss = configurationRoot.GetSection("SshConfig").Get<SshConfiguration>();
+        Assert.NotNull(ss);
+            
+        var ifsCount = ss.Hosts.Where(host => host.IdentityFiles is not null).Sum(host => host.IdentityFiles?.Length);
+        ifsCount.ShouldNotBe(null);
+        if(ifsCount is {  } count)
+            count.ShouldBeGreaterThan(0);
     }
 
     [Fact]
