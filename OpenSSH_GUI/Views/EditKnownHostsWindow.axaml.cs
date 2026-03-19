@@ -8,7 +8,8 @@ namespace OpenSSH_GUI.Views;
 
 public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsWindowViewModel>
 {
-    public EditKnownHostsWindow(ILogger<EditKnownHostsWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
+    public EditKnownHostsWindow(ILogger<EditKnownHostsWindow> logger,
+        [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) : base(logger, icon)
     {
         InitializeComponent();
     }

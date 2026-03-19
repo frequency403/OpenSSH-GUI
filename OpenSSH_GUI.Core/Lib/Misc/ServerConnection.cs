@@ -6,7 +6,6 @@ using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Credentials;
-using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using ReactiveUI;
 using Renci.SshNet;

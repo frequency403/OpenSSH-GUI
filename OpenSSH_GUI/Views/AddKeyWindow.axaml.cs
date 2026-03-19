@@ -10,7 +10,8 @@ namespace OpenSSH_GUI.Views;
 
 public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
 {
-    public AddKeyWindow(ILogger<AddKeyWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
+    public AddKeyWindow(ILogger<AddKeyWindow> logger, [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) :
+        base(logger, icon)
     {
         InitializeComponent();
         this.WhenActivated(_ =>

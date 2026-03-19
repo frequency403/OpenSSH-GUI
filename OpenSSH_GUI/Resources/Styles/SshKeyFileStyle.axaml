@@ -20,17 +20,6 @@
                             <Setter Property="BorderBrush" Value="LightGreen" />
                         </Style>
                     </Border.Styles>
-                    <Border.ContextMenu>
-                        <ContextMenu IsEnabled="{Binding !NeedsPassword}">
-                            <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysShowPassword}"
-                                      Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPassword}"
-                                      CommandParameter="{Binding .}">
-                                <MenuItem.Icon>
-                                    <avalonia:MaterialIcon Kind="KeyArrowRight" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </Border.ContextMenu>
                     <avalonia:MaterialIcon Kind="ShieldLockOpenOutline" Foreground="Green" />
                 </Border>
             </StackPanel>
@@ -126,7 +115,27 @@
                     <ContextMenu>
                         <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"
                                   Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ChangeFilename}"
-                                  CommandParameter="{Binding .}" />
+                                  CommandParameter="{Binding .}">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="FileDocumentEdit" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysForgetPassword}"
+                                  IsVisible="{Binding Password.IsValid}"
+                                  Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ResetKey}"
+                                  CommandParameter="{Binding .}">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="LockReset" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysShowPassword}"
+                                  IsVisible="{Binding Password.IsValid}"
+                                  Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPassword}"
+                                  CommandParameter="{Binding .}">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="KeyArrowRight" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </ContextMenu>
                 </Border.ContextMenu>
                 <Grid ColumnDefinitions="* 3* * *">

@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Avalonia.Threading;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
@@ -22,12 +20,11 @@ using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
-using ReactiveUI.Avalonia;
 using Renci.SshNet;
-using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
 
 namespace OpenSSH_GUI.ViewModels;
+
 [UsedImplicitly]
 public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 {
@@ -35,10 +32,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         .GetCustomAttributes<AssemblyMetadataAttribute>()
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
-    private readonly IDisposable _keyCountObservable;
     private readonly IDialogHost _dialogHost;
-    private readonly IServiceProvider _serviceProvider;
+
+    private readonly IDisposable _keyCountObservable;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
@@ -55,7 +53,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
         _dialogHost = dialogHost;
-        _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount).Subscribe(obs => SetKeyCountIcon(obs.Value));
+        _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount)
+            .Subscribe(obs => SetKeyCountIcon(obs.Value));
 
         DisconnectServer = ReactiveCommand.CreateFromTask(DisconnectFromServerAsync);
         ProvidePassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ProvidePasswordAsync);
@@ -73,10 +72,10 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
         ReloadKeys = ReactiveCommand.CreateFromTask(SshKeyManager.RerunSearchAsync);
         ShowPassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ShowPasswordExportWindow);
+        ResetKey = ReactiveCommand.CreateFromTask<SshKeyFile>(ResetKeyAsync);
         ChangeFilename = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFilenameAsync);
 
-        Version = configuration["RUNNING_VERSION"] ?? "VERSION ERROR";
-        
+        Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
     }
 
     public ReactiveCommand<Unit, Unit> DisconnectServer { get; }
@@ -92,6 +91,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<SshKeyFile, Unit> DeleteKey { get; }
     public ReactiveCommand<Unit, Unit> ReloadKeys { get; }
     public ReactiveCommand<SshKeyFile, Unit> ShowPassword { get; }
+    public ReactiveCommand<SshKeyFile, Unit> ResetKey { get; }
     public ReactiveCommand<SshKeyFile, Unit> ChangeFilename { get; }
 
 
@@ -99,7 +99,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public SshKeyManager SshKeyManager { get; }
 
 
-    public string WindowTitle => string.Format(StringsAndTexts.MainWindowTitle, Version);
+    public string WindowTitle => string.Join("-", Program.AppName, Version);
 
     public string Version
     {
@@ -185,6 +185,19 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = MaterialIconKind.CircleOutline;
 
+    private async Task ResetKeyAsync(SshKeyFile keyFile, CancellationToken token)
+    {
+        try
+        {
+            keyFile.Password.Clear();
+            await keyFile.Load(keyFile.AbsoluteFilePath ?? "");
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Unhandled error during key reset");
+        }
+    }
+
     private async Task ChangeFilenameAsync(SshKeyFile key, CancellationToken token = default)
     {
         var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(new ValidatedInputParams
@@ -202,9 +215,8 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 return SshKeyManager.SshKeys.Any(k => k.FileName == filename) ? "Filename already exists" : null;
             }
         });
-        if(validatedInputResult is { IsConfirmed: true, Value: { Length: > 0} filename })
+        if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
             key.ChangeFilenameOnDisk(filename);
-            
     }
 
     private Task ShowPrivateKeyExportWindow(SshKeyFile key, CancellationToken token = default)
@@ -219,17 +231,18 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             case { NeedsPassword: false, Password.IsValid: true } passwordProtectedKeyFile:
             {
                 keyFile = passwordProtectedKeyFile;
-                if(keyFile is not null)
+                if (keyFile is not null)
                     content = keyFile.ToOpenSshFormat(passwordProtectedKeyFile.Password.GetPasswordString());
                 break;
             }
             default:
             {
-                if(keyFile is not null)
+                if (keyFile is not null)
                     content = keyFile.ToOpenSshFormat();
                 break;
             }
         }
+
         return ShowExportWindow(key, content, null, token);
     }
 
@@ -240,11 +253,18 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         return ShowExportWindow(key, content, null, token);
     }
 
-    private Task ShowPasswordExportWindow(SshKeyFile key, CancellationToken token = default)
+    private async Task ShowPasswordExportWindow(SshKeyFile key, CancellationToken token = default)
     {
-        if(!key.Password.IsValid) return Task.CompletedTask;
-        return ShowExportWindow(key, key.Password.GetPasswordString(),
-            string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath), token);
+        if (!key.Password.IsValid) return;
+        if (await _messageBoxProvider.ShowMessageBoxAsync(new MessageBoxParams
+            {
+                Title = "Are you shure?",
+                Message =
+                    "Are you shure you want to export the password?\r\nThe password can be stored in plain text in the clipboard afterwards",
+                Buttons = MessageBoxButtons.YesNo
+            }) is MessageBoxResult.Yes)
+            await ShowExportWindow(key, key.Password.GetPasswordString(),
+                string.Format(StringsAndTexts.KeysShowPasswordOf, key.AbsoluteFilePath), token);
     }
 
     private async Task ShowExportWindow(SshKeyFile key, string content, string? windowTitle = null,
@@ -361,10 +381,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
         while (key.NeedsPassword && trys < 3)
         {
-            using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
+            using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
+                StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
                 string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
                     Path.GetFileName(key.AbsoluteFilePath)));
-            if(secureInputResult != null && await key.SetPassword(secureInputResult.Value))
+            if (secureInputResult != null && await key.SetPassword(secureInputResult.Value))
                 return;
 
 
@@ -379,13 +400,15 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
 
-    private static MaterialIconKind EvaluateSortIconKind(bool? value) =>
-        value switch
+    private static MaterialIconKind EvaluateSortIconKind(bool? value)
+    {
+        return value switch
         {
             null => MaterialIconKind.CircleOutline,
             true => MaterialIconKind.ChevronDownCircleOutline,
             false => MaterialIconKind.ChevronUpCircleOutline
         };
+    }
 
     private void SetKeyCountIcon(int count)
     {

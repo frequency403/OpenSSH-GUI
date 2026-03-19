@@ -159,7 +159,8 @@ public static class SshHostBlockExtensions
 
                         break;
                 }
-            else if (item is SshConfigEntry otherEntry && settings.OtherEntries is { Length: > 0 } && settings.OtherEntries.Contains(otherEntry) || item is not SshConfigEntry)
+            else if ((item is SshConfigEntry otherEntry && settings.OtherEntries is { Length: > 0 } &&
+                      settings.OtherEntries.Contains(otherEntry)) || item is not SshConfigEntry)
                 newItems.Add(item);
 
         // Add any settings that weren't in the original block

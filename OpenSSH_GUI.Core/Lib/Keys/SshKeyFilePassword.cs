@@ -45,48 +45,6 @@ public sealed class SshKeyFilePassword : INotifyPropertyChanged, IDisposable
     {
     }
 
-    /// <summary>
-    ///     Initializes a new instance with an optional passphrase provided as raw bytes.
-    /// </summary>
-    /// <param name="password">The passphrase bytes, or <c>null</c> to create an empty instance.</param>
-    /// <param name="encoding">Encoding used for byte↔char conversions. Defaults to UTF-8.</param>
-    public SshKeyFilePassword(ReadOnlyMemory<byte>? password = null, Encoding? encoding = null)
-    {
-        if (encoding is not null)
-            _encoding = encoding;
-        if (password is { Length: > 0 } pass)
-            WriteToBuffer(pass.Span);
-    }
-
-    /// <summary>
-    ///     Initializes a new instance from a managed string.
-    /// </summary>
-    /// <param name="password">
-    ///     The passphrase string. Note: the caller-provided <see cref="string" /> is inherently
-    ///     on the managed heap and cannot be wiped. Prefer the <c>ReadOnlyMemory&lt;byte&gt;</c>
-    ///     overload where possible.
-    /// </param>
-    /// <param name="encoding">Encoding used for byte↔char conversions. Defaults to UTF-8.</param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    ///     Thrown when the encoded passphrase exceeds <see cref="MaxPasswordBytes" />.
-    /// </exception>
-    public SshKeyFilePassword(string? password = null, Encoding? encoding = null)
-    {
-        if (string.IsNullOrWhiteSpace(password))
-            return;
-        if (encoding is not null)
-            _encoding = encoding;
-
-        var byteCount = _encoding.GetByteCount(password);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(byteCount, MaxPasswordBytes, nameof(password));
-
-        // Encode into a stack-allocated temp buffer to avoid a heap copy
-        Span<byte> temp = stackalloc byte[byteCount];
-        _encoding.GetBytes(password, temp);
-        WriteToBuffer(temp);
-        CryptographicOperations.ZeroMemory(temp);
-    }
-
     // ── Public API ──────────────────────────────────────────────────────
 
     /// <summary>

@@ -1,7 +1,7 @@
 namespace OpenSSH_GUI.Dialogs.Enums;
 
 /// <summary>
-/// Specifies the icon displayed in a <see cref="MessageBoxDialog"/>.
+///     Specifies the icon displayed in a <see cref="MessageBoxDialog" />.
 /// </summary>
 public enum MessageBoxIcon
 {

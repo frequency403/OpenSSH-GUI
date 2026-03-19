@@ -1,7 +1,7 @@
 namespace OpenSSH_GUI.Dialogs.Enums;
 
 /// <summary>
-/// Defines the set of buttons displayed in a <see cref="MessageBoxDialog"/>.
+///     Defines the set of buttons displayed in a <see cref="MessageBoxDialog" />.
 /// </summary>
 public enum MessageBoxButtons
 {

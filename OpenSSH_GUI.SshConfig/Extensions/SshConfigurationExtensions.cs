@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
-using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Services;
 
 namespace OpenSSH_GUI.SshConfig.Extensions;

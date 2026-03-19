@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
@@ -152,11 +151,9 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     private async ValueTask LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         using var streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
-        if (await streamReader.ReadToEndAsync(cancellationToken) is { } fileContents && !string.IsNullOrWhiteSpace(fileContents))
-        {
-            LoadFileContents(fileContents);
-        }
-        
+        if (await streamReader.ReadToEndAsync(cancellationToken) is { } fileContents &&
+            !string.IsNullOrWhiteSpace(fileContents)) LoadFileContents(fileContents);
+
         if (stream is FileStream fileStream)
         {
             _fileContentsOrPath = fileStream.Name;

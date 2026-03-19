@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI.Avalonia;
@@ -10,6 +9,7 @@ namespace OpenSSH_GUI.Core.Resources.Wrapper;
 public abstract class WindowBase<T> : ReactiveWindow<T> where T : ViewModelBase<T>
 {
     private readonly ILogger<WindowBase<T>> _logger;
+
     protected WindowBase(ILogger<WindowBase<T>> logger, Bitmap icon)
     {
         _logger = logger;

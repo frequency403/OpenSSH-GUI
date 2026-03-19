@@ -4,7 +4,6 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
@@ -22,6 +21,7 @@ namespace OpenSSH_GUI.Core.Services;
 public class SshKeyManager : ReactiveObject
 {
     private const string BackupFileExtension = ".bak";
+
     private static readonly FileStreamOptions FileStreamOptions = new()
     {
         BufferSize = 0,
@@ -47,7 +47,7 @@ public class SshKeyManager : ReactiveObject
         _directoryCrawler = directoryCrawler;
         _serviceProvider = serviceProvider;
 
-        if (!OperatingSystem.IsWindows()) 
+        if (!OperatingSystem.IsWindows())
             FileStreamOptions.UnixCreateMode = (UnixFileMode)Convert.ToInt32("600", 8);
 
         _watcher = new FileSystemWatcher
@@ -71,6 +71,17 @@ public class SshKeyManager : ReactiveObject
     }
 
     private ObservableCollection<SshKeyFile> SshKeysInternal { get; }
+
+    /// <summary>
+    ///     Gets the collection of detected SSH keys.
+    /// </summary>
+    public IReadOnlyCollection<SshKeyFile> SshKeys => SshKeysInternal;
+
+    public int SshKeysCount
+    {
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
 
     /// <summary>
     ///     Changes the format of an existing SSH key.
@@ -178,17 +189,6 @@ public class SshKeyManager : ReactiveObject
     }
 
     /// <summary>
-    ///     Gets the collection of detected SSH keys.
-    /// </summary>
-    public IReadOnlyCollection<SshKeyFile> SshKeys => SshKeysInternal;
-
-    public int SshKeysCount
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    /// <summary>
     ///     Changes the order of the SSH keys in the collection.
     /// </summary>
     /// <param name="orderFunc">Function to reorder the keys.</param>
@@ -279,7 +279,7 @@ public class SshKeyManager : ReactiveObject
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task RerunSearchAsync()
     {
-        if(!await _semaphoreSlim.WaitAsync(100))
+        if (!await _semaphoreSlim.WaitAsync(100))
             throw new InvalidOperationException("Another key operation is in progress");
         if (_searching)
             throw new InvalidOperationException("Can't rerun search while searching");
@@ -288,7 +288,7 @@ public class SshKeyManager : ReactiveObject
             SshKeysInternal.Clear();
             await SearchForKeysAndUpdateCollection();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             _logger.LogError(e, "Unhandled error during key re-search");
         }
@@ -297,14 +297,15 @@ public class SshKeyManager : ReactiveObject
             _semaphoreSlim.Release();
         }
     }
-    
+
     private async Task WatcherOnRenamed(RenamedEventArgs e)
     {
         if (!await _semaphoreSlim.WaitAsync(100))
             return;
         try
         {
-            if(SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is { } oldKey)
+            if (SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is
+                { } oldKey)
                 SshKeyGotDeleted(oldKey, EventArgs.Empty);
             await AddKeyAsync(Path.ChangeExtension(e.FullPath, null));
         }
@@ -410,6 +411,7 @@ public class SshKeyManager : ReactiveObject
 
                 break;
         }
+
         SshKeysCount = SshKeysInternal.Count;
     }
 

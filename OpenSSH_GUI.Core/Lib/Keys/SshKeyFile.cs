@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
@@ -18,108 +17,98 @@ using SshNet.Keygen.SshKeyEncryption;
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
 /// <summary>
-/// Represents an SSH key file used in the OpenSSH GUI application, encapsulating properties
-/// and functionality for managing SSH keys.
+///     Represents an SSH key file used in the OpenSSH GUI application, encapsulating properties
+///     and functionality for managing SSH keys.
 /// </summary>
 public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// A logger instance used for logging events and diagnostic information
-    /// related to the operations and state within the <see cref="SshKeyFile"/> class.
+    ///     A logger instance used for logging events and diagnostic information
+    ///     related to the operations and state within the <see cref="SshKeyFile" /> class.
     /// </summary>
     private readonly ILogger<SshKeyFile> _logger;
 
     /// <summary>
-    /// Manages operations related to transformation and management of SSH key files.
-    /// Provides functionality to change the file format of SSH keys on disk
-    /// and serves as the core service dependency for <see cref="SshKeyFile"/>.
+    ///     Manages operations related to transformation and management of SSH key files.
+    ///     Provides functionality to change the file format of SSH keys on disk
+    ///     and serves as the core service dependency for <see cref="SshKeyFile" />.
     /// </summary>
     private readonly SshKeyManager _sshKeyManager;
 
+    [ObservableAsProperty] private string _comment = string.Empty;
+
     /// <summary>
-    /// Stores the comment associated with the SSH key file.
-    /// This field is primarily used internally for extracting or storing
-    /// metadata related to the SSH key during file operations or processing.
-    /// Default value is an empty string.
+    ///     Stores the comment associated with the SSH key file.
+    ///     This field is primarily used internally for extracting or storing
+    ///     metadata related to the SSH key during file operations or processing.
+    ///     Default value is an empty string.
     /// </summary>
     private string _commentField = string.Empty;
 
-    /// <summary>
-    /// Holds metadata information about the associated SSH key file, such as file path, name,
-    /// format, and available formats for conversion. Provides access to details about the
-    /// primary key file and related files, such as public key files.
-    /// </summary>
-    /// <remarks>
-    /// The source generator creates a public property named <c>KeyFileInfo</c> from this field.
-    /// The name avoids collision with <see cref="System.IO.FileInfo"/>.
-    /// </remarks>
-    [Reactive]
-    private SshKeyFileInformation? _keyFileInfo;
+    [ObservableAsProperty] private string _fingerprint = string.Empty;
 
     /// <summary>
-    /// Stores the fingerprint information of the SSH key.
+    ///     Stores the fingerprint information of the SSH key.
     /// </summary>
     private string _fingerPrintField = string.Empty;
 
+    [ObservableAsProperty] private string _fingerprintString = string.Empty;
+
+    [ObservableAsProperty] private SshKeyHashAlgorithmName _hashAlgorithmName = SshKeyHashAlgorithmName.SHA256;
+
     /// <summary>
-    /// Represents the default hash algorithm name used for calculating SSH key fingerprints.
-    /// This field is initialized to the SHA256 algorithm by default and can be updated
-    /// during key information extraction or other relevant operations. It is used as a fallback
-    /// in cases where the private key's host key algorithm name cannot be determined.
+    ///     Represents the default hash algorithm name used for calculating SSH key fingerprints.
+    ///     This field is initialized to the SHA256 algorithm by default and can be updated
+    ///     during key information extraction or other relevant operations. It is used as a fallback
+    ///     in cases where the private key's host key algorithm name cannot be determined.
     /// </summary>
     private SshKeyHashAlgorithmName _hashAlgorithmNameField = SshKeyHashAlgorithmName.SHA256;
 
+    [ObservableAsProperty] private bool _isInitialized;
+
+    [ObservableAsProperty] private bool _isPuttyKey;
+
     /// <summary>
-    /// Represents the internal field used to store the key type in string representation.
-    /// This field is primarily utilized for parsing and determining the appropriate
-    /// <see cref="SshKeyType"/> when the associated SSH key metadata is loaded or updated.
+    ///     Holds metadata information about the associated SSH key file, such as file path, name,
+    ///     format, and available formats for conversion. Provides access to details about the
+    ///     primary key file and related files, such as public key files.
+    /// </summary>
+    /// <remarks>
+    ///     The source generator creates a public property named <c>KeyFileInfo</c> from this field.
+    ///     The name avoids collision with <see cref="System.IO.FileInfo" />.
+    /// </remarks>
+    [Reactive] private SshKeyFileInformation? _keyFileInfo;
+
+    [ObservableAsProperty] private SshKeyType _keyType = SshKeyType.RSA;
+
+    /// <summary>
+    ///     Represents the internal field used to store the key type in string representation.
+    ///     This field is primarily utilized for parsing and determining the appropriate
+    ///     <see cref="SshKeyType" /> when the associated SSH key metadata is loaded or updated.
     /// </summary>
     private string _keyTypeField = string.Empty;
 
     /// <summary>
-    /// Represents the underlying private key file used to interact with SSH-related
-    /// operations, including authentication and cryptographic functions.
+    ///     Represents the underlying private key file used to interact with SSH-related
+    ///     operations, including authentication and cryptographic functions.
     /// </summary>
     /// <remarks>
-    /// The source generator creates a public property named <c>PrivateKeyFile</c> from this field.
+    ///     The source generator creates a public property named <c>PrivateKeyFile</c> from this field.
     /// </remarks>
-    [Reactive]
-    private PrivateKeyFile? _privateKeyFile;
+    [Reactive] private PrivateKeyFile? _privateKeyFile;
 
     // --- ObservableAsProperty backing fields ---
     // The source generator creates public read-only properties and
     // corresponding _xxxHelper fields from each of these.
 
-    [ObservableAsProperty]
-    private PrivateKeyFile? _privateKeySource;
-
-    [ObservableAsProperty]
-    private string _fingerprint = string.Empty;
-
-    [ObservableAsProperty]
-    private string _fingerprintString = string.Empty;
-
-    [ObservableAsProperty]
-    private string _comment = string.Empty;
-
-    [ObservableAsProperty]
-    private SshKeyType _keyType = SshKeyType.RSA;
-
-    [ObservableAsProperty]
-    private SshKeyHashAlgorithmName _hashAlgorithmName = SshKeyHashAlgorithmName.SHA256;
-
-    [ObservableAsProperty]
-    private bool _isInitialized;
-
-    [ObservableAsProperty]
-    private bool _isPuttyKey;
+    [ObservableAsProperty] private PrivateKeyFile? _privateKeySource;
 
     /// <summary>
-    /// Represents a file-based SSH key with fully encapsulated functionalities for managing,
-    /// manipulating, and interacting with the key. This class provides support for operations
-    /// such as key format conversion, password management, and key metadata retrieval.
-    /// Implements <see cref="ReactiveObject"/> for reactive binding capabilities and
-    /// both <see cref="IDisposable"/> and <see cref="IAsyncDisposable"/> for lifecycle management.
+    ///     Represents a file-based SSH key with fully encapsulated functionalities for managing,
+    ///     manipulating, and interacting with the key. This class provides support for operations
+    ///     such as key format conversion, password management, and key metadata retrieval.
+    ///     Implements <see cref="ReactiveObject" /> for reactive binding capabilities and
+    ///     both <see cref="IDisposable" /> and <see cref="IAsyncDisposable" /> for lifecycle management.
     /// </summary>
     public SshKeyFile(ILogger<SshKeyFile> logger, SshKeyManager sshKeyManager)
     {
@@ -180,20 +169,20 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Provides access to the collection of associated key files for the current SSH key.
-    /// The key files typically include the private and public key files that are associated
-    /// with the key being managed. This property relies on the underlying <see cref="SshKeyFileInformation"/>
-    /// instance to determine and fetch the file information.
-    /// Returns an enumeration of <see cref="FileInfo"/> objects, representing the files associated
-    /// with the SSH key. If no files are linked to the key, an empty enumeration is returned.
+    ///     Provides access to the collection of associated key files for the current SSH key.
+    ///     The key files typically include the private and public key files that are associated
+    ///     with the key being managed. This property relies on the underlying <see cref="SshKeyFileInformation" />
+    ///     instance to determine and fetch the file information.
+    ///     Returns an enumeration of <see cref="FileInfo" /> objects, representing the files associated
+    ///     with the SSH key. If no files are linked to the key, an empty enumeration is returned.
     /// </summary>
     internal IEnumerable<FileInfo> KeyFiles => KeyFileInfo?.Files ?? [];
 
     /// <summary>
-    /// Represents the authorized key associated with an SSH key file.
+    ///     Represents the authorized key associated with an SSH key file.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the SSH key file is not initialized.
+    ///     Thrown when the SSH key file is not initialized.
     /// </exception>
     public AuthorizedKey AuthorizedKey
     {
@@ -206,7 +195,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Indicates whether the associated SSH key file requires a password to access.
+    ///     Indicates whether the associated SSH key file requires a password to access.
     /// </summary>
     public bool NeedsPassword
     {
@@ -215,49 +204,49 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Represents a password container for an SSH key file, encapsulating related
-    /// password properties and operations while supporting password validation.
+    ///     Represents a password container for an SSH key file, encapsulating related
+    ///     password properties and operations while supporting password validation.
     /// </summary>
     public SshKeyFilePassword Password { get; } = new();
 
     /// <summary>
-    /// Gets the absolute file path of the SSH key file.
+    ///     Gets the absolute file path of the SSH key file.
     /// </summary>
     public string? AbsoluteFilePath => KeyFileInfo?.FullName;
 
     /// <summary>
-    /// Gets the name of the SSH key file.
+    ///     Gets the name of the SSH key file.
     /// </summary>
     public string? FileName => KeyFileInfo?.Name;
 
     /// <summary>
-    /// Gets the current format of the SSH key file.
+    ///     Gets the current format of the SSH key file.
     /// </summary>
     public SshKeyFormat? Format => KeyFileInfo?.CurrentFormat;
 
     /// <summary>
-    /// Gets the list of available SSH key formats to which the current key can be converted.
+    ///     Gets the list of available SSH key formats to which the current key can be converted.
     /// </summary>
     public IEnumerable<SshKeyFormat>? AvailableFormatsForConversion => KeyFileInfo?.AvailableFormatsForConversion;
 
     /// <summary>
-    /// Gets the default format to which the key file can be converted.
+    ///     Gets the default format to which the key file can be converted.
     /// </summary>
     public SshKeyFormat? DefaultConversionFormat => KeyFileInfo?.DefaultConversionFormat;
 
     /// <summary>
-    /// A reactive command that allows changing the format of an SSH key file on disk.
+    ///     A reactive command that allows changing the format of an SSH key file on disk.
     /// </summary>
     public ReactiveCommand<SshKeyFormat, Unit> ChangeFormatOfKeyFile { get; }
 
     /// <summary>
-    /// Event triggered when the SSH key file is successfully deleted.
+    ///     Event triggered when the SSH key file is successfully deleted.
     /// </summary>
     public EventHandler? GotDeleted { get; set; } = delegate { };
 
     /// <summary>
-    /// Asynchronously releases the unmanaged resources used by the SshKeyFile instance
-    /// and optionally releases the managed resources.
+    ///     Asynchronously releases the unmanaged resources used by the SshKeyFile instance
+    ///     and optionally releases the managed resources.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
@@ -268,8 +257,8 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Releases the unmanaged resources used by the <see cref="SshKeyFile"/> instance
-    /// and optionally releases the managed resources.
+    ///     Releases the unmanaged resources used by the <see cref="SshKeyFile" /> instance
+    ///     and optionally releases the managed resources.
     /// </summary>
     public void Dispose()
     {
@@ -277,7 +266,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Implicit conversion to the underlying <see cref="Renci.SshNet.PrivateKeyFile"/>.
+    ///     Implicit conversion to the underlying <see cref="Renci.SshNet.PrivateKeyFile" />.
     /// </summary>
     public static implicit operator PrivateKeyFile?(SshKeyFile sshKeyFile)
     {
@@ -285,11 +274,11 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Extracts detailed information about the SSH key file, such as its fingerprint,
-    /// hash algorithm, comment, and key type, using the <c>ssh-keygen</c> command-line tool.
+    ///     Extracts detailed information about the SSH key file, such as its fingerprint,
+    ///     hash algorithm, comment, and key type, using the <c>ssh-keygen</c> command-line tool.
     /// </summary>
     /// <exception cref="FileNotFoundException">
-    /// Thrown if the SSH key file does not exist.
+    ///     Thrown if the SSH key file does not exist.
     /// </exception>
     private async ValueTask ExtractKeyInformation()
     {
@@ -322,12 +311,12 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Loads an SSH key file from the specified file path and initializes it,
-    /// optionally using the provided passphrase for decryption.
+    ///     Loads an SSH key file from the specified file path and initializes it,
+    ///     optionally using the provided passphrase for decryption.
     /// </summary>
     /// <param name="filePath">The full file path of the SSH key file to be loaded.</param>
     /// <param name="passPhrase">
-    /// An optional passphrase for the key file, used to unlock encrypted private keys.
+    ///     An optional passphrase for the key file, used to unlock encrypted private keys.
     /// </param>
     public async ValueTask Load(string filePath, ReadOnlyMemory<byte>? passPhrase = null)
     {
@@ -340,9 +329,9 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
                 ? new PrivateKeyFile(KeyFileInfo.FullName, Password.GetPasswordString())
                 : new PrivateKeyFile(KeyFileInfo.FullName);
         }
-        catch (SshPassPhraseNullOrEmptyException)
+        catch (SshPassPhraseNullOrEmptyException passPhraseNullOrEmptyException)
         {
-            _logger.LogWarning("Missing Password for keyfile {filePath}", filePath);
+            _logger.LogWarning(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}", filePath);
             NeedsPassword = true;
             await ExtractKeyInformation();
         }
@@ -354,7 +343,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Changes the format of the SSH key file on disk to the specified format.
+    ///     Changes the format of the SSH key file on disk to the specified format.
     /// </summary>
     /// <param name="newFormat">The new format to apply to the SSH key file.</param>
     /// <param name="token">A cancellation token to observe while waiting for the operation to complete.</param>
@@ -367,11 +356,11 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Sets the password for the SSH key file by loading the key file using the provided password.
+    ///     Sets the password for the SSH key file by loading the key file using the provided password.
     /// </summary>
     /// <param name="password">A read-only memory block containing the password to initialize the SSH key file.</param>
     /// <returns>
-    /// A boolean value indicating whether the password was successfully set.
+    ///     A boolean value indicating whether the password was successfully set.
     /// </returns>
     public async ValueTask<bool> SetPassword(ReadOnlyMemory<byte> password)
     {
@@ -397,14 +386,14 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Deletes all files associated with this SSH key. If all deletions complete successfully,
-    /// the <see cref="GotDeleted"/> event will be triggered.
+    ///     Deletes all files associated with this SSH key. If all deletions complete successfully,
+    ///     the <see cref="GotDeleted" /> event will be triggered.
     /// </summary>
     /// <returns>
-    /// A boolean indicating whether all files were successfully deleted.
+    ///     A boolean indicating whether all files were successfully deleted.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the SSH key file is not initialized before calling this method.
+    ///     Thrown if the SSH key file is not initialized before calling this method.
     /// </exception>
     public bool Delete()
     {
@@ -429,7 +418,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    /// Changes the filename of the SSH key file on disk to the specified new filename.
+    ///     Changes the filename of the SSH key file on disk to the specified new filename.
     /// </summary>
     /// <param name="newFilename">The new filename to assign to the SSH key file.</param>
     public void ChangeFilenameOnDisk(string newFilename)

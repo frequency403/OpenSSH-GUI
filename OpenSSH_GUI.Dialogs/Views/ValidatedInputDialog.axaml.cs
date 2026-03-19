@@ -1,45 +1,44 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Material.Icons;
 using OpenSSH_GUI.Dialogs.Models;
 
 namespace OpenSSH_GUI.Dialogs.Views;
 
 /// <summary>
-/// A modal text-input dialog that validates the entered value in real-time via
-/// an externally supplied <see cref="Func{T, TResult}"/>.
+///     A modal text-input dialog that validates the entered value in real-time via
+///     an externally supplied <see cref="Func{T, TResult}" />.
 /// </summary>
 /// <remarks>
-/// <para>
-/// The caller provides a <c>Func&lt;string, string?&gt;</c> validator.  It receives the
-/// current input text and should return:
-/// <list type="bullet">
-///   <item><c>null</c> – input is valid.</item>
-///   <item>A non-empty <see cref="string"/> – the error message to display.</item>
-/// </list>
-/// The validator is evaluated on every keystroke so the user gets instant feedback.
-/// The OK button is only enabled when the validator returns <c>null</c>.
-/// </para>
+///     <para>
+///         The caller provides a <c>Func&lt;string, string?&gt;</c> validator.  It receives the
+///         current input text and should return:
+///         <list type="bullet">
+///             <item><c>null</c> – input is valid.</item>
+///             <item>A non-empty <see cref="string" /> – the error message to display.</item>
+///         </list>
+///         The validator is evaluated on every keystroke so the user gets instant feedback.
+///         The OK button is only enabled when the validator returns <c>null</c>.
+///     </para>
 /// </remarks>
 public partial class ValidatedInputDialog : Window
 {
     private readonly Func<string, string?> _validator;
 
     /// <summary>
-    /// Initialises a new <see cref="ValidatedInputDialog"/>.
+    ///     Initialises a new <see cref="ValidatedInputDialog" />.
     /// </summary>
     /// <param name="title">The window title bar text.</param>
     /// <param name="prompt">Descriptive label shown above the input field.</param>
     /// <param name="validator">
-    /// A function that receives the current input text and returns <c>null</c> when
-    /// the value is valid, throws an <see cref="Exception"/> or returns an error message string otherwise.
+    ///     A function that receives the current input text and returns <c>null</c> when
+    ///     the value is valid, throws an <see cref="Exception" /> or returns an error message string otherwise.
     /// </param>
     /// <param name="initialValue">
-    /// Optional pre-filled value for the input field. Defaults to <see cref="string.Empty"/>.
+    ///     Optional pre-filled value for the input field. Defaults to <see cref="string.Empty" />.
     /// </param>
     /// <param name="watermark">
-    /// Optional placeholder text shown when the input is empty.
+    ///     Optional placeholder text shown when the input is empty.
     /// </param>
     public ValidatedInputDialog(
         string title,
@@ -66,7 +65,7 @@ public partial class ValidatedInputDialog : Window
     }
 
     /// <summary>
-    /// Initialises a new <see cref="ValidatedInputDialog"/> with the provided <see cref="ValidatedInputParams"/>.
+    ///     Initialises a new <see cref="ValidatedInputDialog" /> with the provided <see cref="ValidatedInputParams" />.
     /// </summary>
     /// <param name="params">The parameters for the validated text-input prompt.</param>
     public ValidatedInputDialog(ValidatedInputParams @params)
@@ -109,11 +108,14 @@ public partial class ValidatedInputDialog : Window
     //  Validation
     // -------------------------------------------------------------------------
 
-    private void OnInputTextChanged(object? sender, TextChangedEventArgs e) => Validate();
+    private void OnInputTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        Validate();
+    }
 
     /// <summary>
-    /// Runs the external validator against the current input and updates the
-    /// error label and OK button state accordingly.
+    ///     Runs the external validator against the current input and updates the
+    ///     error label and OK button state accordingly.
     /// </summary>
     private void Validate()
     {
@@ -153,10 +155,15 @@ public partial class ValidatedInputDialog : Window
         }
     }
 
-    private void OnOkClick(object? sender, RoutedEventArgs e) => TryConfirm();
+    private void OnOkClick(object? sender, RoutedEventArgs e)
+    {
+        TryConfirm();
+    }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
-        => Close(new ValidatedInputResult(null));
+    {
+        Close(new ValidatedInputResult(null));
+    }
 
     // -------------------------------------------------------------------------
     //  Private helpers

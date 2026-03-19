@@ -13,7 +13,8 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost, 
 {
     private readonly ILogger<MainWindow> _logger;
 
-    public MainWindow(ILogger<MainWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
+    public MainWindow(ILogger<MainWindow> logger, [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) :
+        base(logger, icon)
     {
         _logger = logger;
         InitializeComponent();

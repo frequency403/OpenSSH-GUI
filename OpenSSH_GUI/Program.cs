@@ -1,18 +1,15 @@
 ﻿#if!DEBUG
 using Serilog.Events;
 #endif
-using System.Reactive.Concurrency;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Dialogs;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -35,11 +32,17 @@ using Serilog.Events;
 using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
+
 [UsedImplicitly]
 internal sealed class Program
 {
     private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
     private const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
+    private const string IconUri = "avares://OpenSSH_GUI/Assets/appicon.ico";
+
+    public const string AppName = "OpenSSH GUI";
+    public const string VersionEnvVar = "RUNNING_VERSION";
+    public const string IconServiceKey = "AppIcon";
 
     private static string GetHostVersion()
     {
@@ -60,7 +63,7 @@ internal sealed class Program
             .UseSerilog()
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
-        
+
         await host.StartAsync(mainCancellationTokenSource.Token);
         var appBuilder = AppBuilder.Configure(() => host.Services.GetRequiredService<App>())
             .UsePlatformDetect()
@@ -80,11 +83,10 @@ internal sealed class Program
     private static void ConfigureAppConfiguration(HostBuilderContext builderContext,
         IConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.AddSshConfig(SshConfigFiles.Config.GetPathOfFile(), true, true);
-        configurationBuilder.AddSshConfig(SshConfigFiles.Sshd_Config.GetPathOfFile(), true, true);
-
+        configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true);
+        configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true);
         configurationBuilder.AddInMemoryCollection([
-            new KeyValuePair<string, string?>("RUNNING_VERSION", GetHostVersion())
+            new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
         ]);
     }
 
@@ -115,8 +117,7 @@ internal sealed class Program
             .CreateLogger();
         // AddServices
         collection.AddLogging(e => e.AddSerilog());
-        collection.AddKeyedSingleton<Bitmap>("AppIcon",
-            (_, _) => new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
+        collection.AddKeyedSingleton<Bitmap>(IconServiceKey, (_, _) => new Bitmap(AssetLoader.Open(new Uri(IconUri))));
         collection.AddSingleton<ServerConnectionService>();
         collection.AddTransient<SshKeyFile>();
         collection.AddSingleton<DirectoryCrawler>();

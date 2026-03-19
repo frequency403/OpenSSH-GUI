@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\OpenSSH_GUI.Dialogs\OpenSSH_GUI.Dialogs.csproj" />
+        <ProjectReference Include="..\OpenSSH_GUI.Dialogs\OpenSSH_GUI.Dialogs.csproj"/>
         <ProjectReference Include="..\OpenSSH_GUI.SshConfig\OpenSSH_GUI.SshConfig.csproj"/>
     </ItemGroup>
 </Project>

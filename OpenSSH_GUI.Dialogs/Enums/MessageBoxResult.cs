@@ -1,7 +1,7 @@
 namespace OpenSSH_GUI.Dialogs.Enums;
 
 /// <summary>
-/// Represents the button that the user clicked to close a <see cref="MessageBoxDialog"/>.
+///     Represents the button that the user clicked to close a <see cref="MessageBoxDialog" />.
 /// </summary>
 public enum MessageBoxResult
 {

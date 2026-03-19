@@ -93,51 +93,9 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string ConfirmDialogDefaultNoText {
-            get {
-                return ResourceManager.GetString("ConfirmDialogDefaultNoText", resourceCulture);
-            }
-        }
-        
-        public static string ConfirmDialogDefaultOkText {
-            get {
-                return ResourceManager.GetString("ConfirmDialogDefaultOkText", resourceCulture);
-            }
-        }
-        
-        public static string ConfirmDialogDefaultQuestionText {
-            get {
-                return ResourceManager.GetString("ConfirmDialogDefaultQuestionText", resourceCulture);
-            }
-        }
-        
         public static string EditKnownHostsWindowConfirmButtonToolTipText {
             get {
                 return ResourceManager.GetString("EditKnownHostsWindowConfirmButtonToolTipText", resourceCulture);
-            }
-        }
-        
-        public static string EditKnownHostsWindowDataGridColumnHeaderFingerprintText {
-            get {
-                return ResourceManager.GetString("EditKnownHostsWindowDataGridColumnHeaderFingerprintText", resourceCulture);
-            }
-        }
-        
-        public static string EditKnownHostsWindowDataGridColumnHeaderKeySizeText {
-            get {
-                return ResourceManager.GetString("EditKnownHostsWindowDataGridColumnHeaderKeySizeText", resourceCulture);
-            }
-        }
-        
-        public static string EditKnownHostsWindowDataGridColumnHeaderKeyTypeText {
-            get {
-                return ResourceManager.GetString("EditKnownHostsWindowDataGridColumnHeaderKeyTypeText", resourceCulture);
-            }
-        }
-        
-        public static string EditKnownHostsWindowDataGridColumnHeaderOptionsText {
-            get {
-                return ResourceManager.GetString("EditKnownHostsWindowDataGridColumnHeaderOptionsText", resourceCulture);
             }
         }
         
@@ -150,12 +108,6 @@ namespace OpenSSH_GUI.Resources {
         public static string EditKnownHostsWindowMarkForDeletionButtonToolTipText {
             get {
                 return ResourceManager.GetString("EditKnownHostsWindowMarkForDeletionButtonToolTipText", resourceCulture);
-            }
-        }
-        
-        public static string EditKnownHostsWindowReloadButtonToolTipText {
-            get {
-                return ResourceManager.GetString("EditKnownHostsWindowReloadButtonToolTipText", resourceCulture);
             }
         }
         
@@ -207,12 +159,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowDataGridColumnHeadingKeySizeText {
-            get {
-                return ResourceManager.GetString("MainWindowDataGridColumnHeadingKeySizeText", resourceCulture);
-            }
-        }
-        
         public static string MainWindowDataGridColumnHeadingKeyTypeText {
             get {
                 return ResourceManager.GetString("MainWindowDataGridColumnHeadingKeyTypeText", resourceCulture);
@@ -249,12 +195,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowDataGridRowDetailsPrivateKeyFilenameText {
-            get {
-                return ResourceManager.GetString("MainWindowDataGridRowDetailsPrivateKeyFilenameText", resourceCulture);
-            }
-        }
-        
         public static string MainWindowEditKnownHostsFileToolTip {
             get {
                 return ResourceManager.GetString("MainWindowEditKnownHostsFileToolTip", resourceCulture);
@@ -270,18 +210,6 @@ namespace OpenSSH_GUI.Resources {
         public static string MainWindowFoundKeyPairsCountLabelPart2 {
             get {
                 return ResourceManager.GetString("MainWindowFoundKeyPairsCountLabelPart2", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowTitle {
-            get {
-                return ResourceManager.GetString("MainWindowTitle", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowViewModelDeleteKeyQuestionText {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelDeleteKeyQuestionText", resourceCulture);
             }
         }
         
@@ -303,36 +231,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowViewModelProblemLoadingFileText {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelProblemLoadingFileText", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsDescription {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsDescription", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsMaxServers {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsMaxServers", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsAutoConvertText {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsAutoConvertText", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsSavedServers {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsSavedServers", resourceCulture);
-            }
-        }
-        
         public static string CancelAndClose {
             get {
                 return ResourceManager.GetString("CancelAndClose", resourceCulture);
@@ -342,12 +240,6 @@ namespace OpenSSH_GUI.Resources {
         public static string SaveAndClose {
             get {
                 return ResourceManager.GetString("SaveAndClose", resourceCulture);
-            }
-        }
-        
-        public static string ConnectWindowQuickConnect {
-            get {
-                return ResourceManager.GetString("ConnectWindowQuickConnect", resourceCulture);
             }
         }
         
@@ -447,12 +339,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string AddKeyWindowDefault {
-            get {
-                return ResourceManager.GetString("AddKeyWindowDefault", resourceCulture);
-            }
-        }
-        
         public static string MainWindowConvertTooltip {
             get {
                 return ResourceManager.GetString("MainWindowConvertTooltip", resourceCulture);
@@ -462,30 +348,6 @@ namespace OpenSSH_GUI.Resources {
         public static string ConnectToServerDescription {
             get {
                 return ResourceManager.GetString("ConnectToServerDescription", resourceCulture);
-            }
-        }
-        
-        public static string ErrorAction {
-            get {
-                return ResourceManager.GetString("ErrorAction", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowConvertKeyMessageBoxTitle {
-            get {
-                return ResourceManager.GetString("MainWindowConvertKeyMessageBoxTitle", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowConvertKeyMessageBoxText {
-            get {
-                return ResourceManager.GetString("MainWindowConvertKeyMessageBoxText", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowConvertKeyMessageBoxErrorText {
-            get {
-                return ResourceManager.GetString("MainWindowConvertKeyMessageBoxErrorText", resourceCulture);
             }
         }
         
@@ -522,18 +384,6 @@ namespace OpenSSH_GUI.Resources {
         public static string NotImplementedBoxText {
             get {
                 return ResourceManager.GetString("NotImplementedBoxText", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsEditErrorBoxTitle {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsEditErrorBoxTitle", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsEditErrorBoxText {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsEditErrorBoxText", resourceCulture);
             }
         }
         
@@ -651,12 +501,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords {
-            get {
-                return ResourceManager.GetString("MainWindowSettingsMenuReloadKeysFromDiskAndForgetPasswords", resourceCulture);
-            }
-        }
-        
         public static string KeysShowPassword {
             get {
                 return ResourceManager.GetString("KeysShowPassword", resourceCulture);
@@ -687,12 +531,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowViewModelProvidePasswordPasswordLabel {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelProvidePasswordPasswordLabel", resourceCulture);
-            }
-        }
-        
         public static string MainWindowViewModelProvidePasswordErrorHeading {
             get {
                 return ResourceManager.GetString("MainWindowViewModelProvidePasswordErrorHeading", resourceCulture);
@@ -705,27 +543,15 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowViewModelProvidePasswordButtonAbort {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelProvidePasswordButtonAbort", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowViewModelProvidePasswordButtonSubmit {
-            get {
-                return ResourceManager.GetString("MainWindowViewModelProvidePasswordButtonSubmit", resourceCulture);
-            }
-        }
-        
-        public static string Version {
-            get {
-                return ResourceManager.GetString("Version", resourceCulture);
-            }
-        }
-        
         public static string MainWindowViewModelChangeFilename {
             get {
                 return ResourceManager.GetString("MainWindowViewModelChangeFilename", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowTitle {
+            get {
+                return ResourceManager.GetString("MainWindowTitle", resourceCulture);
             }
         }
     }

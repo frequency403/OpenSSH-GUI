@@ -60,7 +60,8 @@ public static partial class StringExtensions
         /// </example>
         public string Wrap(int maxLength, string? wrapper = null)
         {
-            return string.Join(wrapper ?? Environment.NewLine, EcapeRegex().Replace(input, "").SplitToChunks(maxLength));
+            return string.Join(wrapper ?? Environment.NewLine,
+                EcapeRegex().Replace(input, "").SplitToChunks(maxLength));
         }
 
         /// <summary>
@@ -224,7 +225,8 @@ public static partial class StringExtensions
         public string ToStudlyCaps()
         {
             var random = new Random();
-            return input.Aggregate("", (current, t) => current + (random.Next(2) == 0 ? char.ToUpper(t) : char.ToLower(t)));
+            return input.Aggregate("",
+                (current, t) => current + (random.Next(2) == 0 ? char.ToUpper(t) : char.ToLower(t)));
         }
 
         /// <summary>

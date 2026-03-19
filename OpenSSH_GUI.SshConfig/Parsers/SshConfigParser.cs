@@ -1,7 +1,6 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Diagnostics;
-
 using OpenSSH_GUI.SshConfig.Exceptions;
 using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Options;
@@ -431,7 +430,6 @@ public static class SshConfigParser
                         && !path.StartsWith("~\\", StringComparison.Ordinal)) return path;
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         return path.Length == 1 ? home : Path.Combine(home, path[2..]);
-
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,4 @@
-﻿using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
-using SshNet.Keygen;
+﻿using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 
@@ -25,9 +24,6 @@ public record AuthorizedKey
         Fingerprint = split[1];
         Comment = split[2];
     }
-    
-    internal static AuthorizedKey Parse(string keyEntry) 
-        => new(keyEntry);
 
     /// <summary>
     ///     Represents the key type declaration in the authorized key file.
@@ -66,4 +62,9 @@ public record AuthorizedKey
     /// </remarks>
     /// <returns>The full key entry string.</returns>
     public string GetFullKeyEntry => $"{KeyTypeDeclarationInFile} {Fingerprint} {Comment}";
+
+    internal static AuthorizedKey Parse(string keyEntry)
+    {
+        return new AuthorizedKey(keyEntry);
+    }
 }

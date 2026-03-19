@@ -2,7 +2,6 @@ using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Options;
 using OpenSSH_GUI.SshConfig.Parsers;
-using OpenSSH_GUI.SshConfig.Serializers;
 
 namespace OpenSSH_GUI.SshConfig.Services;
 

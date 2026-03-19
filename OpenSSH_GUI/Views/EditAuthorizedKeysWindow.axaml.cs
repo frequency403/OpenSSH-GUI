@@ -8,7 +8,8 @@ namespace OpenSSH_GUI.Views;
 
 public partial class EditAuthorizedKeysWindow : WindowBase<EditAuthorizedKeysViewModel>
 {
-    public EditAuthorizedKeysWindow(ILogger<EditAuthorizedKeysWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
+    public EditAuthorizedKeysWindow(ILogger<EditAuthorizedKeysWindow> logger,
+        [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) : base(logger, icon)
     {
         InitializeComponent();
     }

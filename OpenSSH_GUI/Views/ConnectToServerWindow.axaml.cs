@@ -8,7 +8,8 @@ namespace OpenSSH_GUI.Views;
 
 public partial class ConnectToServerWindow : WindowBase<ConnectToServerViewModel>
 {
-    public ConnectToServerWindow(ILogger<ConnectToServerWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
+    public ConnectToServerWindow(ILogger<ConnectToServerWindow> logger,
+        [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) : base(logger, icon)
     {
         InitializeComponent();
     }

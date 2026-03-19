@@ -8,7 +8,9 @@ namespace OpenSSH_GUI.ViewModels;
 public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboardService? clipboardService)
     : ViewModelBase<ExportWindowViewModel>(logger)
 {
-    public ExportWindowViewModel() : this(NullLogger<ExportWindowViewModel>.Instance, null) { }
+    public ExportWindowViewModel() : this(NullLogger<ExportWindowViewModel>.Instance, null)
+    {
+    }
 
     public string WindowTitle { get; private set; } = "";
     public string Export { get; private set; } = "";

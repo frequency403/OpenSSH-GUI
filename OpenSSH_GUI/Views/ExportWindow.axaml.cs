@@ -8,7 +8,8 @@ namespace OpenSSH_GUI.Views;
 
 public partial class ExportWindow : WindowBase<ExportWindowViewModel>
 {
-    public ExportWindow(ILogger<ExportWindow> logger, [FromKeyedServices("AppIcon")] Bitmap icon) : base(logger, icon)
+    public ExportWindow(ILogger<ExportWindow> logger, [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) :
+        base(logger, icon)
     {
         InitializeComponent();
     }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Enums;
@@ -17,12 +16,17 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel>? logger, SshKeyManager? sshKeyManager, IMessageBoxProvider? messageBoxProvider)
+public sealed class AddKeyWindowViewModel(
+    ILogger<AddKeyWindowViewModel>? logger,
+    SshKeyManager? sshKeyManager,
+    IMessageBoxProvider? messageBoxProvider)
     : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
     private readonly ILogger<AddKeyWindowViewModel> _logger = logger ?? NullLogger<AddKeyWindowViewModel>.Instance;
 
-    public AddKeyWindowViewModel() : this(null, null, null) { }
+    public AddKeyWindowViewModel() : this(null, null, null)
+    {
+    }
 
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
@@ -125,7 +129,8 @@ public sealed class AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel>? logger
         catch (Exception e)
         {
             Logger.LogError(e, "Error creating key");
-            await messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+            await messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message, MessageBoxButtons.Ok,
+                MessageBoxIcon.Error);
         }
     }
 

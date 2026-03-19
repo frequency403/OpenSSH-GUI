@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Dialogs.Models;
@@ -8,8 +7,8 @@ using OpenSSH_GUI.Dialogs.Views;
 namespace OpenSSH_GUI.Dialogs.Services;
 
 /// <summary>
-/// Provides static factory methods for showing application dialogs.
-/// All methods must be called from the UI thread.
+///     Provides static factory methods for showing application dialogs.
+///     All methods must be called from the UI thread.
 /// </summary>
 public class MessageBoxProvider(Window owner) : IMessageBoxProvider
 {
@@ -58,7 +57,7 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         var dialog = new SecureInputDialog(@params);
         return await dialog.ShowDialog<SecureInputResult?>(owner);
     }
-    
+
     /// <inheritdoc />
     public async Task<ValidatedInputResult?> ShowValidatedInputAsync(
         string title,

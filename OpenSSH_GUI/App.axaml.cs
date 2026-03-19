@@ -20,7 +20,8 @@ public class App(ILogger<App> logger, IServiceProvider serviceProvider) : Applic
         if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         desktop.MainWindow = serviceProvider.GetRequiredKeyedService<MainWindow>("MainWindow");
         logger.LogInformation("MainWindow created");
-        desktop.MainWindow.DataContext = serviceProvider.GetRequiredKeyedService<MainWindowViewModel>("MainWindowViewModel");
+        desktop.MainWindow.DataContext =
+            serviceProvider.GetRequiredKeyedService<MainWindowViewModel>("MainWindowViewModel");
         logger.LogInformation("MainWindowViewModel set");
     }
 }

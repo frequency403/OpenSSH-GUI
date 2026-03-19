@@ -9,13 +9,13 @@ public class ExceptionHandler(ILogger<ExceptionHandler> logger) : IObserver<Exce
 {
     public void OnCompleted()
     {
-        if (Debugger.IsAttached) 
+        if (Debugger.IsAttached)
             Debugger.Break();
     }
 
     public void OnError(Exception error)
     {
-        if (Debugger.IsAttached) 
+        if (Debugger.IsAttached)
             Debugger.Break();
         logger.LogError(error, "Unhandled Exception:");
         AvaloniaScheduler.Instance.Schedule(error, HandleException);
@@ -23,7 +23,7 @@ public class ExceptionHandler(ILogger<ExceptionHandler> logger) : IObserver<Exce
 
     public void OnNext(Exception value)
     {
-        if (Debugger.IsAttached) 
+        if (Debugger.IsAttached)
             Debugger.Break();
         logger.LogError(value, "Unhandled Exception:");
         AvaloniaScheduler.Instance.Schedule(value, HandleException);

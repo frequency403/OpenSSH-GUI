@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
+
 [UsedImplicitly]
 public class EditKnownHostsWindowViewModel(
     ILogger<EditKnownHostsWindowViewModel> logger,
@@ -43,7 +43,8 @@ public class EditKnownHostsWindowViewModel(
         await KnownHostsFileLocal.UpdateFileAsync();
         if (!serverConnectionService.IsConnected) return;
         ArgumentNullException.ThrowIfNull(KnownHostsFileRemote);
-        await serverConnectionService.ServerConnection.WriteKnownHostsToServerAsync(KnownHostsFileRemote, cancellationToken);
+        await serverConnectionService.ServerConnection.WriteKnownHostsToServerAsync(KnownHostsFileRemote,
+            cancellationToken);
     }
 
     public override async ValueTask InitializeAsync(

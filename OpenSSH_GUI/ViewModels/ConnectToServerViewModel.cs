@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Media;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
@@ -31,7 +30,9 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         ResetCommand = ReactiveCommand.Create(Reset);
     }
 
-    public ConnectToServerViewModel() : this(null, null, null, null) { }
+    public ConnectToServerViewModel() : this(null, null, null, null)
+    {
+    }
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }

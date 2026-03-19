@@ -1,5 +1,4 @@
 using System.Text;
-
 using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Options;
 

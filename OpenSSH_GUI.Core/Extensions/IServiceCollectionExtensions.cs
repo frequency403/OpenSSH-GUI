@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
