@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.SshConfig.Exceptions;
@@ -5,6 +8,7 @@ using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Options;
 using OpenSSH_GUI.SshConfig.Parsers;
+using OpenSSH_GUI.SshConfig.Services;
 using Shouldly;
 using Xunit;
 
@@ -12,6 +16,11 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigParserTests
 {
+    private IFileProvider GetEmbeddedFileProvider()
+    {
+        return new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
+    }
+    
     private string GetEmbeddedResource(string fileName)
     {
         var assembly = typeof(SshConfigParserTests).Assembly;
@@ -40,6 +49,20 @@ public class SshConfigParserTests
         var hostStar = allHosts.FirstOrDefault(b => b.Patterns.Contains("*"));
         hostStar.ShouldNotBeNull();
         hostStar.GetEntries().ShouldContain(e => e.Key == "ConnectTimeout" && e.Value == "20");
+    }
+
+    [Fact]
+    public void Parse_PersonalConfig_Into_Config_DependencyInjection()
+    {
+        var sc = new ConfigurationBuilder();
+        sc.AddSshConfig(GetEmbeddedFileProvider(), "ssh_config_personal", false, true);
+
+        var configurationRoot = sc.Build();
+
+        var ss = configurationRoot.AsEnumerable().Where(e => e.Key.Contains("IdentityFile")).ToArray();
+        
+        var ifs = ss.Select(e => e.Value).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToArray();
+        ifs.ShouldNotBeEmpty();
     }
 
     [Fact]
