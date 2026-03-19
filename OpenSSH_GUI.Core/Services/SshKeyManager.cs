@@ -277,15 +277,25 @@ public class SshKeyManager : ReactiveObject
     ///     Triggers a re-search for SSH keys on the disk.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task RerunSearchAsync()
+    public async Task RerunSearchAsync()
     {
+        if(!await _semaphoreSlim.WaitAsync(100))
+            throw new InvalidOperationException("Another key operation is in progress");
         if (_searching)
             throw new InvalidOperationException("Can't rerun search while searching");
-        SshKeysInternal.Clear();
-        return SearchForKeysAndUpdateCollection()
-            .ContinueWith(t =>
-                    _logger.LogError(t.Exception, "Unhandled error during key re-search"),
-                TaskContinuationOptions.OnlyOnFaulted);
+        try
+        {
+            SshKeysInternal.Clear();
+            await SearchForKeysAndUpdateCollection();
+        }
+        catch(Exception e)
+        {
+            _logger.LogError(e, "Unhandled error during key re-search");
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
     
     private async Task WatcherOnRenamed(RenamedEventArgs e)
@@ -294,7 +304,7 @@ public class SshKeyManager : ReactiveObject
             return;
         try
         {
-            if(SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == e.OldFullPath) is { } oldKey)
+            if(SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is { } oldKey)
                 SshKeyGotDeleted(oldKey, EventArgs.Empty);
             await AddKeyAsync(Path.ChangeExtension(e.FullPath, null));
         }
