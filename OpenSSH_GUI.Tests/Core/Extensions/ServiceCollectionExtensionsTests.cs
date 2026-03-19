@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
@@ -20,8 +21,11 @@ public class ServiceCollectionExtensionsTests
         var provider = services.BuildServiceProvider();
 
         // Assert
-        Assert.NotNull(provider.GetKeyedService<MockWindow>("MockWindow"));
-        Assert.NotNull(provider.GetKeyedService<MockWindowViewModel>("MockWindowViewModel"));
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            Assert.NotNull(provider.GetKeyedService<MockWindow>("MockWindow"));
+            Assert.NotNull(provider.GetKeyedService<MockWindowViewModel>("MockWindowViewModel"));
+        });
     }
 
     [Fact]
@@ -46,9 +50,12 @@ public class ServiceCollectionExtensionsTests
         var provider = services.BuildServiceProvider();
 
         // Assert
-        var w1 = provider.GetKeyedService<MockWindow>("MockWindow");
-        var w2 = provider.GetKeyedService<MockWindow>("MockWindow");
-        Assert.Same(w1, w2);
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            var w1 = provider.GetKeyedService<MockWindow>("MockWindow");
+            var w2 = provider.GetKeyedService<MockWindow>("MockWindow");
+            Assert.Same(w1, w2);
+        });
     }
 
     private class MockWindow : Window
