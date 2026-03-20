@@ -15,6 +15,19 @@ public static partial class StringExtensions
     extension(string input)
     {
         /// <summary>
+        ///     Resolves a absolute path from a relative path which can contain <c>~</c> or <c>~user</c> or <c>%AppData%</c> or <c>%UserProfile%</c> etc.
+        /// </summary>
+        public string ResolvePath()
+        {
+            var path = input;
+            path = Environment.ExpandEnvironmentVariables(path);
+            if (!path.StartsWith('~')) return Path.GetFullPath(path);
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            path = path.Length == 1 ? home : Path.Combine(home, path[2..]);
+            return Path.GetFullPath(path);
+        }
+        
+        /// <summary>
         ///     Wraps the input string to the specified maximum length, optionally enclosing each chunk in a specified character.
         /// </summary>
         /// <param name="maxLength">The maximum length of each wrapped chunk.</param>

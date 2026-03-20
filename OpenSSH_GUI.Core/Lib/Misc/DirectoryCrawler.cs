@@ -31,8 +31,18 @@ public class DirectoryCrawler(
 
             try
             {
-                if(configuration.GetSection("SshConfig").Get<SshConfiguration>() is { Global: { IdentityFiles: { } identityFiles }})
-                    possibleKeyFiles.AddRange(identityFiles);
+                if (configuration.GetSection("SshConfig").Get<SshConfiguration>() is { } sshConfig)
+                {
+                    foreach (var hostSetting in sshConfig.Hosts.Concat(sshConfig.Blocks).Append(sshConfig.Global))
+                    {
+                        if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
+                        foreach (var hostIdentityFile in hostIdentityFiles.Select(path => path.ResolvePath()))
+                        {
+                            if(!possibleKeyFiles.Any(e => e.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) && File.Exists(hostIdentityFile))
+                                possibleKeyFiles.Add(hostIdentityFile);
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {

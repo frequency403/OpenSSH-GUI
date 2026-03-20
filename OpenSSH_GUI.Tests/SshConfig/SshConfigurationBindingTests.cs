@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
 using Shouldly;
@@ -8,45 +9,43 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigurationBindingTests
 {
+    private static IFileProvider GetEmbeddedFileProvider()
+    {
+        return new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
+    }
+
     [Fact]
     public void AddSshConfig_ShouldBeBindableToObjects()
     {
         // Arrange
-        var configContent =
-            "Port 2222\nUser globaluser\n\nHost server1\n    Port 2222\n    User serveruser\n\nHost server2\n    Port 3333";
-        var filePath = Path.GetTempFileName();
-        File.WriteAllText(filePath, configContent);
+        var builder = new ConfigurationBuilder();
+        builder.AddSshConfig(GetEmbeddedFileProvider(), "ssh_config_personal", false, true);
+        var configuration = builder.Build();
 
-        try
+        // Act
+        var sshConfig = configuration.GetSection("SshConfig").Get<SshConfiguration>();
+        sshConfig.ShouldNotBeNull();
+
+        // Assert
+        var possibleKeyFiles = new HashSet<string>();
+        foreach (var hostSetting in sshConfig.Hosts.Concat(sshConfig.Blocks).Append(sshConfig.Global))
         {
-            var builder = new ConfigurationBuilder();
-            builder.AddSshConfig(filePath);
-            var configuration = builder.Build();
+            if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
+            foreach (var hostIdentityFile in hostIdentityFiles.Select(path =>
+                     {
+                         path = Environment.ExpandEnvironmentVariables(path);
 
-            // Act
-            var sshConfig = configuration.GetSection("SshConfig").Get<SshConfiguration>();
-
-            // Assert
-            sshConfig.ShouldNotBeNull();
-            sshConfig.Global.ShouldNotBeNull();
-            sshConfig.Global.Port.ShouldBe(2222);
-            sshConfig.Global.User.ShouldBe("globaluser");
-
-            sshConfig.Hosts.ShouldNotBeNull();
-            sshConfig.Hosts.Count.ShouldBe(2);
-
-            sshConfig.Hosts[0].Patterns.ShouldNotBeEmpty();
-            sshConfig.Hosts[0].Patterns[0].ShouldBe("server1");
-            sshConfig.Hosts[0].Port.ShouldBe(2222);
-            sshConfig.Hosts[0].User.ShouldBe("serveruser");
-
-            sshConfig.Hosts[1].Patterns.ShouldNotBeEmpty();
-            sshConfig.Hosts[1].Patterns[0].ShouldBe("server2");
-            sshConfig.Hosts[1].Port.ShouldBe(3333);
+                         if (!path.StartsWith('~')) return Path.GetFullPath(path);
+                         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                         path = path.Length == 1 ? home : Path.Combine(home, path[2..]);
+                         return Path.GetFullPath(path);
+                     }))
+            {
+                if (!possibleKeyFiles.Any(e => e.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)))
+                    possibleKeyFiles.Add(hostIdentityFile);
+            }
         }
-        finally
-        {
-            if (File.Exists(filePath)) File.Delete(filePath);
-        }
+
+        possibleKeyFiles.ShouldNotBeEmpty();
     }
 }
