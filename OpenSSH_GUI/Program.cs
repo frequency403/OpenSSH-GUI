@@ -4,8 +4,10 @@ using Serilog.Events;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,7 +66,6 @@ internal sealed class Program
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
 
-        await host.StartAsync(mainCancellationTokenSource.Token);
         var appBuilder = AppBuilder.Configure(() => host.Services.GetRequiredService<App>())
             .UsePlatformDetect()
             .WithInterFont()
@@ -74,8 +75,9 @@ internal sealed class Program
                 configure.WithAvalonia();
                 configure.WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
             });
+        
+        await host.StartAsync(mainCancellationTokenSource.Token);
         appBuilder.StartWithClassicDesktopLifetime(args);
-
         await host.StopAsync(mainCancellationTokenSource.Token);
     }
 #pragma warning restore CA1416
@@ -139,6 +141,9 @@ internal sealed class Program
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
         collection.AddTransient<IClipboardService, ClipboardService>();
         collection.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
+        collection.AddTransient<IClipboard>(sp => sp.GetRequiredService<Window>().Clipboard);
+        collection.AddTransient<IStorageProvider>(sp => sp.GetRequiredService<Window>().StorageProvider);
+        collection.AddTransient<ILauncher>(sp => sp.GetRequiredService<Window>().Launcher);
         collection.AddHostedService<FileSystemAnalyzer>();
 
         collection.AddKeyedSingleton(ConfigFile,

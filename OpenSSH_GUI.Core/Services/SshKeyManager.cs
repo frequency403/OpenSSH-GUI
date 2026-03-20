@@ -63,12 +63,14 @@ public class SshKeyManager : ReactiveObject
 
         SshKeysInternal = [];
         SshKeysInternal.CollectionChanged += SshKeysOnCollectionChanged;
-
-        _ = SearchForKeysAndUpdateCollection()
-            .ContinueWith(t =>
-                    _logger.LogError(t.Exception, "Unhandled error during initial key search"),
-                TaskContinuationOptions.OnlyOnFaulted);
     }
+    
+    /// <summary>
+    ///     Performs the initial SSH key search on disk.
+    ///     Must be called after the DI container is fully built.
+    /// </summary>
+    public Task InitialSearchAsync(CancellationToken token = default)
+        => SearchForKeysAndUpdateCollection();
 
     private ObservableCollection<SshKeyFile> SshKeysInternal { get; }
 
@@ -419,13 +421,17 @@ public class SshKeyManager : ReactiveObject
     {
         try
         {
-            return _serviceProvider.GetService<SshKeyFile>();
+            if (_serviceProvider.GetService<SshKeyFile>() is { } keyFile)
+            {
+                keyFile.AttachChangeFormatHandler(ChangeFormatOfKeyAsync);
+                return keyFile;
+            }
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error resolving generic SshKeyFile");
-            return null;
         }
+        return null;
     }
 
     private async Task AddKeyAsync(string fullFilePath)

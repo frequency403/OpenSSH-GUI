@@ -102,7 +102,19 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     // corresponding _xxxHelper fields from each of these.
 
     [ObservableAsProperty] private PrivateKeyFile? _privateKeySource;
+    
+    internal void AttachChangeFormatHandler(Func<SshKeyFile, SshKeyFormat, CancellationToken, Task> handler)
+    {
+        changeFormatHandler = handler;
+    }
 
+    private Func<SshKeyFile, SshKeyFormat, CancellationToken, Task>? changeFormatHandler;
+
+    private Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token)
+    {
+        return changeFormatHandler is not null ? changeFormatHandler(this, newFormat, token) : Task.CompletedTask;
+    }
+    
     /// <summary>
     ///     Represents a file-based SSH key with fully encapsulated functionalities for managing,
     ///     manipulating, and interacting with the key. This class provides support for operations
@@ -115,7 +127,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
         _sshKeyManager = sshKeyManager;
         _logger = logger;
         ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
-
+        
         // Wire up all computed ObservableAsPropertyHelper properties.
 
         _privateKeySourceHelper = this.WhenAnyValue(x => x.PrivateKeyFile)
@@ -343,19 +355,6 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    ///     Changes the format of the SSH key file on disk to the specified format.
-    /// </summary>
-    /// <param name="newFormat">The new format to apply to the SSH key file.</param>
-    /// <param name="token">A cancellation token to observe while waiting for the operation to complete.</param>
-    private Task ChangeFormatOnDisk(SshKeyFormat newFormat, CancellationToken token = default)
-    {
-        if (!IsInitialized) throw new InvalidOperationException("Not initialized.");
-        _logger.LogInformation("Changing format of keyfile {filePath} to {newFormat}",
-            KeyFileInfo!.FullName, newFormat);
-        return _sshKeyManager.ChangeFormatOfKeyAsync(this, newFormat, token);
-    }
-
-    /// <summary>
     ///     Sets the password for the SSH key file by loading the key file using the provided password.
     /// </summary>
     /// <param name="password">A read-only memory block containing the password to initialize the SSH key file.</param>
@@ -412,7 +411,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
                 allSucceeded = false;
             }
 
-        if (allSucceeded)
+        if (allSucceeded && GotDeleted is not null)
             GotDeleted(this, EventArgs.Empty);
         return allSucceeded;
     }

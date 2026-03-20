@@ -12,7 +12,6 @@
         x:DataType="viewModels:EditKnownHostsWindowViewModel"
         Width="800"
         Height="600"
-
         x:Name="EditKnownHosts"
         Title="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowTitle}">
     <Window.Styles>

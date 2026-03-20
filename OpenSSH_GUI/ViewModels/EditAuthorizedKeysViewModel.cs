@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -11,6 +12,7 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
+[UsedImplicitly]
 public class EditAuthorizedKeysViewModel(
     ILogger<EditAuthorizedKeysViewModel> logger,
     SshKeyManager sshKeyManager,

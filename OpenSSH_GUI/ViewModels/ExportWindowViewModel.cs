@@ -1,17 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.MVVM;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboardService? clipboardService)
-    : ViewModelBase<ExportWindowViewModel>(logger)
+[UsedImplicitly]
+public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboardService clipboardService) : ViewModelBase<ExportWindowViewModel>(logger)
 {
-    public ExportWindowViewModel() : this(NullLogger<ExportWindowViewModel>.Instance, null)
-    {
-    }
-
     public string WindowTitle { get; private set; } = "";
     public string Export { get; private set; } = "";
 

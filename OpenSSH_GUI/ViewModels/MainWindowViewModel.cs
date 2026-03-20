@@ -2,6 +2,8 @@
 using System.Reactive;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using JetBrains.Annotations;
 using Material.Icons;
@@ -36,6 +38,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private readonly IDisposable _keyCountObservable;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly ILauncher _launcher;
     private readonly IServiceProvider _serviceProvider;
 
     public MainWindowViewModel(
@@ -45,6 +48,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         IServiceProvider serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
+        ILauncher launcher,
         IDialogHost dialogHost) : base(logger)
     {
         SshKeyManager = sshKeyManager;
@@ -52,6 +56,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         ServerConnectionService = serverConnectionService;
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
+        _launcher = launcher;
         _dialogHost = dialogHost;
         _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount)
             .Subscribe(obs => SetKeyCountIcon(obs.Value));
@@ -294,41 +299,15 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             StringsAndTexts.NotImplementedBoxText, MessageBoxButtons.Ok, MessageBoxIcon.Information);
     }
 
-    private static async Task OpenBrowserAsync(int commandTypeParameter, CancellationToken cancellationToken = default)
+    private async Task OpenBrowserAsync(int commandTypeParameter, CancellationToken cancellationToken = default)
     {
-        var url = commandTypeParameter switch
-        {
-            1 => string.Join("/", ProjectUrl, "issues"),
-            2 => string.Join("#", ProjectUrl, "authors"),
-            _ => ProjectUrl
-        };
-
-
-        var processStartInfo = new ProcessStartInfo
-        {
-            Arguments = url
-        };
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            processStartInfo.FileName = "cmd";
-            processStartInfo.Arguments = string.Empty;
-            processStartInfo.ArgumentList.Add("/c");
-            processStartInfo.ArgumentList.Add("start");
-            processStartInfo.ArgumentList.Add(url?.Replace("&", "^&") ?? string.Empty);
-            processStartInfo.CreateNoWindow = true;
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            processStartInfo.FileName = "open";
-        }
-        else
-        {
-            processStartInfo.FileName = "xdg-open";
-        }
-
-        if (Process.Start(processStartInfo) is { } process)
-            await process.WaitForExitAsync(cancellationToken);
+        if (commandTypeParameter switch
+            {
+                1 => string.Join("/", ProjectUrl, "issues"),
+                2 => string.Join("#", ProjectUrl, "authors"),
+                _ => ProjectUrl
+            } is { Length: > 0 } url)
+            await _launcher.LaunchUriAsync(new Uri(HtmlEncoder.Default.Encode(url)));
     }
 
 

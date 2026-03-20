@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 
@@ -23,5 +24,12 @@ public class App(ILogger<App> logger, IServiceProvider serviceProvider) : Applic
         desktop.MainWindow.DataContext =
             serviceProvider.GetRequiredKeyedService<MainWindowViewModel>("MainWindowViewModel");
         logger.LogInformation("MainWindowViewModel set");
+        
+        _ = serviceProvider
+            .GetRequiredService<SshKeyManager>()
+            .InitialSearchAsync()
+            .ContinueWith(
+                t => logger.LogError(t.Exception, "Initial key search failed"),
+                TaskContinuationOptions.OnlyOnFaulted);
     }
 }

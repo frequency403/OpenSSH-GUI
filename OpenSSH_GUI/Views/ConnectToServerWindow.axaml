@@ -31,9 +31,6 @@
             </Style.Animations>
         </Style>
     </Window.Styles>
-    <Design.DataContext>
-        <viewModels:ConnectToServerViewModel />
-    </Design.DataContext>
     <Grid RowDefinitions="* * * * *" ColumnDefinitions="* * *" Margin="5">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold"
                    Text="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}" HorizontalAlignment="Center" />

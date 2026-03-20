@@ -1,5 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
@@ -9,6 +11,7 @@ using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 
+[UsedImplicitly]
 public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost, IClipboardHost
 {
     private readonly ILogger<MainWindow> _logger;

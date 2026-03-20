@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
@@ -16,18 +17,13 @@ using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.ViewModels;
 
+[UsedImplicitly]
 public sealed class AddKeyWindowViewModel(
-    ILogger<AddKeyWindowViewModel>? logger,
-    SshKeyManager? sshKeyManager,
-    IMessageBoxProvider? messageBoxProvider)
+    ILogger<AddKeyWindowViewModel> logger,
+    SshKeyManager sshKeyManager,
+    IMessageBoxProvider messageBoxProvider)
     : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
 {
-    private readonly ILogger<AddKeyWindowViewModel> _logger = logger ?? NullLogger<AddKeyWindowViewModel>.Instance;
-
-    public AddKeyWindowViewModel() : this(null, null, null)
-    {
-    }
-
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
@@ -50,7 +46,7 @@ public sealed class AddKeyWindowViewModel(
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error setting key type");
+                Logger.LogError(e, "Error setting key type");
             }
         }
     }
@@ -74,7 +70,7 @@ public sealed class AddKeyWindowViewModel(
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error setting avaliable key sizes");
+                Logger.LogError(e, "Error setting avaliable key sizes");
             }
         }
     } = [];

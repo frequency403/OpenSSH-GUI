@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using Avalonia.Media;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
@@ -12,14 +13,15 @@ using ReactiveUI;
 
 namespace OpenSSH_GUI.ViewModels;
 
+[UsedImplicitly]
 public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
     private readonly IMessageBoxProvider? _messageBoxProvider;
 
-    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel>? logger,
-        ServerConnectionService? serverConnectionService,
-        IMessageBoxProvider? messageBoxProvider,
-        SshKeyManager? sshKeyManager) : base(logger)
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger,
+        ServerConnectionService serverConnectionService,
+        IMessageBoxProvider messageBoxProvider,
+        SshKeyManager sshKeyManager) : base(logger)
     {
         _messageBoxProvider = messageBoxProvider;
         ServerConnectionService = serverConnectionService;
@@ -28,10 +30,6 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
         UploadButtonEnabled = !TryingToConnect && ServerConnectionService.IsConnected;
         TestConnection = ReactiveCommand.CreateFromTask(TestConnectionAsync);
         ResetCommand = ReactiveCommand.Create(Reset);
-    }
-
-    public ConnectToServerViewModel() : this(null, null, null, null)
-    {
     }
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
