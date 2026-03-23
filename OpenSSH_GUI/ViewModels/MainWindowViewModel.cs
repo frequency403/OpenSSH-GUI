@@ -316,7 +316,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         {
             try
             {
-                await ServerConnectionService.CloseConnection(cancellationToken);
+                await ServerConnectionService.CloseConnection(true, cancellationToken);
             }
             catch (Exception exception)
             {

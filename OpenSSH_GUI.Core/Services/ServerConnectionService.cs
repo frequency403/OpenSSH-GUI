@@ -2,7 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.Misc;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.SshConfig.Models;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Services;
@@ -75,6 +77,7 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     /// <summary>
     ///     Closes the current connection to the server, if a connection exists.
     /// </summary>
+    /// <param name="throwOnNoConnection">Indicates whether to throw an exception if no connection exists.</param>
     /// <param name="token">
     ///     A <see cref="CancellationToken" /> used to cancel the operation if necessary.
     /// </param>
@@ -84,9 +87,10 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     <see langword="false" />.
     ///     Throws <see cref="InvalidOperationException" /> if there is no active connection.
     /// </returns>
-    public async ValueTask<bool> CloseConnection(CancellationToken token = default)
+    public async ValueTask<bool> CloseConnection(bool throwOnNoConnection = true, CancellationToken token = default)
     {
-        if (!IsConnected) throw new InvalidOperationException("No connection to disconnect from");
+        if (!IsConnected) 
+            return throwOnNoConnection ? throw new InvalidOperationException("No connection to disconnect from") : true;
         var disconnectResult = await ServerConnection.DisconnectFromServerAsync(token);
         if (disconnectResult)
             ServerConnection = null;
