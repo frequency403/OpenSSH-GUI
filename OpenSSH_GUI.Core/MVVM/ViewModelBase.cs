@@ -64,8 +64,11 @@ public abstract class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = nu
 /// Serves as an abstract base class for view models, providing shared properties, commands,
 /// and behaviors for managing the interaction between the view and the application logic.
 /// </summary>
-public abstract partial class ViewModelBase : ReactiveObject
+public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyncDisposable
 {
+    private readonly IDisposable _booleanSubmitSubscription;
+    private readonly IDisposable _thrownExceptionsSubscription;
+    
     /// <summary>
     /// Represents an event handler used to signal close requests for the view model.
     /// This private field can be invoked internally to notify subscribers of the close event.
@@ -88,9 +91,9 @@ public abstract partial class ViewModelBase : ReactiveObject
     protected ViewModelBase(ILogger? logger)
     {
         Logger = logger ?? NullLogger.Instance;
-        ThrownExceptions.Subscribe(exception => Logger.LogError(exception, "Viewmodel threw an exception"));
+        _thrownExceptionsSubscription = ThrownExceptions.Subscribe(exception => Logger.LogError(exception, "Viewmodel threw an exception"));
         BooleanSubmit = ReactiveCommand.CreateFromTask<bool>(OnBooleanSubmitAsync);
-        BooleanSubmit.Subscribe(_ =>
+        _booleanSubmitSubscription = BooleanSubmit.Subscribe(_ =>
         {
             if (CloseOnBooleanSubmit)
                 RequestClose();
@@ -156,6 +159,22 @@ public abstract partial class ViewModelBase : ReactiveObject
     protected virtual Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public virtual void Dispose()
+    {
+        _booleanSubmitSubscription.Dispose();
+        _thrownExceptionsSubscription.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <inheritdoc />
+    public virtual ValueTask DisposeAsync()
+    {
+        Dispose();
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
     }
 }
 

@@ -7,6 +7,7 @@ using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
 using ReactiveUI.Validation.Extensions;
@@ -17,127 +18,118 @@ using SshNet.Keygen.SshKeyEncryption;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public sealed class AddKeyWindowViewModel(
-    ILogger<AddKeyWindowViewModel> logger,
-    SshKeyManager sshKeyManager,
-    IMessageBoxProvider messageBoxProvider)
-    : ViewModelBase<AddKeyWindowViewModel>(logger), IValidatableViewModel
+public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
 {
+    private readonly SshKeyManager _sshKeyManager;
+    private readonly IMessageBoxProvider _messageBoxProvider;
+
+    public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
+        SshKeyManager sshKeyManager,
+        IMessageBoxProvider messageBoxProvider) : base(logger)
+    {
+        _sshKeyManager = sshKeyManager;
+        _messageBoxProvider = messageBoxProvider;
+        
+        _keyTypeSubscription = this.WhenAnyValue(x => x.SelectedKeyType)
+            .Subscribe(type =>
+            {
+                try
+                {
+                    KeyName = $"id_{Enum.GetName(type)!.ToLower()}";
+
+                    var ordered = type.SupportedKeySizes.OrderDescending().ToList();
+                    AvaliableKeySizes = ordered;
+                    SelectedKeySize   = ordered.First();
+                    CanChangeKeySize = ordered.Count > 1;
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "Error reacting to key type change");
+                }
+            });
+
+        KeyNameValidationHelper = this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError);
+        SelectedKeyType = SshKeyTypes.First();
+    }
+
+    private static bool IsPropertyValid(string? arg)
+    {
+        if(string.IsNullOrWhiteSpace(arg)) return false;
+        return !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), arg));
+    }
+
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
-    public ValidationHelper KeyNameValidationHelper
-    {
-        get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new(new ValidationContext());
+    private readonly IDisposable _keyTypeSubscription;
 
-    public SshKeyType SelectedKeyType
-    {
-        get;
-        set
-        {
-            try
-            {
-                this.RaiseAndSetIfChanged(ref field, value);
-                KeyName = $"id_{Enum.GetName(value)!.ToLower()}";
-                AvaliableKeySizes = value.SupportedKeySizes;
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "Error setting key type");
-            }
-        }
-    }
+    [Reactive]
+    private SshKeyType _selectedKeyType;
 
-    public bool CanChangeKeySize
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    [Reactive]
+    private IEnumerable<int> _avaliableKeySizes = [];
 
-    public IEnumerable<int> AvaliableKeySizes
-    {
-        get;
-        set
-        {
-            try
-            {
-                this.RaiseAndSetIfChanged(ref field, value.OrderDescending());
-                CanChangeKeySize = value.Count() > 1;
-                SelectedKeySize = value.OrderDescending().First();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "Error setting avaliable key sizes");
-            }
-        }
-    } = [];
+    [Reactive]
+    private int _selectedKeySize;
 
-    public int SelectedKeySize
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    [Reactive]
+    private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
 
-
-    public SshKeyFormat KeyFormat
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = SshKeyFormat.OpenSSH;
-
-
-    public string KeyName
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "id_rsa";
-
+    [Reactive]
+    private string _keyName = "id_rsa";
+    
+    [Reactive]
+    private bool _canChangeKeySize;
+    
     public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
     public string Password { get; set; } = "";
+    public ValidationHelper KeyNameValidationHelper { get; }
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
-
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+    
+    /// <inheritdoc />
+    protected override async Task OnBooleanSubmitAsync(
+        bool inputParameter,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(sshKeyManager);
+        ArgumentNullException.ThrowIfNull(_sshKeyManager);
         if (!inputParameter) return;
 
         var fullNewFilePath = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), KeyName);
         if (File.Exists(fullNewFilePath)) return;
+
         try
         {
             var genParm = new SshKeyGenerateInfo(SelectedKeyType)
             {
                 KeyFormat = KeyFormat
             };
+
             if (!string.IsNullOrWhiteSpace(Password))
-                genParm.Encryption = new SshKeyEncryptionAes256(Password, Aes256Mode.CBC,
+                genParm.Encryption = new SshKeyEncryptionAes256(
+                    Password,
+                    Aes256Mode.CBC,
                     genParm.KeyFormat is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null);
+
             if (!string.IsNullOrWhiteSpace(Comment))
                 genParm.Comment = Comment;
 
-            await sshKeyManager.GenerateNewKey(fullNewFilePath, genParm);
+            await _sshKeyManager.GenerateNewKey(fullNewFilePath, genParm);
         }
         catch (Exception e)
         {
             Logger.LogError(e, "Error creating key");
-            await messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message, MessageBoxButtons.Ok,
+            await _messageBoxProvider.ShowMessageBoxAsync(
+                StringsAndTexts.Error,
+                e.Message,
+                MessageBoxButtons.Ok,
                 MessageBoxIcon.Error);
         }
     }
 
-    public override ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    public override void Dispose()
     {
-        KeyNameValidationHelper = this.ValidationRule(
-            e => e.KeyName,
-            name => name is not null && !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), name)),
-            StringsAndTexts.AddKeyWindowFilenameError
-        );
-        AvaliableKeySizes = SelectedKeyType.SupportedKeySizes;
-        SelectedKeyType = SshKeyTypes.First();
-        return base.InitializeAsync(cancellationToken);
+        _keyTypeSubscription.Dispose();
+        base.Dispose();
     }
 }

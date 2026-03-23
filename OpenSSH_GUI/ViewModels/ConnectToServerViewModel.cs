@@ -87,11 +87,6 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
     public SshKeyManager SshKeyManager { get; }
-    
-
-    private bool ValidData => SelectedPublicKey is null
-        ? HostName != "" && Username != "" && Password != ""
-        : HostName != "" && Username != "";
 
     public bool EnablePreConfiguredHosts => SshHostSettings.Any();
     [Reactive] private SshHostSettings? _selectedHostSettings;
@@ -202,7 +197,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
         try
         {
-            if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
+            if(string.IsNullOrWhiteSpace(HostName) || string.IsNullOrWhiteSpace(Username) || (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
+                throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
             TryingToConnect = true;
             IConnectionCredentials? connectionCredentials = null;
             if (AuthWithPublicKey)
@@ -260,5 +256,13 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         AuthWithAllKeys = false;
         AuthWithPublicKey = false;
         ConnectionCredentials = null;
+    }
+
+    public override void Dispose()
+    {
+        _hostSettingsSubscription.Dispose();
+        _keyComboBoxEnabledSubscription.Dispose();
+        _connectionCredentialsSubscription.Dispose();
+        base.Dispose();
     }
 }

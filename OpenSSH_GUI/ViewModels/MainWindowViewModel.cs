@@ -415,4 +415,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             };
         }, DispatcherPriority.MaxValue);
     }
+
+    public override void Dispose()
+    {
+        _keyCountObservable.Dispose();
+        GC.SuppressFinalize(this);
+        base.Dispose();
+    }
 }
