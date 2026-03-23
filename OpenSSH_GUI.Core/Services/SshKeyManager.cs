@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Text;
+using DryIoc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
@@ -33,7 +34,7 @@ public class SshKeyManager : ReactiveObject
     private readonly DirectoryCrawler _directoryCrawler;
     private readonly ILogger<SshKeyManager> _logger;
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IResolver _resolver;
     private readonly FileSystemWatcher _watcher;
 
     private volatile bool _searching;
@@ -41,11 +42,11 @@ public class SshKeyManager : ReactiveObject
     public SshKeyManager(
         ILogger<SshKeyManager> logger,
         DirectoryCrawler directoryCrawler,
-        IServiceProvider serviceProvider)
+        IResolver resolver)
     {
         _logger = logger;
         _directoryCrawler = directoryCrawler;
-        _serviceProvider = serviceProvider;
+        _resolver = resolver;
 
         if (!OperatingSystem.IsWindows())
             FileStreamOptions.UnixCreateMode = (UnixFileMode)Convert.ToInt32("600", 8);
@@ -421,7 +422,7 @@ public class SshKeyManager : ReactiveObject
     {
         try
         {
-            if (_serviceProvider.GetService<SshKeyFile>() is { } keyFile)
+            if (_resolver.GetService<SshKeyFile>() is { } keyFile)
             {
                 keyFile.AttachChangeFormatHandler(ChangeFormatOfKeyAsync);
                 return keyFile;
