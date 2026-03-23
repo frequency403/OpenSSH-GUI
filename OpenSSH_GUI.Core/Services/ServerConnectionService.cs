@@ -1,10 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Misc;
-using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
-using OpenSSH_GUI.SshConfig.Models;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Services;
@@ -34,7 +31,7 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     to retrieve or update the instance of the server connection. Setting this property
     ///     raises an internal change notification.
     /// </remarks>
-    public IServerConnection? ServerConnection
+    public ServerConnection? ServerConnection
     {
         get;
         set

@@ -1,9 +1,7 @@
 ﻿using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -12,7 +10,7 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
-public class ServerConnection : ReactiveObject, IServerConnection
+public class ServerConnection : ReactiveObject, IDisposable
 {
     private SshClient _sshClient;
 
@@ -124,7 +122,7 @@ public class ServerConnection : ReactiveObject, IServerConnection
         return command.ExitStatus == 0;
     }
 
-    public async ValueTask<IAuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default)
+    public async ValueTask<AuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default)
     {
         if (!IsConnected)
             throw new InvalidOperationException("No connection to get authorized keys from");
@@ -136,7 +134,7 @@ public class ServerConnection : ReactiveObject, IServerConnection
         return await AuthorizedKeysFile.ParseAsync(command.OutputStream, token);
     }
 
-    public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(IAuthorizedKeysFile authorizedKeysFile,
+    public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFile authorizedKeysFile,
         CancellationToken token = default)
     {
         if (!IsConnected) return false;

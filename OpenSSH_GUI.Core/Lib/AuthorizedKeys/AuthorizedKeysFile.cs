@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Keys;
 using ReactiveUI;
 
@@ -10,7 +9,7 @@ namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 /// <summary>
 ///     Represents an Authorized Keys file.
 /// </summary>
-public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
+public class AuthorizedKeysFile : ReactiveObject
 {
     /// <summary>
     ///     The contents of the authorized keys file or the path to the file.
@@ -23,7 +22,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     private AuthorizedKeysFile()
     {
     }
-
+    
     /// <summary>
     ///     Gets a value indicating whether the file is from a server.
     /// </summary>
@@ -38,6 +37,18 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
+    public bool CanAddKey(SshKeyFile key)
+    {
+        try
+        {
+            return !AuthorizedKeys.Any(e => e.Equals(key.AuthorizedKey));
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+    
     /// <summary>
     ///     Adds an authorized key to the authorized keys file.
     /// </summary>
@@ -66,7 +77,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     Persists the changes made to the authorized keys file.
     /// </summary>
     /// <returns>The modified <see cref="IAuthorizedKeysFile" /> object.</returns>
-    public async ValueTask<IAuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
+    public async ValueTask<AuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
     {
         if (IsFileFromServer) return this;
         await using var file = new FileStream(_fileContentsOrPath, FileMode.Truncate);
@@ -123,8 +134,10 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
                 (s, key) => s +=
                     $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
     }
+    
+    public static AuthorizedKeysFile Empty { get; } = new();
 
-    public static async ValueTask<IAuthorizedKeysFile> OpenAsync(string? filePath = null,
+    public static async ValueTask<AuthorizedKeysFile> OpenAsync(string? filePath = null,
         CancellationToken cancellationToken = default)
     {
         filePath ??= SshConfigFiles.Authorized_Keys.GetPathOfFile();
@@ -135,7 +148,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
         return await ParseAsync(fileStream, cancellationToken);
     }
 
-    public static async ValueTask<IAuthorizedKeysFile> ParseAsync(Stream stream,
+    public static async ValueTask<AuthorizedKeysFile> ParseAsync(Stream stream,
         CancellationToken cancellationToken = default)
     {
         var authorizedKeyFile = new AuthorizedKeysFile();

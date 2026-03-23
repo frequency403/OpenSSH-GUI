@@ -68,9 +68,6 @@ public static class DependencyInjectionExtensions
 
             container.Register<IMessageBoxProvider, MessageBoxProvider>(Reuse.Transient);
             container.Register<SshKeyFile>(Reuse.Transient);
-
-            // container.RegisterInstance(SshConfigFileService.LoadFromFile(Program.ConfigFile.GetPathOfFile()), serviceKey: Program.ConfigFile);
-            // container.RegisterInstance(SshConfigFileService.LoadFromFile(Program.SshdConfig.GetPathOfFile()), serviceKey: Program.SshdConfig);
         }
     }
 

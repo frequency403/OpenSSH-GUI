@@ -56,7 +56,7 @@ public class EditKnownHostsWindowViewModel(
             KnownHostsFileRemote =
                 await serverConnectionService.ServerConnection.GetKnownHostsFromServerAsync(cancellationToken);
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
-        KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
+        KnownHostsRemote = serverConnectionService.IsConnected ? new ObservableCollection<IKnownHost>(KnownHostsFileRemote!.KnownHosts.OrderBy(e => e.Host)) : [];
         await base.InitializeAsync(cancellationToken);
     }
 }

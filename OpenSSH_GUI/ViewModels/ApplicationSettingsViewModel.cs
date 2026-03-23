@@ -82,7 +82,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
         LogFiles.Clear();
         foreach (var logFile in Directory.EnumerateFiles(logConfiguration.LogFilePath, "*.log", SearchOption.TopDirectoryOnly))
         {
-            var extractedDate = Path.ChangeExtension(Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty), null);
+            var extractedDate = Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty)[..8];
             if(DateOnly.TryParseExact(extractedDate, "yyyyMMdd", out var dateTime) && DateTime.Now.Subtract(dateTime.ToDateTime(TimeOnly.MinValue)) > TimeSpan.FromDays(obj))
                 LogFiles.Add(logFile);
         }

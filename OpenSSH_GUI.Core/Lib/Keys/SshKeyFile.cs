@@ -193,9 +193,9 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     {
         get
         {
-            if (!IsInitialized)
-                throw new InvalidOperationException("Not initialized.");
-            return AuthorizedKey.Parse(PrivateKeyFile!.ToOpenSshPublicFormat());
+            if(PrivateKeyFile is { } privateKeyFile)
+                return AuthorizedKey.Parse(privateKeyFile.ToOpenSshPublicFormat());
+            throw new InvalidOperationException("SshKeyFile not initialized.");
         }
     }
 
@@ -278,14 +278,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
         return sshKeyFile.PrivateKeyFile;
     }
 
-    /// <summary>
-    ///     Extracts detailed information about the SSH key file, such as its fingerprint,
-    ///     hash algorithm, comment, and key type, using the <c>ssh-keygen</c> command-line tool.
-    /// </summary>
-    /// <exception cref="FileNotFoundException">
-    ///     Thrown if the SSH key file does not exist.
-    /// </exception>
-    private async ValueTask ExtractKeyInformation()
+    private Process? BuildInformationProcess()
     {
         if (KeyFileInfo is not { Exists: true })
             throw new FileNotFoundException();
@@ -298,10 +291,40 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
             UseShellExecute = false,
             RedirectStandardOutput = true
         };
+        return Process.Start(processInformation);
+    }
 
-        if (Process.Start(processInformation) is { } process)
+    private string? GetPublicKeyInfo()
+    {
+        string? publicKeyInfo = null;
+        if (BuildInformationProcess() is not { } process) return publicKeyInfo;
+        publicKeyInfo = process.StandardOutput.ReadToEnd();
+        return publicKeyInfo;
+    }
+
+    private async ValueTask<string?> GetPublicKeyInfoAsync()
+    {
+        string? publicKeyInfo = null;
+        if (BuildInformationProcess() is not { } process) return publicKeyInfo;
+        publicKeyInfo = await process.StandardOutput.ReadToEndAsync();
+        return publicKeyInfo;
+    }
+    
+    /// <summary>
+    ///     Extracts detailed information about the SSH key file, such as its fingerprint,
+    ///     hash algorithm, comment, and key type, using the <c>ssh-keygen</c> command-line tool.
+    /// </summary>
+    /// <exception cref="FileNotFoundException">
+    ///     Thrown if the SSH key file does not exist.
+    /// </exception>
+    private async ValueTask ExtractKeyInformation()
+    {
+        if (KeyFileInfo is not { Exists: true })
+            throw new FileNotFoundException();
+
+        if (await GetPublicKeyInfoAsync() is { } publicKeyInfo)
         {
-            var splitted = (await process.StandardOutput.ReadToEndAsync()).TrimEnd('\r', '\n').Split(' ',
+            var splitted = publicKeyInfo.TrimEnd('\r', '\n').Split(' ',
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             var pingerprintSplit = splitted[1].Split(':');
 

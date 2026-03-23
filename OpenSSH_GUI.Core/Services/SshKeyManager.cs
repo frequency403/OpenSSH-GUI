@@ -19,7 +19,7 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
-public class SshKeyManager : ReactiveObject
+public class SshKeyManager : ReactiveObject, IDisposable
 {
     private const string BackupFileExtension = ".bak";
 
@@ -486,5 +486,16 @@ public class SshKeyManager : ReactiveObject
         {
             _logger.LogWarning(e, "Could not delete temporary file '{path}'", path);
         }
+    }
+
+    public void Dispose()
+    {
+        _watcher.Dispose();
+        _semaphoreSlim.Dispose();
+        foreach (var sshKeyFile in SshKeys)
+        {
+            sshKeyFile.Dispose();
+        }
+        GC.SuppressFinalize(this);
     }
 }
