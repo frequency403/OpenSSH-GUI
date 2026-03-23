@@ -26,6 +26,7 @@
         <PackageReference Include="Material.Icons.Avalonia" Version="3.0.0"/>
         <PackageReference Include="ReactiveUI" Version="23.1.8"/>
         <PackageReference Include="ReactiveUI.Validation" Version="7.0.5"/>
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
         <PackageReference Include="System.Reactive" Version="6.1.0"/>
     </ItemGroup>
 

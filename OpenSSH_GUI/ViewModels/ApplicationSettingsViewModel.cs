@@ -1,0 +1,104 @@
+using System.Collections.ObjectModel;
+using System.Reactive;
+using System.Reactive.Linq;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Dialogs.Interfaces;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+
+namespace OpenSSH_GUI.ViewModels;
+
+[UsedImplicitly]
+public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
+{
+    private readonly ILogger<ApplicationSettingsViewModel> _logger;
+    private readonly LoggingLevelSwitch _levelSwitch;
+    public static LogEventLevel[] AvailableLogLevels { get; }= Enum.GetValues<LogEventLevel>();
+    public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
+    private readonly IDisposable _levelSwitchSubscription;
+    private readonly IDisposable _daysToDeleteSubscription;
+    
+    [Reactive]
+    private LogEventLevel _currentLogLevel;
+    
+    [Reactive]
+    private int _daysToDeleteSelected;
+    
+    public ObservableCollection<string> LogFiles { get; } = [];
+    
+    [ObservableAsProperty] 
+    private bool _canDeleteOldLogFiles;
+    
+    public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, IMessageBoxProvider messageBoxProvider, LoggingLevelSwitch levelSwitch)
+    {
+        _logger = logger;
+        _levelSwitch = levelSwitch;
+        CurrentLogLevel = levelSwitch.MinimumLevel;
+        _levelSwitchSubscription = this.WhenAnyValue(model => model.CurrentLogLevel)
+            .DistinctUntilChanged()
+            .Subscribe(OnNext);
+        
+        _daysToDeleteSubscription = this.WhenAnyValue(model => model.DaysToDeleteSelected)
+            .Subscribe(OnNext);
+
+        _canDeleteOldLogFilesHelper = this.WhenAnyValue(model => model.LogFiles.Count)
+            .DistinctUntilChanged()
+            .Select(e => e > 0)
+            .ToProperty(this, model => model.CanDeleteOldLogFiles);
+        
+        DeleteOldLogFilesCommand = ReactiveCommand.Create(DeleteOldLogFiles);
+        DaysToDeleteSelected = DaysToDelete[0];
+    }
+    
+    public ReactiveCommand<Unit, Unit> DeleteOldLogFilesCommand { get; }
+
+    private void DeleteOldLogFiles()
+    {
+        foreach (var logFile in LogFiles)
+        {
+            try
+            {
+                if (!File.Exists(logFile)) continue;
+                File.Delete(logFile);
+                _logger.LogInformation("Deleted log file: {LogFile}", logFile);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to delete log file: {LogFile}", logFile);
+            }
+        }
+        LogFiles.Clear();
+    }
+
+    private void OnNext(int obj)
+    {
+        _logger.LogDebug("Days to delete selected: {Days}", obj);
+        var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        LogFiles.Clear();
+        foreach (var logFile in Directory.EnumerateFiles(logConfiguration.LogFilePath, "*.log", SearchOption.TopDirectoryOnly))
+        {
+            var extractedDate = Path.ChangeExtension(Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty), null);
+            if(DateOnly.TryParseExact(extractedDate, "yyyyMMdd", out var dateTime) && DateTime.Now.Subtract(dateTime.ToDateTime(TimeOnly.MinValue)) > TimeSpan.FromDays(obj))
+                LogFiles.Add(logFile);
+        }
+    }
+
+    private void OnNext(LogEventLevel obj)
+    {
+        _levelSwitch.MinimumLevel = obj;
+        _logger.LogCritical("Log level changed to {LogLevel}", obj);
+    }
+
+    public override void Dispose()
+    {
+        _levelSwitchSubscription.Dispose();
+        _daysToDeleteSubscription.Dispose();
+        GC.SuppressFinalize(this);
+        base.Dispose();
+    }
+}

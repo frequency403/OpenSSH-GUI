@@ -43,12 +43,14 @@ internal sealed class Program
 
         return new LoggerConfiguration()
             .Enrich.FromLogContext()
+            .Enrich.WithCaller()
+            .MinimumLevel.ControlledBy(container.Resolve<LoggingLevelSwitch>())
 #if DEBUG
-            .WriteTo.Console(levelSwitch: container.Resolve<LoggingLevelSwitch>())
+            .WriteTo.ColoredConsole(outputTemplate: logConfiguration.LogOutputTemplate)
 #endif
             .WriteTo.File(
                 logConfiguration.LogFileFullPath,
-                levelSwitch: container.Resolve<LoggingLevelSwitch>(),
+                outputTemplate: logConfiguration.LogOutputTemplate,
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
     }

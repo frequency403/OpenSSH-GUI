@@ -251,7 +251,7 @@
                             </MenuItem>
                             <Separator />
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuAppSettings}"
-                                      Command="{Binding NotImplementedMessage}">
+                                      Command="{Binding OpenApplicationSettingsWindow}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
                                 </MenuItem.Icon>

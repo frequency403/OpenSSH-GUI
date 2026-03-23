@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
+        x:DataType="viewModels:ApplicationSettingsViewModel"
+        Width="400"
+        Height="375"
+        CanResize="False"
+        ShowInTaskbar="True"
+        ShowActivated="True"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="* * *" ColumnDefinitions="* * *">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label Content="LogLevel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Separator />
+            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                      ItemsSource="{Binding AvailableLogLevels}"
+                      SelectedItem="{Binding CurrentLogLevel}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Cleanup logs older than" />
+            <Separator HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+            <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
+                <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                          SelectedItem="{Binding DaysToDeleteSelected}"
+                          ItemsSource="{Binding DaysToDelete}"/>
+                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch" Content="Days"/>
+                <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
+                        Command="{Binding DeleteOldLogFilesCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <TextBlock Text="Cleanup"/>
+                        <TextBlock Text="{Binding LogFiles.Count}"/>
+                        <TextBlock Text="files"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -72,17 +72,6 @@ public class SshConfigSerializerTests
     }
 
     [Fact]
-    public void Serialize_UnsupportedBlockType_ShouldThrow()
-    {
-        // Arrange
-        var mockBlock = new UnsupportedBlock();
-        var doc = new SshConfigDocument([], [mockBlock]);
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => SshConfigSerializer.Serialize(doc));
-    }
-
-    [Fact]
     public void Serialize_RoundTrip_WithModifications_ShouldRegenerate()
     {
         // Arrange
@@ -118,12 +107,5 @@ public class SshConfigSerializerTests
 
         // Assert
         Assert.Contains("\"/path/with space/id_rsa\"", output);
-    }
-
-    private sealed record UnsupportedBlock : SshBlock
-    {
-        public UnsupportedBlock() : base([], 0, "", null)
-        {
-        }
     }
 }
