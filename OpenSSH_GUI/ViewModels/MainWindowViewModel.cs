@@ -192,8 +192,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     {
         try
         {
-            keyFile.Password.Clear();
-            await keyFile.Load(keyFile.AbsoluteFilePath ?? "");
+            await keyFile.Reset();
         }
         catch (Exception e)
         {
@@ -349,7 +348,10 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question) is MessageBoxResult.Yes)
-            sshKeyFile.Delete();
+            if(!sshKeyFile.Delete(out var error))
+                await _messageBoxProvider.ShowMessageBoxAsync(
+                    string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName)
+                    , error.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
     }
 
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)

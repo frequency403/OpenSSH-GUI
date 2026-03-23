@@ -122,7 +122,8 @@ public class SshKeyManager : ReactiveObject
                 backedUpFiles.Add((backup, existingFile));
             }
 
-            key.Delete();
+            if(!key.Delete(out var exception))
+                throw exception;
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
             if (!semaphoreAquired)
                 throw new InvalidOperationException("Another key operation is in progress");
@@ -164,7 +165,7 @@ public class SshKeyManager : ReactiveObject
             foreach (var (backup, _) in backedUpFiles)
                 TryDeleteFile(backup);
 
-            await AddKeyAsync(filePath);
+            await AddKeyAsync(SshKeyFileSource.FromDisk(filePath));
         }
         catch (Exception e)
         {
@@ -237,7 +238,7 @@ public class SshKeyManager : ReactiveObject
                             generateParamsInfo.Encryption, generateParamsInfo.KeyFormat));
                     }
 
-                    await keyFile.Load(puttyPath,
+                    await keyFile.Load(SshKeyFileSource.FromDisk(puttyPath),
                         Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
                     break;
 
@@ -258,7 +259,7 @@ public class SshKeyManager : ReactiveObject
                         await sw.WriteAsync(createdKey.ToOpenSshPublicFormat());
                     }
 
-                    await keyFile.Load(privatePath,
+                    await keyFile.Load(SshKeyFileSource.FromDisk(privatePath),
                         Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
                     break;
             }
@@ -310,7 +311,7 @@ public class SshKeyManager : ReactiveObject
             if (SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is
                 { } oldKey)
                 SshKeyGotDeleted(oldKey, EventArgs.Empty);
-            await AddKeyAsync(Path.ChangeExtension(e.FullPath, null));
+            await AddKeyAsync(SshKeyFileSource.FromDisk(Path.ChangeExtension(e.FullPath, null)));
         }
         catch (Exception exception)
         {
@@ -369,7 +370,7 @@ public class SshKeyManager : ReactiveObject
                         StringComparison.OrdinalIgnoreCase)))
                 return;
 
-            await AddKeyAsync(keyFilePath);
+            await AddKeyAsync(SshKeyFileSource.FromDisk(keyFilePath));
         }
         catch (Exception exception)
         {
@@ -435,10 +436,10 @@ public class SshKeyManager : ReactiveObject
         return null;
     }
 
-    private async Task AddKeyAsync(string fullFilePath)
+    private async Task AddKeyAsync(SshKeyFileSource keyFileSource)
     {
         if (SshKeysInternal.Any(k =>
-                string.Equals(k.AbsoluteFilePath, fullFilePath,
+                string.Equals(k.AbsoluteFilePath, keyFileSource.AbsolutePath,
                     StringComparison.OrdinalIgnoreCase)))
             return;
         try
@@ -446,12 +447,12 @@ public class SshKeyManager : ReactiveObject
             if (GenerateKeyFile() is not { } keyFileGenerated)
                 throw new InvalidOperationException("Key file not generated");
 
-            await keyFileGenerated.Load(fullFilePath);
+            await keyFileGenerated.Load(keyFileSource);
             SshKeysInternal.Add(keyFileGenerated);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error loading keyfile {filePath}", fullFilePath);
+            _logger.LogError(e, "Error loading keyfile {filePath}", keyFileSource.AbsolutePath);
         }
     }
 

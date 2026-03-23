@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.SshConfig.Models;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
@@ -20,11 +21,11 @@ public class DirectoryCrawler(
     /// </summary>
     /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation.</param>
     /// <returns>An asynchronous enumerable containing the file paths of the discovered SSH keys.</returns>
-    public ValueTask<IEnumerable<string>> GetPossibleKeyFilesOnDisk(CancellationToken token = default)
+    public ValueTask<IEnumerable<SshKeyFileSource>> GetPossibleKeyFilesOnDisk(CancellationToken token = default)
     {
         try
         {
-            var possibleKeyFiles = new List<string>();
+            var possibleKeyFiles = new List<SshKeyFileSource>();
 
             try
             {
@@ -35,8 +36,8 @@ public class DirectoryCrawler(
                         if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
                         foreach (var hostIdentityFile in hostIdentityFiles.Select(path => path.ResolvePath()))
                         {
-                            if(!possibleKeyFiles.Any(e => e.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) && File.Exists(hostIdentityFile))
-                                possibleKeyFiles.Add(hostIdentityFile);
+                            if(!possibleKeyFiles.Any(e => e.AbsolutePath.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) && File.Exists(hostIdentityFile))
+                                possibleKeyFiles.Add(SshKeyFileSource.FromConfig(hostIdentityFile));
                         }
                     }
                 }
@@ -55,15 +56,15 @@ public class DirectoryCrawler(
                     .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
                     .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
                                 e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
-                    .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => e.FullName)
+                    .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => SshKeyFileSource.FromDisk(e.FullName))
             ).ToList();
 
             logger.LogInformation("Found {count} keys", possibleKeyFiles.Count);
-            return ValueTask.FromResult<IEnumerable<string>>(possibleKeyFiles);
+            return ValueTask.FromResult<IEnumerable<SshKeyFileSource>>(possibleKeyFiles);
         }
         catch (Exception exception)
         {
-            return ValueTask.FromException<IEnumerable<string>>(exception);
+            return ValueTask.FromException<IEnumerable<SshKeyFileSource>>(exception);
         }
     }
 }

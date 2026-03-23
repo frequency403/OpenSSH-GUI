@@ -8,13 +8,16 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 ///     Provides access to the associated private and potential public key file information,
 ///     as well as details about key format and available conversion options.
 /// </summary>
-public class SshKeyFileInformation(string filePath)
+public class SshKeyFileInformation(SshKeyFileSource keyFileSource)
 {
     /// <summary>
     ///     Represents the internal <see cref="FileInfo" /> object associated with the SSH key file.
     ///     This variable is used to perform various file operations and retrieve metadata of the specified SSH key file path.
     /// </summary>
-    private readonly FileInfo _fileInfo = new(filePath);
+    private readonly FileInfo _fileInfo = new(keyFileSource.AbsolutePath);
+
+    public SshKeyFileSource KeyFileSource => keyFileSource;
+    public bool CanChangeFileName => !keyFileSource.ProvidedByConfig;
 
     /// <summary>
     ///     Indicates whether the SSH key file associated with the instance conforms to the OpenSSH format.

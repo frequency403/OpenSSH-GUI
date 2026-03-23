@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
@@ -27,13 +28,6 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     ///     related to the operations and state within the <see cref="SshKeyFile" /> class.
     /// </summary>
     private readonly ILogger<SshKeyFile> _logger;
-
-    /// <summary>
-    ///     Manages operations related to transformation and management of SSH key files.
-    ///     Provides functionality to change the file format of SSH keys on disk
-    ///     and serves as the core service dependency for <see cref="SshKeyFile" />.
-    /// </summary>
-    private readonly SshKeyManager _sshKeyManager;
 
     [ObservableAsProperty] private string _comment = string.Empty;
 
@@ -122,9 +116,8 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     ///     Implements <see cref="ReactiveObject" /> for reactive binding capabilities and
     ///     both <see cref="IDisposable" /> and <see cref="IAsyncDisposable" /> for lifecycle management.
     /// </summary>
-    public SshKeyFile(ILogger<SshKeyFile> logger, SshKeyManager sshKeyManager)
+    public SshKeyFile(ILogger<SshKeyFile> logger)
     {
-        _sshKeyManager = sshKeyManager;
         _logger = logger;
         ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
         
@@ -323,18 +316,47 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     }
 
     /// <summary>
-    ///     Loads an SSH key file from the specified file path and initializes it,
-    ///     optionally using the provided passphrase for decryption.
+    /// Resets the state of the current SSH key file instance, clearing any previously set password,
+    /// and reinitializing the associated private key file to its initial state.
+    /// If the associated key file requires a password to decrypt but no password is set,
+    /// the method updates the state to indicate that a password is needed and attempts to
+    /// extract key metadata for further operations. Logs errors and rethrows exceptions
+    /// in case of unexpected failures during the reset process.
     /// </summary>
-    /// <param name="filePath">The full file path of the SSH key file to be loaded.</param>
-    /// <param name="passPhrase">
-    ///     An optional passphrase for the key file, used to unlock encrypted private keys.
-    /// </param>
-    public async ValueTask Load(string filePath, ReadOnlyMemory<byte>? passPhrase = null)
+    /// <returns>A task representing the asynchronous operation of resetting the SSH key file.</returns>
+    public async ValueTask Reset()
     {
         try
         {
-            KeyFileInfo = new SshKeyFileInformation(filePath);
+            Password.Clear();
+            PrivateKeyFile = new PrivateKeyFile(KeyFileInfo!.FullName);
+        }
+        catch (SshPassPhraseNullOrEmptyException)
+        {
+            NeedsPassword = true;
+            await ExtractKeyInformation();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
+            throw;
+        }
+        _logger.LogInformation("Reset {className} successfully", KeyFileInfo?.Name ?? string.Empty);
+    }
+    
+    /// <summary>
+    ///     Loads an SSH key file from the specified file path and initializes it,
+    ///     optionally using the provided passphrase for decryption.
+    /// </summary>
+    /// <param name="keyFileSource">The SSH key file source from with the file is to be loaded.</param>
+    /// <param name="passPhrase">
+    ///     An optional passphrase for the key file, used to unlock encrypted private keys.
+    /// </param>
+    public async ValueTask Load(SshKeyFileSource keyFileSource, ReadOnlyMemory<byte>? passPhrase = null)
+    {
+        try
+        {
+            KeyFileInfo = new SshKeyFileInformation(keyFileSource);
             if (passPhrase is { Length: > 0 } pass)
                 Password.Set(pass);
             PrivateKeyFile = Password.IsValid
@@ -343,7 +365,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
         }
         catch (SshPassPhraseNullOrEmptyException passPhraseNullOrEmptyException)
         {
-            _logger.LogWarning(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}", filePath);
+            _logger.LogInformation(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}", keyFileSource.AbsolutePath);
             NeedsPassword = true;
             await ExtractKeyInformation();
         }
@@ -367,7 +389,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
         {
             if (KeyFileInfo is not { Exists: true })
                 throw new FileNotFoundException("SshKeyFile not found", KeyFileInfo?.Name);
-            await Load(KeyFileInfo.FullName, password);
+            await Load(KeyFileInfo.KeyFileSource, password);
             NeedsPassword = false;
             return true;
         }
@@ -394,8 +416,9 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     /// <exception cref="InvalidOperationException">
     ///     Thrown if the SSH key file is not initialized before calling this method.
     /// </exception>
-    public bool Delete()
+    public bool Delete([NotNullWhen(false)] out Exception? error)
     {
+        error = null;
         if (!IsInitialized)
             throw new InvalidOperationException("Not initialized.");
 
@@ -408,6 +431,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to delete {FilePath}", file.FullName);
+                error = e;
                 allSucceeded = false;
             }
 
