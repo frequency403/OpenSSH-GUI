@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -8,7 +7,6 @@ using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Options;
 using OpenSSH_GUI.SshConfig.Parsers;
-using OpenSSH_GUI.SshConfig.Services;
 using Shouldly;
 using Xunit;
 

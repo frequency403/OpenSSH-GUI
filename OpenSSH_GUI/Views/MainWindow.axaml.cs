@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,18 +13,14 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost
 {
-    private readonly ILogger<MainWindow> _logger;
-
-    public MainWindow(ILogger<MainWindow> logger, [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) :
-        base(logger, icon)
+    public MainWindow()
     {
-        _logger = logger;
         InitializeComponent();
     }
-
+    
     public Task ShowDialog<TWindow>(TWindow dialogWindow) where TWindow : Window
     {
-        _logger.LogDebug("Showing dialog {nameOfWindow}", typeof(TWindow).Name);
+        Logger.LogDebug("Showing dialog {nameOfWindow}", typeof(TWindow).Name);
         return dialogWindow.ShowDialog(this);
     }
 
@@ -36,13 +31,13 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost
         Task<TResult?> ShowDialog<TWindow, TResult>(TWindow dialogWindow)
         where TWindow : Window where TResult : ViewModelBase
     {
-        _logger.LogDebug("Showing dialog {nameOfWindow} with expected result {nameOfResult}", typeof(TWindow).Name,
+        Logger.LogDebug("Showing dialog {nameOfWindow} with expected result {nameOfResult}", typeof(TWindow).Name,
             typeof(TResult).Name);
 #if !DEBUG
         return dialogWindow.ShowDialog<TResult?>(this);
 #else
         var result = await dialogWindow.ShowDialog<TResult?>(this);
-        _logger.LogDebug("Result: {nameOfResult}", result?.GetType().Name);
+        Logger.LogDebug("Result: {nameOfResult}", result?.GetType().Name);
         return result;
 #endif
     }

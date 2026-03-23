@@ -2,14 +2,18 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard) : ViewModelBase<ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(logger)
+public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard) : ViewModelBase<ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(logger)
 {
-    public string WindowTitle { get; private set; } = "";
-    public string Export { get; private set; } = "";
+    [Reactive]
+    private string _windowTitle = "";
+    
+    [Reactive]
+    private string _export = "";
     
     public override ValueTask InitializeAsync(ExportWindowViewModelInitializerParameters parameters,
         CancellationToken cancellationToken = default)

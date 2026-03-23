@@ -1,10 +1,9 @@
-﻿using System.Diagnostics;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Encodings.Web;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
 using Material.Icons.Avalonia;
@@ -35,17 +34,16 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
     private readonly IDialogHost _dialogHost;
-
     private readonly IDisposable _keyCountObservable;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly ILauncher _launcher;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IResolver _serviceProvider;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
         SshKeyManager sshKeyManager,
         ServerConnectionService serverConnectionService,
-        IServiceProvider serviceProvider,
+        IResolver serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
         ILauncher launcher,

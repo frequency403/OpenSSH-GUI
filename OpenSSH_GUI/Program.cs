@@ -1,13 +1,7 @@
-﻿#if!DEBUG
-using Serilog.Events;
-#endif
-using System.Reflection;
+﻿using System.Reflection;
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input.Platform;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using Avalonia.Platform.Storage;
+using DryIoc;
+using DryIoc.Microsoft.DependencyInjection;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,32 +9,19 @@ using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Hosts;
-using OpenSSH_GUI.Core.Lib.Keys;
-using OpenSSH_GUI.Core.Lib.Misc;
-using OpenSSH_GUI.Core.Services;
-using OpenSSH_GUI.Core.Services.Hosted;
-using OpenSSH_GUI.Dialogs.Interfaces;
-using OpenSSH_GUI.Dialogs.Services;
+using OpenSSH_GUI.Extensions;
 using OpenSSH_GUI.SshConfig.Extensions;
-using OpenSSH_GUI.SshConfig.Services;
-using OpenSSH_GUI.ViewModels;
-using OpenSSH_GUI.Views;
 using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
-using Serilog.Events;
-using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
 [UsedImplicitly]
 internal sealed class Program
 {
-    private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
-    private const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
-    private const string IconUri = "avares://OpenSSH_GUI/Assets/appicon.ico";
-
+    public const SshConfigFiles ConfigFile = SshConfigFiles.Config;
+    public const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
     public const string AppName = "OpenSSH GUI";
     public const string VersionEnvVar = "RUNNING_VERSION";
     public const string IconServiceKey = "AppIcon";
@@ -54,14 +35,46 @@ internal sealed class Program
                ?? "0.0.0";
     }
 
+    private static Logger? CreateLogger(IContainer container)
+    {
+        var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        if (!Directory.Exists(logConfiguration.LogFilePath))
+            Directory.CreateDirectory(logConfiguration.LogFilePath);
+
+        return new LoggerConfiguration()
+            .Enrich.FromLogContext()
+#if DEBUG
+            .WriteTo.Console(levelSwitch: container.Resolve<LoggingLevelSwitch>())
+#endif
+            .WriteTo.File(
+                logConfiguration.LogFileFullPath,
+                levelSwitch: container.Resolve<LoggingLevelSwitch>(),
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+    }
+
 #pragma warning disable CA1416
     [STAThread]
     public static async Task Main(string[] args)
     {
+        using var container = new Container(rules =>
+        {
+            var newRules = rules;
+            if (!rules.HasMicrosoftDependencyInjectionRules())
+                newRules = rules.WithMicrosoftDependencyInjectionRules();
+
+            return newRules.WithDefaultReuse(Reuse.Singleton)
+                .WithTrackingDisposableTransients()
+                .WithoutThrowOnRegisteringDisposableTransient()
+                .WithDefaultIfAlreadyRegistered(IfAlreadyRegistered.Replace);
+        });
+        container.ConfigureServicesInternal();
+        var factory = new DryIocServiceProviderFactory(container);
         using var mainCancellationTokenSource = new CancellationTokenSource();
         var host = Host.CreateDefaultBuilder(args)
-            .ConfigureServices(ConfigureServicesInternal)
-            .UseSerilog()
+            .UseServiceProviderFactory(factory)
+            .ConfigureServices(services => services.RegisterOpenSshGuiServices())
+            .UseSerilog(logger: CreateLogger(container), dispose: true)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
 
@@ -89,65 +102,5 @@ internal sealed class Program
         configurationBuilder.AddInMemoryCollection([
             new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
         ]);
-    }
-
-    private static void ConfigureServicesInternal(HostBuilderContext hostBuilderContext, IServiceCollection collection)
-    {
-        collection.AddSingleton<App>();
-        collection.AddSingleton<ExceptionHandler>();
-        var loggingLevelSwitch = new LoggingLevelSwitch(
-#if DEBUG
-            LogEventLevel.Verbose
-#endif
-        );
-        collection.AddSingleton(loggingLevelSwitch);
-
-        var logConfiguration = LoggerConfiguration.Default;
-        if (!Directory.Exists(logConfiguration.LogFilePath))
-            Directory.CreateDirectory(logConfiguration.LogFilePath);
-
-        Log.Logger = new Serilog.LoggerConfiguration()
-            .Enrich.FromLogContext()
-#if DEBUG
-            .WriteTo.Console(levelSwitch: loggingLevelSwitch)
-#endif
-            .WriteTo.File(
-                logConfiguration.LogFileFullPath,
-                levelSwitch: loggingLevelSwitch,
-                rollingInterval: RollingInterval.Day)
-            .CreateLogger();
-        // AddServices
-        collection.AddLogging(e => e.AddSerilog());
-        collection.AddKeyedSingleton<Bitmap>(IconServiceKey, (_, _) => new Bitmap(AssetLoader.Open(new Uri(IconUri))));
-        collection.AddSingleton<ServerConnectionService>();
-        collection.AddTransient<SshKeyFile>();
-        collection.AddSingleton<DirectoryCrawler>();
-        collection.AddSingleton<SshKeyManager>();
-        collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
-            serviceCollection =>
-            {
-                serviceCollection.AddSingleton<IDialogHost>(sp =>
-                    sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
-                serviceCollection.AddSingleton<Window>(sp =>
-                    sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
-                collection.AddTransient<IClipboard>(sp => sp.GetRequiredService<Window>().Clipboard);
-                collection.AddTransient<IStorageProvider>(sp => sp.GetRequiredService<Window>().StorageProvider);
-                collection.AddTransient<ILauncher>(sp => sp.GetRequiredService<Window>().Launcher);
-            });
-        collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
-        collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
-        collection.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
-        collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
-        collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
-        collection.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
-        collection.AddHostedService<FileSystemAnalyzer>();
-
-        collection.AddKeyedSingleton(ConfigFile,
-            (_, _) => SshConfigFileService.LoadFromFile(
-                ConfigFile.GetPathOfFile()));
-
-        collection.AddKeyedSingleton(SshdConfig,
-            (_, _) => SshConfigFileService.LoadFromFile(
-                SshdConfig.GetPathOfFile()));
     }
 }

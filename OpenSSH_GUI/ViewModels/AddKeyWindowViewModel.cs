@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;

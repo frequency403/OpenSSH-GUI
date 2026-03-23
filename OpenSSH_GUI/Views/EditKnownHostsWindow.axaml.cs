@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,8 +11,7 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsWindowViewModel>
 {
-    public EditKnownHostsWindow(ILogger<EditKnownHostsWindow> logger,
-        [FromKeyedServices(Program.IconServiceKey)] Bitmap icon) : base(logger, icon)
+    public EditKnownHostsWindow()
     {
         InitializeComponent();
     }

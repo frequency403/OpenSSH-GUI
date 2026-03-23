@@ -4,6 +4,8 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.12"/>
+        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
+        <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
