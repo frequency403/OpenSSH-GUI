@@ -284,7 +284,7 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             return;
         }
 
-        var view = await _serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel>(
+        var view = await _serviceProvider.ResolveViewAsync<ExportWindow, ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(
             new ExportWindowViewModelInitializerParameters
             {
                 Export = content,

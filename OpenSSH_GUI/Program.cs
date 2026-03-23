@@ -16,7 +16,6 @@ using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.Services;
@@ -127,23 +126,20 @@ internal sealed class Program
         collection.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(true,
             serviceCollection =>
             {
-                serviceCollection.AddSingleton<IClipboardHost>(sp =>
-                    sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 serviceCollection.AddSingleton<IDialogHost>(sp =>
                     sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 serviceCollection.AddSingleton<Window>(sp =>
                     sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                collection.AddTransient<IClipboard>(sp => sp.GetRequiredService<Window>().Clipboard);
+                collection.AddTransient<IStorageProvider>(sp => sp.GetRequiredService<Window>().StorageProvider);
+                collection.AddTransient<ILauncher>(sp => sp.GetRequiredService<Window>().Launcher);
             });
         collection.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
         collection.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
         collection.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
         collection.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
         collection.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
-        collection.AddTransient<IClipboardService, ClipboardService>();
         collection.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
-        collection.AddTransient<IClipboard>(sp => sp.GetRequiredService<Window>().Clipboard);
-        collection.AddTransient<IStorageProvider>(sp => sp.GetRequiredService<Window>().StorageProvider);
-        collection.AddTransient<ILauncher>(sp => sp.GetRequiredService<Window>().Launcher);
         collection.AddHostedService<FileSystemAnalyzer>();
 
         collection.AddKeyedSingleton(ConfigFile,

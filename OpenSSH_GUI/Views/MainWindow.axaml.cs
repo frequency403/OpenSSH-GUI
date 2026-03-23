@@ -12,7 +12,7 @@ using OpenSSH_GUI.ViewModels;
 namespace OpenSSH_GUI.Views;
 
 [UsedImplicitly]
-public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost, IClipboardHost
+public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost
 {
     private readonly ILogger<MainWindow> _logger;
 

@@ -40,24 +40,45 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    public static async ValueTask<TView> ResolveViewAsync<TView, TViewModel>(this IServiceProvider provider,
-        IInitializerParameters<TViewModel>? initializerParameters = null,
-        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
-        CancellationToken token = default)
-        where TView : WindowBase<TViewModel>
-        where TViewModel : ViewModelBase<TViewModel>
+    
+    extension(IServiceProvider provider)
     {
-        var viewName = typeof(TView).Name;
-        var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
-        var viewModelName = typeof(TViewModel).Name;
-        var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
-        await viewModel.InitializeAsync(initializerParameters, token);
-        if (!viewModel.IsInitialized)
-            throw new InvalidOperationException("ViewModel not properly initialized");
-        resolvedView.DataContext = viewModel;
-        resolvedView.WindowStartupLocation = windowStartupLocation;
-        resolvedView.AttachCloseRequest();
-        return resolvedView;
+        public async ValueTask<TView> ResolveViewAsync<TView, TViewModel, TViewModelInitializerParameter>(
+            TViewModelInitializerParameter initializerParameters,
+            WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
+            CancellationToken token = default)
+            where TView : WindowBase<TViewModel>
+            where TViewModel : ViewModelBase<TViewModel, TViewModelInitializerParameter>
+            where TViewModelInitializerParameter : class, IInitializerParameters<TViewModel>
+        {
+            var viewName = typeof(TView).Name;
+            var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
+            var viewModelName = typeof(TViewModel).Name;
+            var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
+            await viewModel.InitializeAsync(initializerParameters, token);
+            if (!viewModel.IsInitialized)
+                throw new InvalidOperationException("ViewModel not properly initialized");
+            resolvedView.DataContext = viewModel;
+            resolvedView.WindowStartupLocation = windowStartupLocation;
+            return resolvedView;
+        }
+
+        public async ValueTask<TView> ResolveViewAsync<TView, TViewModel>(
+            WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
+            CancellationToken token = default)
+            where TView : WindowBase<TViewModel>
+            where TViewModel : ViewModelBase<TViewModel>
+        {
+            var viewName = typeof(TView).Name;
+            var resolvedView = provider.GetRequiredKeyedService<TView>(viewName);
+            var viewModelName = typeof(TViewModel).Name;
+            var viewModel = provider.GetRequiredKeyedService<TViewModel>(viewModelName);
+            await viewModel.InitializeAsync(token);
+            if (!viewModel.IsInitialized)
+                throw new InvalidOperationException("ViewModel not properly initialized");
+            resolvedView.DataContext = viewModel;
+            resolvedView.WindowStartupLocation = windowStartupLocation;
+            return resolvedView;
+        }
     }
 }

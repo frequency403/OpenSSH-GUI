@@ -47,9 +47,7 @@ public class EditKnownHostsWindowViewModel(
             cancellationToken);
     }
 
-    public override async ValueTask InitializeAsync(
-        IInitializerParameters<EditKnownHostsWindowViewModel>? parameters = null,
-        CancellationToken cancellationToken = default)
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         KnownHostsFileLocal =
             await new KnownHostsFile().InitializeAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(),
@@ -59,6 +57,6 @@ public class EditKnownHostsWindowViewModel(
                 await serverConnectionService.ServerConnection.GetKnownHostsFromServerAsync(cancellationToken);
         KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
         KnownHostsRemote = new ObservableCollection<IKnownHost>(KnownHostsFileRemote.KnownHosts.OrderBy(e => e.Host));
-        await base.InitializeAsync(parameters, cancellationToken);
+        await base.InitializeAsync(cancellationToken);
     }
 }

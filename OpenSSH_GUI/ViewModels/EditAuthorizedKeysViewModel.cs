@@ -64,9 +64,7 @@ public class EditAuthorizedKeysViewModel(
         }
     }
 
-    public override async ValueTask InitializeAsync(
-        IInitializerParameters<EditAuthorizedKeysViewModel>? parameters = null,
-        CancellationToken cancellationToken = default)
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         AuthorizedKeysFileLocal =
             await AuthorizedKeysFile.OpenAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(), cancellationToken);
@@ -77,7 +75,7 @@ public class EditAuthorizedKeysViewModel(
         _selectedKey = SshKeyManager.SshKeys.FirstOrDefault();
         UpdateAddButton();
         AddKey = ReactiveCommand.CreateFromTask<SshKeyFile>(OnAddKey);
-        await base.InitializeAsync(parameters, cancellationToken);
+        await base.InitializeAsync(cancellationToken);
     }
 
     private async Task OnAddKey(SshKeyFile key)

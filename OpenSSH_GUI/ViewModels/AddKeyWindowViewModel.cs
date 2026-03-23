@@ -130,8 +130,7 @@ public sealed class AddKeyWindowViewModel(
         }
     }
 
-    public override ValueTask InitializeAsync(IInitializerParameters<AddKeyWindowViewModel>? parameters = null,
-        CancellationToken cancellationToken = default)
+    public override ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         KeyNameValidationHelper = this.ValidationRule(
             e => e.KeyName,
@@ -140,6 +139,6 @@ public sealed class AddKeyWindowViewModel(
         );
         AvaliableKeySizes = SelectedKeyType.SupportedKeySizes;
         SelectedKeyType = SshKeyTypes.First();
-        return base.InitializeAsync(parameters, cancellationToken);
+        return base.InitializeAsync(cancellationToken);
     }
 }

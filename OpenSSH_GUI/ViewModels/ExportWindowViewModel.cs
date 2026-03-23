@@ -1,35 +1,29 @@
-﻿using JetBrains.Annotations;
+﻿using Avalonia.Input.Platform;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using OpenSSH_GUI.Core.Interfaces.Services;
 using OpenSSH_GUI.Core.MVVM;
 
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboardService clipboardService) : ViewModelBase<ExportWindowViewModel>(logger)
+public class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard) : ViewModelBase<ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(logger)
 {
     public string WindowTitle { get; private set; } = "";
     public string Export { get; private set; } = "";
-
-    public override async ValueTask InitializeAsync(IInitializerParameters<ExportWindowViewModel>? parameters = null,
+    
+    public override ValueTask InitializeAsync(ExportWindowViewModelInitializerParameters parameters,
         CancellationToken cancellationToken = default)
     {
-        if (parameters is ExportWindowViewModelInitializerParameters initializerParameters)
-        {
-            WindowTitle = initializerParameters.WindowTitle;
-            Export = initializerParameters.Export;
-        }
-
-        await base.InitializeAsync(parameters, cancellationToken);
+        WindowTitle = parameters.WindowTitle;
+        Export = parameters.Export;
+        return base.InitializeAsync(parameters, cancellationToken);
     }
 
     protected override async Task OnBooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(clipboardService);
         if (inputParameter)
-            await clipboardService.SetTextAsync(Export);
+            await clipboard.SetTextAsync(Export);
     }
 }
 
