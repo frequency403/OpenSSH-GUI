@@ -55,7 +55,7 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
     
     public SshKeyManager SshKeyManager { get; }
     public ServerConnectionService ServerConnectionService { get; }
-    public ReactiveCommand<SshKeyFile, Unit> AddKey { get; private set; }
+    public ReactiveCommand<SshKeyFile, Unit> AddKey { get; }
 
     protected override async Task OnBooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)

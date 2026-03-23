@@ -8,11 +8,12 @@ using OpenSSH_GUI.Core.Lib.KnownHosts;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public class EditKnownHostsWindowViewModel(
+public partial class EditKnownHostsWindowViewModel(
     ILogger<EditKnownHostsWindowViewModel> logger,
     ServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
@@ -20,23 +21,18 @@ public class EditKnownHostsWindowViewModel(
     private IKnownHostsFile? KnownHostsFileLocal { get; set; }
     private IKnownHostsFile? KnownHostsFileRemote { get; set; }
 
-    public ObservableCollection<IKnownHost> KnownHostsRemote
-    {
-        get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
-
-    public ObservableCollection<IKnownHost> KnownHostsLocal
-    {
-        get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
+    [Reactive]
+    private ObservableCollection<IKnownHost> _knownHostsRemote = [];
+    
+    [Reactive]
+    private ObservableCollection<IKnownHost> _knownHostsLocal = [];
 
     protected override async Task OnBooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
         if (!inputParameter) return;
         ArgumentNullException.ThrowIfNull(KnownHostsFileLocal);
+        
         KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
         if (serverConnectionService.IsConnected)
             KnownHostsFileRemote?.SyncKnownHosts(KnownHostsRemote);

@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Text.Encodings.Web;
 using Avalonia.Platform.Storage;
@@ -21,23 +22,24 @@ using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
 using SshNet.Keygen.Extensions;
 
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
+public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 {
     private static readonly string? ProjectUrl = Assembly.GetExecutingAssembly()
         .GetCustomAttributes<AssemblyMetadataAttribute>()
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
     private readonly IDialogHost _dialogHost;
-    private readonly IDisposable _keyCountObservable;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly ILauncher _launcher;
     private readonly IResolver _serviceProvider;
+    private readonly IDisposable[] _subscriptions = [];
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
@@ -50,14 +52,11 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         IDialogHost dialogHost) : base(logger)
     {
         SshKeyManager = sshKeyManager;
-        SetKeyCountIcon(sshKeyManager.SshKeysCount);
         ServerConnectionService = serverConnectionService;
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
         _launcher = launcher;
         _dialogHost = dialogHost;
-        _keyCountObservable = sshKeyManager.ObservableForProperty(manager => manager.SshKeysCount)
-            .Subscribe(obs => SetKeyCountIcon(obs.Value));
 
         DisconnectServer = ReactiveCommand.CreateFromTask(DisconnectFromServerAsync);
         ProvidePassword = ReactiveCommand.CreateFromTask<SshKeyFile>(ProvidePasswordAsync);
@@ -80,6 +79,53 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         OpenApplicationSettingsWindow = ReactiveCommand.CreateFromTask(OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>);
 
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
+        
+        _itemsCountIconHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys.Count)
+            .Select(GetMaterialNumericIcon)
+            .ToProperty(this, vm => vm.ItemsCountIcon);
+        
+        _windowTitleHelper = this.WhenAnyValue(vm => vm.Version)
+            .Select(ver => string.Join("-", Program.AppName, ver))
+            .ToProperty(this, vm => vm.WindowTitle);
+
+        _keyTypeSortDirectionIconHelper =
+            this.WhenAnyValue(vm => vm.KeyTypeSort)
+                .Select(EvaluateSortIconKind)
+                .ToProperty(this, vm => vm.KeyTypeSortDirectionIcon);
+        
+        _commentSortDirectionIconHelper = this.WhenAnyValue(vm => vm.CommentSort)
+            .Select(EvaluateSortIconKind)
+            .ToProperty(this, vm => vm.CommentSortDirectionIcon);
+        
+        _fingerPrintSortDirectionIconHelper = this.WhenAnyValue(vm => vm.FingerPrintSort)
+            .Select(EvaluateSortIconKind)
+            .ToProperty(this, vm => vm.FingerPrintSortDirectionIcon);
+        
+        _subscriptions = _subscriptions.Concat([
+            this.WhenAnyValue(vm => vm.KeyTypeSort)
+                .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
+                {
+                    null => key => key.OrderBy(e => e.FileName),
+                    true => key => key.OrderBy(e => e.KeyType),
+                    false => key => key.OrderByDescending(e => e.KeyType)
+                })),
+        
+            this.WhenAnyValue(vm => vm.CommentSort)
+            .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
+            {
+            null => key => key.OrderBy(e => e.FileName),
+            true => key => key.OrderBy(e => e.Comment),
+            false => key => key.OrderByDescending(e => e.Comment)
+            })),
+        
+            this.WhenAnyValue(vm => vm.FingerPrintSort)
+            .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
+            {
+            null => key => key.OrderBy(e => e.FileName),
+            true => key => key.OrderBy(e => e.Fingerprint),
+            false => key => key.OrderByDescending(e => e.Fingerprint)
+            }))
+        ]).ToArray();
     }
 
     public ReactiveCommand<Unit, Unit> DisconnectServer { get; }
@@ -98,97 +144,40 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<SshKeyFile, Unit> ResetKey { get; }
     public ReactiveCommand<SshKeyFile, Unit> ChangeFilename { get; }
     public ReactiveCommand<Unit, Unit> OpenApplicationSettingsWindow { get; }
-
-
     public ServerConnectionService ServerConnectionService { get; }
     public SshKeyManager SshKeyManager { get; }
 
+    [Reactive] private string _version;
+    [Reactive] private bool? _keyTypeSort;
+    [Reactive] private bool? _commentSort;
+    [Reactive] private bool? _fingerPrintSort;
 
-    public string WindowTitle => string.Join("-", Program.AppName, Version);
+    [ObservableAsProperty] private MaterialIcon _itemsCountIcon = new() { Kind = MaterialIconKind.Infinity };
+    [ObservableAsProperty] private string _windowTitle = string.Empty;
+    [ObservableAsProperty] private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
+    [ObservableAsProperty] private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
+    [ObservableAsProperty] private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
 
-    public string Version
+    private static MaterialIcon GetMaterialNumericIcon(int count) => new()
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public MaterialIcon ItemsCountIcon
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new()
-    {
-        Kind = MaterialIconKind.ErrorOutline,
+        Kind = count switch
+        {
+            0 => MaterialIconKind.NumericZero,
+            1 => MaterialIconKind.NumericOne,
+            2 => MaterialIconKind.NumericTwo,
+            3 => MaterialIconKind.NumericThree,
+            4 => MaterialIconKind.NumericFour,
+            5 => MaterialIconKind.NumericFive,
+            6 => MaterialIconKind.NumericSix,
+            7 => MaterialIconKind.NumericSeven,
+            8 => MaterialIconKind.NumericEight,
+            9 => MaterialIconKind.NumericNine,
+            10 => MaterialIconKind.Numeric10,
+            _ => MaterialIconKind.Infinity
+        },
         Width = 20,
         Height = 20
     };
-
-
-    public bool? KeyTypeSort
-    {
-        get;
-        set
-        {
-            KeyTypeSortDirectionIcon = EvaluateSortIconKind(value);
-            SshKeyManager.ChangeOrder(value switch
-            {
-                null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.KeyType),
-                false => key => key.OrderByDescending(e => e.KeyType)
-            });
-            this.RaiseAndSetIfChanged(ref field, value);
-        }
-    }
-
-    public MaterialIconKind KeyTypeSortDirectionIcon
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = MaterialIconKind.CircleOutline;
-
-    public bool? CommentSort
-    {
-        get;
-        set
-        {
-            CommentSortDirectionIcon = EvaluateSortIconKind(value);
-            SshKeyManager.ChangeOrder(value switch
-            {
-                null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.Comment),
-                false => key => key.OrderByDescending(e => e.Comment)
-            });
-            this.RaiseAndSetIfChanged(ref field, value);
-        }
-    }
-
-    public MaterialIconKind CommentSortDirectionIcon
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = MaterialIconKind.CircleOutline;
-
-    public bool? FingerPrintSort
-    {
-        get;
-        set
-        {
-            FingerPrintSortDirectionIcon = EvaluateSortIconKind(value);
-            SshKeyManager.ChangeOrder(value switch
-            {
-                null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.Fingerprint),
-                false => key => key.OrderByDescending(e => e.Fingerprint)
-            });
-            this.RaiseAndSetIfChanged(ref field, value);
-        }
-    }
-
-    public MaterialIconKind FingerPrintSortDirectionIcon
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = MaterialIconKind.CircleOutline;
 
     private async Task ResetKeyAsync(SshKeyFile keyFile, CancellationToken token)
     {
@@ -208,15 +197,14 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         {
             Buttons = MessageBoxButtons.OkCancel,
             Icon = MaterialIconKind.FileEditOutline,
-            InitialValue = key.FileName,
+            InitialValue = key.FileName ?? string.Empty,
             Message = "ChangeMe",
             Prompt = "EnterNewFilename",
             Watermark = "Enter new filename",
-            Validator = filename =>
+            Validator = argument =>
             {
-                ArgumentException.ThrowIfNullOrWhiteSpace(filename);
-
-                return SshKeyManager.SshKeys.Any(k => k.FileName == filename) ? "Filename already exists" : null;
+                ArgumentException.ThrowIfNullOrWhiteSpace(argument);
+                return SshKeyManager.SshKeys.Any(k => k.FileName == argument) ? "Filename already exists" : null;
             }
         });
         if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
@@ -379,48 +367,24 @@ public class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             trys++;
         }
     }
-
-
-    private static MaterialIconKind EvaluateSortIconKind(bool? value)
-    {
-        return value switch
+    
+    private static MaterialIconKind EvaluateSortIconKind(bool? value) =>
+        value switch
         {
             null => MaterialIconKind.CircleOutline,
             true => MaterialIconKind.ChevronDownCircleOutline,
             false => MaterialIconKind.ChevronUpCircleOutline
         };
-    }
-
-    private void SetKeyCountIcon(int count)
-    {
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            ItemsCountIcon = new MaterialIcon
-            {
-                Kind = count switch
-                {
-                    0 => MaterialIconKind.NumericZero,
-                    1 => MaterialIconKind.NumericOne,
-                    2 => MaterialIconKind.NumericTwo,
-                    3 => MaterialIconKind.NumericThree,
-                    4 => MaterialIconKind.NumericFour,
-                    5 => MaterialIconKind.NumericFive,
-                    6 => MaterialIconKind.NumericSix,
-                    7 => MaterialIconKind.NumericSeven,
-                    8 => MaterialIconKind.NumericEight,
-                    9 => MaterialIconKind.NumericNine,
-                    10 => MaterialIconKind.Numeric10,
-                    _ => MaterialIconKind.Infinity
-                },
-                Width = 20,
-                Height = 20
-            };
-        }, DispatcherPriority.MaxValue);
-    }
 
     public override void Dispose()
     {
-        _keyCountObservable.Dispose();
+        _windowTitleHelper.Dispose();
+        _itemsCountIconHelper.Dispose();
+        _commentSortDirectionIconHelper.Dispose();
+        _fingerPrintSortDirectionIconHelper.Dispose();
+        _keyTypeSortDirectionIconHelper.Dispose();
+        foreach (var subscription in _subscriptions)
+            subscription.Dispose();
         GC.SuppressFinalize(this);
         base.Dispose();
     }
