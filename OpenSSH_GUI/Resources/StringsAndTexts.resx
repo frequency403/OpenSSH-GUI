@@ -279,4 +279,7 @@
     <data name="MainWindowTitle" xml:space="preserve">
         <value/>
     </data>
+    <data name="MainWindowViewModelChangeFilenameDisabledTooltip" xml:space="preserve">
+        <value>Can not change filename - file is referenced in configuration files</value>
+    </data>
 </root>

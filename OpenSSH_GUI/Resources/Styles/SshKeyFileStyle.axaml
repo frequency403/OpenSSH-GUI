@@ -114,8 +114,14 @@
                 <Border.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"
+                                  IsEnabled="{Binding KeyFileInfo.CanChangeFileName}"
                                   Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ChangeFilename}"
                                   CommandParameter="{Binding .}">
+                            <MenuItem.Styles>
+                                <Style Selector="MenuItem:disabled">
+                                    <Setter Property="ToolTip.Tip" Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
+                                </Style>
+                            </MenuItem.Styles>
                             <MenuItem.Icon>
                                 <avalonia:MaterialIcon Kind="FileDocumentEdit" />
                             </MenuItem.Icon>
@@ -200,9 +206,15 @@
                             </StackPanel>
                         </Button>
                         <Button Padding="5" Grid.Column="2" HorizontalAlignment="Center"
+                                IsEnabled="{Binding !KeyFileInfo.KeyFileSource.ProvidedByConfig}"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).DeleteKey}"
                                 CommandParameter="{Binding .}"
                                 Background="DarkRed">
+                            <Button.Styles>
+                                <Style Selector="Button:disabled">
+                                    <Setter Property="ToolTip.Tip" Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
+                                </Style>
+                            </Button.Styles>
                             <ToolTip.Tip>
                                 <Label
                                     Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />

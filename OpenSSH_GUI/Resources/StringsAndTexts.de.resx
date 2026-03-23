@@ -264,4 +264,7 @@
     <data name="MainWindowViewModelChangeFilename" xml:space="preserve">
         <value>Dateinamen ändern</value>
     </data>
+    <data name="MainWindowViewModelChangeFilenameDisabledTooltip" xml:space="preserve">
+        <value>Der Dateiname lässt sich nicht sicher ändern, da die Datei in den Konfigurationsdateien refenziert wird</value>
+    </data>
 </root>

@@ -54,8 +54,8 @@ public class DirectoryCrawler(
                         RecurseSubdirectories = false
                     }).Select(e => new FileInfo(e))
                     .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-                    .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
-                                e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
+                    .Where(e => !possibleKeyFiles.Any(k => k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
+                    .Where(e => string.IsNullOrWhiteSpace(e.Extension) || e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
                     .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => SshKeyFileSource.FromDisk(e.FullName))
             ).ToList();
 

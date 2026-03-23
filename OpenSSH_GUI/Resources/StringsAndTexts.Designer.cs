@@ -554,5 +554,11 @@ namespace OpenSSH_GUI.Resources {
                 return ResourceManager.GetString("MainWindowTitle", resourceCulture);
             }
         }
+        
+        public static string MainWindowViewModelChangeFilenameDisabledTooltip {
+            get {
+                return ResourceManager.GetString("MainWindowViewModelChangeFilenameDisabledTooltip", resourceCulture);
+            }
+        }
     }
 }
