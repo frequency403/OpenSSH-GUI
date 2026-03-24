@@ -77,6 +77,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         ResetKey = ReactiveCommand.CreateFromTask<SshKeyFile>(ResetKeyAsync);
         ChangeFilename = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFilenameAsync);
         OpenApplicationSettingsWindow = ReactiveCommand.CreateFromTask(OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>);
+        OpenFileInfoWindow = ReactiveCommand.CreateFromTask<SshKeyFile>(OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFile, FileInfoViewModelInitializer>);
 
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
         
@@ -144,6 +145,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<SshKeyFile, Unit> ResetKey { get; }
     public ReactiveCommand<SshKeyFile, Unit> ChangeFilename { get; }
     public ReactiveCommand<Unit, Unit> OpenApplicationSettingsWindow { get; }
+    public ReactiveCommand<SshKeyFile, Unit> OpenFileInfoWindow { get; }
     public ServerConnectionService ServerConnectionService { get; }
     public SshKeyManager SshKeyManager { get; }
 
@@ -324,8 +326,24 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             MessageBoxButtons.Ok, messageBoxIcon);
     }
 
+    private async Task OpenWindow<TWindow, TViewModel, TParam, TInitializer>(TParam param, CancellationToken token = default)
+        where TWindow : WindowBase<TViewModel, TInitializer> 
+        where TViewModel : ViewModelBase<TViewModel, TInitializer>
+        where TInitializer : class, IInitializerParameters<TViewModel>
+
+    {
+        var initializer = Activator.CreateInstance<TInitializer>();
+        foreach (var property in initializer.GetType().GetProperties().Where(pi => pi.PropertyType == typeof(TParam) && pi.CanWrite))
+            property.SetValue(initializer, param);
+        
+        await _dialogHost.ShowDialog<TWindow, TViewModel>(
+            await _serviceProvider.ResolveViewAsync<TWindow, TViewModel, TInitializer>(initializer, token: token)
+        );
+    }
+
     private async Task OpenWindow<TWindow, TViewModel>(CancellationToken token = default)
-        where TWindow : WindowBase<TViewModel> where TViewModel : ViewModelBase<TViewModel>
+        where TWindow : WindowBase<TViewModel> 
+        where TViewModel : ViewModelBase<TViewModel>
     {
         await _dialogHost.ShowDialog<TWindow, TViewModel>(
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));

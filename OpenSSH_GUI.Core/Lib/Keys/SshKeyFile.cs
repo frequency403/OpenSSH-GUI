@@ -181,7 +181,7 @@ public sealed partial class SshKeyFile : ReactiveObject, IDisposable, IAsyncDisp
     ///     Returns an enumeration of <see cref="FileInfo" /> objects, representing the files associated
     ///     with the SSH key. If no files are linked to the key, an empty enumeration is returned.
     /// </summary>
-    internal IEnumerable<FileInfo> KeyFiles => KeyFileInfo?.Files ?? [];
+    internal FileInfo[] KeyFiles => KeyFileInfo?.Files ?? [];
 
     /// <summary>
     ///     Represents the authorized key associated with an SSH key file.

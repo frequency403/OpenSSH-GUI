@@ -7,7 +7,7 @@ using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
-public partial class FileInfoWindow : WindowBase<FileInfoWindowViewModel>
+public partial class FileInfoWindow : WindowBase<FileInfoWindowViewModel, FileInfoViewModelInitializer>
 {
     public FileInfoWindow()
     {

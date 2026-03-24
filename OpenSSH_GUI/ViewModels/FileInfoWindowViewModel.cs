@@ -13,12 +13,11 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)
     {
         KeyFile = parameters.Key;
-        
         return base.InitializeAsync(parameters, cancellationToken);
     }
 }
 
 public class FileInfoViewModelInitializer : IInitializerParameters<FileInfoWindowViewModel>
 {
-    public required SshKeyFile Key { get; init; }
+    public required SshKeyFile Key { get; set; }
 }

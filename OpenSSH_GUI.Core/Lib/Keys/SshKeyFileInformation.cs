@@ -88,8 +88,8 @@ public class SshKeyFileInformation(SshKeyFileSource keyFileSource)
     /// <summary>
     ///     Represents a collection of key-related files associated with an SSH key.
     /// </summary>
-    public IEnumerable<FileInfo> Files => new[] { FullName, PublicKeyFileName }.Where(e => !string.IsNullOrEmpty(e))
-        .Select(e => new FileInfo(e!));
+    public FileInfo[] Files => new[] { FullName, PublicKeyFileName }.Where(e => !string.IsNullOrEmpty(e))
+        .Select(e => new FileInfo(e!)).ToArray();
 
     /// <summary>
     ///     Gets the current format of the SSH key file.

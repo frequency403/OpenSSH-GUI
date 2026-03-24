@@ -3,9 +3,42 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:io="clr-namespace:System.IO;assembly=System.Runtime"
+        xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.FileInfoWindow"
         x:DataType="viewModels:FileInfoWindowViewModel"
+        Width="400"
+        Height="375"
+        CanResize="False"
+        ShowInTaskbar="True"
+        ShowActivated="True"
+        WindowStartupLocation="CenterOwner"
         Title="FileInfoWindow">
-    Welcome to Avalonia!
+    <Grid RowDefinitions="* * * * *" Margin="20">
+        <StackPanel Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+                <TextBlock Text="Found"/>
+                <TextBlock Text="{Binding KeyFile.KeyFileInfo.Files.Length, FallbackValue=0}" FontWeight="Bold"/>
+                <TextBlock Text="associated Files" />
+            </StackPanel>
+            <Separator />
+            <ItemsControl IsVisible="{Binding KeyFile.IsInitialized}"
+                          ItemsSource="{Binding KeyFile.KeyFileInfo.Files}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type io:FileInfo}">
+                        <StackPanel Margin="0 5">
+                            <TextBlock Text="{Binding FullName}"/>
+                            <Separator Margin="0 5 10 0 "/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+        <StackPanel Grid.Row="2" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
+            <TextBlock Text="Key format"/>
+            <Separator />
+            <TextBlock Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}"/>
+        </StackPanel>
+    </Grid>
 </Window>

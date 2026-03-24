@@ -113,6 +113,13 @@
                 </Border.Styles>
                 <Border.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="Open FileInfo"
+                                  Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindow}"
+                                  CommandParameter="{Binding}">
+                            <MenuItem.Icon>
+                                <avalonia:MaterialIcon Kind="InformationBoxOutline" />
+                            </MenuItem.Icon>
+                        </MenuItem>
                         <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"
                                   IsEnabled="{Binding KeyFileInfo.CanChangeFileName}"
                                   Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ChangeFilename}"
