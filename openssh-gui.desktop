@@ -5,6 +5,6 @@ Name=OpenSSH GUI
 Comment=A GUI for OpenSSH configuration and management
 Exec=openssh-gui
 Icon=openssh-gui
-Categories=Utility;Network;
+Categories=Network;RemoteAccess;
 Terminal=false
 StartupWMClass=OpenSSH_GUI

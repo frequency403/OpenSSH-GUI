@@ -57,7 +57,8 @@ jobs:
             --output "./publish" \
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:Version="${GITHUB_REF_NAME#v}"
       
       # Rename the output file to the desired asset name
       - name: Rename artifact
@@ -75,6 +76,8 @@ jobs:
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
           mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/metainfo
+          cp appimage/openssh-gui.appdata.xml AppDir/usr/share/metainfo/openssh-gui.appdata.xml
 
           cp ./publish/${{ matrix.asset_name }} AppDir/usr/bin/openssh-gui
           chmod +x AppDir/usr/bin/openssh-gui
@@ -85,6 +88,8 @@ jobs:
           cp openssh-gui.desktop AppDir/usr/share/applications/openssh-gui.desktop
 
           cp appimage/AppRun AppDir/AppRun
+          sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${GITHUB_REF_NAME#v}\" date=\"$(date +%Y-%m-%d)\"/>|" \
+          AppDir/usr/share/metainfo/openssh-gui.appdata.xml
           chmod +x AppDir/AppRun
 
           # Build AppImage

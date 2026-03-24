@@ -10,7 +10,7 @@ depends=('dotnet-runtime-10.0')
 makedepends=('git' 'dotnet-sdk-10.0')
 provides=('openssh-gui')
 conflicts=('openssh-gui' 'openssh-gui-bin' 'openssh-gui-nightly')
-source=("git+${url}.git#branch=develop")
+source=("git+${url}.git#branch=development")
 sha256sums=('SKIP')
 
 pkgver() {
