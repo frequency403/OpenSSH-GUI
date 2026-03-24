@@ -92,7 +92,7 @@ jobs:
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
           mkdir -p AppDir/usr/share/applications
           mkdir -p AppDir/usr/share/metainfo
-          cp appimage/openssh-gui.appdata.xml AppDir/usr/share/metainfo/openssh-gui.appdata.xml
+          cp appimage/io.github.OWNER.openssh-gui.appdata.xml AppDir/usr/share/metainfo/io.github.OWNER.openssh-gui.appdata.xml
 
           cp ./publish/${{ matrix.asset_name }} AppDir/usr/bin/openssh-gui
           chmod +x AppDir/usr/bin/openssh-gui
@@ -105,7 +105,7 @@ jobs:
           cp appimage/AppRun AppDir/AppRun
           APPSTREAM_VERSION="${VERSION//+/~}"
           sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
-          AppDir/usr/share/metainfo/openssh-gui.appdata.xml
+          AppDir/usr/share/metainfo/io.github.OWNER.openssh-gui.appdata.xml
           chmod +x AppDir/AppRun
 
           ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir OpenSSH-GUI-nightly-x86_64.AppImage
