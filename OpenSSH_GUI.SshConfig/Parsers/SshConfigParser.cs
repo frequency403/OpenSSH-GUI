@@ -411,7 +411,22 @@ public static class SshConfigParser
 
             foreach (var file in Directory.GetFiles(dir, filePattern).Order(StringComparer.Ordinal))
             {
-                var fileContent = File.ReadAllText(file);
+                string fileContent;
+                try
+                {
+                    fileContent = File.ReadAllText(file);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    options.OnSkippedIncludeFile?.Invoke(file, ex);
+                    continue;
+                }
+                catch (IOException ex)
+                {
+                    options.OnSkippedIncludeFile?.Invoke(file, ex);
+                    continue;
+                }
+
                 var included = ParseDocument(fileContent, file, options, depth + 1);
                 globalItems.AddRange(included.GlobalItems);
                 blocks.AddRange(included.Blocks);

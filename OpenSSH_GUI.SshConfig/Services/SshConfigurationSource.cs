@@ -8,6 +8,14 @@ namespace OpenSSH_GUI.SshConfig.Services;
 public sealed class SshConfigurationSource : FileConfigurationSource
 {
     /// <summary>
+    /// Optional callback invoked when an included file cannot be read due to
+    /// insufficient permissions or an I/O error. Receives the file path and the
+    /// causing exception. When <see langword="null"/>, inaccessible files are
+    /// silently skipped.
+    /// </summary>
+    public Action<string, Exception>? OnSkippedIncludeFile { get; init; }
+    
+    /// <summary>
     ///     Builds the <see cref="SshConfigurationProvider" /> for this source.
     /// </summary>
     /// <param name="builder">The <see cref="IConfigurationBuilder" />.</param>
