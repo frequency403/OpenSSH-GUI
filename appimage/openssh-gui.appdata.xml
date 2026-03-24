@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-    <id>openssh-gui</id>
+    <id>io.github.OWNER.openssh-gui</id>
     <metadata_license>MIT</metadata_license>
     <project_license>MIT</project_license>
 
@@ -14,10 +14,14 @@
         </p>
     </description>
 
+    <developer id="io.github.OWNER">
+        <name>frequency403</name>
+    </developer>
+
     <launchable type="desktop-id">openssh-gui.desktop</launchable>
 
-    <url type="homepage">https://github.com/frequency403/OpenSSH-GUI</url>
-    <url type="bugtracker">https://github.com/frequency403/OpenSSH-GUI/issues</url>
+    <url type="homepage">https://github.com/OWNER/openssh-gui</url>
+    <url type="bugtracker">https://github.com/OWNER/openssh-gui/issues</url>
 
     <releases>
         <release version="0.0.0" date="1970-01-01"/>
