@@ -103,7 +103,7 @@ jobs:
           cp openssh-gui.desktop AppDir/usr/share/applications/openssh-gui.desktop
 
           cp appimage/AppRun AppDir/AppRun
-          APPSTREAM_VERSION="${{ env.VERSION }//+/~}"
+          APPSTREAM_VERSION="${VERSION//+/~}"
           sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
           AppDir/usr/share/metainfo/openssh-gui.appdata.xml
           chmod +x AppDir/AppRun
