@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>io.github.frequency403.openssh_gui</id>
+
+    <name>OpenSSH GUI</name>
+    <summary>A graphical user interface for OpenSSH key management</summary>
+
+    <metadata_license>MIT</metadata_license>
+    <project_license>MIT</project_license>
+
+    <description>
+        <p>
+            An intuitive graphical interface for OpenSSH, designed for Windows, Linux, and Mac users. Built entirely in
+            C#, this open-source tool simplifies managing SSH connections, keys, and configurations.
+        </p>
+        <p>
+            Whether you&apos;re a network administrator, developer, or a casual user, OpenSSH-GUI eliminates the
+            complexity of command-line SSH interactions while retaining the power of OpenSSH. Explore a streamlined
+            experience for secure remote access and system management.
+        </p>
+        <p>
+            Empower your workflow today with OpenSSH-GUI.
+        </p>
+    </description>
+
+    <launchable type="desktop-id">io.github.frequency403.openssh_gui.desktop</launchable>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://raw.githubusercontent.com/frequency403/OpenSSH-GUI/master/images/NewMainUI.png</image>
+        </screenshot>
+        <screenshot>
+            <image>https://raw.githubusercontent.com/frequency403/OpenSSH-GUI/master/images/MainWindow.png</image>
+        </screenshot>
+    </screenshots>
+
+    <icon type="stock">opensshgui</icon>
+    <releases>
+        <release version="0.0.0" date="1970-01-01"/>
+    </releases>
+
+    <categories>
+        <category>System</category>
+        <category>Security</category>
+    </categories>
+
+    <provides>
+        <binary>openssh-gui</binary>
+    </provides>
+</component>

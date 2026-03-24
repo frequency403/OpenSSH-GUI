@@ -11,7 +11,7 @@ provides=('openssh-gui')
 conflicts=('openssh-gui' 'openssh-gui-bin' 'openssh-gui-git')
 source=("${pkgname}-${pkgver}::${url}/releases/download/nightly/OpenSSH-GUI-nightly-linux-x64"
         "${pkgname}-icon-${pkgver}.png::${url}/raw/develop/OpenSSH_GUI/Assets/appicon.png"
-        "${pkgname}-desktop-${pkgver}.desktop::${url}/raw/develop/openssh-gui.desktop"
+        "${pkgname}-desktop-${pkgver}.desktop::${url}/raw/develop/io.github.frequency403.openssh_gui.desktop"
         "${pkgname}-license-${pkgver}::${url}/raw/develop/LICENSE")
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 

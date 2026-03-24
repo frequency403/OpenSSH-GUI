@@ -77,19 +77,24 @@ jobs:
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
           mkdir -p AppDir/usr/share/applications
           mkdir -p AppDir/usr/share/metainfo
-          cp appimage/io.github.frequency403.openssh-gui.appdata.xml AppDir/usr/share/metainfo/io.github.frequency403.openssh-gui.appdata.xml
 
           cp ./publish/${{ matrix.asset_name }} AppDir/usr/bin/openssh-gui
           chmod +x AppDir/usr/bin/openssh-gui
 
           cp OpenSSH_GUI/Assets/appicon.png AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
           cp OpenSSH_GUI/Assets/appicon.png AppDir/openssh-gui.png
-          cp openssh-gui.desktop AppDir/openssh-gui.desktop
-          cp openssh-gui.desktop AppDir/usr/share/applications/openssh-gui.desktop
+          cp appimage/io.github.frequency403.openssh_gui.metainfo.xml AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml
+          sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
+          AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml
+          
+          appstreamcli make-desktop-file \
+          AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml \
+          AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
+          
+          cp AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop \
+          AppDir/io.github.frequency403.openssh_gui.desktop
 
           cp appimage/AppRun AppDir/AppRun
-          sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${GITHUB_REF_NAME#v}\" date=\"$(date +%Y-%m-%d)\"/>|" \
-          AppDir/usr/share/metainfo/io.github.frequency403.openssh-gui.appdata.xml
           chmod +x AppDir/AppRun
 
           # Build AppImage
@@ -101,6 +106,13 @@ jobs:
         with:
           name: OpenSSH-GUI-x86_64.AppImage
           path: OpenSSH-GUI-x86_64.AppImage
+
+      - name: Upload generated desktop file
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: io.github.frequency403.openssh_gui.desktop
+          path: AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -135,7 +147,6 @@ jobs:
 
       - name: Prepare extra assets
         run: |
-          cp openssh-gui.desktop artifacts/
           cp OpenSSH_GUI/Assets/appicon.png artifacts/
           cp LICENSE artifacts/
 
@@ -166,13 +177,19 @@ jobs:
         with:
           name: OpenSSH-GUI-linux-x64
           path: ./
+          
+      - name: Download generated desktop file
+        uses: actions/download-artifact@v4
+        with:
+          name: io.github.frequency403.openssh_gui.desktop
+          path: ./
 
       - name: Update PKGBUILD for openssh-gui-bin
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           SHA_BIN=$(sha256sum OpenSSH-GUI-linux-x64 | cut -d' ' -f1)
           SHA_ICON=$(sha256sum OpenSSH_GUI/Assets/appicon.png | cut -d' ' -f1)
-          SHA_DESKTOP=$(sha256sum openssh-gui.desktop | cut -d' ' -f1)
+          SHA_DESKTOP=$(sha256sum io.github.frequency403.openssh_gui.desktop | cut -d' ' -f1)
           SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
           
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
