@@ -27,9 +27,6 @@ This program - nor the author(s) take responsibility for saved messed up files!
 
 If you need help, open an [Issue]()
 
-The program has a tooltip on every icon, describing what will happen  
-if you click on it.
-
 #### Main Window
 
 ![](images/MainWindow.png)
@@ -127,26 +124,12 @@ If you want to remove the whole host, just toggle the button on the top label.
 
 - The program will create these at startup without prompting if they don't exist:  
   .ssh/(**authorized_keys**, **known_hosts**)  
-  (.config/OpenSSH_GUI/ | AppData\Roaming\OpenSSH_GUI\) **OpenSSH_GUI** and a "logs" directory
-
-### Attention: This program will save your Passwords!
-
-You can not disable this feature. The Passwords are stored when:
-
-- you enter a server connection with a password
-- provide a password for a keyfile
-
-Your passwords are stored on your local machine inside the SQLite Database, protected with AES-Encryption.  
-Only the program itself can read any kind of string value inside the database.
+  (.config/OpenSSH_GUI/ | AppData\Roaming\OpenSSH_GUI\) **OpenSSH_GUI** and a "log" directory
 
 ## Plans for the future
 
-- [X] ~~Add functionality for putting a key onto a Server~~
 - [ ] Beautify UI
-- [X] ~~Add functionality for editing authorized_keys~~
 - [ ] Add functionality for editing local and remote SSH (user/root) Settings
-- [X] ~~Add functionality for editing application settings~~
-- [X] ~~Servers should be saved and quickly accessed in the connect window.~~
 - many more not yet known!
 
 ## Authors
@@ -175,12 +158,6 @@ who participated in this project.
 - [SshNet.Keygen](https://github.com/darinkes/SshNet.Keygen/)
 
 - [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile)
-
-- [EntityFrameworkCore](https://github.com/dotnet/EntityFramework.Docs)
-
-- [EntityFrameworkCore.DataEncryption](https://github.com/Eastrall/EntityFrameworkCore.DataEncryption)
-
-- [SQLite](https://sqlite.org/)
 
 ## License
 
