@@ -30,8 +30,8 @@ jobs:
           BRANCH="${{ github.event.pull_request.head.ref }}"
           VERSION="${BRANCH#release/}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "TAG=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Detected version: $VERSION (tag: ${VERSION})"
+          echo "TAG=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $VERSION (tag: v${VERSION})"
 
       - name: Check if tag already exists
         id: check

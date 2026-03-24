@@ -3,7 +3,7 @@ name: Staging / Nightly Build
 on:
   push:
     branches:
-      - develop
+      - development
 
 env:
   BUILD_CONFIGURATION: Release
@@ -154,6 +154,7 @@ jobs:
         run: gh release delete nightly --yes --cleanup-tag 2>/dev/null || true
 
       - name: Create nightly release
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly
@@ -165,7 +166,13 @@ jobs:
 
             > Automated nightly build — not intended for production use.
           prerelease: true
+          draft: true
           files: "artifacts/**/*"
+          
+      - name: Publish nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit nightly --draft=false --prerelease
 
   # --- JOB 3: AUR NIGHTLY ---
   deploy-aur-nightly:
