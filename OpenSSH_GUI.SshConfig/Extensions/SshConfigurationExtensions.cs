@@ -20,9 +20,9 @@ public static class SshConfigurationExtensions
         ///     <paramref name="builder" />.
         /// </param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
-        public IConfigurationBuilder AddSshConfig(string path)
+        public IConfigurationBuilder AddSshConfig(string path, Action<string, Exception>? loggingAction = null)
         {
-            return builder.AddSshConfig(null, path, false, false);
+            return builder.AddSshConfig(null, path, false, false, loggingAction);
         }
 
         /// <summary>
@@ -34,9 +34,9 @@ public static class SshConfigurationExtensions
         /// </param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
-        public IConfigurationBuilder AddSshConfig(string path, bool optional)
+        public IConfigurationBuilder AddSshConfig(string path, bool optional, Action<string, Exception>? loggingAction = null)
         {
-            return builder.AddSshConfig(null, path, optional, false);
+            return builder.AddSshConfig(null, path, optional, false, loggingAction);
         }
 
         /// <summary>
@@ -50,9 +50,9 @@ public static class SshConfigurationExtensions
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(string path, bool optional,
-            bool reloadOnChange)
+            bool reloadOnChange, Action<string, Exception>? loggingAction = null)
         {
-            return builder.AddSshConfig(null, path, optional, reloadOnChange);
+            return builder.AddSshConfig(null, path, optional, reloadOnChange, loggingAction);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ public static class SshConfigurationExtensions
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(IFileProvider? fileProvider,
-            string path, bool optional, bool reloadOnChange)
+            string path, bool optional, bool reloadOnChange, Action<string, Exception>? loggingAction = null)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentException.ThrowIfNullOrEmpty(path);
@@ -79,7 +79,7 @@ public static class SshConfigurationExtensions
                 s.Optional = optional;
                 s.ReloadOnChange = reloadOnChange;
                 s.ResolveFileProvider();
-            });
+            }, loggingAction);
         }
 
         /// <summary>
@@ -87,9 +87,12 @@ public static class SshConfigurationExtensions
         /// </summary>
         /// <param name="configureSource">Configures the source.</param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
-        public IConfigurationBuilder AddSshConfig(Action<SshConfigurationSource>? configureSource)
+        public IConfigurationBuilder AddSshConfig(Action<SshConfigurationSource>? configureSource, Action<string, Exception>? loggingAction)
         {
-            var source = new SshConfigurationSource();
+            var source = new SshConfigurationSource
+            {
+                OnSkippedIncludeFile = loggingAction
+            };
             configureSource?.Invoke(source);
             return builder.Add(source);
         }

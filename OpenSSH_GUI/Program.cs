@@ -99,10 +99,15 @@ internal sealed class Program
     private static void ConfigureAppConfiguration(HostBuilderContext builderContext,
         IConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true);
-        configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true);
+        configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true, LoggingAction);
+        configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true, LoggingAction);
         configurationBuilder.AddInMemoryCollection([
             new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
         ]);
+    }
+
+    private static void LoggingAction(string arg1, Exception arg2)
+    {
+        Log.Logger.Error(arg2, "Failed to load SSH config file: {Path}", arg1);
     }
 }

@@ -33,7 +33,7 @@
         </screenshot>
     </screenshots>
 
-    <icon type="stock">opensshgui</icon>
+    <icon type="stock">openssh-gui</icon>
     <releases>
         <release version="0.0.0" date="1970-01-01"/>
     </releases>
