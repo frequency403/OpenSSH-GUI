@@ -124,7 +124,17 @@ If you want to remove the whole host, just toggle the button on the top label.
 
 - The program will create these at startup without prompting if they don't exist:  
   .ssh/(**authorized_keys**, **known_hosts**)  
-  (.config/OpenSSH_GUI/ | AppData\Roaming\OpenSSH_GUI\) **OpenSSH_GUI** and a "log" directory
+  (.config/OpenSSH_GUI/ | AppData\Roaming\OpenSSH_GUI\) **OpenSSH_GUI** and a "logs" directory
+
+### Attention: This program will save your Passwords!
+
+You can not disable this feature. The Passwords are stored when:
+
+- you enter a server connection with a password
+- provide a password for a keyfile
+
+Your passwords are stored on your local machine inside the SQLite Database, protected with AES-Encryption.  
+Only the program itself can read any kind of string value inside the database.
 
 ## Plans for the future
 
@@ -156,6 +166,10 @@ who participated in this project.
 - [Serilog](https://serilog.net/)
 
 - [SshNet.Keygen](https://github.com/darinkes/SshNet.Keygen/)
+
+- [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile)
+
+- [EntityFrameworkCore](https://github.com/dotnet/EntityFramework.Docs)
 
 - [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile)
 
