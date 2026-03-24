@@ -549,15 +549,75 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowTitle {
-            get {
-                return ResourceManager.GetString("MainWindowTitle", resourceCulture);
-            }
-        }
-        
         public static string MainWindowViewModelChangeFilenameDisabledTooltip {
             get {
                 return ResourceManager.GetString("MainWindowViewModelChangeFilenameDisabledTooltip", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsWindowTitle {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsWindowTitle", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsWindowCleanupLogsOlderThan {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsWindowCleanupLogsOlderThan", resourceCulture);
+            }
+        }
+        
+        public static string Days {
+            get {
+                return ResourceManager.GetString("Days", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsCleanup {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsCleanup", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsFiles {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsFiles", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsClearWholeCache {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsClearWholeCache", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsProceedWithCaution {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsProceedWithCaution", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsViewModelAreYouSure {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsViewModelAreYouSure", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsViewModelConfirmMessageBoxContent {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsViewModelConfirmMessageBoxContent", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsViewModelConfirmDialogConfirmValue {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsViewModelConfirmDialogConfirmValue", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsViewModelConfirmationError {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsViewModelConfirmationError", resourceCulture);
             }
         }
     }

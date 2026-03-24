@@ -3,6 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:resources="clr-namespace:OpenSSH_GUI.Resources"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
@@ -11,6 +13,7 @@
         CanResize="False"
         ShowInTaskbar="True"
         ShowActivated="True"
+        Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
         WindowStartupLocation="CenterOwner">
     <Grid RowDefinitions="* * *" ColumnDefinitions="* * *">
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
@@ -21,22 +24,32 @@
                       SelectedItem="{Binding CurrentLogLevel}"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Cleanup logs older than" />
+            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
             <Separator HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
             <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
                 <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch" 
                           SelectedItem="{Binding DaysToDeleteSelected}"
                           ItemsSource="{Binding DaysToDelete}"/>
-                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch" Content="Days"/>
+                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch" Content="{x:Static resources:StringsAndTexts.Days}"/>
                 <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
                         Command="{Binding DeleteOldLogFilesCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="3">
-                        <TextBlock Text="Cleanup"/>
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsCleanup}"/>
                         <TextBlock Text="{Binding LogFiles.Count}"/>
-                        <TextBlock Text="files"/>
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsFiles}"/>
                     </StackPanel>
                 </Button>
             </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
+            <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}"/>
+            <Separator />
+            <Button Command="{Binding ClearWholeCacheCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <avalonia:MaterialIcon Kind="ReportProblem"/>   
+                    <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

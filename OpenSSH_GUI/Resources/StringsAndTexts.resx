@@ -276,10 +276,40 @@
     <data name="MainWindowViewModelChangeFilename" xml:space="preserve">
         <value>Change Filename</value>
     </data>
-    <data name="MainWindowTitle" xml:space="preserve">
-        <value/>
-    </data>
     <data name="MainWindowViewModelChangeFilenameDisabledTooltip" xml:space="preserve">
         <value>Can not change filename - file is referenced in configuration files</value>
+    </data>
+    <data name="ApplicationSettingsWindowTitle" xml:space="preserve">
+        <value>Application Settings</value>
+    </data>
+    <data name="ApplicationSettingsWindowCleanupLogsOlderThan" xml:space="preserve">
+        <value>Cleanup logs older than</value>
+    </data>
+    <data name="Days" xml:space="preserve">
+        <value>Days</value>
+    </data>
+    <data name="ApplicationSettingsCleanup" xml:space="preserve">
+        <value>Cleanup</value>
+    </data>
+    <data name="ApplicationSettingsFiles" xml:space="preserve">
+        <value>files</value>
+    </data>
+    <data name="ApplicationSettingsClearWholeCache" xml:space="preserve">
+        <value>Clear whole cache</value>
+    </data>
+    <data name="ApplicationSettingsProceedWithCaution" xml:space="preserve">
+        <value>Proceed with caution</value>
+    </data>
+    <data name="ApplicationSettingsViewModelAreYouSure" xml:space="preserve">
+        <value>Are you sure?</value>
+    </data>
+    <data name="ApplicationSettingsViewModelConfirmMessageBoxContent" xml:space="preserve">
+        <value>This will delete all files and directories in \n{0}!\n\nType "{1}" to confirm deletion</value>
+    </data>
+    <data name="ApplicationSettingsViewModelConfirmDialogConfirmValue" xml:space="preserve">
+        <value>I aM sUrE</value>
+    </data>
+    <data name="ApplicationSettingsViewModelConfirmationError" xml:space="preserve">
+        <value>Provide the correct phrase to continue</value>
     </data>
 </root>

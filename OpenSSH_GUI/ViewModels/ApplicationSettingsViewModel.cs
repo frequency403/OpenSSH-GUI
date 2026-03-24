@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Resources;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Serilog;
@@ -17,6 +19,7 @@ namespace OpenSSH_GUI.ViewModels;
 public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
 {
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
+    private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly LoggingLevelSwitch _levelSwitch;
     public static LogEventLevel[] AvailableLogLevels { get; }= Enum.GetValues<LogEventLevel>();
     public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
@@ -37,6 +40,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, IMessageBoxProvider messageBoxProvider, LoggingLevelSwitch levelSwitch)
     {
         _logger = logger;
+        _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         CurrentLogLevel = levelSwitch.MinimumLevel;
         _levelSwitchSubscription = this.WhenAnyValue(model => model.CurrentLogLevel)
@@ -52,11 +56,56 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
             .ToProperty(this, model => model.CanDeleteOldLogFiles);
         
         DeleteOldLogFilesCommand = ReactiveCommand.Create(DeleteOldLogFiles);
+        ClearWholeCacheCommand = ReactiveCommand.CreateFromTask(ClearWholeCache);
         DaysToDeleteSelected = DaysToDelete[0];
     }
     
     public ReactiveCommand<Unit, Unit> DeleteOldLogFilesCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearWholeCacheCommand { get; }
 
+    private async Task ClearWholeCache(CancellationToken cancellationToken = default)
+    {
+        var loggerConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        var cachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppDomain.CurrentDomain.FriendlyName);
+        if ((await _messageBoxProvider.ShowValidatedInputAsync(StringsAndTexts.ApplicationSettingsViewModelAreYouSure,
+                string.Format(StringsAndTexts.ApplicationSettingsViewModelConfirmMessageBoxContent.Replace("\\n", Environment.NewLine), cachePath, StringsAndTexts.ApplicationSettingsViewModelConfirmDialogConfirmValue),
+                inputToValidate =>
+                {
+                    ArgumentException.ThrowIfNullOrWhiteSpace(inputToValidate);
+                    return string.Equals(inputToValidate, StringsAndTexts.ApplicationSettingsViewModelConfirmDialogConfirmValue, StringComparison.Ordinal)
+                        ? null
+                        : StringsAndTexts.ApplicationSettingsViewModelConfirmationError;
+                })) is { IsConfirmed: false }) return;
+        var stopWatch = Stopwatch.StartNew();
+        foreach (var file in Directory.EnumerateFiles(cachePath, "*", SearchOption.AllDirectories))
+        {
+            try
+            {
+                File.Delete(file);
+                _logger.LogInformation("Deleted file: {File}", file);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error deleting file: {File}", file);
+            }
+        }
+        foreach (var directory in Directory.EnumerateDirectories(cachePath, "*", SearchOption.AllDirectories))
+        {
+            try
+            {
+                if(directory == loggerConfiguration.LogFilePath) continue;
+                Directory.Delete(directory, true);
+                _logger.LogInformation("Deleted directory: {Directory}", directory);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error deleting directory: {Directory}", directory);
+            }
+        }
+        stopWatch.Stop();
+        _logger.LogInformation("Cache cleared in {ElapsedTime} ms", stopWatch.Elapsed.Milliseconds);
+    }
+    
     private void DeleteOldLogFiles()
     {
         foreach (var logFile in LogFiles)

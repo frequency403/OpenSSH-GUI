@@ -267,4 +267,37 @@
     <data name="MainWindowViewModelChangeFilenameDisabledTooltip" xml:space="preserve">
         <value>Der Dateiname lässt sich nicht sicher ändern, da die Datei in den Konfigurationsdateien refenziert wird</value>
     </data>
+    <data name="ApplicationSettingsWindowCleanupLogsOlderThan" xml:space="preserve">
+        <value>Aufräumen von Logs älter als</value>
+    </data>
+    <data name="ApplicationSettingsWindowTitle" xml:space="preserve">
+        <value>Anwendungseinstellungen</value>
+    </data>
+    <data name="Days" xml:space="preserve">
+        <value>Tage</value>
+    </data>
+    <data name="ApplicationSettingsCleanup" xml:space="preserve">
+        <value>Räume</value>
+    </data>
+    <data name="ApplicationSettingsFiles" xml:space="preserve">
+        <value>Dateien auf</value>
+    </data>
+    <data name="ApplicationSettingsClearWholeCache" xml:space="preserve">
+        <value>Gesamtes cache aufräumen</value>
+    </data>
+    <data name="ApplicationSettingsProceedWithCaution" xml:space="preserve">
+        <value>Weiter auf eigene Gefahr</value>
+    </data>
+    <data name="ApplicationSettingsViewModelAreYouSure" xml:space="preserve">
+        <value>Sind Sie sicher?</value>
+    </data>
+    <data name="ApplicationSettingsViewModelConfirmDialogConfirmValue" xml:space="preserve">
+        <value>IcH bEsTäTiGe</value>
+    </data>
+    <data name="ApplicationSettingsViewModelConfirmMessageBoxContent" xml:space="preserve">
+        <value>Dies wird alle Dateien und Ordner sowie deren inhalt in \n{0} löschen! Bestätigen mit "{1}"</value>
+    </data>
+    <data name="ApplicationSettingsViewModelConfirmationError" xml:space="preserve">
+        <value>Bitte den richtigen Bestätigungswert eingeben</value>
+    </data>
 </root>
