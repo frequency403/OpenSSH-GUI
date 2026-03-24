@@ -5,6 +5,8 @@
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:io="clr-namespace:System.IO;assembly=System.Runtime"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.FileInfoWindow"
         x:DataType="viewModels:FileInfoWindowViewModel"
@@ -17,11 +19,41 @@
         Title="FileInfoWindow">
     <Grid RowDefinitions="* * * * *" Margin="20">
         <StackPanel Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
-            <StackPanel Orientation="Horizontal" Spacing="5">
-                <TextBlock Text="Found"/>
-                <TextBlock Text="{Binding KeyFile.KeyFileInfo.Files.Length, FallbackValue=0}" FontWeight="Bold"/>
-                <TextBlock Text="associated Files" />
-            </StackPanel>
+            <UniformGrid Rows="1" Columns="2" ColumnSpacing="50">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
+                    <TextBlock Text="Found"/>
+                    <TextBlock Text="{Binding KeyFile.KeyFileInfo.Files.Length, FallbackValue=0}" FontWeight="Bold"/>
+                    <TextBlock Text="associated Files" />
+                </StackPanel>
+                <UniformGrid Rows="1" Columns="2" ColumnSpacing="5" HorizontalAlignment="Right">
+                    <Button Padding="5" 
+                            IsEnabled="{Binding KeyFile.KeyFileInfo.CanChangeFileName, FallbackValue=False}"
+                            Command="{Binding ChangeFileNames}"
+                            CommandParameter="{Binding KeyFile}"
+                            Background="Purple">
+                        <ToolTip.Tip>
+                            <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"/>
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="FileEditOutline"/>
+                    </Button>
+                    <Button Padding="5" 
+                            IsEnabled="{Binding !KeyFile.KeyFileInfo.KeyFileSource.ProvidedByConfig}"
+                            Command="{Binding DeleteKey}"
+                            CommandParameter="{Binding KeyFile}"
+                            Background="DarkRed">
+                        <Button.Styles>
+                            <Style Selector="Button:disabled">
+                                <Setter Property="ToolTip.Tip" Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
+                            </Style>
+                        </Button.Styles>
+                        <ToolTip.Tip>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="DeleteOutline" />
+                    </Button>
+                </UniformGrid>
+            </UniformGrid>
             <Separator />
             <ItemsControl IsVisible="{Binding KeyFile.IsInitialized}"
                           ItemsSource="{Binding KeyFile.KeyFileInfo.Files}">
@@ -40,5 +72,6 @@
             <Separator />
             <TextBlock Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}"/>
         </StackPanel>
+        <StackPanel Grid.Row="3"></StackPanel>
     </Grid>
 </Window>

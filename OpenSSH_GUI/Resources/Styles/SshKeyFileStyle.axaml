@@ -120,19 +120,6 @@
                                 <avalonia:MaterialIcon Kind="InformationBoxOutline" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"
-                                  IsEnabled="{Binding KeyFileInfo.CanChangeFileName}"
-                                  Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ChangeFilename}"
-                                  CommandParameter="{Binding .}">
-                            <MenuItem.Styles>
-                                <Style Selector="MenuItem:disabled">
-                                    <Setter Property="ToolTip.Tip" Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
-                                </Style>
-                            </MenuItem.Styles>
-                            <MenuItem.Icon>
-                                <avalonia:MaterialIcon Kind="FileDocumentEdit" />
-                            </MenuItem.Icon>
-                        </MenuItem>
                         <MenuItem Header="{x:Static openSshGui:StringsAndTexts.KeysForgetPassword}"
                                   IsVisible="{Binding Password.IsValid}"
                                   Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ResetKey}"
