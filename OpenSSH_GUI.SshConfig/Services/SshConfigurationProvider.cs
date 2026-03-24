@@ -32,7 +32,7 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
         // We use the file path from the source if available for better error messages.
         var filePath = Source.Path;
         var document = SshConfigParser.Parse(content,
-            new SshConfigParserOptions { IncludeBasePath = filePath is null ? null : Path.GetDirectoryName(filePath) });
+            new SshConfigParserOptions { IncludeBasePath = filePath is null ? null : Path.GetDirectoryName(filePath), OnSkippedIncludeFile = Source is SshConfigurationSource source ? source.OnSkippedIncludeFile : null });
 
         var data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
