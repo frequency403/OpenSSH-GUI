@@ -62,10 +62,10 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           BASE_VERSION=$(grep -oPm1 '(?<=<BaseVersion>)[^<]+' Directory.Build.props)
           VERSION="${BASE_VERSION}+${HASH}"
-          echo "GIT_HASH=$HASH" >> "$GITHUB_ENV"
-          echo "BUILD_DATE=$DATE" >> "$GITHUB_ENV"
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "BASE_VERSION=$BASE_VERSION" >> "$GITHUB_ENV"
+          echo "GIT_HASH=$HASH"               >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$DATE"             >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION"             >> "$GITHUB_ENV"
+          echo "BASE_VERSION=$BASE_VERSION"   >> "$GITHUB_ENV"
 
       - name: Publish application
         run: |
@@ -130,14 +130,13 @@ jobs:
           fetch-depth: 0
 
       - name: Resolve git metadata
-        id: meta
         run: |
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y-%m-%d)
-          VERSION="${{ env.BASE_VERSION }}+${HASH}"
-          echo "GIT_HASH=$HASH" >> "$GITHUB_ENV"
-          echo "BUILD_DATE=$DATE" >> "$GITHUB_ENV"
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          BASE_VERSION=$(grep -oPm1 '(?<=<BaseVersion>)[^<]+' Directory.Build.props)
+          echo "GIT_HASH=$HASH"                         >> "$GITHUB_ENV"
+          echo "BUILD_DATE=$DATE"                       >> "$GITHUB_ENV"
+          echo "VERSION=${BASE_VERSION}+${HASH}"        >> "$GITHUB_ENV"
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -146,33 +145,33 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -R artifacts
-
-      # Delete existing nightly release to allow tag re-use
-      - name: Delete existing nightly release
+        
+      - name: Update nightly release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release delete nightly --yes --cleanup-tag 2>/dev/null || true
-
-      - name: Create nightly release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: nightly
-          name: "Nightly (${{ env.BUILD_DATE }}) — ${{ env.VERSION }}"
-          body: |
-            **Branch:** `develop`
-            **Commit:** `${{ env.GIT_HASH }}`
-            **Built:** ${{ env.BUILD_DATE }}
-
-            > Automated nightly build — not intended for production use.
-          prerelease: true
-          draft: true
-          files: "artifacts/**/*"
+        run: |
+          NOTES="**Branch:** \`development\`
+          **Commit:** \`${{ env.GIT_HASH }}\`
+          **Built:** ${{ env.BUILD_DATE }}
+  
+          > Automated nightly build — not intended for production use."
           
-      - name: Publish nightly release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit nightly --draft=false --prerelease
+          if gh release view nightly &>/dev/null; then
+            gh release edit nightly \
+              --title "Nightly (${{ env.BUILD_DATE }}) — ${{ env.VERSION }}" \
+              --notes "$NOTES" \
+              --prerelease
+          
+            gh release view nightly --json assets --jq '.assets[].name' \
+              | xargs -r -I{} gh release delete-asset nightly {} --yes
+          
+            find artifacts -type f | xargs gh release upload nightly
+          else
+            find artifacts -type f | xargs gh release create nightly \
+              --title "Nightly (${{ env.BUILD_DATE }}) — ${{ env.VERSION }}" \
+              --notes "$NOTES" \
+              --prerelease
+          fi
 
   # --- JOB 3: AUR NIGHTLY ---
   deploy-aur-nightly:
@@ -196,8 +195,10 @@ jobs:
         run: |
           HASH=$(git rev-parse --short HEAD)
           DATE=$(date +%Y%m%d)
-          VERSION="${{ env.BASE_VERSION }}.${DATE}.${HASH}"
-
+          BASE_VERSION=$(grep -oPm1 '(?<=<BaseVersion>)[^<]+' Directory.Build.props)
+          VERSION="${BASE_VERSION}.${DATE}.${HASH}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          
           SHA_BIN=$(sha256sum OpenSSH-GUI-nightly-linux-x64 | cut -d' ' -f1)
           SHA_ICON=$(sha256sum OpenSSH_GUI/Assets/appicon.png | cut -d' ' -f1)
           SHA_DESKTOP=$(sha256sum openssh-gui.desktop | cut -d' ' -f1)
