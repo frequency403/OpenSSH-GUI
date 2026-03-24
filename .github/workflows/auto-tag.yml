@@ -29,6 +29,7 @@ jobs:
         run: |
           BRANCH="${{ github.event.pull_request.head.ref }}"
           VERSION="${BRANCH#release/}"
+          VERSION="${VERSION#v}" 
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG=v${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Detected version: $VERSION (tag: v${VERSION})"

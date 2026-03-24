@@ -1,10 +1,9 @@
 ﻿name: Build and Release
 
 on:
-  workflow_dispatch:
   push:
     tags:
-      - 'v*.*.*' # Trigger only on version tags like v1.2.3
+      - 'v[0-9]*.[0-9]*.[0-9]*'# Trigger only on version tags like v1.2.3
 
 jobs:
   # --- JOB 1: BUILD ---
