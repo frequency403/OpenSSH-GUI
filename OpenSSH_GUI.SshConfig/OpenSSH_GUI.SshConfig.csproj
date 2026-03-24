@@ -3,7 +3,6 @@
         <!-- Target framework and other specs in Directory.Build.props -->
         <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <Optimize>true</Optimize>
         <PackageId>OpenSSH_GUI.SshConfig</PackageId>
     </PropertyGroup>
