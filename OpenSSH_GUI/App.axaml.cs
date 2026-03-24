@@ -1,93 +1,62 @@
-#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:35
-
-#endregion
-
-using System;
-using System.IO;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using DryIoc;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Database.Context;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Lib.Misc;
-using OpenSSH_GUI.Core.Lib.Settings;
-using OpenSSH_GUI.Core.Lib.Static;
+using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
-using Serilog;
-using Serilog.Events;
 
 namespace OpenSSH_GUI;
 
-public class App : Application
+public class App(ILogger<App> logger, IResolver resolver) : Application
 {
-    public static ServiceProvider ServiceProvider { get; private set; }
-    public static WindowIcon WindowIcon => new (new Bitmap(AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/appicon.ico"))));
-    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
-        ServiceProvider = BuildServiceCollection().BuildServiceProvider();
-        using (var db = new OpenSshGuiDbContext())
+        try
         {
-            db.Database.Migrate();
-            if (!db.Settings.Any()) db.Settings.Add(new Settings());
-            db.SaveChanges();
+            base.OnFrameworkInitializationCompleted();
+            if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+            desktop.MainWindow = await resolver.ResolveViewAsync<MainWindow, MainWindowViewModel>();
+            logger.LogInformation("MainWindow created");
+            desktop.MainWindow.Opened += OnMainWindowOpened;
         }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error during application initialization");
+        }
+    }
+    
+    /// <summary>
+    /// Triggers the initial SSH key search after the main window has been presented,
+    /// ensuring the UI is fully ready before background work begins.
+    /// </summary>
+    private async void OnMainWindowOpened(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (sender is Window window)
+                window.Opened -= OnMainWindowOpened;
 
-        InitAndOrPrepareServices();
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = new MainWindow
+            try
             {
-                DataContext = new MainWindowViewModel()
-            };
-        base.OnFrameworkInitializationCompleted();
-    }
-
-    private void InitAndOrPrepareServices()
-    {
-        var logger = ServiceProvider.GetRequiredService<ILogger<App>>();
-        DirectoryCrawler.ProvideContext(logger);
-        FileOperations.EnsureFilesAndFoldersExist(logger);
-    }
-
-    private ServiceCollection BuildServiceCollection()
-    {
-        var collection = new ServiceCollection();
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            AppDomain.CurrentDomain.FriendlyName);
-        var logFilebasePath = Path.Combine(appDataPath, "logs");
-        if (!Directory.Exists(logFilebasePath)) Directory.CreateDirectory(logFilebasePath);
-        var logFilePath = Path.Combine(logFilebasePath, $"{AppDomain.CurrentDomain.FriendlyName}.log");
-        var serilog = new LoggerConfiguration()
-            .Enrich.FromLogContext()
-            .WriteTo.File(logFilePath, LogEventLevel.Debug, rollingInterval: RollingInterval.Day)
-            .CreateLogger();
-        // AddServices
-
-        collection.AddLogging(e => e.AddSerilog(serilog, true));
-
-        // return ServiceCollection
-        return collection;
-    }
-
-    private void CloseProgram(object? sender, EventArgs e)
-    {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.Shutdown();
+                await resolver.Resolve<SshKeyManager>().InitialSearchAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Initial key search failed");
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Error handling MainWindowOpened event");
+        }
     }
 }

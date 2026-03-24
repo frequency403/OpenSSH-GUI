@@ -1,14 +1,6 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:30
-
-#endregion
-
-using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Interfaces.KnownHosts;
+﻿using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using ReactiveUI;
+using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
@@ -18,11 +10,6 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 public class KnownHostKey : ReactiveObject, IKnownHostKey
 {
     /// <summary>
-    ///     Represents a known host key.
-    /// </summary>
-    private bool _markedForDeletion;
-
-    /// <summary>
     ///     Represents a known host key in the OpenSSH GUI.
     /// </summary>
     public KnownHostKey(string entry)
@@ -30,7 +17,7 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
         EntryWithoutHost = entry;
         var splitted = EntryWithoutHost.Split(' ');
         TypeDeclarationInFile = splitted[0];
-        KeyType = Enum.Parse<KeyType>(
+        KeyType = Enum.Parse<SshKeyType>(
             TypeDeclarationInFile.StartsWith("ssh-")
                 ? TypeDeclarationInFile.Replace("ssh-", "")
                 : TypeDeclarationInFile.Split('-')[0], true);
@@ -45,7 +32,7 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
     /// <summary>
     ///     Represents the type of a known host key.
     /// </summary>
-    public KeyType KeyType { get; }
+    public SshKeyType KeyType { get; }
 
     /// <summary>
     ///     Represents a known host key.
@@ -62,7 +49,7 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
     /// </summary>
     public bool MarkedForDeletion
     {
-        get => _markedForDeletion;
-        set => this.RaiseAndSetIfChanged(ref _markedForDeletion, value);
+        get;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 }

@@ -1,0 +1,138 @@
+# ============================================================
+# Global SSH Client Configuration
+# /etc/ssh/ssh_config
+# Managed by: IT-Ops / Ansible (role: ssh-hardening v2.3)
+# DO NOT edit manually – changes will be overwritten!
+# ============================================================
+
+# ------------------------------------------------------------------
+# SYSTEM-WIDE DEFAULTS
+# Can be overridden by the user's ~/.ssh/config.
+# ------------------------------------------------------------------
+Host *
+    # --- Connection behaviour ---
+    ConnectTimeout              20
+    TCPKeepAlive                yes
+    ServerAliveInterval         120
+    ServerAliveCountMax         3
+    # No automatic agent forwarding system-wide
+    ForwardAgent                no
+    ForwardX11                  no
+    ForwardX11Trusted           no
+
+    # --- Authentication ---
+    # Order: key first, then interactive
+    PreferredAuthentications    publickey,keyboard-interactive,password
+    PasswordAuthentication      yes
+    PubkeyAuthentication        yes
+    GSSAPIAuthentication        no
+    GSSAPIDelegateCredentials   no
+    HostbasedAuthentication     no
+    # Do not automatically load keys from the agent
+    AddKeysToAgent              no
+    IdentitiesOnly              no
+
+    # --- Known hosts ---
+    StrictHostKeyChecking       ask
+    HashKnownHosts              yes
+    # System-wide known_hosts in addition to the user's own file
+    GlobalKnownHostsFile        /etc/ssh/ssh_known_hosts /etc/ssh/ssh_known_hosts2
+
+    # --- Cryptography (BSI-compliant, as of 2024) ---
+    # Only modern, considered-secure algorithms
+    Ciphers                     chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+    MACs                        hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+    KexAlgorithms               curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group18-sha512,diffie-hellman-group16-sha512,diffie-hellman-group14-sha256
+    HostKeyAlgorithms           ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256
+    PubkeyAcceptedKeyTypes      ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+    # --- Performance ---
+    Compression                 no
+
+    # --- Security ---
+    # ControlMaster disabled system-wide (users may enable it)
+    ControlMaster               no
+    # Disallow local commands triggered by host configuration
+    PermitLocalCommand          no
+    # Do not silently accept changed host keys
+    VisualHostKey               yes
+    # Security-relevant logging
+    LogLevel                    VERBOSE
+    # Disable escape sequence (prevents session hijacking)
+    EscapeChar                  none
+
+    # --- Forwarding ---
+    Tunnel                      no
+    TunnelDevice                any:any
+    ExitOnForwardFailure        no
+    ClearAllForwardings         no
+
+    # --- Miscellaneous ---
+    BatchMode                   no
+    CheckHostIP                 yes
+    AddressFamily               inet
+    NumberOfPasswordPrompts     3
+    SendEnv                     LANG LC_*
+
+# ------------------------------------------------------------------
+# SPECIAL RULES FOR INTERNAL HOSTS
+# (Matched before the global * where SSH honours ordering)
+# Note: SSH applies first match – more restrictive rules go on top!
+# ------------------------------------------------------------------
+# Internal infrastructure: stricter rules, no password auth
+Host *.internal.example.com *.infra.example.com
+    PasswordAuthentication      no
+    PubkeyAuthentication        yes
+    StrictHostKeyChecking       yes
+    LogLevel                    INFO
+    ConnectTimeout              10
+
+# CI/CD systems: batch mode, no interactive login
+Host ci.example.com *.ci.example.com
+    BatchMode                   yes
+    PasswordAuthentication      no
+    StrictHostKeyChecking       yes
+    ConnectTimeout              5
+    ServerAliveInterval         30
+
+# Monitoring systems: read-only access, no agent forwarding
+Host mon*.example.com nagios.example.com zabbix.example.com
+    ForwardAgent                no
+    PasswordAuthentication      no
+    StrictHostKeyChecking       yes
+
+# External partners: maximum security, keys only
+Host *.partner-company.de *.ext-vendor.eu secure-ftp.supplychain.net
+    PasswordAuthentication      no
+    PubkeyAuthentication        yes
+    StrictHostKeyChecking       yes
+    IdentitiesOnly              yes
+    ConnectTimeout              30
+    # Only the strongest algorithms
+    Ciphers                     chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+    MACs                        hmac-sha2-512-etm@openssh.com
+    KexAlgorithms               curve25519-sha256
+
+# Legacy exceptions (e.g. old OT systems, IoT devices)
+# WARNING: Only enable after an approved change ticket!
+Host legacy.dmz.example.com old-scada.plant.example.com
+    # Explicitly allow deprecated algorithms
+    HostKeyAlgorithms           +ssh-rsa
+    PubkeyAcceptedKeyTypes      +ssh-rsa
+    KexAlgorithms               +diffie-hellman-group14-sha1,diffie-hellman-group14-sha256
+    Ciphers                     +3des-cbc,aes128-cbc
+    MACs                        +hmac-sha1
+    LogLevel                    DEBUG3
+    StrictHostKeyChecking       yes
+    # Must be added manually to /etc/ssh/ssh_known_hosts
+
+# GitHub / GitLab (public)
+Host github.com
+    StrictHostKeyChecking       yes
+    PasswordAuthentication      no
+    IdentitiesOnly              yes
+
+Host gitlab.com
+    StrictHostKeyChecking       yes
+    PasswordAuthentication      no
+    IdentitiesOnly              yes

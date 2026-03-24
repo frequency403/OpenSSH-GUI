@@ -1,17 +1,15 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:38
-
-#endregion
-
-using OpenSSH_GUI.Resources.Wrapper;
+﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 
 namespace OpenSSH_GUI.Views;
 
-public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsViewModel>
+[UsedImplicitly]
+public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsWindowViewModel>
 {
     public EditKnownHostsWindow()
     {

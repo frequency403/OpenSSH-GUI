@@ -1,0 +1,81 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="OpenSSH_GUI.Dialogs.Views.MessageBoxDialog"
+        Title="Message"
+        Width="440"
+        MinWidth="300"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="False">
+
+    <Border Padding="24 20 24 16">
+        <Grid RowDefinitions="*,16,Auto">
+
+            <!-- Content row: icon + message -->
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        Spacing="16"
+                        VerticalAlignment="Top">
+
+                <!-- Material Icon – visibility and kind set from code-behind -->
+                <avalonia:MaterialIcon x:Name="PART_MaterialIcon"
+                                       Width="32"
+                                       Height="32"
+                                       VerticalAlignment="Top"
+                                       IsVisible="False" />
+
+                <!-- Legacy Icon label – kept for backward compatibility if needed -->
+                <TextBlock x:Name="PART_Icon"
+                           FontSize="28"
+                           VerticalAlignment="Top"
+                           IsVisible="False" />
+
+                <TextBlock x:Name="PART_Message"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"
+                           MaxWidth="340"
+                           FontSize="14" />
+            </StackPanel>
+
+            <!-- Spacer -->
+            <Border Grid.Row="1" />
+
+            <!-- Button row -->
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="8">
+
+                <Button x:Name="PART_YesButton"
+                        Content="Yes"
+                        MinWidth="88"
+                        IsVisible="False"
+                        Click="OnYesClick" />
+
+                <Button x:Name="PART_NoButton"
+                        Content="No"
+                        MinWidth="88"
+                        IsVisible="False"
+                        Click="OnNoClick" />
+
+                <Button x:Name="PART_OkButton"
+                        Content="OK"
+                        MinWidth="88"
+                        IsDefault="True"
+                        IsVisible="False"
+                        Click="OnOkClick" />
+
+                <Button x:Name="PART_CancelButton"
+                        Content="Cancel"
+                        MinWidth="88"
+                        IsCancel="True"
+                        IsVisible="False"
+                        Click="OnCancelClick" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

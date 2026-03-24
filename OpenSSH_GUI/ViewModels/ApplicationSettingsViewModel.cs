@@ -1,102 +1,153 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:41
-
-#endregion
-
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.Diagnostics;
+using System.Reactive;
 using System.Reactive.Linq;
-using Microsoft.EntityFrameworkCore;
-using MsBox.Avalonia;
-using OpenSSH_GUI.Core.Database.Context;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Settings;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Resources;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
+[UsedImplicitly]
+public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
 {
-    private bool _convertPpkAutomatically;
-
-    private List<IConnectionCredentials> _knownServers;
-
-    private readonly Settings _settings;
-
-    public ObservableCollection<ISshKey> Keys = [];
-    public Interaction<EditSavedServerEntryViewModel, EditSavedServerEntryViewModel?> ShowEditEntry = new();
-
-    public ApplicationSettingsViewModel(ref ObservableCollection<ISshKey> sshKeys)
+    private readonly ILogger<ApplicationSettingsViewModel> _logger;
+    private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly LoggingLevelSwitch _levelSwitch;
+    public static LogEventLevel[] AvailableLogLevels { get; }= Enum.GetValues<LogEventLevel>();
+    public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
+    private readonly IDisposable _levelSwitchSubscription;
+    private readonly IDisposable _daysToDeleteSubscription;
+    
+    [Reactive]
+    private LogEventLevel _currentLogLevel;
+    
+    [Reactive]
+    private int _daysToDeleteSelected;
+    
+    public ObservableCollection<string> LogFiles { get; } = [];
+    
+    [ObservableAsProperty] 
+    private bool _canDeleteOldLogFiles;
+    
+    public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, IMessageBoxProvider messageBoxProvider, LoggingLevelSwitch levelSwitch)
     {
-        Keys = sshKeys;
-        using var dbContext = new OpenSshGuiDbContext();
-        _settings = dbContext.Settings.First();
-        _convertPpkAutomatically = _settings.ConvertPpkAutomatically;
-        _knownServers = dbContext.ConnectionCredentialsDtos.Select(e => e.ToCredentials()).ToList();
+        _logger = logger;
+        _messageBoxProvider = messageBoxProvider;
+        _levelSwitch = levelSwitch;
+        CurrentLogLevel = levelSwitch.MinimumLevel;
+        _levelSwitchSubscription = this.WhenAnyValue(model => model.CurrentLogLevel)
+            .DistinctUntilChanged()
+            .Subscribe(OnNext);
+        
+        _daysToDeleteSubscription = this.WhenAnyValue(model => model.DaysToDeleteSelected)
+            .Subscribe(OnNext);
 
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ApplicationSettingsViewModel?>(async e =>
-        {
-            if (!e) return this;
-            await using var context = new OpenSshGuiDbContext();
-            var file = context.Settings.Update(_settings).Entity;
-            file.ConvertPpkAutomatically = ConvertPpkAutomatically;
-            var knownServerIds = KnownServers.Select(s => s.Id).ToList();
-            await context.ConnectionCredentialsDtos.Where(f => !knownServerIds.Contains(f.Id)).ExecuteDeleteAsync();
-            await context.SaveChangesAsync();
-            return this;
-        });
+        _canDeleteOldLogFilesHelper = this.WhenAnyValue(model => model.LogFiles.Count)
+            .DistinctUntilChanged()
+            .Select(e => e > 0)
+            .ToProperty(this, model => model.CanDeleteOldLogFiles);
+        
+        DeleteOldLogFilesCommand = ReactiveCommand.Create(DeleteOldLogFiles);
+        ClearWholeCacheCommand = ReactiveCommand.CreateFromTask(ClearWholeCache);
+        DaysToDeleteSelected = DaysToDelete[0];
     }
+    
+    public ReactiveCommand<Unit, Unit> DeleteOldLogFilesCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearWholeCacheCommand { get; }
 
-
-    public List<IConnectionCredentials> KnownServers
+    private async Task ClearWholeCache(CancellationToken cancellationToken = default)
     {
-        get => _knownServers;
-        set => this.RaiseAndSetIfChanged(ref _knownServers, value);
-    }
-
-    public bool ConvertPpkAutomatically
-    {
-        get => _convertPpkAutomatically;
-        set => this.RaiseAndSetIfChanged(ref _convertPpkAutomatically, value);
-    }
-
-    public ReactiveCommand<IConnectionCredentials, ApplicationSettingsViewModel?> RemoveServer =>
-        ReactiveCommand.Create<IConnectionCredentials, ApplicationSettingsViewModel?>(input =>
-        {
-            var index = KnownServers.IndexOf(input);
-            var copy = KnownServers.ToList();
-            copy.RemoveAt(index);
-            KnownServers = copy;
-            return this;
-        });
-
-    public ReactiveCommand<IConnectionCredentials, IConnectionCredentials?> EditEntry =>
-        ReactiveCommand.CreateFromTask<IConnectionCredentials, IConnectionCredentials?>(
-            async e =>
-            {
-                if (e is IMultiKeyConnectionCredentials)
+        var loggerConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        var cachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppDomain.CurrentDomain.FriendlyName);
+        if ((await _messageBoxProvider.ShowValidatedInputAsync(StringsAndTexts.ApplicationSettingsViewModelAreYouSure,
+                string.Format(StringsAndTexts.ApplicationSettingsViewModelConfirmMessageBoxContent.Replace("\\n", Environment.NewLine), cachePath, StringsAndTexts.ApplicationSettingsViewModelConfirmDialogConfirmValue),
+                inputToValidate =>
                 {
-                    var box = MessageBoxManager.GetMessageBoxStandard(
-                        StringsAndTexts.ApplicationSettingsEditErrorBoxTitle,
-                        StringsAndTexts.ApplicationSettingsEditErrorBoxText);
-                    await box.ShowAsync();
-                    return null;
-                }
+                    ArgumentException.ThrowIfNullOrWhiteSpace(inputToValidate);
+                    return string.Equals(inputToValidate, StringsAndTexts.ApplicationSettingsViewModelConfirmDialogConfirmValue, StringComparison.Ordinal)
+                        ? null
+                        : StringsAndTexts.ApplicationSettingsViewModelConfirmationError;
+                })) is { IsConfirmed: false }) return;
+        var stopWatch = Stopwatch.StartNew();
+        foreach (var file in Directory.EnumerateFiles(cachePath, "*", SearchOption.AllDirectories))
+        {
+            try
+            {
+                File.Delete(file);
+                _logger.LogInformation("Deleted file: {File}", file);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error deleting file: {File}", file);
+            }
+        }
+        foreach (var directory in Directory.EnumerateDirectories(cachePath, "*", SearchOption.AllDirectories))
+        {
+            try
+            {
+                if(directory == loggerConfiguration.LogFilePath) continue;
+                Directory.Delete(directory, true);
+                _logger.LogInformation("Deleted directory: {Directory}", directory);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error deleting directory: {Directory}", directory);
+            }
+        }
+        stopWatch.Stop();
+        _logger.LogInformation("Cache cleared in {ElapsedTime} ms", stopWatch.Elapsed.Milliseconds);
+    }
+    
+    private void DeleteOldLogFiles()
+    {
+        foreach (var logFile in LogFiles)
+        {
+            try
+            {
+                if (!File.Exists(logFile)) continue;
+                File.Delete(logFile);
+                _logger.LogInformation("Deleted log file: {LogFile}", logFile);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to delete log file: {LogFile}", logFile);
+            }
+        }
+        LogFiles.Clear();
+    }
 
-                var service = new EditSavedServerEntryViewModel();
-                service.SetValues(ref Keys, e);
-                var result = await ShowEditEntry.Handle(service);
-                if (result is null) return e;
-                var list = KnownServers.ToList();
-                var index = list.IndexOf(e);
-                list.RemoveAt(index);
-                list.Insert(index, result.CredentialsToEdit);
-                KnownServers = list;
-                return result.CredentialsToEdit; // @TODO DoesNotShowKeys
-            });
+    private void OnNext(int obj)
+    {
+        _logger.LogDebug("Days to delete selected: {Days}", obj);
+        var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        LogFiles.Clear();
+        foreach (var logFile in Directory.EnumerateFiles(logConfiguration.LogFilePath, "*.log", SearchOption.TopDirectoryOnly))
+        {
+            var extractedDate = Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty)[..8];
+            if(DateOnly.TryParseExact(extractedDate, "yyyyMMdd", out var dateTime) && DateTime.Now.Subtract(dateTime.ToDateTime(TimeOnly.MinValue)) > TimeSpan.FromDays(obj))
+                LogFiles.Add(logFile);
+        }
+    }
+
+    private void OnNext(LogEventLevel obj)
+    {
+        _levelSwitch.MinimumLevel = obj;
+        _logger.LogCritical("Log level changed to {LogLevel}", obj);
+    }
+
+    public override void Dispose()
+    {
+        _levelSwitchSubscription.Dispose();
+        _daysToDeleteSubscription.Dispose();
+        GC.SuppressFinalize(this);
+        base.Dispose();
+    }
 }

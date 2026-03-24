@@ -1,7 +1,3 @@
-// File Created by: Oliver Schantz
-// Created: 16.05.2024 - 08:05:28
-// Last edit: 16.05.2024 - 08:05:28
-
 using Renci.SshNet;
 using SshNet.Keygen.Extensions;
 

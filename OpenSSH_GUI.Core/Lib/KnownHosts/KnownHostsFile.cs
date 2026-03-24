@@ -1,16 +1,5 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:30
-
-#endregion
-
-using System.Collections.ObjectModel;
-using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Extensions;
+﻿using System.Collections.ObjectModel;
 using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using OpenSSH_GUI.Core.Lib.Static;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -21,22 +10,44 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
 {
     /// Represents the path to the known hosts file.
     /// /
-    private readonly string _fileKnownHostsPath = "";
+    private string _fileKnownHostsPath = "";
 
     /// <summary>
     ///     Gets or sets a boolean value indicating whether the `KnownHostsFile` object is created from a server or not.
     /// </summary>
-    private readonly bool _isFromServer;
+    private bool _isFromServer;
 
     /// <summary>
-    ///     Represents a collection of known host entries in a file.
+    ///     Initializes a new instance of the <see cref="KnownHostsFile" /> class.
     /// </summary>
-    private ObservableCollection<IKnownHost> _knownHosts = [];
+    public KnownHostsFile()
+    {
+    }
 
     /// <summary>
     ///     Represents a known hosts file that stores information about trusted hosts.
     /// </summary>
+    /// <param name="knownHostsPathOrContent">The path to the file or its content.</param>
+    /// <param name="fromServer">Indicates whether the content is from a server.</param>
     public KnownHostsFile(string knownHostsPathOrContent, bool fromServer = false)
+    {
+        _isFromServer = fromServer;
+        if (_isFromServer)
+            SetKnownHosts(knownHostsPathOrContent);
+        else
+            _fileKnownHostsPath = knownHostsPathOrContent;
+        // Synchronous reading is deprecated. Use InitializeAsync.
+    }
+
+    /// <summary>
+    ///     Initializes the known hosts file asynchronously.
+    /// </summary>
+    /// <param name="knownHostsPathOrContent">The path to the file or its content.</param>
+    /// <param name="fromServer">Indicates whether the content is from a server.</param>
+    /// <param name="token">A cancellation token.</param>
+    /// <returns>A <see cref="ValueTask{IKnownHostsFile}" /> representing the initialized object.</returns>
+    public async ValueTask<IKnownHostsFile> InitializeAsync(string knownHostsPathOrContent, bool fromServer = false,
+        CancellationToken token = default)
     {
         _isFromServer = fromServer;
         if (_isFromServer)
@@ -46,8 +57,10 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
         else
         {
             _fileKnownHostsPath = knownHostsPathOrContent;
-            ReadContent();
+            await ReadContentAsync();
         }
+
+        return this;
     }
 
     /// <summary>
@@ -60,9 +73,9 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// </summary>
     public ObservableCollection<IKnownHost> KnownHosts
     {
-        get => _knownHosts;
-        private set => this.RaiseAndSetIfChanged(ref _knownHosts, value);
-    }
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
 
     /// <summary>
     ///     Asynchronously reads the contents of the known hosts file.
@@ -71,13 +84,14 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     ///     The file stream to read from. If null, the method reads from the file specified in the
     ///     constructor.
     /// </param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task ReadContentAsync(FileStream? stream = null)
+    /// <returns>A <see cref="ValueTask" /> representing the asynchronous operation.</returns>
+    public async ValueTask ReadContentAsync(FileStream? stream = null)
     {
         if (_isFromServer) return;
         if (stream is null)
         {
-            await using var file = FileOperations.OpenOrCreate(_fileKnownHostsPath);
+            if (string.IsNullOrEmpty(_fileKnownHostsPath)) return;
+            await using var file = new FileStream(_fileKnownHostsPath, FileMode.OpenOrCreate);
             using var streamReader = new StreamReader(file, leaveOpen: true);
             SetKnownHosts(await streamReader.ReadToEndAsync());
         }
@@ -98,13 +112,15 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     }
 
     /// <summary>
-    ///     Updates the content of the known hosts file.
+    ///     Updates the content of the known hosts file asynchronously.
     /// </summary>
-    /// <returns>A task representing the update operation.</returns>
-    public async Task UpdateFile()
+    /// <returns>A <see cref="ValueTask" /> representing the update operation.</returns>
+    public async ValueTask UpdateFileAsync()
     {
         if (_isFromServer) return;
-        await using var streamWriter = new StreamWriter(FileOperations.OpenTruncated(_fileKnownHostsPath));
+        if (string.IsNullOrEmpty(_fileKnownHostsPath)) return;
+        await using var file = new FileStream(_fileKnownHostsPath, FileMode.Truncate);
+        await using var streamWriter = new StreamWriter(file);
         var newContent = KnownHosts
             .Where(e => !e.DeleteWholeHost)
             .Aggregate("", (current, host) => current + host.GetAllEntries());
@@ -139,19 +155,5 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
             .Where(e => !string.IsNullOrEmpty(e))
             .GroupBy(e => e.Split(' ')[0])
             .Select(e => new KnownHost(e)));
-    }
-
-    /// <summary>
-    ///     Reads the content of the known hosts file.
-    /// </summary>
-    /// <param name="stream">Optional file stream to read from. If null, the file specified during instantiation will be used.</param>
-    private void ReadContent(FileStream? stream = null)
-    {
-        if (stream is null)
-        {
-            SetKnownHosts(File.ReadAllText(SshConfigFiles.Known_Hosts.GetPathOfFile()));
-            return;
-        }
-        ReadContentAsync(stream).GetAwaiter().GetResult();
     }
 }

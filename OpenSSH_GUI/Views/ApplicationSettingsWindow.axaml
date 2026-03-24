@@ -1,85 +1,55 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
-        Width="400"
-        Height="450"
+        xmlns:resources="clr-namespace:OpenSSH_GUI.Resources"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
-        Title="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsDescription}">
-    <Grid x:Name="TheItemsGrid"
-          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
-          ColumnDefinitions="* *" RowDefinitions="* * * *">
-        <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5">
-            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsDescription}" />
-            <Separator Padding="5" />
+        Width="400"
+        Height="375"
+        CanResize="False"
+        ShowInTaskbar="True"
+        ShowActivated="True"
+        Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="* * *" ColumnDefinitions="* * *">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label Content="LogLevel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Separator />
+            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                      ItemsSource="{Binding AvailableLogLevels}"
+                      SelectedItem="{Binding CurrentLogLevel}"/>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Margin="5"
-                    VerticalAlignment="Bottom">
-            <CheckBox Padding="5" IsChecked="{Binding ConvertPpkAutomatically, Mode=TwoWay}">
-                <Label Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsAutoConvertText}" />
-            </CheckBox>
-            <Separator Padding="5" />
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
+            <Separator HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+            <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
+                <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                          SelectedItem="{Binding DaysToDeleteSelected}"
+                          ItemsSource="{Binding DaysToDelete}"/>
+                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch" Content="{x:Static resources:StringsAndTexts.Days}"/>
+                <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
+                        Command="{Binding DeleteOldLogFilesCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsCleanup}"/>
+                        <TextBlock Text="{Binding LogFiles.Count}"/>
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsFiles}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Grid.RowSpan="2" HorizontalAlignment="Stretch"
-                    Margin="5"
-                    VerticalAlignment="Stretch">
-            <Label Padding="5" Content="{x:Static openSshGui:StringsAndTexts.ApplicationSettingsSavedServers}" />
-            <Separator Padding="5" />
-            <ScrollViewer>
-                <ItemsControl Padding="5" ItemsSource="{Binding KnownServers}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderThickness="0 0 0 1" BorderBrush="DimGray" CornerRadius="5" Padding="5">
-                                <Grid ColumnDefinitions="* * * *">
-                                    <Label Grid.Column="0" HorizontalAlignment="Left" Grid.ColumnSpan="2"
-                                           Content="{Binding Display}" />
-                                    <Label Grid.Column="2" Content="{Binding AuthType}" />
-                                    <Button Grid.Column="3"
-                                            HorizontalAlignment="Left"
-                                            Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).EditEntry}"
-                                            CommandParameter="{Binding}"
-                                            Background="LightBlue">
-                                        <avalonia:MaterialIcon Kind="EditCircleOutline" />
-                                    </Button>
-                                    <Button Grid.Column="3"
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding #TheItemsGrid.((viewModels:ApplicationSettingsViewModel)DataContext).RemoveServer}"
-                                            CommandParameter="{Binding}"
-                                            Background="OrangeRed">
-                                        <avalonia:MaterialIcon Kind="CloseCircleOutline" />
-                                    </Button>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
+            <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}"/>
+            <Separator />
+            <Button Command="{Binding ClearWholeCacheCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <avalonia:MaterialIcon Kind="ReportProblem"/>   
+                    <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
-        <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding BooleanSubmit}" Background="Red">
-            <Button.CommandParameter>
-                <system:Boolean>False</system:Boolean>
-            </Button.CommandParameter>
-            <ToolTip.Tip>
-                <Label Content="{x:Static openSshGui:StringsAndTexts.CancelAndClose}" />
-            </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="Cancel" />
-        </Button>
-        <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                Command="{Binding BooleanSubmit}" Background="Green">
-            <Button.CommandParameter>
-                <system:Boolean>True</system:Boolean>
-            </Button.CommandParameter>
-            <ToolTip.Tip>
-                <Label Content="{x:Static openSshGui:StringsAndTexts.SaveAndClose}" />
-            </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="FloppyDisk" />
-        </Button>
     </Grid>
 </Window>

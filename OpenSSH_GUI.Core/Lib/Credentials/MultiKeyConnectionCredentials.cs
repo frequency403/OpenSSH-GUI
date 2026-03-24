@@ -1,15 +1,7 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:31
-
-#endregion
-
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
+using OpenSSH_GUI.Core.Lib.Keys;
 using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
@@ -22,8 +14,9 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     /// <summary>
     ///     Represents a set of connection credentials for a multi-key authentication.
     /// </summary>
-    public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<ISshKey>? keys) : base(hostname,
-        username, AuthType.MultiKey)
+    public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<SshKeyFile>? keys) : base(
+        hostname,
+        username)
     {
         Keys = keys;
     }
@@ -32,7 +25,7 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     ///     Represents the credentials for a multi-key SSH connection.
     /// </summary>
     [JsonIgnore]
-    public IEnumerable<ISshKey>? Keys { get; set; }
+    public IEnumerable<SshKeyFile>? Keys { get; set; }
 
 
     /// <summary>
@@ -43,6 +36,8 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     /// </returns>
     public override ConnectionInfo GetConnectionInfo()
     {
-        return new PrivateKeyConnectionInfo(Hostname, Port, Username, Keys.Select(e => e.GetSshNetKeyType()).ToArray());
+        if (Keys is not { } keys) return new ConnectionInfo(Hostname, Port, Username);
+        var sources = keys.Select(e => e.PrivateKeySource).ToArray();
+        return sources.All(s => s is not null) ? new PrivateKeyConnectionInfo(Hostname, Port, Username, sources) : new ConnectionInfo(Hostname, Port, Username);
     }
 }

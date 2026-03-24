@@ -4,15 +4,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Interfaces.KnownHosts;assembly=OpenSSH_GUI.Core"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
         x:Class="OpenSSH_GUI.Views.EditKnownHostsWindow"
-        x:DataType="viewModels:EditKnownHostsViewModel"
+        x:DataType="viewModels:EditKnownHostsWindowViewModel"
         Width="800"
         Height="600"
-        
         x:Name="EditKnownHosts"
         Title="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowTitle}">
     <Window.Styles>
@@ -115,7 +114,7 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnection.IsConnected}">
+            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"
