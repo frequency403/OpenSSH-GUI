@@ -65,6 +65,7 @@ public static class DependencyInjectionExtensions
             container.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
             container.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
             container.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
+            container.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
 
             container.Register<IMessageBoxProvider, MessageBoxProvider>(Reuse.Transient);
             container.Register<SshKeyFile>(Reuse.Transient);

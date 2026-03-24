@@ -225,6 +225,7 @@
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Center"
                                      MinHeight="0"
+                                     IsEnabled="{Binding !KeyFileInfo.KeyFileSource.ProvidedByConfig}"
                                      Command="{Binding ChangeFormatOfKeyFile}"
                                      CommandParameter="{Binding DefaultConversionFormat}">
 
