@@ -16,7 +16,7 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     /// </summary>
     public MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<SshKeyFile>? keys) : base(
         hostname,
-        username, AuthType.MultiKey)
+        username)
     {
         Keys = keys;
     }
@@ -36,6 +36,8 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     /// </returns>
     public override ConnectionInfo GetConnectionInfo()
     {
-        return new PrivateKeyConnectionInfo(Hostname, Port, Username, Keys?.Select(e => e.PrivateKeySource).ToArray());
+        if (Keys is not { } keys) return new ConnectionInfo(Hostname, Port, Username);
+        var sources = keys.Select(e => e.PrivateKeySource).ToArray();
+        return sources.All(s => s is not null) ? new PrivateKeyConnectionInfo(Hostname, Port, Username, sources) : new ConnectionInfo(Hostname, Port, Username);
     }
 }

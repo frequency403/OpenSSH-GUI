@@ -8,15 +8,9 @@ namespace OpenSSH_GUI.Core.Lib.Credentials;
 /// <summary>
 ///     Represents the base class for connection credentials.
 /// </summary>
-public class ConnectionCredentials(string hostname, string username, AuthType authType)
+public class ConnectionCredentials(string hostname, string username)
     : IConnectionCredentials
 {
-    /// <summary>
-    ///     Represents the unique identifier for a connection credentials object.
-    ///     This property is used in classes related to connection credentials and server settings.
-    /// </summary>
-    public int Id { get; set; }
-
     /// <summary>
     ///     Represents the hostname of a server.
     ///     This property is used in classes related to connection credentials and server settings.
@@ -42,25 +36,5 @@ public class ConnectionCredentials(string hostname, string username, AuthType au
     public virtual ConnectionInfo GetConnectionInfo()
     {
         return new ConnectionInfo(Hostname, Username);
-    }
-
-    /// <summary>
-    ///     Gets the display string for the connection credentials.
-    /// </summary>
-    [JsonIgnore]
-    public string Display => ToString();
-
-    /// <summary>
-    ///     Represents the authentication type for a connection.
-    /// </summary>
-    public AuthType AuthType { get; set; } = authType;
-
-    /// <summary>
-    ///     Returns a string representation of the ConnectionCredentials object.
-    /// </summary>
-    /// <returns>A string in the format "{Username}@{Hostname}:{Port}"</returns>
-    public override string ToString()
-    {
-        return $"{Username}@{Hostname}{(Port is 22 ? "" : $":{Port}")}";
     }
 }

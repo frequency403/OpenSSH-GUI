@@ -14,8 +14,7 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     /// <summary>
     ///     Represents connection credentials using SSH key authentication.
     /// </summary>
-    public KeyConnectionCredentials(string hostname, string username, SshKeyFile? key) : base(hostname, username,
-        AuthType.Key)
+    public KeyConnectionCredentials(string hostname, string username, SshKeyFile? key) : base(hostname, username)
     {
         Key = key;
     }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.SshConfig.Exceptions;
 using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
@@ -214,10 +215,10 @@ Host key-host
         var example = credentials.First(c => c.Hostname.Contains("1.2.3.4"));
         example.Username.ShouldBe("alice");
         example.Port.ShouldBe(2222);
-        example.AuthType.ShouldBe(AuthType.Password);
+        example.GetType().ShouldBe(typeof(PasswordConnectionCredentials));
 
         var keyHost = credentials.First(c => c.Hostname == "5.6.7.8");
-        keyHost.AuthType.ShouldBe(AuthType.Key);
+        keyHost.GetType().ShouldBe(typeof(KeyConnectionCredentials));
     }
 
     [Fact]
@@ -232,7 +233,7 @@ Host key-host
         var prodWeb = credentials.FirstOrDefault(c => c.Hostname == "10.10.1.11");
         prodWeb.ShouldNotBeNull();
 
-        var keyHost = credentials.FirstOrDefault(c => c.AuthType == AuthType.Key);
+        var keyHost = credentials.FirstOrDefault(c => c is KeyConnectionCredentials);
         keyHost.ShouldNotBeNull();
     }
 

@@ -4,16 +4,12 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;
 
-/// **hostname**: The hostname or IP address of the remote server.
-/// **username**: The username used to authenticate with the remote server.
-/// **password**: The password used to authenticate with the remote server.
-/// **encryptedPassword**: (optional) Specifies whether the password is encrypted. The default value is `false`.
 public class PasswordConnectionCredentials(
     string hostname,
     string username,
     string password,
     bool encryptedPassword = false)
-    : ConnectionCredentials(hostname, username, AuthType.Password), IPasswordConnectionCredentials
+    : ConnectionCredentials(hostname, username), IPasswordConnectionCredentials
 {
     /// <summary>
     ///     Represents connection credentials using password authentication.
