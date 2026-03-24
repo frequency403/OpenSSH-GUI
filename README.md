@@ -27,9 +27,6 @@ This program - nor the author(s) take responsibility for saved messed up files!
 
 If you need help, open an [Issue]()
 
-The program has a tooltip on every icon, describing what will happen  
-if you click on it.
-
 #### Main Window
 
 ![](images/MainWindow.png)
@@ -141,12 +138,8 @@ Only the program itself can read any kind of string value inside the database.
 
 ## Plans for the future
 
-- [X] ~~Add functionality for putting a key onto a Server~~
 - [ ] Beautify UI
-- [X] ~~Add functionality for editing authorized_keys~~
 - [ ] Add functionality for editing local and remote SSH (user/root) Settings
-- [X] ~~Add functionality for editing application settings~~
-- [X] ~~Servers should be saved and quickly accessed in the connect window.~~
 - many more not yet known!
 
 ## Authors
@@ -178,9 +171,7 @@ who participated in this project.
 
 - [EntityFrameworkCore](https://github.com/dotnet/EntityFramework.Docs)
 
-- [EntityFrameworkCore.DataEncryption](https://github.com/Eastrall/EntityFrameworkCore.DataEncryption)
-
-- [SQLite](https://sqlite.org/)
+- [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile)
 
 ## License
 
