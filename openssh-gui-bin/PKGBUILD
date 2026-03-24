@@ -8,7 +8,7 @@ license=('MIT')
 depends=('icu' 'openssl' 'zlib' 'krb5' 'libx11')
 options=('!strip')
 provides=('openssh-gui')
-conflicts=('openssh-gui' 'openssh-gui-git')
+conflicts=('openssh-gui' 'openssh-gui-git' 'openssh-gui-nightly')
 source=("${pkgname}-${pkgver}::${url}/releases/download/v${pkgver}/OpenSSH-GUI-linux-x64"
         "${pkgname}-icon-${pkgver}.png::${url}/raw/v${pkgver}/OpenSSH_GUI/Assets/appicon.png"
         "${pkgname}-desktop-${pkgver}.desktop::${url}/raw/v${pkgver}/openssh-gui.desktop"

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <!-- Target framework and other specs in Directory.Build.props -->
+        <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Optimize>true</Optimize>
+        <PackageId>OpenSSH_GUI.SshConfig</PackageId>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.5" />
+    </ItemGroup>
+</Project>

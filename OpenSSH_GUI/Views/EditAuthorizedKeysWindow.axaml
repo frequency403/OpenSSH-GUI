@@ -4,25 +4,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
-        xmlns:authorizedKeys="clr-namespace:OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;assembly=OpenSSH_GUI.Core"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:authorizedKeys="clr-namespace:OpenSSH_GUI.Core.Lib.AuthorizedKeys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.EditAuthorizedKeysWindow"
         x:DataType="viewModels:EditAuthorizedKeysViewModel"
         Title="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}"
         Width="800"
         Height="600"
-        
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
     <Window.DataTemplates>
-        <DataTemplate DataType="authorizedKeys:IAuthorizedKey">
+        <DataTemplate DataType="authorizedKeys:AuthorizedKey">
             <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="5">
                 <Grid ColumnDefinitions="* 3* 2* *">
                     <TextBlock Grid.Column="0"
-                               Text="{Binding KeyType, Converter={StaticResource SingleSshKeyTypeConverter}}"
+                               Text="{Binding KeyType}"
                                HorizontalAlignment="Left" />
                     <TextBlock Grid.Column="1" Text="{Binding Fingerprint}" HorizontalAlignment="Center" />
                     <TextBlock Grid.Column="2" Text="{Binding Comment}" HorizontalAlignment="Right" />
@@ -66,11 +65,11 @@
                 </ToolTip.Tip>
                 <ItemsControl ItemsSource="{Binding AuthorizedKeysFileLocal.AuthorizedKeys}" />
             </TabItem>
-            <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnection.IsConnected}">
+            <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <ToolTip.Tip>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentFrom}" />
-                        <Label Content="{Binding ServerConnection.ConnectionString}" />
+                        <Label Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}" />
                     </StackPanel>
                 </ToolTip.Tip>
                 <Grid RowDefinitions="10* *" ColumnDefinitions="* *">
@@ -79,7 +78,7 @@
                     <ComboBox Grid.Row="1" Grid.Column="0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
-                              ItemsSource="{Binding PublicKeys}"
+                              ItemsSource="{Binding SshKeyManager.SshKeys}"
                               SelectedItem="{Binding SelectedKey}"
                               IsVisible="{Binding KeyAddPossible}"
                               ItemTemplate="{StaticResource SshKeyComboBoxStyle}"
@@ -95,7 +94,7 @@
                         <ToolTip.Tip>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysAddKeyToFileOf}" />
-                                <Label Content="{Binding ServerConnection.ConnectionString}" />
+                                <Label Content="{Binding ServerConnectionService.ServerConnection.ConnectionString}" />
                             </StackPanel>
                         </ToolTip.Tip>
                         <materialIcons:MaterialIcon Kind="Add" />

@@ -1,0 +1,53 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU"/>
+        <Platform Name="x64"/>
+        <Platform Name="x86"/>
+    </Configurations>
+    <Folder Name="/AUR Files/">
+        <File Path="openssh-gui-bin/PKGBUILD"/>
+        <File Path="openssh-gui-git/PKGBUILD"/>
+        <File Path="openssh-gui.desktop"/>
+    </Folder>
+    <Folder Name="/CI/">
+        <File Path=".github/FUNDING.yml"/>
+        <File Path=".github/workflows/build.yml"/>
+        <File Path=".github/workflows/staging.yml"/>
+    </Folder>
+    <Folder Name="/Images/">
+        <File Path="images/AddKeyWindow.png"/>
+        <File Path="images/AppSettings.png"/>
+        <File Path="images/ConnectToServerQuickConnect.png"/>
+        <File Path="images/ConnectToServerWindow.png"/>
+        <File Path="images/ConnectToServerWindowSuccess.png"/>
+        <File Path="images/ConnectToServerWindowWithKey.png"/>
+        <File Path="images/EditAuthorizedKeysWindow.png"/>
+        <File Path="images/EditAuthorizedKeysWindowRemote.png"/>
+        <File Path="images/ExportKeyWindow.png"/>
+        <File Path="images/FoundPasswordProtectedKey.png"/>
+        <File Path="images/KnownHostsWindow.png"/>
+        <File Path="images/MainWindow.png"/>
+        <File Path="images/NewMainUI.png"/>
+        <File Path="images/ProvidePasswordPrompt.png"/>
+        <File Path="images/SettingsContextMenu.png"/>
+        <File Path="images/ShowForgetPws.png"/>
+        <File Path="images/Sorted.png"/>
+        <File Path="images/tooltip.png"/>
+        <File Path="images/tooltipKey.png"/>
+        <File Path="images/tooltipServer.png"/>
+    </Folder>
+    <Folder Name="/Solution Items/">
+        <File Path=".gitignore"/>
+        <File Path="Directory.Build.props"/>
+        <File Path="Directory.Build.targets"/>
+        <File Path="LICENSE"/>
+        <File Path="README.md"/>
+    </Folder>
+    <Project Path="OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj"/>
+    <Project Path="OpenSSH_GUI.Dialogs/OpenSSH_GUI.Dialogs.csproj"/>
+    <Project Path="OpenSSH_GUI.SshConfig/OpenSSH_GUI.SshConfig.csproj"/>
+    <Project Path="OpenSSH_GUI.Tests/OpenSSH_GUI.Tests.csproj"/>
+    <Project Path="OpenSSH_GUI/OpenSSH_GUI.csproj">
+        <Deploy Solution="Debug|Any CPU"/>
+    </Project>
+</Solution>

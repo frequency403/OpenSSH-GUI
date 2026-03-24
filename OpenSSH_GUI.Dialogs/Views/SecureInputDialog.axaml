@@ -1,0 +1,68 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="OpenSSH_GUI.Dialogs.Views.SecureInputDialog"
+        Title="Secure Input"
+        Width="380"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaToDecorationsHint="False"
+        Opened="OnOpened">
+
+    <Border Padding="24 20 24 16">
+        <StackPanel Spacing="12">
+
+            <!-- Optional prompt label and icon -->
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <avalonia:MaterialIcon x:Name="PART_MaterialIcon"
+                                       Width="32"
+                                       Height="32"
+                                       VerticalAlignment="Center"
+                                       IsVisible="False" />
+                <TextBlock x:Name="PART_Prompt"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"
+                           FontSize="14" />
+            </StackPanel>
+
+            <!-- Password input: PasswordChar hides content visually.
+                 TextInput and KeyDown are handled in code-behind so the raw
+                 characters are intercepted before Avalonia converts them to a
+                 managed string that could linger in the interned string pool. -->
+            <TextBox x:Name="PART_Input"
+                     PasswordChar="●"
+                     FontSize="14"
+                     Watermark="Enter password…"
+                     KeyDown="OnInputKeyDown"
+                     TextInput="OnInputTextInput" />
+
+            <!-- Error hint, shown only on validation failure -->
+            <TextBlock x:Name="PART_Error"
+                       Foreground="Crimson"
+                       FontSize="12"
+                       IsVisible="False"
+                       TextWrapping="Wrap" />
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="8"
+                        Margin="0 4 0 0">
+
+                <Button x:Name="PART_OkButton"
+                        Content="OK"
+                        MinWidth="88"
+                        IsDefault="True"
+                        Click="OnOkClick" />
+
+                <Button Content="Cancel"
+                        MinWidth="88"
+                        IsCancel="True"
+                        Click="OnCancelClick" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

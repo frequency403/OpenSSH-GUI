@@ -1,94 +1,92 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:43
-
-#endregion
-
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Reactive;
+using System.Reactive.Linq;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
-using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Interfaces.Misc;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
+using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
+[UsedImplicitly]
+public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
 {
-    private ObservableCollection<ISshKey?> _publicKeys;
-
-    private ISshKey? _selectedKey;
-
-    private IServerConnection _serverConnection;
-
-    public bool AddButtonEnabled
+    [ObservableAsProperty]
+    private bool _addButtonEnabled;
+    
+    [ObservableAsProperty]
+    private bool _keyAddPossible;
+    
+    [Reactive]
+    private SshKeyFile? _selectedKey;
+    
+    [Reactive]
+    private AuthorizedKeysFile _authorizedKeysFileRemote = AuthorizedKeysFile.Empty;
+    
+    [Reactive]
+    private AuthorizedKeysFile _authorizedKeysFileLocal = AuthorizedKeysFile.Empty;
+    
+    public EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> logger,
+        SshKeyManager sshKeyManager,
+        ServerConnectionService serverConnectionService) : base(logger)
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        SshKeyManager = sshKeyManager;
+        ServerConnectionService = serverConnectionService;
+        SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
+        AddKey = ReactiveCommand.CreateFromTask<SshKeyFile>(OnAddKey);
+        
+        _addButtonEnabledHelper = this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
+            .DistinctUntilChanged()
+            .Select(props =>
+            {
+                if (props is { Item2: { AuthorizedKeys: { Count: > 0 } } col, Item1: { } keyFile , Item3: true})
+                    return col.CanAddKey(keyFile);
+                return false;
+            }).ToProperty(this, vm => vm.AddButtonEnabled);
+        
+        _keyAddPossibleHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeysCount)
+            .Select(props => props > 0).ToProperty(this, vm => vm.KeyAddPossible);
     }
+    
+    public SshKeyManager SshKeyManager { get; }
+    public ServerConnectionService ServerConnectionService { get; }
+    public ReactiveCommand<SshKeyFile, Unit> AddKey { get; }
 
-    public ISshKey? SelectedKey
+    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+        CancellationToken cancellationToken = default)
     {
-        get => _selectedKey;
-        set
+        try
         {
-            this.RaiseAndSetIfChanged(ref _selectedKey, value);
-            UpdateAddButton();
+            if (!inputParameter) return;
+            ArgumentNullException.ThrowIfNull(AuthorizedKeysFileLocal);
+            await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
+            if (ServerConnectionService.IsConnected)
+                await ServerConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(
+                    AuthorizedKeysFileRemote, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error while editing authorized keys");
         }
     }
 
-    public ObservableCollection<ISshKey> PublicKeys
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
-        get => _publicKeys;
-        set => this.RaiseAndSetIfChanged(ref _publicKeys, value);
+        AuthorizedKeysFileLocal =
+            await AuthorizedKeysFile.OpenAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(), cancellationToken);
+        if (ServerConnectionService.IsConnected)
+            AuthorizedKeysFileRemote =
+                await ServerConnectionService.ServerConnection.GetAuthorizedKeysFromServerAsync(cancellationToken);
+        await base.InitializeAsync(cancellationToken);
     }
 
-    public bool KeyAddPossible => PublicKeys.Count > 0;
-
-    public IServerConnection ServerConnection
+    private async Task OnAddKey(SshKeyFile key)
     {
-        get => _serverConnection;
-        set => this.RaiseAndSetIfChanged(ref _serverConnection, value);
-    }
-
-    public IAuthorizedKeysFile AuthorizedKeysFileLocal { get; } =
-        new AuthorizedKeysFile(SshConfigFiles.Authorized_Keys.GetPathOfFile());
-
-    public IAuthorizedKeysFile AuthorizedKeysFileRemote { get; private set; }
-    public ReactiveCommand<ISshKey, ISshKey?> AddKey { get; private set; }
-
-    private void UpdateAddButton()
-    {
-        if (SelectedKey is null) return;
-        AddButtonEnabled = !AuthorizedKeysFileRemote.AuthorizedKeys.Any(key =>
-            string.Equals(key.Fingerprint, SelectedKey.ExportAuthorizedKey().Fingerprint));
-    }
-
-    public void SetConnectionAndKeys(ref IServerConnection serverConnection,
-        ref ObservableCollection<ISshKey?> keys)
-    {
-        _serverConnection = serverConnection;
-        AuthorizedKeysFileRemote = ServerConnection.GetAuthorizedKeysFromServer();
-        _publicKeys = keys;
-        _selectedKey = PublicKeys.FirstOrDefault();
-        UpdateAddButton();
-        BooleanSubmit = ReactiveCommand.Create<bool, EditAuthorizedKeysViewModel?>(e =>
-        {
-            if (!e) return this;
-            AuthorizedKeysFileLocal.PersistChangesInFile();
-            ServerConnection.WriteAuthorizedKeysChangesToServer(AuthorizedKeysFileRemote);
-            return this;
-        });
-        AddKey = ReactiveCommand.CreateFromTask<ISshKey, ISshKey?>(async e =>
-        {
-            await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(e);
-            UpdateAddButton();
-            return e;
-        });
+        await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(key);
     }
 }

@@ -11,10 +11,9 @@ jobs:
   # This job runs in a matrix to build for all target platforms in parallel.
   build:
     name: Build for ${{ matrix.target }}
-    runs-on: ubuntu-latest # A single runner is sufficient for cross-compilation
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Define build targets for different platforms
         include:
           - target: linux-x64
             asset_name: OpenSSH-GUI-linux-x64
@@ -30,10 +29,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
+      - name: Determine .NET version from project
+        id: dotnet-version
+        run: |
+          TFM=$(grep -oPm1 '(?<=<TargetFramework>net)[0-9.]+' Directory.Build.props)
+          echo "version=${TFM}.x" >> "$GITHUB_OUTPUT"
+          echo "Detected TargetFramework: net${TFM} → installing SDK ${TFM}.x"
+
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: ${{ steps.dotnet-version.outputs.version }}
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -58,7 +64,40 @@ jobs:
       - name: Rename artifact
         run: mv ./publish/OpenSSH_GUI${{ matrix.asset_extension }} ./publish/${{ matrix.asset_name }}${{ matrix.asset_extension }}
 
-      # Upload the compiled binary as a workflow artifact
+      # --- AppImage (Linux only) ---
+      - name: Build AppImage
+        if: matrix.target == 'linux-x64'
+        run: |
+          # Download appimagetool
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          mkdir -p AppDir/usr/share/applications
+
+          cp ./publish/${{ matrix.asset_name }} AppDir/usr/bin/openssh-gui
+          chmod +x AppDir/usr/bin/openssh-gui
+
+          cp OpenSSH_GUI/Assets/appicon.png AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
+          cp OpenSSH_GUI/Assets/appicon.png AppDir/openssh-gui.png
+          cp openssh-gui.desktop AppDir/openssh-gui.desktop
+          cp openssh-gui.desktop AppDir/usr/share/applications/openssh-gui.desktop
+
+          cp appimage/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          # Build AppImage
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir OpenSSH-GUI-x86_64.AppImage
+
+      - name: Upload AppImage artifact
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenSSH-GUI-x86_64.AppImage
+          path: OpenSSH-GUI-x86_64.AppImage
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

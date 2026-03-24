@@ -1,12 +1,4 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:25
-
-#endregion
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Enums;
 

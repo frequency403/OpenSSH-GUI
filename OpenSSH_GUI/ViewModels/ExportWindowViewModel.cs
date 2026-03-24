@@ -1,34 +1,38 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:47
-
-#endregion
-
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using ReactiveUI;
+﻿using Avalonia.Input.Platform;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.MVVM;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public class ExportWindowViewModel : ViewModelBase<ExportWindowViewModel>
+[UsedImplicitly]
+public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard) : ViewModelBase<ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(logger)
 {
-    public ExportWindowViewModel()
+    [Reactive]
+    private string _windowTitle = "";
+    
+    [Reactive]
+    private string _export = "";
+    
+    public override ValueTask InitializeAsync(ExportWindowViewModelInitializerParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        BooleanSubmit = ReactiveCommand.Create<bool, ExportWindowViewModel?>(boolean =>
-        {
-            if (!boolean) return null;
-            if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-                return null;
-            var mainWindow = desktop.MainWindow;
-            var clipboard = mainWindow.Clipboard;
-
-            clipboard.SetTextAsync(Export).ConfigureAwait(false);
-            return this;
-        });
+        WindowTitle = parameters.WindowTitle;
+        Export = parameters.Export;
+        return base.InitializeAsync(parameters, cancellationToken);
     }
 
-    public string WindowTitle { get; set; } = "";
-    public string Export { get; set; } = "";
+    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+        CancellationToken cancellationToken = default)
+    {
+        if (inputParameter)
+            await clipboard.SetTextAsync(Export);
+    }
+}
+
+public record ExportWindowViewModelInitializerParameters : IInitializerParameters<ExportWindowViewModel>
+{
+    public string WindowTitle { get; init; } = string.Empty;
+    public string Export { get; init; } = string.Empty;
 }

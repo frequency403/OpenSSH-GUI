@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+        <PackageProjectUrl>https://github.com/frequency403/OpenSSH-GUI</PackageProjectUrl>
+        <BaseVersion>3.0.0</BaseVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ProjectUrl</_Parameter1>
+            <_Parameter2>$(PackageProjectUrl)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+</Project>

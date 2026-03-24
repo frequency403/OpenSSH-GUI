@@ -1,273 +1,130 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:44
-
-#endregion
-
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
-using System.Threading.Tasks;
+﻿using System.Reactive;
 using Avalonia.Media;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
-using OpenSSH_GUI.Core.Database.DTO;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Interfaces.Misc;
-using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Lib.Credentials;
+using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Core.Services;
+using OpenSSH_GUI.Dialogs.Enums;
+using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Resources;
+using OpenSSH_GUI.SshConfig.Models;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
 
-public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
+[UsedImplicitly]
+public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
-    private readonly bool _firstCredentialSet;
+    private readonly ServerConnectionService _serverConnectionService;
+    private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly IDisposable _hostSettingsSubscription;
+    private readonly IDisposable _keyComboBoxEnabledSubscription;
+    private readonly IDisposable _connectionCredentialsSubscription;
 
-    private List<IConnectionCredentials> _connectionCredentials;
-
-    private ISshKey? _selectedPublicKey;
-
-    public ConnectToServerViewModel(ref ObservableCollection<ISshKey?> keys,
-        List<IConnectionCredentials> credentialsList)
+    public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger,
+        ServerConnectionService serverConnectionService,
+        IMessageBoxProvider messageBoxProvider,
+        IConfiguration configuration,
+        SshKeyManager sshKeyManager) : base(logger)
     {
-        PublicKeys = new ObservableCollection<ISshKey?>(keys.Where(e => e is not null && !e.NeedPassword));
-        _selectedPublicKey = PublicKeys.FirstOrDefault();
-        _connectionCredentials = credentialsList;
-        _firstCredentialSet = false;
-        UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
-        TestConnection = ReactiveCommand.CreateFromTask<Unit, Unit>(async e =>
-        {
-            if (QuickConnect)
-            {
-                TestQuickConnection(SelectedConnection).Wait();
-                return e;
-            }
+        _messageBoxProvider = messageBoxProvider;
+        _serverConnectionService = serverConnectionService;
+        SshKeyManager = sshKeyManager;
+        SelectedPublicKey = SshKeyManager.SshKeys.FirstOrDefault();
+        TestConnection = ReactiveCommand.CreateFromTask(TestConnectionAsync);
+        ResetCommand = ReactiveCommand.Create(Reset);
 
-            var task = Task.Run(() =>
+        _hostSettingsSubscription = this
+            .WhenAnyValue<ConnectToServerViewModel, SshHostSettings?>(viewModel => viewModel.SelectedHostSettings)
+            .Subscribe(async settings =>
             {
                 try
                 {
-                    if (!ValidData) throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
-                    ServerConnection = AuthWithPublicKey
-                        ? AuthWithAllKeys
-                            ? new ServerConnection(Hostname, Username, PublicKeys)
-                            : new ServerConnection(Hostname, Username, SelectedPublicKey)
-                        : new ServerConnection(Hostname, Username, Password);
-                    if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
-
-                    return true;
+                    if (settings is not null)
+                        await TestConnectionAsync(settings);
                 }
-                catch (Exception exception)
+                catch (Exception e)
                 {
-                    StatusButtonToolTip = exception.Message;
-                    return false;
+                    logger.LogError(e, "Error testing connection");
                 }
             });
-            TryingToConnect = true;
-            if (await task)
+        
+        _keyComboBoxEnabledSubscription = this
+            .WhenAnyValue(viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys, model => model._serverConnectionService.IsConnected)
+            .Subscribe((tuple) =>
             {
-                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                    StringsAndTexts.ConnectToServerStatusSuccess);
-                StatusButtonToolTip =
-                    string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
-                StatusButtonBackground = Brushes.Green;
-            }
-            else
-            {
-                StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                    StringsAndTexts.ConnectToServerStatusFailed);
-                StatusButtonBackground = Brushes.Red;
-            }
-
-            TryingToConnect = false;
-
-            if (ServerConnection.IsConnected)
-            {
-                UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
-                return e;
-            }
-
-            var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
-                ButtonEnum.Ok, Icon.Error);
-            await messageBox.ShowAsync();
-
-            return e;
-        });
-        ResetCommand = ReactiveCommand.Create<Unit, Unit>(e =>
-        {
-            Hostname = "";
-            Username = "";
-            Password = "";
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                StringsAndTexts.ConnectToServerStatusUnknown);
-            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-                StringsAndTexts.ConnectToServerStatusUntested);
-            StatusButtonBackground = Brushes.Gray;
-            ServerConnection = new ServerConnection("123", "123", "123");
-            UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
-            return e;
-        });
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool, ConnectToServerViewModel?>(
-            async e =>
-            {
-                ServerConnection.ConnectionCredentials.Id =
-                    (await ServerConnection.ConnectionCredentials.SaveDtoInDatabase() ?? new ConnectionCredentialsDto())
-                    .Id;
-                return this;
+                KeyComboBoxEnabled = tuple is { Item3: false, Item1: true, Item2: false };
             });
-    }
 
-    public bool QuickConnectAvailable => ConnectionCredentials.Any();
-
-    public List<IConnectionCredentials> ConnectionCredentials
-    {
-        get => _connectionCredentials;
-        set => this.RaiseAndSetIfChanged(ref _connectionCredentials, value);
-    }
-
-    public IConnectionCredentials? SelectedConnection
-    {
-        get;
-        set
+        _connectionCredentialsSubscription = this.WhenAnyValue(viewModel => viewModel.ConnectionCredentials)
+            .Subscribe(credentials =>
+            {
+                CanConnectToServer = credentials is not null;
+            });
+        
+        try
         {
-            this.RaiseAndSetIfChanged(ref field, value);
-            TestQuickConnection(value).Wait();
+            var config = configuration.GetSection("SshConfig").Get<SshConfiguration>();
+            SshHostSettings = config?.Hosts.Distinct() ?? [];
+        }
+        catch (Exception e)
+        {
+            SshHostSettings = [];
+            logger.LogDebug(e, "Config not readable");
         }
     }
+    [Reactive]
+    private IConnectionCredentials? _connectionCredentials;
 
-    public bool QuickConnect
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public IServerConnection ServerConnection
-    {
-        get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
-    } = new ServerConnection("123", "123", "123");
-
-    private bool ValidData => SelectedPublicKey is null
-        ? Hostname != "" && Username != "" && Password != ""
-        : Hostname != "" && Username != "";
-
-    public bool UploadButtonEnabled
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public bool AuthWithPublicKey
-    {
-        get;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref field, value);
-            UpdateComboBoxState();
-        }
-    }
-
-    public bool AuthWithAllKeys
-    {
-        get;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref field, value);
-            UpdateComboBoxState();
-        }
-    }
-
-    public ISshKey? SelectedPublicKey
-    {
-        get => _selectedPublicKey;
-        set => this.RaiseAndSetIfChanged(ref _selectedPublicKey, value);
-    }
-
-    public ObservableCollection<ISshKey?> PublicKeys { get; }
-
-    public string Hostname
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public string Username
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public string Password
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = "";
-
-    public bool TryingToConnect
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public string StatusButtonToolTip
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUntested);
-
-    public string StatusButtonText
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUnknown);
-
-    public IBrush StatusButtonBackground
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = Brushes.Gray;
-
-    public bool KeyComboBoxEnabled
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    [Reactive] private bool _canConnectToServer;
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+    public SshKeyManager SshKeyManager { get; }
 
-    private bool TestConnectionInternal(IConnectionCredentials credentials)
-    {
-        try
-        {
-            ServerConnection = new ServerConnection(credentials);
-            if (!ServerConnection.TestAndOpenConnection(out var ecException)) throw ecException;
-            return true;
-        }
-        catch (Exception exception)
-        {
-            StatusButtonToolTip = exception.Message;
-            return false;
-        }
-    }
+    public bool EnablePreConfiguredHosts => SshHostSettings.Any();
+    [Reactive] private SshHostSettings? _selectedHostSettings;
 
-    private async Task TestQuickConnection(IConnectionCredentials? credentials)
+    public IEnumerable<SshHostSettings> SshHostSettings { get; }
+    
+    [Reactive] private bool _authWithPublicKey;
+
+    [Reactive] private bool _authWithAllKeys;
+
+    [Reactive] private SshKeyFile? _selectedPublicKey;
+
+    [Reactive] private string _hostName = string.Empty;
+
+    [Reactive] private string _username = string.Empty;
+
+    [Reactive] private string _password = string.Empty;
+
+    [Reactive] private bool _tryingToConnect;
+
+    [Reactive] private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUntested);
+
+    [Reactive] private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUnknown);
+
+    [Reactive] private IBrush _statusButtonBackground = Brushes.Gray;
+
+    [Reactive] private bool _keyComboBoxEnabled;
+
+    private async Task TestConnectionAsyncBase(CancellationToken cancellationToken = default)
     {
-        if (_firstCredentialSet) return;
-        TryingToConnect = true;
-        if (TestConnectionInternal(credentials))
+        if (ConnectionCredentials is not null)
         {
             StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusSuccess);
-            StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, Hostname);
+            StatusButtonToolTip =
+                string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, HostName);
             StatusButtonBackground = Brushes.Green;
         }
         else
@@ -279,19 +136,133 @@ public sealed class ConnectToServerViewModel : ViewModelBase<ConnectToServerView
 
         TryingToConnect = false;
 
-        if (ServerConnection.IsConnected)
+        if (_serverConnectionService.IsConnected)
         {
-            UploadButtonEnabled = !TryingToConnect && ServerConnection.IsConnected;
+            await _serverConnectionService.CloseConnection(false, cancellationToken);
             return;
         }
 
-        var messageBox = MessageBoxManager.GetMessageBoxStandard(StringsAndTexts.Error, StatusButtonToolTip,
-            ButtonEnum.Ok, Icon.Error);
-        await messageBox.ShowAsync();
+        await _messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, StatusButtonToolTip, MessageBoxButtons.Ok,
+            MessageBoxIcon.Error);
     }
 
-    public void UpdateComboBoxState()
+    private async Task TestConnectionAsync(SshHostSettings? hostSettings = null, CancellationToken cancellationToken = default)
     {
-        KeyComboBoxEnabled = !ServerConnection.IsConnected && AuthWithPublicKey && !AuthWithAllKeys;
+        ArgumentNullException.ThrowIfNull(hostSettings);
+        if (hostSettings.IdentityFiles is null)
+        {
+            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+                StringsAndTexts.ConnectToServerStatusFailed);
+            StatusButtonBackground = Brushes.Red;
+            return;
+        }
+
+        using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
+
+        try
+        {
+            TryingToConnect = true;
+            HostName = hostSettings.HostName ?? string.Empty;
+            Username = hostSettings.User ?? string.Empty;
+            AuthWithAllKeys = true;
+
+            var resolvedPaths = hostSettings.IdentityFiles
+                .Select(f => f.ResolvePath())
+                .ToHashSet(StringComparer.Ordinal);
+
+            var keys = (SshKeyManager.SshKeys ?? [])
+                .Where(e => e.KeyFileInfo?.KeyFileSource?.AbsolutePath is { } path
+                            && resolvedPaths.Contains(path));
+
+            var connectionCredentials = new MultiKeyConnectionCredentials(
+                hostSettings.HostName ?? string.Empty,
+                hostSettings.User ?? string.Empty,
+                keys);
+            
+            if(await _serverConnectionService.EstablishConnection(connectionCredentials, linkedTokenSource.Token))
+                ConnectionCredentials = connectionCredentials;
+        }
+        catch (Exception exception)
+        {
+            StatusButtonToolTip = exception.Message;
+        }
+
+        await TestConnectionAsyncBase(cancellationToken);
+    }
+
+    private async Task TestConnectionAsync(CancellationToken cancellationToken = default)
+    {
+        using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
+        try
+        {
+            if(string.IsNullOrWhiteSpace(HostName) || string.IsNullOrWhiteSpace(Username) || (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
+                throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
+            TryingToConnect = true;
+            IConnectionCredentials? connectionCredentials = null;
+            if (AuthWithPublicKey)
+            {
+                connectionCredentials = new KeyConnectionCredentials(HostName, Username, SelectedPublicKey);
+            } else if (AuthWithAllKeys)
+            {
+                connectionCredentials = new MultiKeyConnectionCredentials(HostName, Username, SshKeyManager.SshKeys);
+            }
+            else
+            {
+                connectionCredentials = new PasswordConnectionCredentials(HostName, Username, Password);
+            }
+            if(await _serverConnectionService.EstablishConnection(connectionCredentials, linkedTokenSource.Token))
+                ConnectionCredentials = connectionCredentials;
+        }
+        catch (Exception exception)
+        {
+            StatusButtonToolTip = exception.Message;
+        }
+
+        await TestConnectionAsyncBase(cancellationToken);
+    }
+
+    protected override async Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+    {
+        if (!inputParameter) return;
+        if (!CanConnectToServer) return;
+        if (ConnectionCredentials is null) return;
+        try
+        {
+            if(!(await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken)))
+            {
+                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, "Connection failed", MessageBoxButtons.Ok, MessageBoxIcon.Error);
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Unhandled error during connection");
+            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+        }
+    }
+
+    private void Reset()
+    {
+        HostName = string.Empty;
+        Username = string.Empty;
+        Password = string.Empty;
+        StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StringsAndTexts.ConnectToServerStatusUnknown);
+        StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StringsAndTexts.ConnectToServerStatusUntested);
+        StatusButtonBackground = Brushes.Gray;
+        SelectedHostSettings = null;
+        AuthWithAllKeys = false;
+        AuthWithPublicKey = false;
+        ConnectionCredentials = null;
+    }
+
+    public override void Dispose()
+    {
+        _hostSettingsSubscription.Dispose();
+        _keyComboBoxEnabledSubscription.Dispose();
+        _connectionCredentialsSubscription.Dispose();
+        base.Dispose();
     }
 }

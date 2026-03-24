@@ -1,15 +1,7 @@
-﻿#region CopyrightNotice
-
-// File Created by: Oliver Schantz
-// Created: 15.05.2024 - 00:05:44
-// Last edit: 15.05.2024 - 01:05:32
-
-#endregion
-
-using System.Collections.ObjectModel;
-using OpenSSH_GUI.Core.Interfaces.AuthorizedKeys;
-using OpenSSH_GUI.Core.Interfaces.Keys;
-using OpenSSH_GUI.Core.Lib.Static;
+﻿using System.Collections.ObjectModel;
+using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Lib.Keys;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
@@ -17,50 +9,55 @@ namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 /// <summary>
 ///     Represents an Authorized Keys file.
 /// </summary>
-public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
+public class AuthorizedKeysFile : ReactiveObject
 {
     /// <summary>
     ///     The contents of the authorized keys file or the path to the file.
     /// </summary>
-    private readonly string _fileContentsOrPath;
+    private string _fileContentsOrPath = string.Empty;
 
     /// <summary>
     ///     Represents an authorized keys file.
     /// </summary>
-    public AuthorizedKeysFile(string fileContentsOrPath, bool fromServer = false)
+    private AuthorizedKeysFile()
     {
-        IsFileFromServer = fromServer;
-        _fileContentsOrPath = fileContentsOrPath;
-        if (IsFileFromServer)
-            LoadFileContents(_fileContentsOrPath);
-        else
-            ReadAndLoadFileContents(_fileContentsOrPath);
     }
-
+    
     /// <summary>
     ///     Gets a value indicating whether the file is from a server.
     /// </summary>
-    private bool IsFileFromServer { get; }
+    private bool IsFileFromServer { get; set; }
 
     /// <summary>
     ///     Represents the authorized keys file.
-    /// </summary
-    public ObservableCollection<IAuthorizedKey> AuthorizedKeys
+    /// </summary>
+    public ObservableCollection<AuthorizedKey> AuthorizedKeys
     {
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
+    public bool CanAddKey(SshKeyFile key)
+    {
+        try
+        {
+            return !AuthorizedKeys.Any(e => e.Equals(key.AuthorizedKey));
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+    
     /// <summary>
     ///     Adds an authorized key to the authorized keys file.
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>True if the key was successfully added, otherwise false.</returns>
-    public bool AddAuthorizedKey(ISshKey key)
+    public bool AddAuthorizedKey(SshKeyFile key)
     {
-        if (AuthorizedKeys.Any(e => e.Fingerprint == key.Fingerprint)) return false;
-        var export = key.ExportAuthorizedKeyEntry();
-        AuthorizedKeys.Add(new AuthorizedKey(export));
+        if (AuthorizedKeys.Any(e => e.Equals(key.AuthorizedKey))) return false;
+        AuthorizedKeys.Add(key.AuthorizedKey);
         return true;
     }
 
@@ -69,10 +66,10 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     /// <param name="keys">The collection of keys to be applied as changes.</param>
     /// <returns>True if any changes were made to the authorized keys file; otherwise, false.</returns>
-    public bool ApplyChanges(IEnumerable<IAuthorizedKey> keys)
+    public bool ApplyChanges(IEnumerable<AuthorizedKey> keys)
     {
         var countBefore = AuthorizedKeys.Count;
-        AuthorizedKeys = new ObservableCollection<IAuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
+        AuthorizedKeys = new ObservableCollection<AuthorizedKey>(keys.Where(e => !e.MarkedForDeletion));
         return countBefore != AuthorizedKeys.Count;
     }
 
@@ -80,12 +77,13 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     Persists the changes made to the authorized keys file.
     /// </summary>
     /// <returns>The modified <see cref="IAuthorizedKeysFile" /> object.</returns>
-    public IAuthorizedKeysFile PersistChangesInFile()
+    public async ValueTask<AuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
     {
         if (IsFileFromServer) return this;
-        using var streamWriter = new StreamWriter(FileOperations.OpenTruncated(_fileContentsOrPath));
-        streamWriter.Write(ExportFileContent());
-        ReadAndLoadFileContents(_fileContentsOrPath);
+        await using var file = new FileStream(_fileContentsOrPath, FileMode.Truncate);
+        await using var streamWriter = new StreamWriter(file);
+        await streamWriter.WriteAsync(ExportFileContent());
+        await ReadAndLoadFileContents(_fileContentsOrPath, token);
         return this;
     }
 
@@ -94,12 +92,11 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     /// </summary>
     /// <param name="key">The SSH key to be added.</param>
     /// <returns>
-    ///     A task representing the asynchronous operation. The task result is a boolean value indicating whether the key
-    ///     was added successfully.
+    ///     A <see cref="ValueTask{Boolean}" /> indicating whether the key was added successfully.
     /// </returns>
-    public Task<bool> AddAuthorizedKeyAsync(ISshKey key)
+    public ValueTask<bool> AddAuthorizedKeyAsync(SshKeyFile key)
     {
-        return Task.FromResult(AddAuthorizedKey(key));
+        return ValueTask.FromResult(AddAuthorizedKey(key));
     }
 
     /// <summary>
@@ -110,7 +107,7 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
     ///     Returns <c>true</c> if the key is successfully removed;
     ///     otherwise, <c>false</c>.
     /// </returns>
-    public bool RemoveAuthorizedKey(ISshKey key)
+    public bool RemoveAuthorizedKey(SshKeyFile key)
     {
         if (AuthorizedKeys.All(e => e.Fingerprint != key.Fingerprint)) return false;
         {
@@ -137,6 +134,49 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
                 (s, key) => s +=
                     $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
     }
+    
+    public static AuthorizedKeysFile Empty { get; } = new();
+
+    public static async ValueTask<AuthorizedKeysFile> OpenAsync(string? filePath = null,
+        CancellationToken cancellationToken = default)
+    {
+        filePath ??= SshConfigFiles.Authorized_Keys.GetPathOfFile();
+        var fileInfo = new FileInfo(filePath);
+        if (!fileInfo.Exists)
+            throw new FileNotFoundException("Authorized keyfile was not found", fileInfo.Name);
+        await using var fileStream = File.Open(filePath, FileMode.OpenOrCreate);
+        return await ParseAsync(fileStream, cancellationToken);
+    }
+
+    public static async ValueTask<AuthorizedKeysFile> ParseAsync(Stream stream,
+        CancellationToken cancellationToken = default)
+    {
+        var authorizedKeyFile = new AuthorizedKeysFile();
+        await authorizedKeyFile.LoadFromStreamAsync(stream, cancellationToken);
+        return authorizedKeyFile;
+    }
+
+    /// <summary>
+    ///     Asynchronously loads authorized keys from a given stream.
+    /// </summary>
+    /// <param name="stream">The stream containing the authorized keys file content.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async ValueTask LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
+        if (await streamReader.ReadToEndAsync(cancellationToken) is { } fileContents &&
+            !string.IsNullOrWhiteSpace(fileContents)) LoadFileContents(fileContents);
+
+        if (stream is FileStream fileStream)
+        {
+            _fileContentsOrPath = fileStream.Name;
+            IsFileFromServer = false;
+        }
+        else
+        {
+            IsFileFromServer = true;
+        }
+    }
 
     /// <summary>
     ///     Loads the contents of a file and parses them into a collection of authorized keys.
@@ -148,16 +188,17 @@ public class AuthorizedKeysFile : ReactiveObject, IAuthorizedKeysFile
             .Split("\r\n", StringSplitOptions.RemoveEmptyEntries)
             .Where(e => !string.IsNullOrWhiteSpace(e.Trim()));
         AuthorizedKeys =
-            new ObservableCollection<IAuthorizedKey>(splittedContents.Select(e => new AuthorizedKey(e.Trim())));
+            new ObservableCollection<AuthorizedKey>(splittedContents.Select(e => AuthorizedKey.Parse(e.Trim())));
     }
 
     /// <summary>
     ///     Reads and loads the contents of a file.
     /// </summary>
     /// <param name="pathToFile">The path to the file to be read and loaded.</param>
-    private void ReadAndLoadFileContents(string pathToFile)
+    private async ValueTask ReadAndLoadFileContents(string pathToFile, CancellationToken cancellationToken = default)
     {
-        using var streamReader = new StreamReader(FileOperations.OpenOrCreate(pathToFile));
-        LoadFileContents(streamReader.ReadToEnd());
+        await using var fileStream = File.Open(pathToFile, FileMode.OpenOrCreate);
+        using var streamReader = new StreamReader(fileStream);
+        LoadFileContents(await streamReader.ReadToEndAsync(cancellationToken));
     }
 }

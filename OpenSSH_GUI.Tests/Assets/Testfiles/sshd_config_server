@@ -1,0 +1,200 @@
+# ============================================================
+# SSH Daemon Configuration
+# /etc/ssh/sshd_config
+# Host: prod-web-01.infra.example.com
+# Role: Web Application Server (nginx, Node.js)
+# Managed by: Ansible | role: sshd-hardening v3.1.2
+# Last modified: 2024-10-21 | Ticket: OPS-4471
+# ============================================================
+
+# ------------------------------------------------------------------
+# NETWORK & LISTEN
+# ------------------------------------------------------------------
+Port                            22
+# Additional port for monitoring checks (not for human logins!)
+Port                            2222
+# IPv4 only – no IPv6 in this network
+AddressFamily                   inet
+# Listen on the internal interface only
+ListenAddress                   10.10.1.11
+# No public IP binding
+# ListenAddress                 0.0.0.0  # intentionally disabled
+
+# ------------------------------------------------------------------
+# PROTOCOL & HOST KEYS
+# ------------------------------------------------------------------
+Protocol                        2
+
+# Host keys – order determines client preference
+HostKey                         /etc/ssh/ssh_host_ed25519_key
+HostKey                         /etc/ssh/ssh_host_rsa_key
+# HostKey                       /etc/ssh/ssh_host_ecdsa_key   # disabled (NIST curves)
+# HostKey                       /etc/ssh/ssh_host_dsa_key     # DSA forbidden
+
+# ------------------------------------------------------------------
+# CRYPTOGRAPHY (BSI TR-02102-4 compliant, as of 2024)
+# ------------------------------------------------------------------
+Ciphers                         chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs                            hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+KexAlgorithms                   curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group18-sha512,diffie-hellman-group16-sha512,diffie-hellman-group14-sha256
+HostKeyAlgorithms               ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+PubkeyAcceptedKeyTypes          ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+# Minimum RSA key size
+RequiredRSASize                 3072
+
+# ------------------------------------------------------------------
+# AUTHENTICATION
+# ------------------------------------------------------------------
+# No root login
+PermitRootLogin                 no
+# No password login – public key only
+PasswordAuthentication          no
+PermitEmptyPasswords            no
+ChallengeResponseAuthentication no
+# PAM for account/session handling only (not for auth)
+UsePAM                          yes
+# Kerberos and GSSAPI disabled
+KerberosAuthentication          no
+GSSAPIAuthentication            no
+GSSAPICleanupCredentials        no
+# Public key authentication
+PubkeyAuthentication            yes
+AuthorizedKeysFile              .ssh/authorized_keys .ssh/authorized_keys2
+# No host-based login
+HostbasedAuthentication         no
+IgnoreRhosts                    yes
+IgnoreUserKnownHosts            no
+
+# Permitted authentication methods (in this order)
+AuthenticationMethods           publickey
+
+# Login grace period: disconnect unauthenticated connections after 30s
+LoginGraceTime                  30
+# Maximum of 3 failed attempts
+MaxAuthTries                    3
+# Maximum 3 concurrent unauthenticated sessions
+MaxStartups                     3:50:10
+
+# ------------------------------------------------------------------
+# USERS & GROUPS
+# ------------------------------------------------------------------
+# Only members of these groups may log in
+AllowGroups                     ssh-users deploy gitlab-runner
+
+# Specific users explicitly allowed (in addition to the groups above)
+AllowUsers                      deploy mhofer@10.10.0.0/16 gitlab-runner
+
+# Explicitly denied users (defence in depth)
+DenyUsers                       root bin daemon nobody www-data
+
+# ------------------------------------------------------------------
+# SESSION & SHELL
+# ------------------------------------------------------------------
+# No X11 forwarding on server
+X11Forwarding                   no
+X11DisplayOffset                10
+X11UseLocalhost                 yes
+
+# No agent forwarding (prevents lateral movement)
+AllowAgentForwarding            no
+
+# TCP forwarding restricted to local
+AllowTcpForwarding              local
+# No tunnel devices
+PermitTunnel                    no
+# Do not expose remote ports to the outside (GatewayPorts)
+GatewayPorts                    no
+
+# Disconnect idle sessions after 15 minutes
+ClientAliveInterval             300
+ClientAliveCountMax             3
+
+# Maximum concurrent sessions per connection
+MaxSessions                     5
+
+# SFTP subsystem (chroot-restricted)
+Subsystem                       sftp /usr/lib/openssh/sftp-server
+
+# Environment variables: pass through LANG and LC_* only
+AcceptEnv                       LANG LC_*
+
+# Display login banner (legal requirement)
+Banner                          /etc/ssh/ssh_banner
+
+# ------------------------------------------------------------------
+# LOGGING
+# ------------------------------------------------------------------
+SyslogFacility                  AUTH
+LogLevel                        VERBOSE
+# Connection logging for SIEM
+# (forwarded via rsyslog to siem.infra.example.com:514)
+
+# ------------------------------------------------------------------
+# NETWORK TUNING
+# ------------------------------------------------------------------
+TCPKeepAlive                    yes
+UseDNS                          no
+# No compression (CPU cost outweighs benefit on fast networks)
+Compression                     no
+
+# ------------------------------------------------------------------
+# MATCH BLOCKS (targeted rule overrides)
+# ------------------------------------------------------------------
+
+# Deploy user: no TTY, no forwarding, restricted to a single command
+Match User deploy
+    AllowTcpForwarding          no
+    AllowAgentForwarding        no
+    PermitTTY                   no
+    X11Forwarding               no
+    MaxSessions                 2
+    ForceCommand                /usr/local/bin/deploy-wrapper.sh
+
+# GitLab Runner: heavily restricted
+Match User gitlab-runner
+    AllowTcpForwarding          no
+    AllowAgentForwarding        no
+    MaxAuthTries                2
+    MaxSessions                 3
+    PasswordAuthentication      no
+    AuthenticationMethods       publickey
+
+# SFTP-only users (chrooted to their home directory)
+Match Group sftp-only
+    ForceCommand                internal-sftp -l VERBOSE
+    ChrootDirectory             /data/sftp/%u
+    AllowTcpForwarding          no
+    AllowAgentForwarding        no
+    PermitTTY                   no
+    X11Forwarding               no
+
+# Internal monitoring may connect on port 2222 without a banner
+Match LocalPort 2222 Address 10.10.0.0/16
+    Banner                      none
+    AllowUsers                  monitoring-agent
+    PasswordAuthentication      no
+    MaxSessions                 1
+    AllowTcpForwarding          no
+
+# Admin access from the VPN network: slightly relaxed rules
+Match Group ssh-admins Address 172.20.0.0/14
+    AllowAgentForwarding        yes
+    AllowTcpForwarding          yes
+    MaxSessions                 10
+    PermitTTY                   yes
+
+# Known bastion host: agent forwarding permitted
+Match Address 10.10.0.5
+    AllowAgentForwarding        yes
+    MaxSessions                 20
+    LogLevel                    INFO
+
+# ------------------------------------------------------------------
+# SECURITY NOTES (for auditors)
+# ------------------------------------------------------------------
+# [OPS-3901] PermitRootLogin: Permanently 'no' since 2022-01
+# [OPS-4102] PasswordAuthentication: Disabled since 2023-06
+# [SEC-0044] KexAlgorithms: DH-Group1 + Group14-SHA1 removed (2024-03)
+# [SEC-0071] RequiredRSASize: Raised to 3072 bits (2024-08)
+# [AUDIT-22] AllowGroups: Last reviewed 2024-09-15 by mhofer
+# ============================================================

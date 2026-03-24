@@ -4,20 +4,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
-        xmlns:openSshGui="clr-namespace:OpenSSH_GUI"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
         Width="500"
         Height="300"
         x:Class="OpenSSH_GUI.Views.ExportWindow"
         x:DataType="viewModels:ExportWindowViewModel"
-        Title="{Binding WindowTitle}"
-        >
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <viewModels:ExportWindowViewModel />
-    </Design.DataContext>
+        Title="{Binding WindowTitle}">
     <Grid RowDefinitions="*, *, *" ColumnDefinitions="*, *, *" Margin="25">
         <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3">
             <SelectableTextBlock Name="ExportedText"
