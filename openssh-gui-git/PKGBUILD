@@ -14,8 +14,12 @@ source=("git+${url}.git#branch=development")
 sha256sums=('SKIP')
 
 pkgver() {
-  cd "${_pkgname}"
-  git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//'
+  cd "${srcdir}/OpenSSH-GUI"
+  local base
+  base=$(grep -oP '(?<=<BaseVersion>)[^<]+' Directory.Build.props)
+  local hash
+  hash=$(git rev-parse --short HEAD)
+  echo "${base}-${hash}" | tr '-' '.'
 }
 
 build() {

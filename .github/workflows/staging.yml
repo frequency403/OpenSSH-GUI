@@ -76,7 +76,7 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:Version="${{ env.VERSION }}"
+            -p:IsNightly=true
 
       - name: Rename artifact
         run: mv ./publish/OpenSSH_GUI${{ matrix.asset_extension }} ./publish/${{ matrix.asset_name }}${{ matrix.asset_extension }}
@@ -164,6 +164,11 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R artifacts
         
+      - name: Collect extra release assets
+        run: |
+          cp OpenSSH_GUI/Assets/appicon.png artifacts/appicon.png
+          cp LICENSE artifacts/LICENSE
+        
       - name: Update nightly release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -228,7 +233,7 @@ jobs:
           SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
 
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-nightly/PKGBUILD
-          sed -i "s/sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-nightly/PKGBUILD
+          sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-nightly/PKGBUILD
 
       - name: Update AUR (openssh-gui-nightly)
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1

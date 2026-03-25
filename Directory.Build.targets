@@ -22,12 +22,16 @@
             DependsOnTargets="ResolveGitHash">
         <PropertyGroup>
             <BaseVersion Condition="'$(BaseVersion)' == ''">1.0.0</BaseVersion>
+            <IsNightly Condition="'$(IsNightly)' == ''">false</IsNightly>
 
             <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-
             <SourceRevisionId>$(GitCommitHash)</SourceRevisionId>
-            <Version>$(BaseVersion)</Version>
-            <InformationalVersion>$(BaseVersion)+$(GitCommitHash)</InformationalVersion>
+
+            <Version Condition="'$(IsNightly)' != 'true'">$(BaseVersion)</Version>
+            <InformationalVersion Condition="'$(IsNightly)' != 'true'">$(BaseVersion)</InformationalVersion>
+
+            <Version Condition="'$(IsNightly)' == 'true'">$(BaseVersion)-$(GitCommitHash)</Version>
+            <InformationalVersion Condition="'$(IsNightly)' == 'true'">$(BaseVersion)-$(GitCommitHash)</InformationalVersion>
         </PropertyGroup>
     </Target>
 
