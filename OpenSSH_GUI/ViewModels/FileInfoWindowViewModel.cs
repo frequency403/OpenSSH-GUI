@@ -1,6 +1,7 @@
 using System.Reactive;
 using System.Text;
 using Avalonia.Input.Platform;
+using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
 using Microsoft.Extensions.Logging;
@@ -20,15 +21,18 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
 {
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly IResolver _resolver;
     private readonly IClipboard _clipboard;
     private readonly SshKeyManager _keyManager;
 
-    public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
+    public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider, IResolver resolver, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
+        _resolver = resolver;
         _clipboard = clipboard;
         _keyManager = keyManager;
+        _keyFile = resolver.Resolve<SshKeyFile>();
         ChangeFileNames = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFileNameAsync);
         DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
         CopyPasswordIntoClipboard = ReactiveCommand.CreateFromTask<SshKeyFilePassword>(CopyPasswordIntoClipboardAsync);
@@ -43,7 +47,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)
     {
-        KeyFile = parameters.Key;
+        KeyFile = _keyManager.SshKeys.SingleOrDefault(x => x.FingerprintString == parameters.KeyFingerprint) ?? _resolver.Resolve<SshKeyFile>();
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
@@ -98,5 +102,5 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
 
 public class FileInfoViewModelInitializer : IInitializerParameters<FileInfoWindowViewModel>
 {
-    public required SshKeyFile Key { get; set; }
+    public required string KeyFingerprint { get; set; }
 }

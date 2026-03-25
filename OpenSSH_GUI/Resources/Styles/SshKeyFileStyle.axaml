@@ -115,7 +115,7 @@
                     <ContextMenu>
                         <MenuItem Header="Open FileInfo"
                                   Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindow}"
-                                  CommandParameter="{Binding}">
+                                  CommandParameter="{Binding FingerprintString}">
                             <MenuItem.Icon>
                                 <avalonia:MaterialIcon Kind="InformationBoxOutline" />
                             </MenuItem.Icon>

@@ -77,7 +77,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         ResetKey = ReactiveCommand.CreateFromTask<SshKeyFile>(ResetKeyAsync);
         ChangeFilename = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFilenameAsync);
         OpenApplicationSettingsWindow = ReactiveCommand.CreateFromTask(OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>);
-        OpenFileInfoWindow = ReactiveCommand.CreateFromTask<SshKeyFile>(OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFile, FileInfoViewModelInitializer>);
+        OpenFileInfoWindow = ReactiveCommand.CreateFromTask<string>(OpenWindow<FileInfoWindow, FileInfoWindowViewModel, string, FileInfoViewModelInitializer>);
 
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
         
@@ -145,7 +145,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public ReactiveCommand<SshKeyFile, Unit> ResetKey { get; }
     public ReactiveCommand<SshKeyFile, Unit> ChangeFilename { get; }
     public ReactiveCommand<Unit, Unit> OpenApplicationSettingsWindow { get; }
-    public ReactiveCommand<SshKeyFile, Unit> OpenFileInfoWindow { get; }
+    public ReactiveCommand<string, Unit> OpenFileInfoWindow { get; }
     public ServerConnectionService ServerConnectionService { get; }
     public SshKeyManager SshKeyManager { get; }
 
