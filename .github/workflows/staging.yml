@@ -140,12 +140,13 @@ jobs:
     name: Create Nightly Release
     runs-on: ubuntu-latest
     needs: build
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Resolve git metadata
         run: |
@@ -155,6 +156,13 @@ jobs:
           echo "GIT_HASH=$HASH"                         >> "$GITHUB_ENV"
           echo "BUILD_DATE=$DATE"                       >> "$GITHUB_ENV"
           echo "VERSION=${BASE_VERSION}+${HASH}"        >> "$GITHUB_ENV"
+      
+      - name: Force-update nightly tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f nightly
+          git push origin -f nightly
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -163,12 +171,12 @@ jobs:
 
       - name: Display structure of downloaded files
         run: ls -R artifacts
-        
+
       - name: Collect extra release assets
         run: |
           cp OpenSSH_GUI/Assets/appicon.png artifacts/appicon.png
           cp LICENSE artifacts/LICENSE
-        
+
       - name: Update nightly release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -176,7 +184,7 @@ jobs:
           NOTES="**Branch:** \`development\`
           **Commit:** \`${{ env.GIT_HASH }}\`
           **Built:** ${{ env.BUILD_DATE }}
-  
+          
           > Automated nightly build — not intended for production use."
           
           if gh release view nightly &>/dev/null; then
@@ -190,10 +198,11 @@ jobs:
           
             find artifacts -type f | xargs gh release upload nightly
           else
-            find artifacts -type f | xargs gh release create nightly \
+            gh release create nightly \
               --title "Nightly (${{ env.BUILD_DATE }}) — ${{ env.VERSION }}" \
               --notes "$NOTES" \
-              --prerelease
+              --prerelease \
+              $(find artifacts -type f)
           fi
 
   # --- JOB 3: AUR NIGHTLY ---
