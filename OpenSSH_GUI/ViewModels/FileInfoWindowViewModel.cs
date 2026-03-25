@@ -1,4 +1,6 @@
 using System.Reactive;
+using System.Text;
+using Avalonia.Input.Platform;
 using JetBrains.Annotations;
 using Material.Icons;
 using Microsoft.Extensions.Logging;
@@ -18,15 +20,18 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
 {
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly IClipboard _clipboard;
     private readonly SshKeyManager _keyManager;
 
-    public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider, SshKeyManager keyManager) : base(logger)
+    public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
+        _clipboard = clipboard;
         _keyManager = keyManager;
         ChangeFileNames = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFileNameAsync);
         DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
+        CopyPasswordIntoClipboard = ReactiveCommand.CreateFromTask<SshKeyFilePassword>(CopyPasswordIntoClipboardAsync);
     }
     
     [Reactive]
@@ -34,6 +39,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     
     public ReactiveCommand<SshKeyFile, Unit> ChangeFileNames { get; } 
     public ReactiveCommand<SshKeyFile, Unit> DeleteKey { get; }
+    public ReactiveCommand<SshKeyFilePassword, Unit> CopyPasswordIntoClipboard { get; }
     
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)
     {
@@ -71,6 +77,22 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName)
                     , error.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+    }
+
+    private async Task CopyPasswordIntoClipboardAsync(SshKeyFilePassword password, CancellationToken token = default)
+    {
+        try
+        {
+            Span<char> passwordSpan = stackalloc char[password.Length];
+            Encoding.UTF8.GetChars(password.WrittenSpan, passwordSpan);
+            await _clipboard.SetTextAsync(passwordSpan.ToString());
+            await _clipboard.FlushAsync();
+            await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard", "Password copied to clipboard", MessageBoxButtons.Ok, MessageBoxIcon.Information);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error copying password to clipboard");
+        }
     }
 }
 

@@ -7,6 +7,7 @@
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.FileInfoWindow"
         x:DataType="viewModels:FileInfoWindowViewModel"
@@ -72,6 +73,52 @@
             <Separator />
             <TextBlock Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}"/>
         </StackPanel>
-        <StackPanel Grid.Row="3"></StackPanel>
+        <Grid Grid.Row="3" RowDefinitions="* *" ColumnDefinitions="5* Auto">
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Spacing="2">
+                <TextBlock Text="Password"/>    
+                <Separator />
+            </StackPanel>
+            <controls:PasswordDisplay Grid.Row="1" Grid.Column="0" Name="PasswordBox" SecurePassword="{Binding KeyFile.Password}"/>
+            <Button Grid.Row="1" Grid.Column="1" IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }"
+                    Command="{Binding CopyPasswordIntoClipboard}"
+                    CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}"
+                    Height="{Binding Height, ElementName=PasswordBox}"
+                    HorizontalAlignment="Stretch"
+                    Background="LightSeaGreen">
+                <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
+            </Button>
+        </Grid>
+        
+        
+        <!-- <DockPanel Grid.Row="3" Margin="10 5" HorizontalAlignment="Stretch"> -->
+        <!--     <StackPanel DockPanel.Dock="Top" Spacing="2"> -->
+        <!--         <TextBlock Text="Password"/> -->
+        <!--         <Separator /> -->
+        <!--     </StackPanel> -->
+        <!--     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Stretch"> -->
+        <!--         <controls:PasswordDisplay Name="PasswordBox" SecurePassword="{Binding KeyFile.Password}"/> -->
+        <!--         <Button IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }" -->
+        <!--                 Command="{Binding CopyPasswordIntoClipboard}" -->
+        <!--                 CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}" -->
+        <!--                 Background="LightSeaGreen"> -->
+        <!--             <avalonia:MaterialIcon Kind="ClipboardEditOutline" /> -->
+        <!--         </Button> -->
+        <!--     </StackPanel> -->
+        <!-- </DockPanel> -->
+        <!-- <StackPanel Grid.Row="3" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5"> -->
+        <!--     <StackPanel Spacing="5"> -->
+        <!--         <TextBlock Text="Password"/> -->
+        <!--         <Separator /> -->
+        <!--     </StackPanel> -->
+        <!--     <StackPanel Spacing="10" Orientation="Horizontal"> -->
+        <!--         <controls:PasswordDisplay Name="PasswordBox" SecurePassword="{Binding KeyFile.Password}"/> -->
+        <!--         <Button IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }" -->
+        <!--                 Command="{Binding CopyPasswordIntoClipboard}" -->
+        <!--                 CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}" -->
+        <!--                 Background="LightSeaGreen"> -->
+        <!--             <avalonia:MaterialIcon Kind="ClipboardEditOutline" /> -->
+        <!--         </Button> -->
+        <!--     </StackPanel> -->
+        <!-- </StackPanel> -->
     </Grid>
 </Window>
