@@ -185,7 +185,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     {
         try
         {
-            await keyFile.Reset();
+            keyFile.Reset();
         }
         catch (Exception e)
         {

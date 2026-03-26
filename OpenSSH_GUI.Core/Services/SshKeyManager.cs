@@ -238,7 +238,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
                             generateParamsInfo.Encryption, generateParamsInfo.KeyFormat));
                     }
 
-                    await keyFile.Load(SshKeyFileSource.FromDisk(puttyPath),
+                    keyFile.Load(SshKeyFileSource.FromDisk(puttyPath),
                         Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
                     break;
 
@@ -259,7 +259,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
                         await sw.WriteAsync(createdKey.ToOpenSshPublicFormat());
                     }
 
-                    await keyFile.Load(SshKeyFileSource.FromDisk(privatePath),
+                    keyFile.Load(SshKeyFileSource.FromDisk(privatePath),
                         Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
                     break;
             }
@@ -447,7 +447,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
             if (GenerateKeyFile() is not { } keyFileGenerated)
                 throw new InvalidOperationException("Key file not generated");
 
-            await keyFileGenerated.Load(keyFileSource);
+            keyFileGenerated.Load(keyFileSource);
             SshKeysInternal.Add(keyFileGenerated);
         }
         catch (Exception e)

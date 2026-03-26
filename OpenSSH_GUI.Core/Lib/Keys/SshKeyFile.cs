@@ -31,9 +31,6 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     
     private IDisposable _keyFileInfoSubscription;
 
-    [Reactive]
-    private BasicSshKeyFileInformation _basicSshKeyFileInformation;
-
     [ObservableAsProperty] private string _comment = string.Empty;
     [ObservableAsProperty] private string _fingerprint = string.Empty;
     [ObservableAsProperty] private string _fingerprintString = string.Empty;
@@ -41,6 +38,17 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     [ObservableAsProperty] private bool _isInitialized;
     [ObservableAsProperty] private bool _isPuttyKey;
     [ObservableAsProperty] private SshKeyType _keyType = SshKeyType.RSA;
+    [ObservableAsProperty] private PrivateKeyFile? _privateKeySource;
+    
+    /// <summary>
+    ///     Provides access to the collection of associated key files for the current SSH key.
+    ///     The key files typically include the private and public key files that are associated
+    ///     with the key being managed. This property relies on the underlying <see cref="SshKeyFileInformation" />
+    ///     instance to determine and fetch the file information.
+    ///     Returns an enumeration of <see cref="FileInfo" /> objects, representing the files associated
+    ///     with the SSH key. If no files are linked to the key, an empty enumeration is returned.
+    /// </summary>
+    [ObservableAsProperty] private FileInfo[] _keyFiles = [];
 
     /// <summary>
     ///     Holds metadata information about the associated SSH key file, such as file path, name,
@@ -62,11 +70,13 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// </remarks>
     [Reactive] private PrivateKeyFile? _privateKeyFile;
 
-    // --- ObservableAsProperty backing fields ---
-    // The source generator creates public read-only properties and
-    // corresponding _xxxHelper fields from each of these.
 
-    [ObservableAsProperty] private PrivateKeyFile? _privateKeySource;
+    /// <summary>
+    /// The basic key file information extracted by <c>ssh-keygen</c> or the file itself in case of a PuTTy key.
+    /// </summary>
+    [Reactive]
+    private BasicSshKeyFileInformation _basicSshKeyFileInformation;
+    
     
     internal void AttachChangeFormatHandler(Func<SshKeyFile, SshKeyFormat, CancellationToken, Task> handler)
     {
@@ -92,11 +102,12 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
         _logger = logger;
         ChangeFormatOfKeyFile = ReactiveCommand.CreateFromTask<SshKeyFormat>(ChangeFormatOnDisk);
         _keyFileInfoSubscription = this.WhenAnyValue(vm => vm.KeyFileInfo)
-            .Subscribe(_ =>
+            .Subscribe(keyFileInfo =>
             {
                 try
                 {
-                    ExtractKeyInformation();
+                    if (keyFileInfo is not null)
+                        BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(keyFileInfo);
                 }
                 catch (FileNotFoundException)
                 {
@@ -189,17 +200,11 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
         _isPuttyKeyHelper = this.WhenAnyValue(x => x.KeyFileInfo)
             .Select(fi => fi?.CurrentFormat is not SshKeyFormat.OpenSSH)
             .ToProperty(this, nameof(IsPuttyKey));
+        
+        _keyFilesHelper = this.WhenAnyValue(x => x.KeyFileInfo)
+            .Select(fi => fi is not null ? fi.Files : [])
+            .ToProperty(this, nameof(KeyFiles));
     }
-
-    /// <summary>
-    ///     Provides access to the collection of associated key files for the current SSH key.
-    ///     The key files typically include the private and public key files that are associated
-    ///     with the key being managed. This property relies on the underlying <see cref="SshKeyFileInformation" />
-    ///     instance to determine and fetch the file information.
-    ///     Returns an enumeration of <see cref="FileInfo" /> objects, representing the files associated
-    ///     with the SSH key. If no files are linked to the key, an empty enumeration is returned.
-    /// </summary>
-    internal FileInfo[] KeyFiles => KeyFileInfo?.Files ?? [];
 
     /// <summary>
     ///     Represents the authorized key associated with an SSH key file.
@@ -235,12 +240,12 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// <summary>
     ///     Gets the absolute file path of the SSH key file.
     /// </summary>
-    public string? AbsoluteFilePath => KeyFileInfo?.FullName;
+    public string? AbsoluteFilePath => KeyFileInfo?.FullFileName;
 
     /// <summary>
     ///     Gets the name of the SSH key file.
     /// </summary>
-    public string? FileName => KeyFileInfo?.Name;
+    public string? FileName => KeyFileInfo?.FileName;
 
     /// <summary>
     ///     Gets the current format of the SSH key file.
@@ -295,69 +300,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     {
         return sshKeyFile.PrivateKeyFile;
     }
-
-    private Process? BuildInformationProcess()
-    {
-        if (KeyFileInfo is not { Exists: true })
-            throw new FileNotFoundException();
-        var processInformation = new ProcessStartInfo
-        {
-            FileName = "ssh-keygen",
-            Arguments = $"-lf {KeyFileInfo.FullName}",
-            CreateNoWindow = true,
-            WorkingDirectory = KeyFileInfo.DirectoryName,
-            UseShellExecute = false,
-            RedirectStandardOutput = true
-        };
-        return Process.Start(processInformation);
-    }
-
-    private string? GetPublicKeyInfo()
-    {
-        string? publicKeyInfo = null;
-        if (BuildInformationProcess() is not { } process) return publicKeyInfo;
-        publicKeyInfo = process.StandardOutput.ReadToEnd();
-        return publicKeyInfo;
-    }
-
-    private async ValueTask<string?> GetPublicKeyInfoAsync()
-    {
-        string? publicKeyInfo = null;
-        if (BuildInformationProcess() is not { } process) return publicKeyInfo;
-        publicKeyInfo = await process.StandardOutput.ReadToEndAsync();
-        return publicKeyInfo;
-    }
-
-    private void ExtractKeyInformation()
-    {
-        if (KeyFileInfo is not { Exists: true })
-            throw new FileNotFoundException();
-
-        if (GetPublicKeyInfo() is not { } publicKeyInfo) return;
-        BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromCommandOutput(publicKeyInfo);
-        _logger.LogInformation("Extracted Key Information from {filePath}: \"{joinedString}\"",
-            KeyFileInfo.FullName, BasicSshKeyFileInformation);
-    }
     
-    /// <summary>
-    ///     Extracts detailed information about the SSH key file, such as its fingerprint,
-    ///     hash algorithm, comment, and key type, using the <c>ssh-keygen</c> command-line tool.
-    /// </summary>
-    /// <exception cref="FileNotFoundException">
-    ///     Thrown if the SSH key file does not exist.
-    /// </exception>
-    private async ValueTask ExtractKeyInformationAsync()
-    {
-        if (KeyFileInfo is not { Exists: true })
-            throw new FileNotFoundException();
-
-        if (await GetPublicKeyInfoAsync() is { } publicKeyInfo)
-        {
-            BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromCommandOutput(publicKeyInfo);
-            _logger.LogInformation("Extracted Key Information from {filePath}: \"{joinedString}\"",
-                KeyFileInfo.FullName, BasicSshKeyFileInformation);
-        }
-    }
 
     /// <summary>
     /// Resets the state of the current SSH key file instance, clearing any previously set password,
@@ -368,26 +311,27 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// in case of unexpected failures during the reset process.
     /// </summary>
     /// <returns>A task representing the asynchronous operation of resetting the SSH key file.</returns>
-    public async ValueTask Reset()
+    public void Reset()
     {
         try
         {
             Password.Clear();
-            PrivateKeyFile = new PrivateKeyFile(KeyFileInfo!.FullName);
+            PrivateKeyFile = new PrivateKeyFile(KeyFileInfo!.FullFileName);
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
             NeedsPassword = true;
-            await ExtractKeyInformationAsync();
+            if(KeyFileInfo is not null)
+                BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(KeyFileInfo);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
             throw;
         }
-        _logger.LogInformation("Reset {className} successfully", KeyFileInfo?.Name ?? string.Empty);
+        _logger.LogInformation("Reset {className} successfully", KeyFileInfo?.FileName ?? string.Empty);
     }
-    
+
     /// <summary>
     ///     Loads an SSH key file from the specified file path and initializes it,
     ///     optionally using the provided passphrase for decryption.
@@ -396,7 +340,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// <param name="passPhrase">
     ///     An optional passphrase for the key file, used to unlock encrypted private keys.
     /// </param>
-    public async ValueTask Load(SshKeyFileSource keyFileSource, ReadOnlyMemory<byte>? passPhrase = null)
+    public void Load(SshKeyFileSource keyFileSource, ReadOnlyMemory<byte>? passPhrase = null)
     {
         try
         {
@@ -404,14 +348,15 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
             if (passPhrase is { Length: > 0 } pass)
                 Password.Set(pass);
             PrivateKeyFile = Password.IsValid
-                ? new PrivateKeyFile(KeyFileInfo.FullName, Password.GetPasswordString())
-                : new PrivateKeyFile(KeyFileInfo.FullName);
+                ? new PrivateKeyFile(KeyFileInfo.FullFileName, Password.GetPasswordString())
+                : new PrivateKeyFile(KeyFileInfo.FullFileName);
         }
         catch (SshPassPhraseNullOrEmptyException passPhraseNullOrEmptyException)
         {
             _logger.LogInformation(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}", keyFileSource.AbsolutePath);
             NeedsPassword = true;
-            await ExtractKeyInformationAsync();
+            if(KeyFileInfo is not null)
+                BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(KeyFileInfo);
         }
         catch (Exception e)
         {
@@ -432,15 +377,15 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
         try
         {
             if (KeyFileInfo is not { Exists: true })
-                throw new FileNotFoundException("SshKeyFile not found", KeyFileInfo?.Name);
-            await Load(KeyFileInfo.KeyFileSource, password);
+                throw new FileNotFoundException("SshKeyFile not found", KeyFileInfo?.FileName);
+            Load(KeyFileInfo.KeyFileSource, password);
             NeedsPassword = false;
             return true;
         }
         catch (SshPassPhraseNullOrEmptyException)
         {
             NeedsPassword = true;
-            _logger.LogWarning("Missing Password for keyfile {filePath}", KeyFileInfo?.FullName);
+            _logger.LogWarning("Missing Password for keyfile {filePath}", KeyFileInfo?.FullFileName);
         }
         catch (Exception e)
         {

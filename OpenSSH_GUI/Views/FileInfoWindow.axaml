@@ -23,7 +23,7 @@
             <UniformGrid Rows="1" Columns="2" ColumnSpacing="50">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
                     <TextBlock Text="Found"/>
-                    <TextBlock Text="{Binding KeyFile.KeyFileInfo.Files.Length, FallbackValue=0}" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding KeyFile.KeyFiles.Length, FallbackValue=0}" FontWeight="Bold"/>
                     <TextBlock Text="associated Files" />
                 </StackPanel>
                 <UniformGrid Rows="1" Columns="2" ColumnSpacing="5" HorizontalAlignment="Right">
@@ -56,8 +56,7 @@
                 </UniformGrid>
             </UniformGrid>
             <Separator />
-            <ItemsControl IsVisible="{Binding KeyFile.IsInitialized}"
-                          ItemsSource="{Binding KeyFile.KeyFileInfo.Files}">
+            <ItemsControl ItemsSource="{Binding KeyFile.KeyFiles}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type io:FileInfo}">
                         <StackPanel Margin="0 5">
