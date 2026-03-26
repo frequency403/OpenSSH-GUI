@@ -20,7 +20,7 @@ public partial record SshKeyFileInformation : ReactiveRecord
     ///     Represents the internal <see cref="FileInfo" /> object associated with the SSH key file.
     ///     This variable is used to perform various file operations and retrieve metadata of the specified SSH key file path.
     /// </summary>
-    [ObservableAsProperty(ReadOnly = true)] private readonly FileInfo _fileInfo = new(Assembly.GetExecutingAssembly().Location);
+    [ObservableAsProperty(ReadOnly = true)] private FileInfo _fileInfo = new(Assembly.GetExecutingAssembly().Location);
     
     [Reactive(SetModifier = AccessModifier.Private)]
     private SshKeyFileSource _keyFileSource;
@@ -147,7 +147,7 @@ public partial record SshKeyFileInformation : ReactiveRecord
             .Select(source => !source.ProvidedByConfig)
             .ToProperty(this, vm => vm.CanChangeFileName);
         
-        _currentFormatHelper = this.WhenAnyValue(vm => FileInfo)
+        _currentFormatHelper = this.WhenAnyValue(vm => vm.FileInfo)
             .Select(fi => fi.Extension switch
             {
                 ".ppk" => SshKeyFormat.PuTTYv3,
@@ -178,7 +178,7 @@ public partial record SshKeyFileInformation : ReactiveRecord
             .Select(fi => fi.DirectoryName)
             .ToProperty(this, vm => vm.DirectoryName);
         
-        _filesHelper = this.WhenAnyValue(vm => FullFileName, vm => vm.PublicKeyFileName)
+        _filesHelper = this.WhenAnyValue(vm => vm.FullFileName, vm => vm.PublicKeyFileName)
             .Select(tuple => new[] {tuple.Item1, tuple.Item2}.Where(e => !string.IsNullOrEmpty(e))
                 .Select(e => new FileInfo(e!)).ToArray())
             .ToProperty(this, vm => vm.Files);

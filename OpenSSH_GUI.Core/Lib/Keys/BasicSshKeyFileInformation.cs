@@ -112,16 +112,40 @@ public readonly record struct BasicSshKeyFileInformation()
     /// <exception cref="NotSupportedException">Thrown when the key type in the .ppk file is not supported.</exception>
     private static string ReadPpkAsCommandOutput(string ppkPath)
     {
-        var lines = File.ReadAllLines(ppkPath);
+        using var fileStream = new FileStream(ppkPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var streamReader = new StreamReader(fileStream);
 
-        var keyTypeRaw = GetField(lines, "PuTTY-User-Key-File");
-        var comment = GetField(lines, "Comment");
+        var keyTypeRaw = "";
+        var comment = "";
+        var publicKeyInFile = "";
+        
+        while (streamReader.ReadLine() is { } line)
+        {
+            switch (line)
+            {
+                case not null when line.StartsWith("PuTTY-User-Key-File"):
+                    keyTypeRaw = line.Split(": ", 2)[1].Trim();
+                    break;
+                case not null when line.StartsWith("Comment"):
+                    comment = line.Split(": ", 2)[1].Trim();
+                    break;
+                case not null when line.StartsWith("Public-Lines:") &&
+                                   int.TryParse(line.Split(": ", 2)[1].Trim(), out var pubLinesCount):
+                {
+                    var linesFetched = 0;
+                    while (linesFetched < pubLinesCount)
+                    {
+                        if (streamReader.ReadLine() is not { } pubKLine) continue;
+                        linesFetched++;
+                        publicKeyInFile = string.Concat(publicKeyInFile, pubKLine);
+                    }
 
-        var pubLinesIdx = Array.FindIndex(lines, l => l.StartsWith("Public-Lines:"));
-        var pubCount = int.Parse(lines[pubLinesIdx].Split(": ", 2)[1].Trim());
-        var raw = Convert.FromBase64String(
-            string.Concat(lines[(pubLinesIdx + 1)..(pubLinesIdx + 1 + pubCount)]));
+                    break;
+                }
+            }
+        }
 
+        var raw = Convert.FromBase64String(publicKeyInFile);
         var fingerprint = Convert.ToBase64String(SHA256.HashData(raw)).TrimEnd('=');
 
         var (keyType, bits) = keyTypeRaw switch
@@ -137,15 +161,6 @@ public readonly record struct BasicSshKeyFileInformation()
 
         return $"{bits} SHA256:{fingerprint} {comment} ({keyType})";
     }
-
-    /// <summary>
-    /// Extracts the value of a colon-separated field from the .ppk header lines.
-    /// </summary>
-    /// <param name="lines">All lines of the .ppk file.</param>
-    /// <param name="key">The field name to look for (e.g. "Comment").</param>
-    /// <returns>The trimmed value after the colon.</returns>
-    private static string GetField(string[] lines, string key) =>
-        lines.First(l => l.StartsWith(key)).Split(": ", 2)[1].Trim();
 
     /// <summary>
     /// Parses the SSH wire-format blob of an RSA public key to determine its bit length via the modulus size.
