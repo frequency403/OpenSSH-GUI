@@ -87,37 +87,5 @@
                 <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
             </Button>
         </Grid>
-        
-        
-        <!-- <DockPanel Grid.Row="3" Margin="10 5" HorizontalAlignment="Stretch"> -->
-        <!--     <StackPanel DockPanel.Dock="Top" Spacing="2"> -->
-        <!--         <TextBlock Text="Password"/> -->
-        <!--         <Separator /> -->
-        <!--     </StackPanel> -->
-        <!--     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Stretch"> -->
-        <!--         <controls:PasswordDisplay Name="PasswordBox" SecurePassword="{Binding KeyFile.Password}"/> -->
-        <!--         <Button IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }" -->
-        <!--                 Command="{Binding CopyPasswordIntoClipboard}" -->
-        <!--                 CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}" -->
-        <!--                 Background="LightSeaGreen"> -->
-        <!--             <avalonia:MaterialIcon Kind="ClipboardEditOutline" /> -->
-        <!--         </Button> -->
-        <!--     </StackPanel> -->
-        <!-- </DockPanel> -->
-        <!-- <StackPanel Grid.Row="3" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5"> -->
-        <!--     <StackPanel Spacing="5"> -->
-        <!--         <TextBlock Text="Password"/> -->
-        <!--         <Separator /> -->
-        <!--     </StackPanel> -->
-        <!--     <StackPanel Spacing="10" Orientation="Horizontal"> -->
-        <!--         <controls:PasswordDisplay Name="PasswordBox" SecurePassword="{Binding KeyFile.Password}"/> -->
-        <!--         <Button IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }" -->
-        <!--                 Command="{Binding CopyPasswordIntoClipboard}" -->
-        <!--                 CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}" -->
-        <!--                 Background="LightSeaGreen"> -->
-        <!--             <avalonia:MaterialIcon Kind="ClipboardEditOutline" /> -->
-        <!--         </Button> -->
-        <!--     </StackPanel> -->
-        <!-- </StackPanel> -->
     </Grid>
 </Window>
