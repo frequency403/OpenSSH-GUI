@@ -14,89 +14,35 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 /// <summary>
 ///     A reactive, disposable container for an SSH key passphrase stored as raw bytes.
 ///     Acts as a two-state machine: <c>Empty</c> ↔ <c>HasPassword</c>.
-///     All observable properties (<see cref="IsValid"/>, <see cref="Length"/>,
-///     <see cref="WrittenCount"/>, <see cref="WrittenSpan"/>) fire
+///     All observable properties (<see cref="IsValid"/> fire
 ///     <see cref="System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>
 ///     on every state transition triggered by <see cref="Set"/> or <see cref="Clear"/>.
 /// </summary>
 public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
 {
-    // ── Private state ────────────────────────────────────────────────────
+    private readonly ILogger<SshKeyFilePassword> _logger;
 
-    private readonly ArrayBufferWriter<byte> _bufferWriter = new();
-
-    /// <summary>Fires Unit.Default on every buffer mutation (Set / Clear).</summary>
+    private readonly ArrayBufferWriter<byte> _bufferWriter = new(ushort.MaxValue);
     private readonly Subject<Unit> _bufferMutated = new();
-
     private readonly CompositeDisposable _disposables = new();
-
-    // ── Encoding ─────────────────────────────────────────────────────────
-
-    private Encoding Encoding
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = Encoding.UTF8;
-
-    // ── Derived observable properties ────────────────────────────────────
+    private Encoding _encoding = Encoding.UTF8;
 
     /// <summary>
     ///     Gets a value indicating whether the buffer contains at least one byte.
     /// </summary>
-    [ObservableAsProperty(ReadOnly = true)]
+    [Reactive(SetModifier = AccessModifier.Private)]
     private bool _isValid;
-
-    /// <summary>
-    ///     Gets the number of passphrase bytes currently stored in the buffer.
-    /// </summary>
-    [ObservableAsProperty(ReadOnly = true)]
-    private int _length;
-
-    /// <summary>
-    ///     Gets the number of bytes written to the buffer.
-    ///     Alias of <see cref="Length"/> kept for interface compatibility.
-    /// </summary>
-    [ObservableAsProperty(ReadOnly = true)]
-    private int _writtenCount;
-
-    // ── Constructor ──────────────────────────────────────────────────────
-
+    
     /// <summary>
     ///     Initialises the state machine and wires all derived properties
     ///     to the internal mutation subject.
     /// </summary>
     public SshKeyFilePassword(ILogger<SshKeyFilePassword> logger)
     {
-        // Single shared stream: emits once immediately (StartWith) so that
-        // all ObservableAsProperty helpers have a synchronous initial value,
-        // then re-emits on every Set / Clear call.
-        var bufferState = _bufferMutated
-            .StartWith(Unit.Default)
-            .Publish()
-            .RefCount();
-
-        _isValidHelper = bufferState
-            .Select(_ => _bufferWriter.WrittenCount > 0)
-            .Do(v => logger.LogDebug("IsValid changing to {Value}", v))
-            .ToProperty(this, x => x.IsValid)
-            .DisposeWith(_disposables);
-
-        _lengthHelper = bufferState
-            .Select(_ => _bufferWriter.WrittenCount)
-            .Do(v => logger.LogDebug("Length changing to {Value}", v))
-            .ToProperty(this, x => x.Length)
-            .DisposeWith(_disposables);
-
-        _writtenCountHelper = bufferState
-            .Select(_ => _bufferWriter.WrittenCount)
-            .Do(v => logger.LogDebug("WrittenCount changing to {Value}", v))
-            .ToProperty(this, x => x.WrittenCount)
-            .DisposeWith(_disposables);
-        
+        _logger = logger;
         _bufferMutated
             .Subscribe(_ => this.RaisePropertyChanged(nameof(WrittenSpan)))
             .DisposeWith(_disposables);
-
         _disposables.Add(_bufferMutated);
     }
 
@@ -121,8 +67,8 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     /// </summary>
     /// <param name="password">Raw passphrase bytes to store.</param>
     /// <param name="encoding">
-    ///     Optional encoding override used by <see cref="GetChars"/> and
-    ///     <see cref="GetMaxCharCount"/>. Defaults to the previously configured encoding.
+    ///     Optional encoding override used by <see cref="GetPasswordString"/>.
+    ///     Defaults to the previously configured encoding.
     /// </param>
     /// <exception cref="ArgumentOutOfRangeException"/>
     /// <exception cref="ObjectDisposedException"/>
@@ -130,9 +76,10 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     {
         _bufferWriter.Clear();
         _bufferWriter.ResetWrittenCount();
-        Encoding = encoding ?? Encoding;
+        _encoding = encoding ?? _encoding;
         _bufferWriter.Write(password);
         _bufferMutated.OnNext(Unit.Default);
+        IsValid = _bufferWriter.WrittenCount > 0;
     }
 
     /// <summary>
@@ -146,6 +93,7 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
         _bufferWriter.Clear();
         _bufferWriter.ResetWrittenCount();
         _bufferMutated.OnNext(Unit.Default);
+        IsValid = _bufferWriter.WrittenCount > 0;
     }
 
     // ── IDisposable ──────────────────────────────────────────────────────
@@ -160,37 +108,15 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
         _bufferWriter.Clear();
         _disposables.Dispose(); // completes bufferMutated and all ToProperty helpers
     }
-
-    // ── Passphrase accessors ─────────────────────────────────────────────
-
-    /// <summary>
-    ///     Decodes the stored passphrase into the caller-provided character buffer.
-    ///     The caller is responsible for wiping <paramref name="destination"/> after use.
-    /// </summary>
-    /// <param name="destination">
-    ///     Target buffer; ideally allocated with <c>stackalloc</c>.
-    ///     Size it using <see cref="GetMaxCharCount"/>.
-    /// </param>
-    /// <returns>The number of characters written.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="destination"/> is too small.</exception>
-    public int GetChars(Span<char> destination) =>
-        Encoding.GetChars(_bufferWriter.WrittenSpan, destination);
-
-    /// <summary>
-    ///     Returns the maximum number of characters that <see cref="GetChars"/> could write
-    ///     for the currently stored passphrase. Use this to size a <c>stackalloc</c> buffer.
-    /// </summary>
-    public int GetMaxCharCount() => Encoding.GetMaxCharCount(WrittenCount);
-
+    
     /// <summary>
     ///     Decodes the stored passphrase to a managed <see cref="string"/> on the heap.
     ///     The resulting string <b>cannot</b> be securely wiped and will persist until GC collection.
-    ///     Prefer <see cref="GetChars"/> for security-sensitive consumers.
     /// </summary>
     public string GetPasswordString()
     {
-        Span<char> chars = stackalloc char[GetMaxCharCount()];
-        var written = GetChars(chars);
+        Span<char> chars = stackalloc char[_encoding.GetMaxCharCount(_bufferWriter.WrittenCount)];
+        var written = _encoding.GetChars(_bufferWriter.WrittenSpan, chars);
         var result = new string(chars[..written]);
         chars.Clear();
         return result;

@@ -217,8 +217,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         var content = keyFile is not null ? keyFile.ToOpenSshPublicFormat() : string.Empty;
         return ShowExportWindow(key, content, null, token);
     }
-
-    [ReactiveCommand]
+    
     private async Task ShowExportWindow(SshKeyFile key, string content, string? windowTitle = null,
         CancellationToken token = default)
     {

@@ -96,9 +96,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     {
         try
         {
-            Span<char> passwordSpan = stackalloc char[password.Length];
-            Encoding.UTF8.GetChars(password.WrittenSpan, passwordSpan);
-            await _clipboard.SetTextAsync(passwordSpan.ToString());
+            await _clipboard.SetTextAsync(password.GetPasswordString());
             await _clipboard.FlushAsync();
             await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard", "Password copied to clipboard", MessageBoxButtons.Ok, MessageBoxIcon.Information);
         }

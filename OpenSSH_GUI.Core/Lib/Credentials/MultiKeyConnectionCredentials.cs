@@ -37,7 +37,7 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     public override ConnectionInfo GetConnectionInfo()
     {
         if (Keys is not { } keys) return new ConnectionInfo(Hostname, Port, Username);
-        var sources = keys.Select(e => e.PrivateKeySource).ToArray();
-        return sources.All(s => s is not null) ? new PrivateKeyConnectionInfo(Hostname, Port, Username, sources) : new ConnectionInfo(Hostname, Port, Username);
+        var sources = keys.Select(e => e.PrivateKeyFile).ToArray();
+        return sources.All(s => s is not null) ? new PrivateKeyConnectionInfo(Hostname, Port, Username, sources as PrivateKeyFile[]) : new ConnectionInfo(Hostname, Port, Username);
     }
 }

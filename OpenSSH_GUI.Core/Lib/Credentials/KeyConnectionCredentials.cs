@@ -42,6 +42,6 @@ public class KeyConnectionCredentials : ConnectionCredentials, IKeyConnectionCre
     /// </returns>
     public override ConnectionInfo GetConnectionInfo()
     {
-        return new PrivateKeyConnectionInfo(Hostname, Username, ProxyTypes.None, "", 0, Key?.PrivateKeySource);
+        return new PrivateKeyConnectionInfo(Hostname, Username, ProxyTypes.None, "", 0, Key?.PrivateKeyFile);
     }
 }

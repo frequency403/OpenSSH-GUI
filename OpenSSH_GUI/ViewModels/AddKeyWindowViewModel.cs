@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
@@ -31,17 +32,24 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         _sshKeyManager = sshKeyManager;
         _messageBoxProvider = messageBoxProvider;
         
-        this.WhenAnyValue(x => x.SelectedKeyType)
-            .Subscribe(type =>
+        _keyNameHelper = this.WhenAnyValue(vm => vm.SelectedKeyType)
+            .Select(e => $"id_{Enum.GetName(e)!.ToLower()}")
+            .ToProperty(this, vm => vm.KeyName).DisposeWith(Disposables);
+        
+        _avaliableKeySizesHelper = this.WhenAnyValue(vm => vm.SelectedKeyType)
+            .Select(e => e.SupportedKeySizes.OrderDescending())
+            .ToProperty(this, vm => vm.AvaliableKeySizes).DisposeWith(Disposables);
+        
+        _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvaliableKeySizes)
+            .Select(e => e.Any())
+            .ToProperty(this, vm => vm.CanChangeKeySize).DisposeWith(Disposables);
+        
+        this.WhenAnyValue(x => x.AvaliableKeySizes)
+            .Subscribe(sizes =>
             {
                 try
                 {
-                    KeyName = $"id_{Enum.GetName(type)!.ToLower()}";
-
-                    var ordered = type.SupportedKeySizes.OrderDescending().ToList();
-                    AvaliableKeySizes = ordered;
-                    SelectedKeySize   = ordered.First();
-                    CanChangeKeySize = ordered.Count > 1;
+                    SelectedKeySize   = sizes.First();
                 }
                 catch (Exception e)
                 {
@@ -65,7 +73,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     [Reactive]
     private SshKeyType _selectedKeyType;
 
-    [Reactive]
+    [ObservableAsProperty(ReadOnly = true)]
     private IEnumerable<int> _avaliableKeySizes = [];
 
     [Reactive]
@@ -74,14 +82,18 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     [Reactive]
     private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
 
-    [Reactive]
+    [ObservableAsProperty(ReadOnly = true)]
     private string _keyName = "id_rsa";
     
-    [Reactive]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _canChangeKeySize;
-    
-    public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
-    public string Password { get; set; } = "";
+
+    [Reactive]
+    private string _comment = $"{Environment.UserName}@{Environment.MachineName}";
+
+    [Reactive]
+    private string _password = "";
+
     public ValidationHelper KeyNameValidationHelper { get; }
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();

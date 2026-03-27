@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Services;
@@ -24,6 +27,8 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 /// </summary>
 public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDisposable
 {
+    private CompositeDisposable _disposables = new();
+    
     /// <summary>
     ///     A logger instance used for logging events and diagnostic information
     ///     related to the operations and state within the <see cref="SshKeyFile" /> class.
@@ -79,12 +84,6 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     resolved from the loaded <see cref="PrivateKeyFile" /> or <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
     [ObservableAsProperty] private SshKeyType _keyType = SshKeyType.RSA;
-
-    /// <summary>
-    ///     Mirrors the current value of <see cref="PrivateKeyFile" /> and is intended for
-    ///     consumers that require a read-only observable view of the underlying key source.
-    /// </summary>
-    [ObservableAsProperty] private PrivateKeyFile? _privateKeySource;
 
     /// <summary>
     ///     Gets the absolute file path of the SSH key file, projected from <see cref="KeyFileInfo" />.
@@ -145,7 +144,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     {
         _logger = logger;
         Password = new SshKeyFilePassword(loggerFactory.CreateLogger<SshKeyFilePassword>());
-        _keyFileInfoSubscription = this.WhenAnyValue(vm => vm.KeyFileInfo)
+        this.WhenAnyValue(vm => vm.KeyFileInfo)
             .Subscribe(keyFileInfo =>
             {
                 try
@@ -161,10 +160,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 {
                     logger.LogInformation(e, "Failed to extract key information");
                 }
-            });
-
-        _privateKeySourceHelper = this.WhenAnyValue(x => x.PrivateKeyFile)
-            .ToProperty(this, vm => vm.PrivateKeySource);
+            }).DisposeWith(_disposables);
 
         _fingerprintHelper = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .Select(tuple =>
@@ -178,7 +174,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     return tuple.Item2.FingerPrint;
                 }
             })
-            .ToProperty(this, vm => vm.Fingerprint);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(Fingerprint), val))
+            .ToProperty(this, vm => vm.Fingerprint).DisposeWith(_disposables);
 
         _fingerprintStringHelper = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .Select(tuple =>
@@ -195,7 +192,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     return tuple.Item2.FingerPrint;
                 }
             })
-            .ToProperty(this, vm => vm.FingerprintString);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(Fingerprint), val))
+            .ToProperty(this, vm => vm.FingerprintString).DisposeWith(_disposables);
 
         _commentHelper = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .Select(tuple =>
@@ -209,7 +207,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     return tuple.Item2.Comment;
                 }
             })
-            .ToProperty(this, vm => vm.Comment);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(Comment), val))
+            .ToProperty(this, vm => vm.Comment).DisposeWith(_disposables);
 
         _keyTypeHelper = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .Select(tuple =>
@@ -223,7 +222,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     };
                 return tuple.Item2.KeyType;
             })
-            .ToProperty(this, vm => vm.KeyType);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(Format), val))
+            .ToProperty(this, vm => vm.KeyType).DisposeWith(_disposables);
 
         _hashAlgorithmNameHelper = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .Select(tuple =>
@@ -235,35 +235,45 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     : tuple.Item2.HashAlgorithmName;
                 return tuple.Item2.HashAlgorithmName;
             })
-            .ToProperty(this, vm => vm.HashAlgorithmName);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(HashAlgorithmName), val))
+            .ToProperty(this, vm => vm.HashAlgorithmName).DisposeWith(_disposables);
 
         _isInitializedHelper = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.KeyFileInfo)
             .Select(t => t.Item1 is not null && t.Item2 is { Exists: true })
-            .ToProperty(this, vm => vm.IsInitialized);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(IsInitialized), val))
+            .ToProperty(this, vm => vm.IsInitialized).DisposeWith(_disposables);
 
         _isPuttyKeyHelper = this.WhenAnyValue(x => x.KeyFileInfo)
             .Select(fi => fi?.CurrentFormat is not SshKeyFormat.OpenSSH)
-            .ToProperty(this, vm => vm.IsPuttyKey);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(IsPuttyKey), val))
+            .ToProperty(this, vm => vm.IsPuttyKey).DisposeWith(_disposables);
 
         _keyFilesHelper = this.WhenAnyValue(x => x.KeyFileInfo)
             .Select(fi => fi is not null ? fi.Files : [])
-            .ToProperty(this, vm => vm.KeyFiles);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(KeyFiles), val))
+            .ToProperty(this, vm => vm.KeyFiles).DisposeWith(_disposables);
 
         _absoluteFilePathHelper = this.WhenAnyValue(vm => vm.KeyFileInfo)
             .Select(e => e?.FullFileName)
-            .ToProperty(this, vm => vm.AbsoluteFilePath);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(AbsoluteFilePath), val))
+            .ToProperty(this, vm => vm.AbsoluteFilePath).DisposeWith(_disposables);
 
         _fileNameHelper = this.WhenAnyValue(vm => vm.KeyFileInfo)
             .Select(fi => fi?.FileName)
-            .ToProperty(this, vm => vm.FileName);
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(FileName), val))
+            .ToProperty(this, vm => vm.FileName).DisposeWith(_disposables);
 
-        _formatHelper = this.WhenAnyValue(vm => vm.KeyFileInfo)
-            .Select(fi => fi?.CurrentFormat)
-            .ToProperty(this, vm => vm.Format);
+        _formatHelper = this.WhenAnyValue(vm => vm.KeyFileInfo, fi => fi?.CurrentFormat)
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(Format), val))
+            .ToProperty(this, vm => vm.Format).DisposeWith(_disposables);
 
-        _needsPasswordHelper = this.WhenAnyValue(vm => vm.PrivateKeyFile, vm => vm.Password.IsValid)
-            .Select(tuple => tuple is { Item1: null, Item2: false })
-            .ToProperty(this, vm => vm.NeedsPassword);
+        _needsPasswordHelper = this
+            .WhenAnyValue(vm => vm.PrivateKeyFile)
+            .Select(keyFile => keyFile == null)
+            .DistinctUntilChanged()
+            .Do(val => logger.LogDebug("{Property}: {Value}", nameof(NeedsPassword), val))
+            .ToProperty(this, vm => vm.NeedsPassword)
+            .DisposeWith(_disposables);
     }
     
     /// <summary>
@@ -293,13 +303,10 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     Asynchronously releases the unmanaged resources used by the SshKeyFile instance
     ///     and optionally releases the managed resources.
     /// </summary>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (PrivateKeyFile is IAsyncDisposable privateKeyFileAsyncDisposable)
-            await privateKeyFileAsyncDisposable.DisposeAsync();
-        else
-            PrivateKeyFile?.Dispose();
-        _keyFileInfoSubscription.Dispose();
+        _disposables.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -308,8 +315,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// </summary>
     public void Dispose()
     {
-        PrivateKeyFile?.Dispose();
-        _keyFileInfoSubscription.Dispose();
+        _disposables.Dispose();
     }
 
     /// <summary>
@@ -332,6 +338,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     {
         try
         {
+            PrivateKeyFile?.Dispose();
+            PrivateKeyFile = null;
             Password.Clear();
             PrivateKeyFile = new PrivateKeyFile(KeyFileInfo!.FullFileName);
         }
@@ -407,74 +415,4 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
 
         return false;
     }
-
-    // /// <summary>
-    // ///     Deletes all files associated with this SSH key. If all deletions complete successfully,
-    // ///     the <see cref="GotDeleted" /> event will be triggered.
-    // /// </summary>
-    // /// <param name="error">
-    // ///     When this method returns <see langword="false" />, contains the last exception that
-    // ///     occurred during deletion; otherwise <see langword="null" />.
-    // /// </param>
-    // /// <returns>
-    // ///     A boolean indicating whether all files were successfully deleted.
-    // /// </returns>
-    // /// <exception cref="InvalidOperationException">
-    // ///     Thrown if the SSH key file is not initialized before calling this method.
-    // /// </exception>
-    // public bool Delete([NotNullWhen(false)] out Exception? error)
-    // {
-    //     error = null;
-    //     if (!IsInitialized)
-    //         throw new InvalidOperationException("Not initialized.");
-    //
-    //     var allSucceeded = true;
-    //     foreach (var file in KeyFileInfo!.Files)
-    //         try
-    //         {
-    //             file.Delete();
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             _logger.LogError(e, "Failed to delete {FilePath}", file.FullName);
-    //             error = e;
-    //             allSucceeded = false;
-    //         }
-    //
-    //     if (allSucceeded && GotDeleted is not null)
-    //         GotDeleted(this, EventArgs.Empty);
-    //     return allSucceeded;
-    // }
-    //
-    // /// <summary>
-    // ///     Changes the filename of the SSH key file on disk to the specified new filename.
-    // ///     All associated files (e.g. the public key counterpart) are renamed in the same
-    // ///     directory, preserving their respective extensions.
-    // /// </summary>
-    // /// <param name="newFilename">The new filename to assign to the SSH key file.</param>
-    // /// <exception cref="InvalidOperationException">
-    // ///     Thrown when a file with the computed destination path already exists on disk.
-    // /// </exception>
-    // public void ChangeFilenameOnDisk(string newFilename)
-    // {
-    //     try
-    //     {
-    //         foreach (var file in KeyFileInfo?.Files ?? [])
-    //         {
-    //             var newFileNameWithMatchingExtension = Path.ChangeExtension(newFilename,
-    //                 string.IsNullOrEmpty(file.Extension) ? null : file.Extension);
-    //             var destination = Path.Combine(
-    //                 file.DirectoryName ?? SshConfigFilesExtension.GetBaseSshPath(),
-    //                 newFileNameWithMatchingExtension);
-    //             if (File.Exists(destination))
-    //                 throw new InvalidOperationException($"File {destination} already exists");
-    //             file.MoveTo(destination);
-    //         }
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _logger.LogError(e, "Failed to change filename of {className}", nameof(SshKeyFile));
-    //         throw;
-    //     }
-    // }
 }
