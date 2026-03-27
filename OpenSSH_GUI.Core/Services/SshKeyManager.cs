@@ -16,6 +16,7 @@ using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
+using SshNet.Keygen.SshKeyEncryption;
 using SshKey = SshNet.Keygen.SshKey;
 
 namespace OpenSSH_GUI.Core.Services;
@@ -26,8 +27,6 @@ namespace OpenSSH_GUI.Core.Services;
 /// </summary>
 public partial class SshKeyManager : ReactiveObject, IDisposable
 {
-    private const string BackupFileExtension = ".bak";
-
     private static readonly FileStreamOptions FileStreamOptions = new()
     {
         BufferSize = 0,
@@ -67,15 +66,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         _watcher.Deleted += WatcherOnDeleted;
         _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
         
-        _sshKeysHelper = Observable
-            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => _sshKeysInternal.CollectionChanged += h,
-                h => _sshKeysInternal.CollectionChanged -= h)
-            .Select(IReadOnlyCollection<SshKeyFile> (_) => _sshKeysInternal).ToProperty(this, vm => vm.SshKeys);
-        
-        _sshKeysCountHelper = _sshKeysInternal.WhenPropertyChanged(col => col.Count)
-            .Select(e => e.Value)
-            .ToProperty(this, vm => vm.SshKeysCount);
+        _sshKeysInternal.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(SshKeys));
     }
     
     /// <summary>
@@ -84,17 +75,12 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
     /// </summary>
     public Task InitialSearchAsync(CancellationToken token = default)
         => SearchForKeysAndUpdateCollection();
-
+    
     private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
     /// <summary>
     ///     Gets the collection of detected SSH keys.
     /// </summary>
-    [ObservableAsProperty(ReadOnly = true)] private IReadOnlyCollection<SshKeyFile> _sshKeys = [];
-    
-    /// <summary>
-    /// Gets the number of detected SSH keys.
-    /// </summary>
-    [ObservableAsProperty(ReadOnly = true)] private int _sshKeysCount;
+    public IReadOnlyCollection<SshKeyFile> SshKeys => _sshKeysInternal;
 
     public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key, CancellationToken token = default)
     {
@@ -156,7 +142,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
                 files.Add(file.Extension.EndsWith("ppk") ? destination : Path.ChangeExtension(destination, null));
             }
 
-            var mainFile = files.Distinct().Single();
+            key.Load(SshKeyFileSource.FromDisk(files.Distinct().Single()), key.Password.WrittenSpan);
         }
         catch (Exception e)
         {
@@ -195,39 +181,44 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             ? key.Password.GetPasswordString()
             : null;
 
-        var backedUpFiles = new List<(string backup, string original)>();
+        var writtenFiles = new List<string>();
+        var backupDir = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), AppDomain.CurrentDomain.FriendlyName);
         var semaphoreAquired = false;
         try
         {
-            foreach (var existingFile in key.KeyFiles.Select(e => e.FullName))
+            foreach (var existingFile in key.KeyFiles)
             {
-                var backup = existingFile + BackupFileExtension;
-                File.Move(existingFile, backup, true);
-                backedUpFiles.Add((backup, existingFile));
+                if(!Directory.Exists(backupDir))
+                    Directory.CreateDirectory(backupDir);
+                var backup =  existingFile.Name + ".bak";
+                existingFile.MoveTo(Path.Combine(backupDir, backup));
             }
             
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
             if (!semaphoreAquired)
                 throw new InvalidOperationException("Another key operation is in progress");
-
+            
             switch (newFormat)
             {
                 case SshKeyFormat.OpenSSH:
+                    
                     await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
                     {
+                        
                         await streamWriter.WriteAsync(key.Password.IsValid
-                            ? privateKeyFile.ToOpenSshFormat(key.Password.GetPasswordString())
+                            ? privateKeyFile.ToOpenSshFormat(new SshKeyEncryptionAes256(key.Password.GetPasswordString()))
                             : privateKeyFile.ToOpenSshFormat());
                     }
-
+                    writtenFiles.Add(filePath);
+                    var pubFilePath = newFormat.ChangeExtension(filePath);
                     await using (var publicFileStream =
-                                 new FileStream(newFormat.ChangeExtension(filePath), FileStreamOptions))
+                                 new FileStream(pubFilePath, FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(publicFileStream, Encoding.UTF8))
                     {
                         await streamWriter.WriteAsync(privateKeyFile.ToOpenSshPublicFormat());
                     }
-
+                    writtenFiles.Add(pubFilePath);
                     break;
 
                 case SshKeyFormat.PuTTYv2:
@@ -236,36 +227,45 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
                     await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
                     await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
                     {
-                        await streamWriter.WriteAsync(password is not null
-                            ? privateKeyFile.ToPuttyFormat(password, newFormat)
-                            : privateKeyFile.ToPuttyFormat(newFormat));
+                        await streamWriter.WriteAsync(privateKeyFile.ToPuttyFormat((password is not null 
+                            ? new SshKeyEncryptionAes256(password, (newFormat is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null)) : SshKeyGenerateInfo.DefaultSshKeyEncryption), newFormat));
                     }
-
+                    writtenFiles.Add(filePath);
                     break;
             }
-
-            foreach (var (backup, _) in backedUpFiles)
-                TryDeleteFile(backup);
-
-            await AddKeyAsync(SshKeyFileSource.FromDisk(filePath));
+            
+            key.Load(SshKeyFileSource.FromDisk(filePath), key.Password.WrittenSpan);
+            
+            if(Directory.Exists(backupDir))
+                Directory.Delete(backupDir, true);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error changing format of key – attempting rollback");
-            foreach (var (backup, original) in backedUpFiles)
+            foreach (var writtenFile in writtenFiles)
+            {
                 try
                 {
-                    File.Copy(backup, original, true);
-                    TryDeleteFile(backup);
+                    File.Delete(writtenFile);
                 }
-                catch (Exception rollbackEx)
+                catch (Exception ex)
                 {
-                    _logger.LogError(rollbackEx,
-                        "Rollback failed for '{original}' – manual recovery may be required",
-                        original);
+                    _logger.LogWarning(ex, "Could not delete backup file '{path}'", writtenFile);
                 }
+            }
 
-            throw;
+            foreach (var backupFileInfo in Directory.EnumerateFiles(backupDir, "*.bak", SearchOption.AllDirectories).Select(file => new FileInfo(file)))
+            {
+                if (backupFileInfo.Directory?.Parent?.FullName is { } parentDirectory)
+                {
+                    var destination = Path.Combine(parentDirectory, backupFileInfo.Name.Replace(".bak", ""));
+                    backupFileInfo.MoveTo(destination);
+                    _logger.LogWarning("Restored backup file {backupFile} to its original location {original}", backupFileInfo.FullName, destination);
+                    continue;
+                }
+                _logger.LogWarning("Could not move backup file {backupFile} to its original location", backupFileInfo.FullName);
+                break;
+            }
         }
         finally
         {

@@ -50,7 +50,7 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
                 return false;
             }).ToProperty(this, vm => vm.AddButtonEnabled).DisposeWith(Disposables);
         
-        _keyAddPossibleHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeysCount)
+        _keyAddPossibleHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys.Count)
             .Select(props => props > 0).ToProperty(this, vm => vm.KeyAddPossible).DisposeWith(Disposables);
     }
     

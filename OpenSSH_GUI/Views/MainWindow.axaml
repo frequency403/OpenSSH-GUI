@@ -226,7 +226,7 @@
                         <StackPanel Orientation="Horizontal">
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                            <Label Content="{Binding SshKeyManager.SshKeysCount}" FontWeight="Bold" />
+                            <Label Content="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
                             <Label
                                 Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>

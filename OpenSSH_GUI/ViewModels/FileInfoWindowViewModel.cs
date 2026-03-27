@@ -22,6 +22,7 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewModel, FileInfoViewModelInitializer>
 {
+    
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _resolver;
@@ -54,8 +55,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     }
 
     [ReactiveCommand]
-    private Task ChangeFormatOfKeyFileAsync(SshKeyFormat format, CancellationToken cancellationToken = default) => 
-        _keyManager.ChangeFormatOfKeyAsync(KeyFile, format, cancellationToken);
+    private async Task ChangeFormatOfKeyFileAsync(SshKeyFormat format, CancellationToken cancellationToken = default) => 
+        await _keyManager.ChangeFormatOfKeyAsync(KeyFile, format, cancellationToken);
 
     [ReactiveCommand]
     private async Task ChangeFileNameAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
@@ -89,6 +90,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName)
                     , error.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+        RequestClose();
     }
 
     [ReactiveCommand]

@@ -24,6 +24,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
 {
     private readonly SshKeyManager _sshKeyManager;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private const string KeyPrefix = "id";
 
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
@@ -32,16 +33,22 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         _sshKeyManager = sshKeyManager;
         _messageBoxProvider = messageBoxProvider;
         
-        _keyNameHelper = this.WhenAnyValue(vm => vm.SelectedKeyType)
-            .Select(e => $"id_{Enum.GetName(e)!.ToLower()}")
-            .ToProperty(this, vm => vm.KeyName).DisposeWith(Disposables);
+        this.WhenAnyValue(vm => vm.SelectedKeyType)
+            .Subscribe(e =>
+            {
+                if (!SshKeyTypes.Select(kt => string.Join("_", KeyPrefix, Enum.GetName(kt)!.ToLower()))
+                        .Any(ktp => KeyName.EndsWith(ktp, StringComparison.Ordinal)))
+                    return;
+                KeyName = string.Join("_", KeyPrefix, Enum.GetName(e)!.ToLower());
+            })
+            .DisposeWith(Disposables);
         
         _avaliableKeySizesHelper = this.WhenAnyValue(vm => vm.SelectedKeyType)
             .Select(e => e.SupportedKeySizes.OrderDescending())
             .ToProperty(this, vm => vm.AvaliableKeySizes).DisposeWith(Disposables);
         
         _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvaliableKeySizes)
-            .Select(e => e.Any())
+            .Select(e => e.Count() > 1)
             .ToProperty(this, vm => vm.CanChangeKeySize).DisposeWith(Disposables);
         
         this.WhenAnyValue(x => x.AvaliableKeySizes)
@@ -82,7 +89,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     [Reactive]
     private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
 
-    [ObservableAsProperty(ReadOnly = true)]
+    [Reactive]
     private string _keyName = "id_rsa";
     
     [ObservableAsProperty(ReadOnly = true)]
