@@ -1,13 +1,18 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Linq;
 using System.Text;
 using DryIoc;
+using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
+using Org.BouncyCastle.Tls;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
@@ -19,7 +24,7 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
-public class SshKeyManager : ReactiveObject, IDisposable
+public partial class SshKeyManager : ReactiveObject, IDisposable
 {
     private const string BackupFileExtension = ".bak";
 
@@ -61,9 +66,16 @@ public class SshKeyManager : ReactiveObject, IDisposable
         _watcher.Created += async (_, eventArgs) => await WatcherOnCreated(eventArgs);
         _watcher.Deleted += WatcherOnDeleted;
         _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
-
-        SshKeysInternal = [];
-        SshKeysInternal.CollectionChanged += SshKeysOnCollectionChanged;
+        
+        _sshKeysHelper = Observable
+            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => _sshKeysInternal.CollectionChanged += h,
+                h => _sshKeysInternal.CollectionChanged -= h)
+            .Select(IReadOnlyCollection<SshKeyFile> (_) => _sshKeysInternal).ToProperty(this, vm => vm.SshKeys);
+        
+        _sshKeysCountHelper = _sshKeysInternal.WhenPropertyChanged(col => col.Count)
+            .Select(e => e.Value)
+            .ToProperty(this, vm => vm.SshKeysCount);
     }
     
     /// <summary>
@@ -73,19 +85,91 @@ public class SshKeyManager : ReactiveObject, IDisposable
     public Task InitialSearchAsync(CancellationToken token = default)
         => SearchForKeysAndUpdateCollection();
 
-    private ObservableCollection<SshKeyFile> SshKeysInternal { get; }
-
+    private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
     /// <summary>
     ///     Gets the collection of detected SSH keys.
     /// </summary>
-    public IReadOnlyCollection<SshKeyFile> SshKeys => SshKeysInternal;
+    [ObservableAsProperty(ReadOnly = true)] private IReadOnlyCollection<SshKeyFile> _sshKeys = [];
+    
+    /// <summary>
+    /// Gets the number of detected SSH keys.
+    /// </summary>
+    [ObservableAsProperty(ReadOnly = true)] private int _sshKeysCount;
 
-    public int SshKeysCount
+    public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key, CancellationToken token = default)
     {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
+        var success = true;
+        Exception? exception = null;
+        var semaphoreAquired = false;
+        try
+        {
+            semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
+            foreach (var keyFile in key.KeyFiles)
+            {
+                try
+                {
+                   keyFile.Delete();
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogDebug("Error while deleting key {key}: {ex}", key.AbsoluteFilePath, ex);
+                    exception = exception is null ? ex : new AggregateException(exception, ex);
+                    success = false;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error deleting key");
+            success = false;
+            exception = exception is null ? e : new AggregateException(exception, e);
+        }
+        finally
+        {
+            if (semaphoreAquired)
+                _semaphoreSlim.Release();
+        }
+        return (success, exception);
     }
 
+    public async Task RenameKeyAsync(SshKeyFile key, string newFileName, CancellationToken token = default)
+    {
+        var semaphoreAquired = false;
+        try
+        {
+            semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
+            if (!semaphoreAquired)
+                return;
+
+            var files = new List<string>();
+            
+            foreach (var file in key.KeyFileInfo?.Files ?? [])
+            {
+                var newFileNameWithMatchingExtension = Path.ChangeExtension(newFileName,
+                    string.IsNullOrEmpty(file.Extension) ? null : file.Extension);
+                var destination = Path.Combine(
+                    file.DirectoryName ?? SshConfigFilesExtension.GetBaseSshPath(),
+                    newFileNameWithMatchingExtension);
+                if (File.Exists(destination))
+                    throw new InvalidOperationException($"File {destination} already exists");
+                file.MoveTo(destination);
+                files.Add(file.Extension.EndsWith("ppk") ? destination : Path.ChangeExtension(destination, null));
+            }
+
+            var mainFile = files.Distinct().Single();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to change filename of {className}", nameof(SshKeyFile));
+            throw;
+        }
+        finally
+        {
+            if (semaphoreAquired)
+                _semaphoreSlim.Release();
+        }
+    }
+    
     /// <summary>
     ///     Changes the format of an existing SSH key.
     /// </summary>
@@ -118,12 +202,10 @@ public class SshKeyManager : ReactiveObject, IDisposable
             foreach (var existingFile in key.KeyFiles.Select(e => e.FullName))
             {
                 var backup = existingFile + BackupFileExtension;
-                File.Copy(existingFile, backup, true);
+                File.Move(existingFile, backup, true);
                 backedUpFiles.Add((backup, existingFile));
             }
-
-            if(!key.Delete(out var exception))
-                throw exception;
+            
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
             if (!semaphoreAquired)
                 throw new InvalidOperationException("Another key operation is in progress");
@@ -201,9 +283,9 @@ public class SshKeyManager : ReactiveObject, IDisposable
         var reordered = orderFunc(SshKeys).ToList();
         for (var i = 0; i < reordered.Count; i++)
         {
-            var oldIndex = SshKeysInternal.IndexOf(reordered[i]);
+            var oldIndex = _sshKeysInternal.IndexOf(reordered[i]);
             if (oldIndex != i)
-                SshKeysInternal.Move(oldIndex, i);
+                _sshKeysInternal.Move(oldIndex, i);
         }
     }
 
@@ -264,7 +346,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
                     break;
             }
 
-            SshKeysInternal.Add(keyFile);
+            _sshKeysInternal.Add(keyFile);
         }
         catch (Exception e)
         {
@@ -289,7 +371,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
             throw new InvalidOperationException("Can't rerun search while searching");
         try
         {
-            SshKeysInternal.Clear();
+            _sshKeysInternal.Clear();
             await SearchForKeysAndUpdateCollection();
         }
         catch (Exception e)
@@ -308,7 +390,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
             return;
         try
         {
-            if (SshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is
+            if (_sshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is
                 { } oldKey)
                 SshKeyGotDeleted(oldKey, EventArgs.Empty);
             await AddKeyAsync(SshKeyFileSource.FromDisk(Path.ChangeExtension(e.FullPath, null)));
@@ -382,50 +464,12 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    private void SshKeysOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        switch (e.Action)
-        {
-            case NotifyCollectionChangedAction.Add:
-                if (e.NewItems is { } newItems)
-                    foreach (var key in newItems.OfType<SshKeyFile>())
-                        try
-                        {
-                            key.GotDeleted += SshKeyGotDeleted;
-                        }
-                        catch (Exception exception)
-                        {
-                            _logger.LogError(exception, "Error adding GotDeleted event handler");
-                        }
-
-                break;
-
-            case NotifyCollectionChangedAction.Remove:
-                if (e.OldItems is { } oldItems)
-                    foreach (var key in oldItems.OfType<SshKeyFile>())
-                        try
-                        {
-                            key.GotDeleted -= SshKeyGotDeleted;
-                            key.Dispose();
-                        }
-                        catch (Exception exception)
-                        {
-                            _logger.LogError(exception, "Error removing GotDeleted event handler");
-                        }
-
-                break;
-        }
-
-        SshKeysCount = SshKeysInternal.Count;
-    }
-
     private SshKeyFile? GenerateKeyFile()
     {
         try
         {
             if (_resolver.GetService<SshKeyFile>() is { } keyFile)
             {
-                keyFile.AttachChangeFormatHandler(ChangeFormatOfKeyAsync);
                 return keyFile;
             }
         }
@@ -435,10 +479,10 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
         return null;
     }
-
+    
     private async Task AddKeyAsync(SshKeyFileSource keyFileSource)
     {
-        if (SshKeysInternal.Any(k =>
+        if (_sshKeysInternal.Any(k =>
                 string.Equals(k.AbsoluteFilePath, keyFileSource.AbsolutePath,
                     StringComparison.OrdinalIgnoreCase)))
             return;
@@ -447,8 +491,8 @@ public class SshKeyManager : ReactiveObject, IDisposable
             if (GenerateKeyFile() is not { } keyFileGenerated)
                 throw new InvalidOperationException("Key file not generated");
 
-            keyFileGenerated.Load(keyFileSource);
-            SshKeysInternal.Add(keyFileGenerated);
+            keyFileGenerated.Load(keyFileSource, ReadOnlySpan<byte>.Empty);
+            _sshKeysInternal.Add(keyFileGenerated);
         }
         catch (Exception e)
         {
@@ -473,7 +517,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
     private void SshKeyGotDeleted(object? sender, EventArgs e)
     {
         if (sender is not SshKeyFile key) return;
-        SshKeysInternal.Remove(key);
+        _sshKeysInternal.Remove(key);
     }
 
     private void TryDeleteFile(string path)

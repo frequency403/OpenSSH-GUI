@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Reactive.Disposables.Fluent;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
@@ -30,7 +31,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         _sshKeyManager = sshKeyManager;
         _messageBoxProvider = messageBoxProvider;
         
-        _keyTypeSubscription = this.WhenAnyValue(x => x.SelectedKeyType)
+        this.WhenAnyValue(x => x.SelectedKeyType)
             .Subscribe(type =>
             {
                 try
@@ -46,9 +47,9 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
                 {
                     Logger.LogError(e, "Error reacting to key type change");
                 }
-            });
+            }).DisposeWith(Disposables);
 
-        KeyNameValidationHelper = this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError);
+        KeyNameValidationHelper = this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError).DisposeWith(Disposables);
         SelectedKeyType = SshKeyTypes.First();
     }
 
@@ -60,9 +61,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
 
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
-
-    private readonly IDisposable _keyTypeSubscription;
-
+    
     [Reactive]
     private SshKeyType _selectedKeyType;
 
@@ -88,7 +87,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     public IValidationContext ValidationContext { get; } = new ValidationContext();
     
     /// <inheritdoc />
-    protected override async Task OnBooleanSubmitAsync(
+    protected override async Task BooleanSubmitAsync(
         bool inputParameter,
         CancellationToken cancellationToken = default)
     {
@@ -125,11 +124,5 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
                 MessageBoxButtons.Ok,
                 MessageBoxIcon.Error);
         }
-    }
-
-    public override void Dispose()
-    {
-        _keyTypeSubscription.Dispose();
-        base.Dispose();
     }
 }

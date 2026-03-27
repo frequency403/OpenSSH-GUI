@@ -27,7 +27,7 @@ public partial class EditKnownHostsWindowViewModel(
     [Reactive]
     private ObservableCollection<IKnownHost> _knownHostsLocal = [];
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+    protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
         if (!inputParameter) return;

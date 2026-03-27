@@ -1,4 +1,6 @@
 using System.Reactive;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using System.Text;
 using Avalonia.Input.Platform;
 using DryIoc;
@@ -14,6 +16,7 @@ using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
+using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
@@ -33,17 +36,16 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         _clipboard = clipboard;
         _keyManager = keyManager;
         _keyFile = resolver.Resolve<SshKeyFile>();
-        ChangeFileNames = ReactiveCommand.CreateFromTask<SshKeyFile>(ChangeFileNameAsync);
-        DeleteKey = ReactiveCommand.CreateFromTask<SshKeyFile>(DeleteKeyAsync);
-        CopyPasswordIntoClipboard = ReactiveCommand.CreateFromTask<SshKeyFilePassword>(CopyPasswordIntoClipboardAsync);
+        _windowTitleHelper = this.WhenAnyValue(vm => vm.KeyFile)
+            .Select(e => string.Join(" ", e.FingerprintString, e.FileName))
+            .ToProperty(this, vm => vm.WindowTitle).DisposeWith(Disposables);
     }
     
     [Reactive]
     private SshKeyFile _keyFile;
     
-    public ReactiveCommand<SshKeyFile, Unit> ChangeFileNames { get; } 
-    public ReactiveCommand<SshKeyFile, Unit> DeleteKey { get; }
-    public ReactiveCommand<SshKeyFilePassword, Unit> CopyPasswordIntoClipboard { get; }
+    [ObservableAsProperty] private string _windowTitle = "Key info";
+    
     
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)
     {
@@ -51,6 +53,11 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
+    [ReactiveCommand]
+    private Task ChangeFormatOfKeyFileAsync(SshKeyFormat format, CancellationToken cancellationToken = default) => 
+        _keyManager.ChangeFormatOfKeyAsync(KeyFile, format, cancellationToken);
+
+    [ReactiveCommand]
     private async Task ChangeFileNameAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
     {
         var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(new ValidatedInputParams
@@ -68,21 +75,23 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             }
         });
         if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
-            keyFile.ChangeFilenameOnDisk(filename);
+            await _keyManager.RenameKeyAsync(keyFile, filename, cancellationToken);
     }
 
+    [ReactiveCommand]
     private async Task DeleteKeyAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
     {
         if (await _messageBoxProvider.ShowMessageBoxAsync(
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question) is MessageBoxResult.Yes)
-            if(!keyFile.Delete(out var error))
+            if((await _keyManager.TryDeleteKeyAsync(keyFile, cancellationToken)) is { success: false, exception: { } error})
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName)
                     , error.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
     }
 
+    [ReactiveCommand]
     private async Task CopyPasswordIntoClipboardAsync(SshKeyFilePassword password, CancellationToken token = default)
     {
         try

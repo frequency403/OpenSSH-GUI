@@ -21,7 +21,7 @@
               VerticalAlignment="Bottom">
             <Button Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom"
-                    Command="{Binding BooleanSubmit}" HorizontalContentAlignment="Center">
+                    Command="{Binding BooleanSubmitCommand}" HorizontalContentAlignment="Center">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
                 </Button.CommandParameter>
@@ -32,7 +32,7 @@
             </Button>
             <Button Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
                     VerticalAlignment="Bottom"
-                    Command="{Binding BooleanSubmit}" HorizontalContentAlignment="Center">
+                    Command="{Binding BooleanSubmitCommand}" HorizontalContentAlignment="Center">
                 <Button.CommandParameter>
                     <system:Boolean>True</system:Boolean>
                 </Button.CommandParameter>

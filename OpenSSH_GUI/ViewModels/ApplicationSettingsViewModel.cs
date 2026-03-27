@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -23,8 +24,6 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     private readonly LoggingLevelSwitch _levelSwitch;
     public static LogEventLevel[] AvailableLogLevels { get; }= Enum.GetValues<LogEventLevel>();
     public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
-    private readonly IDisposable _levelSwitchSubscription;
-    private readonly IDisposable _daysToDeleteSubscription;
     
     [Reactive]
     private LogEventLevel _currentLogLevel;
@@ -43,26 +42,23 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         CurrentLogLevel = levelSwitch.MinimumLevel;
-        _levelSwitchSubscription = this.WhenAnyValue(model => model.CurrentLogLevel)
+        this.WhenAnyValue(model => model.CurrentLogLevel)
             .DistinctUntilChanged()
-            .Subscribe(OnNext);
+            .Subscribe(OnNext).DisposeWith(Disposables);
         
-        _daysToDeleteSubscription = this.WhenAnyValue(model => model.DaysToDeleteSelected)
-            .Subscribe(OnNext);
+        this.WhenAnyValue(model => model.DaysToDeleteSelected)
+            .Subscribe(OnNext).DisposeWith(Disposables);
 
         _canDeleteOldLogFilesHelper = this.WhenAnyValue(model => model.LogFiles.Count)
             .DistinctUntilChanged()
             .Select(e => e > 0)
-            .ToProperty(this, model => model.CanDeleteOldLogFiles);
+            .ToProperty(this, model => model.CanDeleteOldLogFiles).DisposeWith(Disposables);
         
-        DeleteOldLogFilesCommand = ReactiveCommand.Create(DeleteOldLogFiles);
-        ClearWholeCacheCommand = ReactiveCommand.CreateFromTask(ClearWholeCache);
         DaysToDeleteSelected = DaysToDelete[0];
     }
     
-    public ReactiveCommand<Unit, Unit> DeleteOldLogFilesCommand { get; }
-    public ReactiveCommand<Unit, Unit> ClearWholeCacheCommand { get; }
 
+    [ReactiveCommand]
     private async Task ClearWholeCache(CancellationToken cancellationToken = default)
     {
         var loggerConfiguration = Core.Configuration.LoggerConfiguration.Default;
@@ -106,6 +102,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
         _logger.LogInformation("Cache cleared in {ElapsedTime} ms", stopWatch.Elapsed.Milliseconds);
     }
     
+    [ReactiveCommand]
     private void DeleteOldLogFiles()
     {
         foreach (var logFile in LogFiles)
@@ -141,13 +138,5 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     {
         _levelSwitch.MinimumLevel = obj;
         _logger.LogCritical("Log level changed to {LogLevel}", obj);
-    }
-
-    public override void Dispose()
-    {
-        _levelSwitchSubscription.Dispose();
-        _daysToDeleteSubscription.Dispose();
-        GC.SuppressFinalize(this);
-        base.Dispose();
     }
 }

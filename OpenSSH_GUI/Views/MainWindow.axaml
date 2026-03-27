@@ -101,7 +101,7 @@
             <!-- Open Add Key Window -->
 
             <Button Grid.Column="0"
-                    Command="{Binding OpenCreateKeyWindow}"
+                    Command="{Binding OpenCreateKeyWindowCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="ForestGreen">
@@ -116,7 +116,7 @@
             <!-- Open Edit Known Host Window  -->
 
             <Button Grid.Column="1"
-                    Command="{Binding OpenEditKnownHostsWindow}"
+                    Command="{Binding OpenEditKnownHostsWindowCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="CornflowerBlue">
@@ -140,7 +140,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="DarkOliveGreen"
-                    Command="{Binding OpenEditAuthorizedKeysWindow}">
+                    Command="{Binding OpenEditAuthorizedKeysWindowCommand}">
                 <ToolTip.Tip>
                     <StackPanel>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}" />
@@ -192,14 +192,14 @@
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuConnect}"
                                       IsEnabled="{Binding !ServerConnectionService.IsConnected}"
-                                      Command="{Binding OpenConnectToServerWindow}">
+                                      Command="{Binding OpenConnectToServerWindowCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanConnect" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuDisconnect}"
                                       IsEnabled="{Binding ServerConnectionService.IsConnected}"
-                                      Command="{Binding DisconnectServer}">
+                                      Command="{Binding DisconnectFromServerCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIconExt Kind="LanDisconnect" />
                                 </MenuItem.Icon>
@@ -244,28 +244,28 @@
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDisk}"
-                                Command="{Binding ReloadKeys}">
+                                Command="{Binding ReloadKeysCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="Reload" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator />
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuAppSettings}"
-                                      Command="{Binding OpenApplicationSettingsWindow}">
+                                      Command="{Binding OpenApplicationSettingsWindowCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ApplicationSettingsOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuLocalUserSshConfig}"
-                                Command="{Binding NotImplementedMessage}">
+                                Command="{Binding ShowNotImplementedMessageBoxCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="AccountCogOutline" />
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuMachineSshdConfig}"
-                                Command="{Binding NotImplementedMessage}">
+                                Command="{Binding ShowNotImplementedMessageBoxCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="BookCogOutline" />
                                 </MenuItem.Icon>
@@ -274,7 +274,7 @@
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteUserSshConfig}"
                                 IsEnabled="{Binding ServerConnectionService.IsConnected}"
-                                Command="{Binding NotImplementedMessage}">
+                                Command="{Binding ShowNotImplementedMessageBoxCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ServerNetworkOutline" />
                                 </MenuItem.Icon>
@@ -282,7 +282,7 @@
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuRemoteMachineSshdConfig}"
                                 IsEnabled="{Binding ServerConnectionService.IsConnected}"
-                                Command="{Binding NotImplementedMessage}">
+                                Command="{Binding ShowNotImplementedMessageBoxCommand}">
                                 <MenuItem.Icon>
                                     <materialIcons:MaterialIcon Kind="ServerOutline" />
                                 </MenuItem.Icon>
@@ -307,7 +307,7 @@
                     <Border.ContextMenu>
                         <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuWebsite}"
-                                      Command="{Binding OpenBrowser}">
+                                      Command="{Binding OpenBrowserCommand}">
                                 <MenuItem.CommandParameter>
                                     <sys:Int32>0</sys:Int32>
                                 </MenuItem.CommandParameter>
@@ -317,7 +317,7 @@
                             </MenuItem>
                             <Separator />
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuQuestion}"
-                                      Command="{Binding OpenBrowser}">
+                                      Command="{Binding OpenBrowserCommand}">
                                 <MenuItem.CommandParameter>
                                     <sys:Int32>1</sys:Int32>
                                 </MenuItem.CommandParameter>
@@ -326,7 +326,7 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuAbout}"
-                                      Command="{Binding OpenBrowser}">
+                                      Command="{Binding OpenBrowserCommand}">
                                 <MenuItem.CommandParameter>
                                     <sys:Int32>2</sys:Int32>
                                 </MenuItem.CommandParameter>

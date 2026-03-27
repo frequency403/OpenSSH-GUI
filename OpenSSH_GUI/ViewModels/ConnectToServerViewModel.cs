@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables.Fluent;
 using Avalonia.Media;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -23,9 +24,6 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
 {
     private readonly ServerConnectionService _serverConnectionService;
     private readonly IMessageBoxProvider _messageBoxProvider;
-    private readonly IDisposable _hostSettingsSubscription;
-    private readonly IDisposable _keyComboBoxEnabledSubscription;
-    private readonly IDisposable _connectionCredentialsSubscription;
 
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger,
         ServerConnectionService serverConnectionService,
@@ -40,7 +38,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         TestConnection = ReactiveCommand.CreateFromTask(TestConnectionAsync);
         ResetCommand = ReactiveCommand.Create(Reset);
 
-        _hostSettingsSubscription = this
+        this
             .WhenAnyValue<ConnectToServerViewModel, SshHostSettings?>(viewModel => viewModel.SelectedHostSettings)
             .Subscribe(async settings =>
             {
@@ -53,20 +51,20 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
                 {
                     logger.LogError(e, "Error testing connection");
                 }
-            });
+            }).DisposeWith(Disposables);
         
-        _keyComboBoxEnabledSubscription = this
+        this
             .WhenAnyValue(viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys, model => model._serverConnectionService.IsConnected)
             .Subscribe((tuple) =>
             {
                 KeyComboBoxEnabled = tuple is { Item3: false, Item1: true, Item2: false };
-            });
+            }).DisposeWith(Disposables);
 
-        _connectionCredentialsSubscription = this.WhenAnyValue(viewModel => viewModel.ConnectionCredentials)
+        this.WhenAnyValue(viewModel => viewModel.ConnectionCredentials)
             .Subscribe(credentials =>
             {
                 CanConnectToServer = credentials is not null;
-            });
+            }).DisposeWith(Disposables);
         
         try
         {
@@ -223,7 +221,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         await TestConnectionAsyncBase(cancellationToken);
     }
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+    protected override async Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
     {
         if (!inputParameter) return;
         if (!CanConnectToServer) return;
@@ -256,13 +254,5 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         AuthWithAllKeys = false;
         AuthWithPublicKey = false;
         ConnectionCredentials = null;
-    }
-
-    public override void Dispose()
-    {
-        _hostSettingsSubscription.Dispose();
-        _keyComboBoxEnabledSubscription.Dispose();
-        _connectionCredentialsSubscription.Dispose();
-        base.Dispose();
     }
 }

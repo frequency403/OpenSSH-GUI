@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -47,17 +48,17 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
                 if (props is { Item2: { AuthorizedKeys: { Count: > 0 } } col, Item1: { } keyFile , Item3: true})
                     return col.CanAddKey(keyFile);
                 return false;
-            }).ToProperty(this, vm => vm.AddButtonEnabled);
+            }).ToProperty(this, vm => vm.AddButtonEnabled).DisposeWith(Disposables);
         
         _keyAddPossibleHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeysCount)
-            .Select(props => props > 0).ToProperty(this, vm => vm.KeyAddPossible);
+            .Select(props => props > 0).ToProperty(this, vm => vm.KeyAddPossible).DisposeWith(Disposables);
     }
     
     public SshKeyManager SshKeyManager { get; }
     public ServerConnectionService ServerConnectionService { get; }
     public ReactiveCommand<SshKeyFile, Unit> AddKey { get; }
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+    protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
         try

@@ -27,7 +27,7 @@ public class ViewModelBaseTests
         var vm = new TestViewModel();
 
         // Act
-        await vm.BooleanSubmit.Execute(true).FirstAsync();
+        await vm.BooleanSubmitCommand.Execute(true).FirstAsync();
 
         // Assert
         Assert.True(vm.OnBooleanSubmitCalled);
@@ -56,7 +56,7 @@ public class ViewModelBaseTests
         public bool OnBooleanSubmitCalled { get; private set; }
         public bool InputParam { get; private set; }
 
-        protected override Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+        protected override Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
         {
             OnBooleanSubmitCalled = true;
             InputParam = inputParameter;

@@ -103,7 +103,7 @@
             </TabItem>
         </TabControl>
         <Button Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5 0"
-                Command="{Binding BooleanSubmit}"
+                Command="{Binding BooleanSubmitCommand}"
                 Background="Red">
             <Button.CommandParameter>
                 <system:Boolean>False</system:Boolean>
@@ -114,7 +114,7 @@
             <materialIcons:MaterialIcon Kind="Cancel" />
         </Button>
         <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5 0"
-                Command="{Binding BooleanSubmit}"
+                Command="{Binding BooleanSubmitCommand}"
                 Background="Green">
             <Button.CommandParameter>
                 <system:Boolean>True</system:Boolean>

@@ -1,4 +1,6 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ReactiveUI;
@@ -66,8 +68,7 @@ public abstract class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = nu
 /// </summary>
 public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyncDisposable
 {
-    private readonly IDisposable _booleanSubmitSubscription;
-    private readonly IDisposable _thrownExceptionsSubscription;
+    protected readonly CompositeDisposable Disposables;
     
     /// <summary>
     /// Represents an event handler used to signal close requests for the view model.
@@ -90,14 +91,16 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     /// </summary>
     protected ViewModelBase(ILogger? logger)
     {
+        Disposables = new CompositeDisposable();
         Logger = logger ?? NullLogger.Instance;
-        _thrownExceptionsSubscription = ThrownExceptions.Subscribe(exception => Logger.LogError(exception, "Viewmodel threw an exception"));
-        BooleanSubmit = ReactiveCommand.CreateFromTask<bool>(OnBooleanSubmitAsync);
-        _booleanSubmitSubscription = BooleanSubmit.Subscribe(_ =>
+        ThrownExceptions
+            .Subscribe(exception => Logger.LogError(exception, "Viewmodel threw an exception"))
+            .DisposeWith(Disposables);
+        BooleanSubmitCommand.Subscribe(_ =>
         {
             if (CloseOnBooleanSubmit)
                 RequestClose();
-        });
+        }).DisposeWith(Disposables);
     }
 
     /// <summary>
@@ -114,26 +117,14 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
 
     /// <summary>
     /// Gets or sets a value indicating whether the view model should automatically
-    /// request to close when the <see cref="BooleanSubmit"/> command is executed.
+    /// request to close when the <see cref="BooleanSubmitCommand"/> command is executed.
     /// </summary>
     /// <remarks>
     /// When set to true, the view model invokes the <see cref="RequestClose"/> method
-    /// after the execution of the <see cref="BooleanSubmit"/> command. This behavior
+    /// after the execution of the <see cref="BooleanSubmitCommand"/> command. This behavior
     /// enables automatic closure of the view upon certain operations.
     /// </remarks>
     private protected bool CloseOnBooleanSubmit { get; set; } = true;
-
-    /// <summary>
-    /// Gets a reactive command that represents an asynchronous operation
-    /// triggered with a boolean parameter. Typically used to handle
-    /// user interactions requiring confirmation, such as "Ok" or "Cancel" actions.
-    /// </summary>
-    /// <remarks>
-    /// When executed, the command invokes the <c>OnBooleanSubmitAsync</c> method
-    /// with the provided boolean parameter. By default, this may also trigger a
-    /// window close action if <c>CloseOnBooleanSubmit</c> is set to <c>true</c>.
-    /// </remarks>
-    public ReactiveCommand<bool, Unit> BooleanSubmit { get; }
 
     /// <summary>
     /// Triggers a request to close the associated view or component.
@@ -156,21 +147,21 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     /// <param name="inputParameter">The boolean input parameter supplied during submission.</param>
     /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    protected virtual Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+    [ReactiveCommand]
+    protected virtual Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
 
     /// <inheritdoc />
-    public virtual void Dispose()
+    public void Dispose()
     {
-        _booleanSubmitSubscription.Dispose();
-        _thrownExceptionsSubscription.Dispose();
+        Disposables.Dispose();
         GC.SuppressFinalize(this);
     }
 
     /// <inheritdoc />
-    public virtual ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         Dispose();
         GC.SuppressFinalize(this);

@@ -123,7 +123,7 @@
         <Grid ColumnDefinitions="* *" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
             <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
                     Background="Red"
-                    Command="{Binding BooleanSubmit}"
+                    Command="{Binding BooleanSubmitCommand}"
                     HotKey="Escape">
                 <Button.CommandParameter>
                     <system:Boolean>False</system:Boolean>
@@ -136,7 +136,7 @@
             <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
                     Background="LimeGreen" 
                     IsEnabled="{Binding CanConnectToServer}"
-                    Command="{Binding BooleanSubmit}"
+                    Command="{Binding BooleanSubmitCommand}"
                     HotKey="Enter">
                 <Button.Styles>
                     <Style Selector="Button:enabled">

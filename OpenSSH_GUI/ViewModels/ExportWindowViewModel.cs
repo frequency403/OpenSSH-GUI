@@ -23,7 +23,7 @@ public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+    protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
         if (inputParameter)
