@@ -47,9 +47,15 @@ public abstract class ViewModelBase<TViewModel, TParameters>(ILogger<TViewModel>
 /// Integrates with ILogger for logging purposes and supports exception handling via a reactive subscription.
 /// Defines commands and methods that assist in the management of ViewModel-specific operations.
 /// </remarks>
-public abstract class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = null) : ViewModelBase(logger)
+public abstract class ViewModelBase<TViewModel> : ViewModelBase, IActivatableViewModel, IViewFor<TViewModel>
     where TViewModel : ViewModelBase
 {
+    public ViewModelBase(ILogger<TViewModel>? logger = null) : base(logger)
+    {
+        Activator = new ViewModelActivator();
+    }
+    
+    
     /// <summary>
     /// Asynchronously initializes the view model, performing necessary setup operations.
     /// </summary>
@@ -60,13 +66,22 @@ public abstract class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = nu
         IsInitialized = true;
         return ValueTask.CompletedTask;
     }
+    
+    public TViewModel? ViewModel { get; set; }
+    object? IViewFor.ViewModel
+    {
+        get => ViewModel;
+        set => ViewModel = value as TViewModel;
+    }
+
+    public ViewModelActivator Activator { get; }
 }
 
 /// <summary>
 /// Serves as an abstract base class for view models, providing shared properties, commands,
 /// and behaviors for managing the interaction between the view and the application logic.
 /// </summary>
-public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyncDisposable
+public abstract partial class ViewModelBase : ReactiveObject,  IDisposable, IAsyncDisposable
 {
     protected readonly CompositeDisposable Disposables;
     

@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using DryIoc;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
+using ReactiveUI;
 using ReactiveUI.Avalonia;
 using Serilog;
 

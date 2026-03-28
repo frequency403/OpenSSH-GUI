@@ -9,6 +9,7 @@ using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
 using Serilog;
 using Serilog.Core;
@@ -33,7 +34,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     
     public ObservableCollection<string> LogFiles { get; } = [];
     
-    [ObservableAsProperty] 
+    [Reactive] 
     private bool _canDeleteOldLogFiles;
     
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, IMessageBoxProvider messageBoxProvider, LoggingLevelSwitch levelSwitch)
@@ -43,16 +44,20 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
         _levelSwitch = levelSwitch;
         CurrentLogLevel = levelSwitch.MinimumLevel;
         this.WhenAnyValue(model => model.CurrentLogLevel)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
             .Subscribe(OnNext).DisposeWith(Disposables);
         
         this.WhenAnyValue(model => model.DaysToDeleteSelected)
             .Subscribe(OnNext).DisposeWith(Disposables);
 
-        _canDeleteOldLogFilesHelper = this.WhenAnyValue(model => model.LogFiles.Count)
+        this.WhenAnyValue(vm => vm.LogFiles.Count)
             .DistinctUntilChanged()
-            .Select(e => e > 0)
-            .ToProperty(this, model => model.CanDeleteOldLogFiles).DisposeWith(Disposables);
+            .Subscribe(count =>
+            {
+                CanDeleteOldLogFiles = count > 0;
+            })
+            .DisposeWith(Disposables);
         
         DaysToDeleteSelected = DaysToDelete[0];
     }

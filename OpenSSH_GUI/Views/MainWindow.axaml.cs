@@ -7,6 +7,7 @@ using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
+using ReactiveUI;
 
 namespace OpenSSH_GUI.Views;
 

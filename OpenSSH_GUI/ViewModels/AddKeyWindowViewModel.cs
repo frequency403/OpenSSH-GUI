@@ -36,33 +36,15 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         this.WhenAnyValue(vm => vm.SelectedKeyType)
             .Subscribe(e =>
             {
-                if (!SshKeyTypes.Select(kt => string.Join("_", KeyPrefix, Enum.GetName(kt)!.ToLower()))
-                        .Any(ktp => KeyName.EndsWith(ktp, StringComparison.Ordinal)))
-                    return;
-                KeyName = string.Join("_", KeyPrefix, Enum.GetName(e)!.ToLower());
+                if(SshKeyTypes.Select(kt => string.Join("_", KeyPrefix, Enum.GetName(kt)!.ToLower()))
+                   .Any(ktp => KeyName.EndsWith(ktp, StringComparison.Ordinal)))
+                    KeyName = string.Join("_", KeyPrefix, Enum.GetName(e)!.ToLower());
+
+                AvaliableKeySizes = e.SupportedKeySizes.OrderDescending().ToArray();
+                SelectedKeySize = AvaliableKeySizes.FirstOrDefault();
+                CanChangeKeySize = AvaliableKeySizes.Length > 1;
             })
             .DisposeWith(Disposables);
-        
-        _avaliableKeySizesHelper = this.WhenAnyValue(vm => vm.SelectedKeyType)
-            .Select(e => e.SupportedKeySizes.OrderDescending())
-            .ToProperty(this, vm => vm.AvaliableKeySizes).DisposeWith(Disposables);
-        
-        _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvaliableKeySizes)
-            .Select(e => e.Count() > 1)
-            .ToProperty(this, vm => vm.CanChangeKeySize).DisposeWith(Disposables);
-        
-        this.WhenAnyValue(x => x.AvaliableKeySizes)
-            .Subscribe(sizes =>
-            {
-                try
-                {
-                    SelectedKeySize   = sizes.FirstOrDefault();
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e, "Error reacting to key type change");
-                }
-            }).DisposeWith(Disposables);
 
         KeyNameValidationHelper = this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError).DisposeWith(Disposables);
         SelectedKeyType = SshKeyTypes.First();
@@ -80,8 +62,8 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     [Reactive]
     private SshKeyType _selectedKeyType;
 
-    [ObservableAsProperty(ReadOnly = true)]
-    private IEnumerable<int> _avaliableKeySizes = [];
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private int[] _avaliableKeySizes = [];
 
     [Reactive]
     private int _selectedKeySize;
@@ -92,7 +74,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     [Reactive]
     private string _keyName = "id_rsa";
     
-    [ObservableAsProperty(ReadOnly = true)]
+    [Reactive(SetModifier = AccessModifier.Private)]
     private bool _canChangeKeySize;
 
     [Reactive]

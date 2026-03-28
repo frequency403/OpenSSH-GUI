@@ -10,6 +10,7 @@ using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
@@ -17,10 +18,10 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
 {
-    [ObservableAsProperty]
+    [Reactive(SetModifier = AccessModifier.Private)]
     private bool _addButtonEnabled;
     
-    [ObservableAsProperty]
+    [Reactive(SetModifier = AccessModifier.Private)]
     private bool _keyAddPossible;
     
     [Reactive]
@@ -41,17 +42,31 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
         SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
         AddKey = ReactiveCommand.CreateFromTask<SshKeyFile>(OnAddKey);
         
-        _addButtonEnabledHelper = this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
+        this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
             .DistinctUntilChanged()
-            .Select(props =>
+            .Subscribe(props =>
             {
-                if (props is { Item2: { AuthorizedKeys: { Count: > 0 } } col, Item1: { } keyFile , Item3: true})
-                    return col.CanAddKey(keyFile);
-                return false;
-            }).ToProperty(this, vm => vm.AddButtonEnabled).DisposeWith(Disposables);
+                AddButtonEnabled = props is
+                {
+                    Item1: { } keyFile,
+                    Item2:
+                    {
+                        AuthorizedKeys:
+                        {
+                            Count: > 0
+                        }
+                    } col, 
+                    Item3: true
+                } && col.CanAddKey(keyFile);
+            }).DisposeWith(Disposables);
         
-        _keyAddPossibleHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys.Count)
-            .Select(props => props > 0).ToProperty(this, vm => vm.KeyAddPossible).DisposeWith(Disposables);
+        this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Subscribe(keys =>
+            {
+                KeyAddPossible = keys.Count > 0;
+            })
+            .DisposeWith(Disposables);
     }
     
     public SshKeyManager SshKeyManager { get; }

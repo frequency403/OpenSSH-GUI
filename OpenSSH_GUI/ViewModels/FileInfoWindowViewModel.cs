@@ -36,15 +36,17 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         _clipboard = clipboard;
         _keyManager = keyManager;
         _keyFile = resolver.Resolve<SshKeyFile>();
-        _windowTitleHelper = this.WhenAnyValue(vm => vm.KeyFile)
-            .Select(e => string.Join(" ", e.FileName, e.Format, e.Comment))
-            .ToProperty(this, vm => vm.WindowTitle).DisposeWith(Disposables);
+        this.WhenAnyValue(vm => vm.KeyFile)
+            .Subscribe(e =>
+            {
+                WindowTitle = string.Join(" ", e.FileName, e.Format, e.Comment);
+            }).DisposeWith(Disposables);
     }
     
     [Reactive]
     private SshKeyFile _keyFile;
     
-    [ObservableAsProperty] private string _windowTitle = "Key info";
+    [Reactive] private string _windowTitle = "Key info";
     
     
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)

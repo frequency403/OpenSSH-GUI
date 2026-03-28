@@ -59,60 +59,57 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         _launcher = launcher;
         _dialogHost = dialogHost;
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
+        WindowTitle = string.Join("-", Program.AppName, Version);
 
-        _itemsCountIconHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys.Count)
+        this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(GetMaterialNumericIcon)
-            .ToProperty(this, vm => vm.ItemsCountIcon).DisposeWith(Disposables);
-
-        _windowTitleHelper = this.WhenAnyValue(vm => vm.Version)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(ver => string.Join("-", Program.AppName, ver))
-            .ToProperty(this, vm => vm.WindowTitle).DisposeWith(Disposables);
-
-        _keyTypeSortDirectionIconHelper =
-            this.WhenAnyValue(vm => vm.KeyTypeSort)
-                .ObserveOn(AvaloniaScheduler.Instance)
-                .Select(EvaluateSortIconKind)
-                .ToProperty(this, vm => vm.KeyTypeSortDirectionIcon)
-                .DisposeWith(Disposables);
-
-        _commentSortDirectionIconHelper = this.WhenAnyValue(vm => vm.CommentSort)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(EvaluateSortIconKind)
-            .ToProperty(this, vm => vm.CommentSortDirectionIcon).DisposeWith(Disposables);
-
-        _fingerPrintSortDirectionIconHelper = this.WhenAnyValue(vm => vm.FingerPrintSort)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(EvaluateSortIconKind)
-            .ToProperty(this, vm => vm.FingerPrintSortDirectionIcon).DisposeWith(Disposables);
+            .Subscribe(keyFiles =>
+            {
+                ItemsCountIcon = GetMaterialNumericIcon(keyFiles.Count);
+            })
+            .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.KeyTypeSort)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
+            .Subscribe(sort =>
             {
-                null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.KeyType),
-                false => key => key.OrderByDescending(e => e.KeyType)
-            })).DisposeWith(Disposables);
-        
+                KeyTypeSortDirectionIcon = EvaluateSortIconKind(sort);
+                SshKeyManager.ChangeOrder(sort switch
+                {
+                    null => key => key.OrderBy(e => e.FileName),
+                    true => key => key.OrderBy(e => e.KeyType),
+                    false => key => key.OrderByDescending(e => e.KeyType)
+                });
+            })
+            .DisposeWith(Disposables);
+
         this.WhenAnyValue(vm => vm.CommentSort)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
+            .Subscribe(sort =>
             {
-                null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.Comment),
-                false => key => key.OrderByDescending(e => e.Comment)
-            })).DisposeWith(Disposables);
-        
+                CommentSortDirectionIcon = EvaluateSortIconKind(sort);
+                SshKeyManager.ChangeOrder(sort switch
+                {
+                    null => key => key.OrderBy(e => e.FileName),
+                    true => key => key.OrderBy(e => e.Comment),
+                    false => key => key.OrderByDescending(e => e.Comment)
+                });
+            }).DisposeWith(Disposables);
+
         this.WhenAnyValue(vm => vm.FingerPrintSort)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
+            .Subscribe(sort =>
             {
-                null => key => key.OrderBy(e => e.FileName),
-                true => key => key.OrderBy(e => e.Fingerprint),
-                false => key => key.OrderByDescending(e => e.Fingerprint)
-            })).DisposeWith(Disposables);
+                FingerPrintSortDirectionIcon = EvaluateSortIconKind(sort);
+                SshKeyManager.ChangeOrder(sort switch
+                {
+                    null => key => key.OrderBy(e => e.FileName),
+                    true => key => key.OrderBy(e => e.Fingerprint),
+                    false => key => key.OrderByDescending(e => e.Fingerprint)
+                });
+            })
+            .DisposeWith(Disposables);
+        
     }
 
     public ServerConnectionService ServerConnectionService { get; }
@@ -123,11 +120,11 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     [Reactive] private bool? _commentSort;
     [Reactive] private bool? _fingerPrintSort;
 
-    [ObservableAsProperty] private MaterialIcon _itemsCountIcon = new() { Kind = MaterialIconKind.Infinity };
-    [ObservableAsProperty] private string _windowTitle = string.Empty;
-    [ObservableAsProperty] private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
-    [ObservableAsProperty] private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
-    [ObservableAsProperty] private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
+    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIcon _itemsCountIcon = new() { Kind = MaterialIconKind.Infinity };
+    [Reactive(SetModifier = AccessModifier.Private)] private string _windowTitle = string.Empty;
+    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
+    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
+    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
 
     [ReactiveCommand]
     private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default) =>
@@ -333,7 +330,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         where TInitializer : class, IInitializerParameters<TViewModel>
 
     {
-        var initializer = Activator.CreateInstance<TInitializer>();
+        var initializer = System.Activator.CreateInstance<TInitializer>();
         foreach (var property in initializer.GetType().GetProperties()
                      .Where(pi => pi.PropertyType == typeof(TParam) && pi.CanWrite))
             property.SetValue(initializer, param);
