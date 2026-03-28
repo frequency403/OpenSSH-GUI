@@ -140,8 +140,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
             return;
         }
 
-        await _messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, StatusButtonToolTip, MessageBoxButtons.Ok,
-            MessageBoxIcon.Error);
+        await _messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, StatusButtonToolTip);
     }
 
     private async Task TestConnectionAsync(SshHostSettings? hostSettings = null, CancellationToken cancellationToken = default)
@@ -230,13 +229,13 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         {
             if(!(await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken)))
             {
-                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, "Connection failed", MessageBoxButtons.Ok, MessageBoxIcon.Error);
+                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, "Connection failed");
             }
         }
         catch (Exception e)
         {
             Logger.LogError(e, "Unhandled error during connection");
-            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message);
         }
     }
 

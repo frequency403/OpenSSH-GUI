@@ -49,10 +49,7 @@ public partial class MessageBoxDialog : Window
 
         ApplyButtons(@params.Buttons);
 
-        if (@params.Icon.HasValue)
-            ApplyIcon(@params.Icon);
-        else
-            ApplyIcon(@params.LegacyIcon);
+        ApplyIcon(@params.Icon);
     }
 
     // -------------------------------------------------------------------------

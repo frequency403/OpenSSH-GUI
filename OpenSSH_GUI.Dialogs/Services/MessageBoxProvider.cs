@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Material.Icons;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Dialogs.Models;
@@ -13,60 +14,90 @@ namespace OpenSSH_GUI.Dialogs.Services;
 public class MessageBoxProvider(Window owner) : IMessageBoxProvider
 {
     /// <inheritdoc />
-    public async Task<MessageBoxResult> ShowMessageBoxAsync(
+    public Task<MessageBoxResult> ShowMessageBoxAsync(
         string title,
         string message,
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
-        MessageBoxIcon icon = MessageBoxIcon.None)
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline)
     {
-        return await ShowMessageBoxAsync(new MessageBoxParams
+        return ShowMessageBoxAsync(new MessageBoxParams
         {
             Title = title,
             Message = message,
             Buttons = buttons,
-            LegacyIcon = icon
+            Icon =  icon
         });
     }
 
     /// <inheritdoc />
-    public async Task<MessageBoxResult> ShowMessageBoxAsync(MessageBoxParams @params)
+    public Task<MessageBoxResult> ShowMessageBoxAsync(MessageBoxParams @params)
     {
         var dialog = new MessageBoxDialog(@params);
-        return await dialog.ShowDialog<MessageBoxResult>(owner);
+        return dialog.ShowDialog<MessageBoxResult>(owner);
+    }
+
+    public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null) =>
+        ShowMessageBoxAsync(new MessageBoxParams()
+        {
+            Title = e?.GetType().Name ?? "Error",
+            Message = e switch
+            {
+                not null when !string.IsNullOrWhiteSpace(customMessage) => string.Join(" ", customMessage, e.Message),
+                null when !string.IsNullOrWhiteSpace(customMessage) => customMessage,
+                not null => e.ToString(),
+                _ => string.Empty
+            },
+            Buttons = MessageBoxButtons.Ok,
+            Icon = MaterialIconKind.ErrorOutline,
+        });
+
+    public async Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool>> tryActionAsync, string title, string message, MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true)
+    {
+        var tryCount = 1;
+        
+        while (tryCount <= retries)
+        {
+            if (showTryCountInTitle)
+                title = string.Join(" ", title, string.Join("/", tryCount, retries));
+            if (await tryActionAsync())
+                break;
+            if (await ShowMessageBoxAsync(title, message, MessageBoxButtons.OkCancel, icon) is MessageBoxResult.Cancel)
+                break;
+            tryCount++;
+        }
+        return tryCount <= retries;
     }
 
     /// <inheritdoc />
-    public async Task<SecureInputResult?> ShowSecureInputAsync(
+    public Task<SecureInputResult?> ShowSecureInputAsync(
         string title,
         string prompt,
         int minLength = 1,
-        int maxLength = 0)
-    {
-        return await ShowSecureInputAsync(new SecureInputParams
+        int maxLength = 0) =>
+        ShowSecureInputAsync(new SecureInputParams
         {
             Title = title,
             Prompt = prompt,
             MinLength = minLength,
             MaxLength = maxLength
         });
-    }
 
     /// <inheritdoc />
-    public async Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params)
+    public Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params)
     {
         var dialog = new SecureInputDialog(@params);
-        return await dialog.ShowDialog<SecureInputResult?>(owner);
+        return dialog.ShowDialog<SecureInputResult?>(owner);
     }
 
     /// <inheritdoc />
-    public async Task<ValidatedInputResult?> ShowValidatedInputAsync(
+    public Task<ValidatedInputResult?> ShowValidatedInputAsync(
         string title,
         string prompt,
         Func<string, string?> validator,
         string initialValue = "",
         string watermark = "Enter value…")
     {
-        return await ShowValidatedInputAsync(new ValidatedInputParams
+        return ShowValidatedInputAsync(new ValidatedInputParams
         {
             Title = title,
             Prompt = prompt,
@@ -77,9 +108,9 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
     }
 
     /// <inheritdoc />
-    public async Task<ValidatedInputResult?> ShowValidatedInputAsync(ValidatedInputParams @params)
+    public Task<ValidatedInputResult?> ShowValidatedInputAsync(ValidatedInputParams @params)
     {
         var dialog = new ValidatedInputDialog(@params);
-        return await dialog.ShowDialog<ValidatedInputResult?>(owner);
+        return dialog.ShowDialog<ValidatedInputResult?>(owner);
     }
 }

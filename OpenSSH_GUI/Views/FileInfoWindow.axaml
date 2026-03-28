@@ -106,7 +106,6 @@
                                      IsEnabled="{Binding !KeyFile.KeyFileInfo.KeyFileSource.ProvidedByConfig}"
                                      Command="{Binding ChangeFormatOfKeyFileCommand}"
                                      CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
-
                             <SplitButton.Resources>
                                 <SolidColorBrush x:Key="SplitButtonBackground">DarkCyan</SolidColorBrush>
                                 <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver">#00838F</SolidColorBrush>
@@ -123,25 +122,21 @@
                             <SplitButton.Flyout>
                                 <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                             ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">
-                                    <!-- <MenuFlyout.ItemTemplate> -->
-                                    <!--     <DataTemplate DataType="MenuItem"> -->
-                                    <!--         <MenuItem> -->
-                                    <!--             <ToolTip.ShowDelay><system:Int32>0</system:Int32></ToolTip.ShowDelay> -->
-                                    <!--             <ToolTip.Tip> -->
-                                    <!--                 <StackPanel Orientation="Horizontal" Spacing="2"> -->
-                                    <!--                     <Label Content="Change format to the"/> -->
-                                    <!--                     <Label Content="{Binding Header}"/> -->
-                                    <!--                     <Label Content="format"/> -->
-                                    <!--                 </StackPanel> -->
-                                    <!--             </ToolTip.Tip> -->
-                                    <!--         </MenuItem> -->
-                                    <!--     </DataTemplate> -->
-                                    <!-- </MenuFlyout.ItemTemplate> -->
                                     <MenuFlyout.ItemContainerTheme>
                                         <ControlTheme TargetType="MenuItem"
                                                       BasedOn="{StaticResource {x:Type MenuItem}}"
                                                       x:DataType="keygen:SshKeyFormat">
-
+                                            
+                                            <Setter Property="ToolTip.Tip">
+                                                    <Template>
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                                            <TextBlock Text="Change format to the"/>
+                                                            <TextBlock Text="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" FontWeight="ExtraBold"/>
+                                                            <TextBlock Text="format"/>
+                                                        </StackPanel>
+                                                    </Template>
+                                            </Setter>
+                                            <Setter Property="ToolTip.ShowDelay" Value="0" />
                                             <Setter Property="Background" Value="DarkCyan" />
                                             <Setter Property="Foreground" Value="White" />
                                             <Setter Property="Padding" Value="12,8" />
@@ -166,7 +161,11 @@
                             </SplitButton.Flyout>
 
                             <ToolTip.Tip>
-                                <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowConvertTooltip}" />
+                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                    <TextBlock Text="Change format to the"/>
+                                    <TextBlock Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat, Converter={x:Static converters:Converter.FormatToStringConverter}}" FontWeight="ExtraBold"/>
+                                    <TextBlock Text="format"/>
+                                </StackPanel>
                             </ToolTip.Tip>
                             <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
 

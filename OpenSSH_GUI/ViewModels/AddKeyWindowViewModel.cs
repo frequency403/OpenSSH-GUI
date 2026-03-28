@@ -56,7 +56,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
             {
                 try
                 {
-                    SelectedKeySize   = sizes.First();
+                    SelectedKeySize   = sizes.FirstOrDefault();
                 }
                 catch (Exception e)
                 {
@@ -137,11 +137,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         catch (Exception e)
         {
             Logger.LogError(e, "Error creating key");
-            await _messageBoxProvider.ShowMessageBoxAsync(
-                StringsAndTexts.Error,
-                e.Message,
-                MessageBoxButtons.Ok,
-                MessageBoxIcon.Error);
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(e, StringsAndTexts.Error);
         }
     }
 }

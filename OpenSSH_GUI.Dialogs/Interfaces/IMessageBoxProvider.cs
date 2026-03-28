@@ -1,3 +1,4 @@
+using Material.Icons;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Models;
 
@@ -21,7 +22,7 @@ public interface IMessageBoxProvider
         string title,
         string message,
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
-        MessageBoxIcon icon = MessageBoxIcon.None);
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline);
 
     /// <summary>
     ///     Shows a modal message box and returns the button the user clicked.
@@ -34,6 +35,11 @@ public interface IMessageBoxProvider
     /// </returns>
     Task<MessageBoxResult> ShowMessageBoxAsync(MessageBoxParams @params);
 
+    public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null);
+
+    public Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool>> tryActionAsync, string title, string message,
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true);
+    
     /// <summary>
     ///     Shows a modal secure-input (password) prompt and returns the result.
     /// </summary>

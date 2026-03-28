@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
@@ -66,7 +67,11 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         _watcher.Deleted += WatcherOnDeleted;
         _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
         
-        _sshKeysInternal.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(SshKeys));
+        _sshKeysInternal.CollectionChanged += (_, _) =>
+        {
+            this.RaisePropertyChanging(nameof(SshKeys));
+            this.RaisePropertyChanged(nameof(SshKeys));
+        };
     }
     
     /// <summary>
@@ -142,7 +147,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
                 files.Add(file.Extension.EndsWith("ppk") ? destination : Path.ChangeExtension(destination, null));
             }
 
-            key.Load(SshKeyFileSource.FromDisk(files.Distinct().Single()), key.Password.WrittenSpan);
+            key.Load(SshKeyFileSource.FromDisk(files.Distinct().Single()));
         }
         catch (Exception e)
         {
@@ -154,6 +159,49 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             if (semaphoreAquired)
                 _semaphoreSlim.Release();
         }
+    }
+
+    private async ValueTask WriteToFile(string filePath, string content, Encoding? encoding = null)
+    {
+        if (encoding is null)
+        {
+            encoding ??= Encoding.UTF8;
+            _logger.LogDebug("Using default encoding:  {encoding}", encoding);
+        }
+        else
+        {
+            _logger.LogDebug("Using encoding: {encoding}", encoding);
+        }
+
+        await using var fileStream = new FileStream(filePath, FileStreamOptions);
+        _logger.LogDebug("Opened file {filePath}", filePath);
+        
+        byte[]? rented = null;
+        var buffer = content.Length <= 256
+            ? stackalloc byte[256]
+            : (rented = ArrayPool<byte>.Shared.Rent(encoding.GetByteCount(content)));
+        _logger.LogDebug("Allocated {byteCount} bytes", buffer.Length);
+        try
+        {
+            var writtenBytes = encoding.GetBytes(content, buffer);
+            _logger.LogDebug("Writing {byteCount} bytes into file {filePath}", writtenBytes, filePath);
+            fileStream.Write(buffer[..writtenBytes]);
+            
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while writing file {filePath}", filePath);
+            throw;
+        }
+        finally
+        {
+            if (rented is not null)
+            {
+                ArrayPool<byte>.Shared.Return(rented, clearArray: true);
+                _logger.LogDebug("Freeing memory");
+            }
+        }
+        _logger.LogDebug("Successfully wrote file {filePath}", filePath);
     }
     
     /// <summary>
@@ -198,49 +246,26 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             if (!semaphoreAquired)
                 throw new InvalidOperationException("Another key operation is in progress");
             
-            switch (newFormat)
-            {
-                case SshKeyFormat.OpenSSH:
-                    
-                    await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
-                    await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
-                    {
-                        
-                        await streamWriter.WriteAsync(key.Password.IsValid
-                            ? privateKeyFile.ToOpenSshFormat(new SshKeyEncryptionAes256(key.Password.GetPasswordString()))
-                            : privateKeyFile.ToOpenSshFormat());
-                    }
-                    writtenFiles.Add(filePath);
-                    var pubFilePath = newFormat.ChangeExtension(filePath);
-                    await using (var publicFileStream =
-                                 new FileStream(pubFilePath, FileStreamOptions))
-                    await using (var streamWriter = new StreamWriter(publicFileStream, Encoding.UTF8))
-                    {
-                        await streamWriter.WriteAsync(privateKeyFile.ToOpenSshPublicFormat());
-                    }
-                    writtenFiles.Add(pubFilePath);
-                    break;
+            var sshKeyEncryption = key.Password is { IsValid: true } keyPassword
+                ? new SshKeyEncryptionAes256(
+                    keyPassword.GetPasswordString(),
+                    (newFormat is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null))
+                : SshKeyGenerateInfo.DefaultSshKeyEncryption;
 
-                case SshKeyFormat.PuTTYv2:
-                case SshKeyFormat.PuTTYv3:
-                default:
-                    await using (var privateFileStream = new FileStream(filePath, FileStreamOptions))
-                    await using (var streamWriter = new StreamWriter(privateFileStream, Encoding.UTF8))
-                    {
-                        await streamWriter.WriteAsync(privateKeyFile.ToPuttyFormat((password is not null 
-                            ? new SshKeyEncryptionAes256(password, (newFormat is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null)) : SshKeyGenerateInfo.DefaultSshKeyEncryption), newFormat));
-                    }
-                    writtenFiles.Add(filePath);
-                    break;
-            }
+            var files = await WriteToFileInSpecificFormat(newFormat,
+                sshKeyEncryption,
+                privateKeyFile,
+                filePath);
+            writtenFiles.AddRange(files);
             
-            key.Load(SshKeyFileSource.FromDisk(filePath), key.Password.WrittenSpan);
+            key.Load(SshKeyFileSource.FromDisk(filePath));
             
             if(Directory.Exists(backupDir))
                 Directory.Delete(backupDir, true);
         }
         catch (Exception e)
         {
+            var exc = e;
             _logger.LogError(e, "Error changing format of key – attempting rollback");
             foreach (var writtenFile in writtenFiles)
             {
@@ -250,6 +275,13 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
                 }
                 catch (Exception ex)
                 {
+                    exc = exc switch
+                    {
+                        AggregateException aggregateException => new AggregateException(
+                            aggregateException.InnerExceptions.Append(ex)),
+                        not null => new AggregateException(exc, ex),
+                        _ => ex
+                    };
                     _logger.LogWarning(ex, "Could not delete backup file '{path}'", writtenFile);
                 }
             }
@@ -258,14 +290,29 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             {
                 if (backupFileInfo.Directory?.Parent?.FullName is { } parentDirectory)
                 {
-                    var destination = Path.Combine(parentDirectory, backupFileInfo.Name.Replace(".bak", ""));
-                    backupFileInfo.MoveTo(destination);
-                    _logger.LogWarning("Restored backup file {backupFile} to its original location {original}", backupFileInfo.FullName, destination);
-                    continue;
+                    try
+                    {
+                        var destination = Path.Combine(parentDirectory, backupFileInfo.Name.Replace(".bak", ""));
+                        backupFileInfo.MoveTo(destination);
+                        _logger.LogWarning("Restored backup file {backupFile} to its original location {original}",
+                            backupFileInfo.FullName, destination);
+                        continue;
+                    }
+                    catch (Exception exception)
+                    {
+                        exc = exc switch
+                        {
+                            AggregateException aggregateException => new AggregateException(
+                                aggregateException.InnerExceptions.Append(exception)),
+                            not null => new AggregateException(exc, exception),
+                            _ => exception
+                        };
+                    }
                 }
                 _logger.LogWarning("Could not move backup file {backupFile} to its original location", backupFileInfo.FullName);
                 break;
             }
+            throw exc;
         }
         finally
         {
@@ -289,6 +336,35 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
+    private async ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(SshKeyFormat format, ISshKeyEncryption encryption,
+        IPrivateKeySource privateKeySource, string filePath)
+    {
+        var privateKeyFileContent = encryption is SshKeyEncryptionAes256
+            ? format is SshKeyFormat.OpenSSH ? privateKeySource.ToOpenSshFormat(encryption) : privateKeySource.ToPuttyFormat(encryption, format)
+            : format is SshKeyFormat.OpenSSH ? privateKeySource.ToOpenSshFormat() : privateKeySource.ToPuttyFormat(format);
+        var writtenFiles  = new List<string>();
+        switch (format)
+        {
+            case SshKeyFormat.PuTTYv2:
+            case SshKeyFormat.PuTTYv3:
+                break;
+            case SshKeyFormat.OpenSSH:
+            default:
+                var pubKeyFormat = format.ChangeExtension(filePath);
+                await WriteToFile(pubKeyFormat,
+                    privateKeySource.ToOpenSshPublicFormat());
+                writtenFiles.Add(pubKeyFormat);
+                break;
+        }
+
+        await WriteToFile(filePath, privateKeyFileContent);
+        writtenFiles.Add(filePath);
+        return writtenFiles;
+    }
+
+    private ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(SshKeyGenerateInfo generateInfo, GeneratedPrivateKey createdKey, string filePath) => 
+        WriteToFileInSpecificFormat(generateInfo.KeyFormat, generateInfo.Encryption, createdKey, filePath);
+
     /// <summary>
     ///     Generates a new SSH key.
     /// </summary>
@@ -305,47 +381,31 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             throw new InvalidOperationException("Another key operation is in progress");
         try
         {
-            await using var privateStream = new MemoryStream();
-            var createdKey = SshKey.Generate(privateStream, generateParamsInfo);
+            GeneratedPrivateKey? createdKey = null;
 
-            switch (generateParamsInfo.KeyFormat)
+            try
             {
-                case SshKeyFormat.PuTTYv2:
-                case SshKeyFormat.PuTTYv3:
-                    var puttyPath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath);
-                    await using (var fs = new FileStream(puttyPath, FileStreamOptions))
-                    await using (var sw = new StreamWriter(fs))
-                    {
-                        await sw.WriteAsync(createdKey.ToPuttyFormat(
-                            generateParamsInfo.Encryption, generateParamsInfo.KeyFormat));
-                    }
-
-                    keyFile.Load(SshKeyFileSource.FromDisk(puttyPath),
-                        Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
-                    break;
-
-                case SshKeyFormat.OpenSSH:
-                default:
-                    var pubPath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath);
-                    var privatePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath, false);
-                    await using (var fs = new FileStream(privatePath, FileStreamOptions))
-                    await using (var sw = new StreamWriter(fs))
-                    {
-                        await sw.WriteAsync(
-                            createdKey.ToOpenSshFormat(generateParamsInfo.Encryption));
-                    }
-
-                    await using (var fs = new FileStream(pubPath, FileStreamOptions))
-                    await using (var sw = new StreamWriter(fs))
-                    {
-                        await sw.WriteAsync(createdKey.ToOpenSshPublicFormat());
-                    }
-
-                    keyFile.Load(SshKeyFileSource.FromDisk(privatePath),
-                        Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
-                    break;
+                await using var privateStream = new MemoryStream();
+                createdKey = SshKey.Generate(privateStream, generateParamsInfo);
+                if(createdKey is null)
+                    throw new InvalidOperationException("Could not generate new key");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while generating key file {filePath}", fullFilePath);
+                throw;
             }
 
+            var filePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath, false);
+
+            await WriteToFileInSpecificFormat(generateParamsInfo, createdKey, filePath);
+            
+            var keyFileSource = SshKeyFileSource.FromDisk(filePath);
+            if(string.IsNullOrWhiteSpace(generateParamsInfo.Encryption.Passphrase))
+                keyFile.Load(keyFileSource);
+            else
+                keyFile.Load(keyFileSource, Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
+            
             _sshKeysInternal.Add(keyFile);
         }
         catch (Exception e)
@@ -393,7 +453,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             if (_sshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is
                 { } oldKey)
                 SshKeyGotDeleted(oldKey, EventArgs.Empty);
-            await AddKeyAsync(SshKeyFileSource.FromDisk(Path.ChangeExtension(e.FullPath, null)));
+            AddKey(SshKeyFileSource.FromDisk(Path.ChangeExtension(e.FullPath, null)));
         }
         catch (Exception exception)
         {
@@ -452,7 +512,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
                         StringComparison.OrdinalIgnoreCase)))
                 return;
 
-            await AddKeyAsync(SshKeyFileSource.FromDisk(keyFilePath));
+            AddKey(SshKeyFileSource.FromDisk(keyFilePath));
         }
         catch (Exception exception)
         {
@@ -480,7 +540,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         return null;
     }
     
-    private async Task AddKeyAsync(SshKeyFileSource keyFileSource)
+    private void AddKey(SshKeyFileSource keyFileSource)
     {
         if (_sshKeysInternal.Any(k =>
                 string.Equals(k.AbsoluteFilePath, keyFileSource.AbsolutePath,
@@ -491,7 +551,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
             if (GenerateKeyFile() is not { } keyFileGenerated)
                 throw new InvalidOperationException("Key file not generated");
 
-            keyFileGenerated.Load(keyFileSource, ReadOnlySpan<byte>.Empty);
+            keyFileGenerated.Load(keyFileSource);
             _sshKeysInternal.Add(keyFileGenerated);
         }
         catch (Exception e)
@@ -506,7 +566,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         try
         {
             foreach (var key in await _directoryCrawler.GetPossibleKeyFilesOnDisk())
-                await AddKeyAsync(key);
+                AddKey(key);
         }
         finally
         {
@@ -518,18 +578,6 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
     {
         if (sender is not SshKeyFile key) return;
         _sshKeysInternal.Remove(key);
-    }
-
-    private void TryDeleteFile(string path)
-    {
-        try
-        {
-            File.Delete(path);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Could not delete temporary file '{path}'", path);
-        }
     }
 
     public void Dispose()

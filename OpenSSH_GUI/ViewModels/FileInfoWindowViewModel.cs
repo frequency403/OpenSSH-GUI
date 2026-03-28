@@ -22,7 +22,6 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewModel, FileInfoViewModelInitializer>
 {
-    
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _resolver;
@@ -38,7 +37,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         _keyManager = keyManager;
         _keyFile = resolver.Resolve<SshKeyFile>();
         _windowTitleHelper = this.WhenAnyValue(vm => vm.KeyFile)
-            .Select(e => string.Join(" ", e.FingerprintString, e.FileName))
+            .Select(e => string.Join(" ", e.FileName, e.Format, e.Comment))
             .ToProperty(this, vm => vm.WindowTitle).DisposeWith(Disposables);
     }
     
@@ -55,9 +54,18 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     }
 
     [ReactiveCommand]
-    private async Task ChangeFormatOfKeyFileAsync(SshKeyFormat format, CancellationToken cancellationToken = default) => 
-        await _keyManager.ChangeFormatOfKeyAsync(KeyFile, format, cancellationToken);
-
+    private async Task ChangeFormatOfKeyFileAsync(SshKeyFormat format, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _keyManager.ChangeFormatOfKeyAsync(KeyFile, format, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error changing format of key file");
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(e);
+        }
+    }
     [ReactiveCommand]
     private async Task ChangeFileNameAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
     {
@@ -72,11 +80,21 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             Validator = argument =>
             {
                 ArgumentException.ThrowIfNullOrWhiteSpace(argument);
-                return _keyManager.SshKeys.Any(k => k.FileName == argument) ? "Filename already exists" : null;
+                return _keyManager.SshKeys.Any(k => string.Equals(k.FileName, argument, StringComparison.Ordinal)) ? "Filename already exists" : null;
             }
         });
         if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
-            await _keyManager.RenameKeyAsync(keyFile, filename, cancellationToken);
+        {
+            try
+            {
+                await _keyManager.RenameKeyAsync(keyFile, filename, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error renaming key file");
+                await _messageBoxProvider.ShowErrorMessageBoxAsync(e);
+            }
+        }
     }
 
     [ReactiveCommand]
@@ -85,11 +103,11 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         if (await _messageBoxProvider.ShowMessageBoxAsync(
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question) is MessageBoxResult.Yes)
+                MaterialIconKind.QuestionMarkCircleOutline) is MessageBoxResult.Yes)
             if((await _keyManager.TryDeleteKeyAsync(keyFile, cancellationToken)) is { success: false, exception: { } error})
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName)
-                    , error.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+                    , error.Message);
         RequestClose();
     }
 
@@ -100,7 +118,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         {
             await _clipboard.SetTextAsync(password.GetPasswordString());
             await _clipboard.FlushAsync();
-            await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard", "Password copied to clipboard", MessageBoxButtons.Ok, MessageBoxIcon.Information);
+            await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard", "Password copied to clipboard", MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
         }
         catch (Exception e)
         {

@@ -23,6 +23,7 @@ using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using OpenSSH_GUI.Views;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
 using SshNet.Keygen.Extensions;
@@ -60,28 +61,34 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
 
         _itemsCountIconHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys.Count)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Select(GetMaterialNumericIcon)
             .ToProperty(this, vm => vm.ItemsCountIcon).DisposeWith(Disposables);
 
         _windowTitleHelper = this.WhenAnyValue(vm => vm.Version)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Select(ver => string.Join("-", Program.AppName, ver))
             .ToProperty(this, vm => vm.WindowTitle).DisposeWith(Disposables);
 
         _keyTypeSortDirectionIconHelper =
             this.WhenAnyValue(vm => vm.KeyTypeSort)
+                .ObserveOn(AvaloniaScheduler.Instance)
                 .Select(EvaluateSortIconKind)
                 .ToProperty(this, vm => vm.KeyTypeSortDirectionIcon)
                 .DisposeWith(Disposables);
 
         _commentSortDirectionIconHelper = this.WhenAnyValue(vm => vm.CommentSort)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Select(EvaluateSortIconKind)
             .ToProperty(this, vm => vm.CommentSortDirectionIcon).DisposeWith(Disposables);
 
         _fingerPrintSortDirectionIconHelper = this.WhenAnyValue(vm => vm.FingerPrintSort)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Select(EvaluateSortIconKind)
             .ToProperty(this, vm => vm.FingerPrintSortDirectionIcon).DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.KeyTypeSort)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
             {
                 null => key => key.OrderBy(e => e.FileName),
@@ -90,6 +97,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             })).DisposeWith(Disposables);
         
         this.WhenAnyValue(vm => vm.CommentSort)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
             {
                 null => key => key.OrderBy(e => e.FileName),
@@ -98,6 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             })).DisposeWith(Disposables);
         
         this.WhenAnyValue(vm => vm.FingerPrintSort)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(sort => SshKeyManager.ChangeOrder(sort switch
             {
                 null => key => key.OrderBy(e => e.FileName),
@@ -226,7 +235,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         if (string.IsNullOrWhiteSpace(content))
         {
             await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
-                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage);
             return;
         }
 
@@ -244,7 +253,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default)
     {
         await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.NotImplementedBoxTitle,
-            StringsAndTexts.NotImplementedBoxText, MessageBoxButtons.Ok, MessageBoxIcon.Information);
+            StringsAndTexts.NotImplementedBoxText, MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
     }
 
     [ReactiveCommand]
@@ -263,7 +272,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private async Task DisconnectFromServerAsync(CancellationToken cancellationToken)
     {
         var messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextSuccess;
-        var messageBoxIcon = MessageBoxIcon.Information;
+        var messageBoxIcon = MaterialIconKind.InformationOutline;
         if (ServerConnectionService.IsConnected)
         {
             try
@@ -273,13 +282,13 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             catch (Exception exception)
             {
                 messageBoxText = exception.Message;
-                messageBoxIcon = MessageBoxIcon.Error;
+                messageBoxIcon = MaterialIconKind.ErrorOutline;
             }
         }
         else
         {
             messageBoxText = StringsAndTexts.MainWindowDisconnectBoxTextNone;
-            messageBoxIcon = MessageBoxIcon.Error;
+            messageBoxIcon = MaterialIconKind.ErrorOutline;
         }
 
         await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.MainWindowDisconnectBoxTitle, messageBoxText,
@@ -293,37 +302,28 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         if (await _messageBoxProvider.ShowMessageBoxAsync(
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question) is MessageBoxResult.Yes)
+                MaterialIconKind.QuestionBoxOutline) is MessageBoxResult.Yes)
             if ((await SshKeyManager.TryDeleteKeyAsync(sshKeyFile, cancellationToken)) is
                 { success: false, exception: { } error })
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName)
-                    , error.Message, MessageBoxButtons.Ok, MessageBoxIcon.Error);
+                    , error.Message);
     }
 
     [ReactiveCommand]
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)
     {
-        var trys = 0;
-
-        while (key.NeedsPassword && trys < 3)
-        {
-            using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
-                StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
-                string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
-                    Path.GetFileName(key.AbsoluteFilePath)));
-            if (secureInputResult != null && key.SetPassword(secureInputResult.Value.Span))
-                return;
-
-
-            if (await _messageBoxProvider.ShowMessageBoxAsync(
-                    StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading, string.Format(
-                        StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
-                        trys + 1, 3), MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning) is MessageBoxResult
-                    .Cancel)
-                break;
-            trys++;
-        }
+        if(!(await _messageBoxProvider.ShowRetryMessageBoxAsync(tryActionAsync: async () =>
+               {
+                   using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
+                       StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
+                       string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
+                           Path.GetFileName(key.AbsoluteFilePath)));
+                   return secureInputResult != null && key.SetPassword(secureInputResult.Value.Span);
+               }, title: StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
+               message: StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
+               retries: 3, showTryCountInTitle: true, icon: MaterialIconKind.WarningOutline)))
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(customMessage: string.Join(" ", "Key", key.FileName, "could not be opened correctly"));
     }
 
     private async Task OpenWindow<TWindow, TViewModel, TParam, TInitializer>(TParam param,

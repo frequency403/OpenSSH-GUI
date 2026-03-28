@@ -6,7 +6,9 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
@@ -20,10 +22,7 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 /// </summary>
 public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
 {
-    private readonly ILogger<SshKeyFilePassword> _logger;
-
-    private readonly ArrayBufferWriter<byte> _bufferWriter = new(ushort.MaxValue);
-    private readonly Subject<Unit> _bufferMutated = new();
+    private readonly ReactiveBufferWriter<byte> _bufferWriter = new(ushort.MaxValue);
     private readonly CompositeDisposable _disposables = new();
     private Encoding _encoding = Encoding.UTF8;
 
@@ -39,11 +38,18 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     /// </summary>
     public SshKeyFilePassword(ILogger<SshKeyFilePassword> logger)
     {
-        _logger = logger;
-        _bufferMutated
-            .Subscribe(_ => this.RaisePropertyChanged(nameof(WrittenSpan)))
+         _bufferWriter.WhenAnyValue(vm => vm.WrittenCount)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Do(count => logger.LogDebug("WrittenCount changed to {count}",  count))
+            .Select(e => e != 0)
+            .Do(isValid => logger.LogDebug("IsValid will be pushed as {isValid}", isValid))
+            .Subscribe(eval =>
+            {
+                this.RaisePropertyChanging(nameof(WrittenSpan));
+                IsValid = eval;
+                this.RaisePropertyChanged(nameof(WrittenSpan));
+            })
             .DisposeWith(_disposables);
-        _disposables.Add(_bufferMutated);
     }
 
     // ── Span accessor ────────────────────────────────────────────────────
@@ -75,11 +81,8 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     public void Set(ReadOnlySpan<byte> password, Encoding? encoding = null)
     {
         _bufferWriter.Clear();
-        _bufferWriter.ResetWrittenCount();
         _encoding = encoding ?? _encoding;
         _bufferWriter.Write(password);
-        _bufferMutated.OnNext(Unit.Default);
-        IsValid = _bufferWriter.WrittenCount > 0;
     }
 
     /// <summary>
@@ -88,13 +91,7 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     ///     Notifies all reactive observers after the wipe.
     /// </summary>
     /// <exception cref="ObjectDisposedException"/>
-    public void Clear()
-    {
-        _bufferWriter.Clear();
-        _bufferWriter.ResetWrittenCount();
-        _bufferMutated.OnNext(Unit.Default);
-        IsValid = _bufferWriter.WrittenCount > 0;
-    }
+    public void Clear() => _bufferWriter.Clear();
 
     // ── IDisposable ──────────────────────────────────────────────────────
 
