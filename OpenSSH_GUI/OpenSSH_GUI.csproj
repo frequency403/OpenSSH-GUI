@@ -10,7 +10,7 @@
         <UseAppHost>true</UseAppHost>
         <PublishReadyToRun>true</PublishReadyToRun>
         <SelfContained>true</SelfContained>
-        <ApplicationIcon>Assets\appicon.ico</ApplicationIcon>
+        <ApplicationIcon>../images/openssh-gui.ico</ApplicationIcon>
         <IsPackable>false</IsPackable>
         <Company>frequency403</Company>
         <NeutralLanguage>en</NeutralLanguage>
@@ -35,7 +35,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="../images/**/*">
+            <Link>Assets/%(Filename)%(Extension)</Link>
+        </AvaloniaResource>
         <None Include="..\openssh-gui.desktop" CopyToPublishDirectory="PreserveNewest"/>
     </ItemGroup>
 

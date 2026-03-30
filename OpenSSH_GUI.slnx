@@ -15,30 +15,9 @@
         <File Path=".github/workflows/staging.yml" />
         <File Path=".github\workflows\auto-tag.yml" />
     </Folder>
-    <Folder Name="/Images/">
-        <File Path="images/AddKeyWindow.png" />
-        <File Path="images/AppSettings.png" />
-        <File Path="images/ConnectToServerQuickConnect.png" />
-        <File Path="images/ConnectToServerWindow.png" />
-        <File Path="images/ConnectToServerWindowSuccess.png" />
-        <File Path="images/ConnectToServerWindowWithKey.png" />
-        <File Path="images/EditAuthorizedKeysWindow.png" />
-        <File Path="images/EditAuthorizedKeysWindowRemote.png" />
-        <File Path="images/ExportKeyWindow.png" />
-        <File Path="images/FoundPasswordProtectedKey.png" />
-        <File Path="images/KnownHostsWindow.png" />
-        <File Path="images/MainWindow.png" />
-        <File Path="images/NewMainUI.png" />
-        <File Path="images/ProvidePasswordPrompt.png" />
-        <File Path="images/SettingsContextMenu.png" />
-        <File Path="images/ShowForgetPws.png" />
-        <File Path="images/Sorted.png" />
-        <File Path="images/tooltip.png" />
-        <File Path="images/tooltipKey.png" />
-        <File Path="images/tooltipServer.png" />
-    </Folder>
     <Folder Name="/Solution Items/">
         <File Path=".gitignore" />
+        <File Path="global.json" />
         <File Path="Directory.Build.props" />
         <File Path="Directory.Build.targets" />
         <File Path="LICENSE" />
