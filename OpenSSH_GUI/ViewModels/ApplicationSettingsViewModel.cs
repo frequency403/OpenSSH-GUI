@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using Avalonia;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
@@ -23,8 +25,12 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly LoggingLevelSwitch _levelSwitch;
+    private readonly Application _application;
     public static LogEventLevel[] AvailableLogLevels { get; }= Enum.GetValues<LogEventLevel>();
+    public static ThemeVariant[] ThemeVariants { get; } = Enum.GetValues<Core.Enums.ThemeVariant>();
     public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
+
+    [Reactive] private ThemeVariant _currentThemeVariant;
     
     [Reactive]
     private LogEventLevel _currentLogLevel;
@@ -37,21 +43,43 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     [Reactive] 
     private bool _canDeleteOldLogFiles;
     
-    public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, IMessageBoxProvider messageBoxProvider, LoggingLevelSwitch levelSwitch)
+    public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger, 
+        IMessageBoxProvider messageBoxProvider, 
+        Application application,
+        LoggingLevelSwitch levelSwitch)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
-        CurrentLogLevel = levelSwitch.MinimumLevel;
+        _currentLogLevel = levelSwitch.MinimumLevel;
+        _application = application;
+        _daysToDeleteSelected = DaysToDelete[0];
+
+        if (Enum.TryParse<ThemeVariant>(application.ActualThemeVariant.Key.ToString(), true, out var themeVariant))
+            _currentThemeVariant = themeVariant;
+
+        Observable
+            .FromEventPattern<LoggingLevelSwitchChangedEventArgs>(
+                handler => levelSwitch.MinimumLevelChanged += handler,
+                handler => levelSwitch.MinimumLevelChanged -= handler
+            )
+            .Select(pattern => pattern.EventArgs)
+            .Subscribe(OnNextLevel)
+            .DisposeWith(Disposables);
+        
         this.WhenAnyValue(model => model.CurrentLogLevel)
             .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
-            .Subscribe(OnNext).DisposeWith(Disposables);
+            .Subscribe(level => OnNextLevel(new LoggingLevelSwitchChangedEventArgs(_levelSwitch.MinimumLevel, level)))
+            .DisposeWith(Disposables);
         
         this.WhenAnyValue(model => model.DaysToDeleteSelected)
-            .Subscribe(OnNext).DisposeWith(Disposables);
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Subscribe(OnNextDaysToDelete)
+            .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.LogFiles.Count)
+            .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
             .Subscribe(count =>
             {
@@ -59,7 +87,11 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
             })
             .DisposeWith(Disposables);
         
-        DaysToDeleteSelected = DaysToDelete[0];
+        this.WhenAnyValue(vm => vm.CurrentThemeVariant)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .DistinctUntilChanged()
+            .Subscribe(OnNextTheme)
+            .DisposeWith(Disposables);
     }
     
 
@@ -126,7 +158,20 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
         LogFiles.Clear();
     }
 
-    private void OnNext(int obj)
+    private void OnNextTheme(ThemeVariant variant)
+    {
+        var themeVariant = variant switch
+        {
+            ThemeVariant.Dark => Avalonia.Styling.ThemeVariant.Dark,
+            ThemeVariant.Light => Avalonia.Styling.ThemeVariant.Light,
+            _ => Avalonia.Styling.ThemeVariant.Default
+        };
+        if (_application.ActualThemeVariant == themeVariant) return;
+        _logger.LogDebug("Changing Theme Variant from {OldThemeVariant} to {ThemeVariant}", _application.ActualThemeVariant.Key.ToString(), themeVariant.Key);
+        _application.RequestedThemeVariant = themeVariant;
+    }
+
+    private void OnNextDaysToDelete(int obj)
     {
         _logger.LogDebug("Days to delete selected: {Days}", obj);
         var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
@@ -139,9 +184,11 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
         }
     }
 
-    private void OnNext(LogEventLevel obj)
+    private void OnNextLevel(LoggingLevelSwitchChangedEventArgs obj)
     {
-        _levelSwitch.MinimumLevel = obj;
-        _logger.LogCritical("Log level changed to {LogLevel}", obj);
+        if (_levelSwitch.MinimumLevel == obj.NewLevel)
+            return;
+        _levelSwitch.MinimumLevel = obj.NewLevel;
+        _logger.LogCritical("Log level changed from {OldLogLevel} to {NewLogLevel}", obj.OldLevel, obj.NewLevel);
     }
 }

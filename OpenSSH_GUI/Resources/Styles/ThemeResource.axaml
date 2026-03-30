@@ -1,0 +1,35 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Dark Theme Colors
+    ═══════════════════════════════════════════════════════════ -->
+
+    <Color x:Key="BackgroundDark">#FF0D1117</Color>
+    <Color x:Key="PrimaryDark">#FF4EC9B0</Color>
+    <Color x:Key="AccentDark">#FFF0A500</Color>
+    <Color x:Key="ErrorDark">#FFFF5F57</Color>
+
+    <SolidColorBrush x:Key="BackgroundDarkBrush" Color="{StaticResource BackgroundDark}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush"    Color="{StaticResource PrimaryDark}"/>
+    <SolidColorBrush x:Key="AccentDarkBrush"     Color="{StaticResource AccentDark}"/>
+    <SolidColorBrush x:Key="ErrorDarkBrush"      Color="{StaticResource ErrorDark}"/>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Light Theme Colors
+    ═══════════════════════════════════════════════════════════ -->
+
+    <Color x:Key="BackgroundLight">#FFF0F4F8</Color>
+    <Color x:Key="PrimaryLight">#FF1A8A75</Color>
+    <Color x:Key="AccentLight">#FFC07800</Color>
+    <Color x:Key="ErrorLight">#FFD93025</Color>
+
+    <SolidColorBrush x:Key="BackgroundLightBrush" Color="{StaticResource BackgroundLight}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush"    Color="{StaticResource PrimaryLight}"/>
+    <SolidColorBrush x:Key="AccentLightBrush"     Color="{StaticResource AccentLight}"/>
+    <SolidColorBrush x:Key="ErrorLightBrush"      Color="{StaticResource ErrorLight}"/>
+    
+    
+    
+
+</ResourceDictionary>

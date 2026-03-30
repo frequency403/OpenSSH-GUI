@@ -6,6 +6,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DryIoc;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
@@ -41,41 +42,43 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
             
             try
             {
-                foreach (var (width, height) in IconSizes)
+                foreach (var variant in new[] {ThemeVariant.Light, ThemeVariant.Dark})
                 {
-                    await using var svgStream =
-                        AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/openssh-gui.svg"));
-                    var memoryStream = new MemoryStream();
-                    using var svg = new SKSvg();
-                    svg.Load(svgStream);
-                    var bitmap = new SKBitmap((int)width, (int)height, true);
-                    using (var canvas = new SKCanvas(bitmap))
+                    foreach (var (width, height) in IconSizes)
                     {
-                        if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width), height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
+                        await using var svgStream = AssetLoader.Open(new Uri($"avares://OpenSSH_GUI/Assets/openssh-gui{(variant is ThemeVariant.Light ? "-light" : string.Empty)}.svg"));
+                        var memoryStream = new MemoryStream();
+                        using var svg = new SKSvg();
+                        svg.Load(svgStream);
+                        var bitmap = new SKBitmap((int)width, (int)height, true);
+                        using (var canvas = new SKCanvas(bitmap))
                         {
-                            canvas.Scale(scale);
+                            if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width), height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
+                            {
+                                canvas.Scale(scale);
+                            }
+                            canvas.Clear(SKColors.Transparent);
+                            canvas.DrawPicture(svg.Picture);
                         }
-                        canvas.Clear(SKColors.Transparent);
-                        canvas.DrawPicture(svg.Picture);
-                    }
 
-                    using (var data = SKImage.FromBitmap(bitmap))
-                    {
-                        if (data != null)
+                        using (var data = SKImage.FromBitmap(bitmap))
                         {
-                            using var dataToEncode = data.Encode(SKEncodedImageFormat.Png, 100);
-                            if (dataToEncode is null) continue;
-                            memoryStream.Write(dataToEncode.AsSpan());
-                            memoryStream.Seek(0, SeekOrigin.Begin);
+                            if (data != null)
+                            {
+                                using var dataToEncode = data.Encode(SKEncodedImageFormat.Png, 100);
+                                if (dataToEncode is null) continue;
+                                memoryStream.Write(dataToEncode.AsSpan());
+                                memoryStream.Seek(0, SeekOrigin.Begin);
+                            }
                         }
-                    }
 
-                    var bm = new Bitmap(memoryStream);
-                    var serviceKey = $"appicon_{width}".ToLower();
-                    registrator.RegisterInstance(bm, serviceKey: serviceKey,
-                        ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                        var bm = new Bitmap(memoryStream);
+                        var serviceKey = string.Join("_", nameof(Bitmap), width).ToLower();
+                        registrator.RegisterInstance(bm, serviceKey: serviceKey,
+                            ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                    }
+                    registrator.RegisterInstance(new WindowIcon(resolver.Resolve<Bitmap>(serviceKey: string.Join("_", nameof(Bitmap), 32).ToLower())), serviceKey: string.Join("_", nameof(WindowIcon), 32, variant).ToLower());
                 }
-                registrator.RegisterInstance(new WindowIcon(resolver.Resolve<Bitmap>(serviceKey: "appicon_32")));
             }
             catch (Exception e)
             {

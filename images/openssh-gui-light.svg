@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    OpenSSH GUI – Application Icon (Light Theme)
+    Design: SSH key (auth) + terminal prompt (shell/GUI) + padlock badge (secure)
+    Theme Colors:
+      BackgroundLight  #F0F4F8  – light blue-grey background
+      PrimaryLight     #1A8A75  – deep teal (key body, strokes, terminal prompt)
+      AccentLight      #C07800  – dark amber (padlock badge = "secure")
+      ErrorLight       #D93025  – strong red (traffic-light close button)
+  -->
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="90" fill="#F0F4F8"/>
+  <rect width="512" height="512" rx="90" fill="none" stroke="#1A8A75" stroke-width="2" opacity="0.25"/>
+
+  <!-- Traffic-light dots (terminal/GUI window indicator) -->
+  <circle cx="56"  cy="56" r="10" fill="#D93025"/>
+  <circle cx="88"  cy="56" r="10" fill="#C07800"/>
+  <circle cx="120" cy="56" r="10" fill="#1E8C34"/>
+
+  <!-- ── Key ─────────────────────────────────────────── -->
+
+  <!-- Key ring (outer stroke) -->
+  <circle cx="178" cy="262" r="112" fill="none" stroke="#1A8A75" stroke-width="40"/>
+
+  <!-- Key ring inner hole -->
+  <circle cx="178" cy="262" r="36" fill="#F0F4F8"/>
+
+  <!-- Terminal prompt >_ carved into the ring hole -->
+  <!-- > chevron -->
+  <path d="M152 247 L176 262 L152 277"
+        fill="none" stroke="#1A8A75" stroke-width="9"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- _ underline (cursor) -->
+  <line x1="186" y1="277" x2="210" y2="277"
+        stroke="#1A8A75" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Key shaft -->
+  <rect x="276" y="238" width="192" height="48" rx="14" fill="#1A8A75"/>
+
+  <!-- Notch 1 -->
+  <rect x="298" y="286" width="36" height="52" rx="8" fill="#1A8A75"/>
+
+  <!-- Notch 2 -->
+  <rect x="374" y="286" width="36" height="52" rx="8" fill="#1A8A75"/>
+
+  <!-- ── Padlock badge (bottom-right) ───────────────── -->
+
+  <!-- Badge background cutout (so padlock "sits" above the key) -->
+  <circle cx="380" cy="400" r="76" fill="#F0F4F8"/>
+
+  <!-- Padlock body -->
+  <rect x="330" y="370" width="100" height="80" rx="16" fill="#C07800"/>
+
+  <!-- Padlock shackle -->
+  <path d="M352 370 L352 350 Q380 328 408 350 L408 370"
+        fill="none" stroke="#C07800"
+        stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Keyhole -->
+  <circle cx="380" cy="405" r="12" fill="#F0F4F8"/>
+  <rect x="374" y="405" width="12" height="22" rx="4" fill="#F0F4F8"/>
+</svg>

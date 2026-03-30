@@ -3,17 +3,29 @@
              x:Class="OpenSSH_GUI.App"
              xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              RequestedThemeVariant="Default">
-    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="Resources/Styles/SshKeyFileStyle.axaml" />
+                <ResourceInclude Source="Resources/Styles/ThemeResource.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme DensityStyle="Compact" />
+        <FluentTheme DensityStyle="Compact">
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Dark"
+                           Accent="{StaticResource PrimaryDark}"
+                           RegionColor="{StaticResource BackgroundDark}"
+                           ErrorText="{StaticResource ErrorDark}"/>
+
+    <ColorPaletteResources x:Key="Light"
+                           Accent="{StaticResource PrimaryLight}"
+                           RegionColor="{StaticResource BackgroundLight}"
+                           ErrorText="{StaticResource ErrorLight}"/>
+            </FluentTheme.Palettes>
+        </FluentTheme>
         <avalonia:MaterialIconStyles />
     </Application.Styles>
 </Application>

@@ -29,7 +29,7 @@ public static class DependencyInjectionExtensions
     {
         internal void ConfigureServicesInternal()
         {
-            container.Register<App>();
+            container.RegisterMany<App>();
             container.Register<ExceptionHandler>();
             container.RegisterInstance(
                 new LoggingLevelSwitch(

@@ -15,15 +15,22 @@
         ShowActivated="True"
         Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
         WindowStartupLocation="CenterOwner">
-    <Grid RowDefinitions="* * *" ColumnDefinitions="* * *">
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+    <Grid RowDefinitions="* * *" ColumnDefinitions="* * * *">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
             <Label Content="LogLevel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
             <Separator />
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
                       ItemsSource="{Binding AvailableLogLevels}"
                       SelectedItem="{Binding CurrentLogLevel}"/>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label Content="Theme" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Separator />
+            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                      ItemsSource="{Binding ThemeVariants}"
+                      SelectedItem="{Binding CurrentThemeVariant}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
             <Label HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
             <Separator HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
             <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">

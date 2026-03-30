@@ -4,6 +4,7 @@ using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Text.Encodings.Web;
+using Avalonia;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using DryIoc;
@@ -47,6 +48,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         ILogger<MainWindowViewModel> logger,
         SshKeyManager sshKeyManager,
         ServerConnectionService serverConnectionService,
+        Application application,
         IResolver serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
@@ -71,6 +73,8 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(count => ItemsCountIcon = GetMaterialNumericIcon(count))
             .DisposeWith(Disposables);
+
+        
 
         this.WhenAnyValue(vm => vm.KeyTypeSort)
             .ObserveOn(AvaloniaScheduler.Instance)
