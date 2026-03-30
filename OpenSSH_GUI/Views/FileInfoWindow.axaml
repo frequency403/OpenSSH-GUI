@@ -50,7 +50,7 @@
                 </StackPanel>
                 <UniformGrid Rows="1" Columns="2" ColumnSpacing="5" HorizontalAlignment="Right">
                     <Button Padding="5" 
-                            IsEnabled="{Binding KeyFile.KeyFileInfo.CanChangeFileName, FallbackValue=False}"
+                            IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
                             Command="{Binding ChangeFileNameCommand}"
                             CommandParameter="{Binding KeyFile}"
                             Background="Purple">
@@ -60,7 +60,7 @@
                         <avalonia:MaterialIcon Kind="FileEditOutline"/>
                     </Button>
                     <Button Padding="5" 
-                            IsEnabled="{Binding !KeyFile.KeyFileInfo.KeyFileSource.ProvidedByConfig}"
+                            IsEnabled="{Binding KeyFile.FileChangesAllowed}"
                             Command="{Binding DeleteKeyCommand}"
                             CommandParameter="{Binding KeyFile}"
                             Background="DarkRed">
@@ -103,7 +103,7 @@
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Center"
                                      MinHeight="0"
-                                     IsEnabled="{Binding !KeyFile.KeyFileInfo.KeyFileSource.ProvidedByConfig}"
+                                     IsEnabled="{Binding KeyFile.FileChangesAllowed}"
                                      Command="{Binding ChangeFormatOfKeyFileCommand}"
                                      CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
                             <SplitButton.Resources>

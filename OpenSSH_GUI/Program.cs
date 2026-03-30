@@ -80,6 +80,7 @@ internal sealed class Program
             .Build();
 
         var appBuilder = AppBuilder.Configure(() => host.Services.GetRequiredService<App>())
+            .UseSkia()
             .UsePlatformDetect()
             .WithInterFont()
             .UseReactiveUI(configure =>

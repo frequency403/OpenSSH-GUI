@@ -1,35 +1,129 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
-    <!-- ═══════════════════════════════════════════════════════════
-         Dark Theme Colors
-    ═══════════════════════════════════════════════════════════ -->
-
-    <Color x:Key="BackgroundDark">#FF0D1117</Color>
-    <Color x:Key="PrimaryDark">#FF4EC9B0</Color>
-    <Color x:Key="AccentDark">#FFF0A500</Color>
-    <Color x:Key="ErrorDark">#FFFF5F57</Color>
-
-    <SolidColorBrush x:Key="BackgroundDarkBrush" Color="{StaticResource BackgroundDark}"/>
-    <SolidColorBrush x:Key="PrimaryDarkBrush"    Color="{StaticResource PrimaryDark}"/>
-    <SolidColorBrush x:Key="AccentDarkBrush"     Color="{StaticResource AccentDark}"/>
-    <SolidColorBrush x:Key="ErrorDarkBrush"      Color="{StaticResource ErrorDark}"/>
-
-    <!-- ═══════════════════════════════════════════════════════════
-         Light Theme Colors
-    ═══════════════════════════════════════════════════════════ -->
-
-    <Color x:Key="BackgroundLight">#FFF0F4F8</Color>
-    <Color x:Key="PrimaryLight">#FF1A8A75</Color>
-    <Color x:Key="AccentLight">#FFC07800</Color>
-    <Color x:Key="ErrorLight">#FFD93025</Color>
-
-    <SolidColorBrush x:Key="BackgroundLightBrush" Color="{StaticResource BackgroundLight}"/>
-    <SolidColorBrush x:Key="PrimaryLightBrush"    Color="{StaticResource PrimaryLight}"/>
-    <SolidColorBrush x:Key="AccentLightBrush"     Color="{StaticResource AccentLight}"/>
-    <SolidColorBrush x:Key="ErrorLightBrush"      Color="{StaticResource ErrorLight}"/>
+    <Color x:Key="DarkAccentColor">#FF4EC9B0</Color>
     
+    <Color x:Key="DarkAltHighColor">#FF000000</Color>        <!-- 100 % black -->
+    <Color x:Key="DarkAltMediumHighColor">#CC000000</Color>  <!--  80 % black -->
+    <Color x:Key="DarkAltMediumColor">#99000000</Color>      <!--  60 % black -->
+    <Color x:Key="DarkAltMediumLowColor">#66000000</Color>   <!--  40 % black -->
+    <Color x:Key="DarkAltLowColor">#19000000</Color>         <!--  10 % black -->
     
+    <Color x:Key="DarkBaseHighColor">#FFFFFFFF</Color>        <!-- 100 % white — primary text / icons -->
+    <Color x:Key="DarkBaseMediumHighColor">#CCFFFFFF</Color>  <!--  80 % white -->
+    <Color x:Key="DarkBaseMediumColor">#99FFFFFF</Color>      <!--  60 % white — secondary text -->
+    <Color x:Key="DarkBaseMediumLowColor">#66FFFFFF</Color>   <!--  40 % white — hint text -->
+    <Color x:Key="DarkBaseLowColor">#33FFFFFF</Color>         <!--  20 % white — dividers -->
     
+    <Color x:Key="DarkChromeAltLowColor">#FFE8E8E8</Color>         <!-- Near-white chrome accent -->
+    <Color x:Key="DarkChromeBlackHighColor">#FF000000</Color>      <!-- 100 % black -->
+    <Color x:Key="DarkChromeBlackMediumColor">#CC000000</Color>    <!--  80 % black -->
+    <Color x:Key="DarkChromeBlackMediumLowColor">#66000000</Color> <!--  40 % black -->
+    <Color x:Key="DarkChromeBlackLowColor">#33000000</Color>       <!--  20 % black -->
+    <Color x:Key="DarkChromeDisabledHighColor">#FF3A3A3A</Color>   <!-- Disabled surface (dark) -->
+    <Color x:Key="DarkChromeDisabledLowColor">#FF767676</Color>    <!-- Disabled text (mid gray) -->
+    <Color x:Key="DarkChromeGrayColor">#FF767676</Color>           <!-- Neutral system gray -->
+    <Color x:Key="DarkChromeHighColor">#FF2A3441</Color>           <!-- Border / separator (navy tint) -->
+    <Color x:Key="DarkChromeLowColor">#FF0A0D12</Color>            <!-- Darker than RegionColor -->
+    <Color x:Key="DarkChromeMediumColor">#FF111720</Color>         <!-- Between ChromeLow and RegionColor -->
+    <Color x:Key="DarkChromeMediumLowColor">#FF161E2A</Color>      <!-- Between ChromeMedium and RegionColor -->
+    <Color x:Key="DarkChromeWhiteColor">#FFFFFFFF</Color>          <!-- Pure white chrome -->
+    
+    <Color x:Key="DarkErrorTextColor">#FFFF5F57</Color>
+    
+    <Color x:Key="DarkListLowColor">#19FFFFFF</Color>     <!-- 10 % white — subtle hover -->
+    <Color x:Key="DarkListMediumColor">#33FFFFFF</Color>  <!-- 20 % white — hover / press -->
+    <Color x:Key="DarkRegionColor">#FF0D1117</Color>
+
+    <SolidColorBrush x:Key="DarkAccentBrush"               Color="{StaticResource DarkAccentColor}"/>
+    <SolidColorBrush x:Key="DarkAltHighBrush"              Color="{StaticResource DarkAltHighColor}"/>
+    <SolidColorBrush x:Key="DarkAltMediumHighBrush"        Color="{StaticResource DarkAltMediumHighColor}"/>
+    <SolidColorBrush x:Key="DarkAltMediumBrush"            Color="{StaticResource DarkAltMediumColor}"/>
+    <SolidColorBrush x:Key="DarkAltMediumLowBrush"         Color="{StaticResource DarkAltMediumLowColor}"/>
+    <SolidColorBrush x:Key="DarkAltLowBrush"               Color="{StaticResource DarkAltLowColor}"/>
+    <SolidColorBrush x:Key="DarkBaseHighBrush"             Color="{StaticResource DarkBaseHighColor}"/>
+    <SolidColorBrush x:Key="DarkBaseMediumHighBrush"       Color="{StaticResource DarkBaseMediumHighColor}"/>
+    <SolidColorBrush x:Key="DarkBaseMediumBrush"           Color="{StaticResource DarkBaseMediumColor}"/>
+    <SolidColorBrush x:Key="DarkBaseMediumLowBrush"        Color="{StaticResource DarkBaseMediumLowColor}"/>
+    <SolidColorBrush x:Key="DarkBaseLowBrush"              Color="{StaticResource DarkBaseLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeAltLowBrush"         Color="{StaticResource DarkChromeAltLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeBlackHighBrush"      Color="{StaticResource DarkChromeBlackHighColor}"/>
+    <SolidColorBrush x:Key="DarkChromeBlackMediumBrush"    Color="{StaticResource DarkChromeBlackMediumColor}"/>
+    <SolidColorBrush x:Key="DarkChromeBlackMediumLowBrush" Color="{StaticResource DarkChromeBlackMediumLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeBlackLowBrush"       Color="{StaticResource DarkChromeBlackLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeDisabledHighBrush"   Color="{StaticResource DarkChromeDisabledHighColor}"/>
+    <SolidColorBrush x:Key="DarkChromeDisabledLowBrush"    Color="{StaticResource DarkChromeDisabledLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeGrayBrush"           Color="{StaticResource DarkChromeGrayColor}"/>
+    <SolidColorBrush x:Key="DarkChromeHighBrush"           Color="{StaticResource DarkChromeHighColor}"/>
+    <SolidColorBrush x:Key="DarkChromeLowBrush"            Color="{StaticResource DarkChromeLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeMediumBrush"         Color="{StaticResource DarkChromeMediumColor}"/>
+    <SolidColorBrush x:Key="DarkChromeMediumLowBrush"      Color="{StaticResource DarkChromeMediumLowColor}"/>
+    <SolidColorBrush x:Key="DarkChromeWhiteBrush"          Color="{StaticResource DarkChromeWhiteColor}"/>
+    <SolidColorBrush x:Key="DarkErrorTextBrush"            Color="{StaticResource DarkErrorTextColor}"/>
+    <SolidColorBrush x:Key="DarkListLowBrush"              Color="{StaticResource DarkListLowColor}"/>
+    <SolidColorBrush x:Key="DarkListMediumBrush"           Color="{StaticResource DarkListMediumColor}"/>
+    <SolidColorBrush x:Key="DarkRegionBrush"               Color="{StaticResource DarkRegionColor}"/>
+   
+    <Color x:Key="LightAccentColor">#FF1A8A75</Color>
+    
+    <Color x:Key="LightAltHighColor">#FFFFFFFF</Color>        <!-- 100 % white -->
+    <Color x:Key="LightAltMediumHighColor">#CCFFFFFF</Color>  <!--  80 % white -->
+    <Color x:Key="LightAltMediumColor">#99FFFFFF</Color>      <!--  60 % white -->
+    <Color x:Key="LightAltMediumLowColor">#66FFFFFF</Color>   <!--  40 % white -->
+    <Color x:Key="LightAltLowColor">#19FFFFFF</Color>         <!--  10 % white -->
+    
+    <Color x:Key="LightBaseHighColor">#FF000000</Color>        <!-- 100 % black — primary text / icons -->
+    <Color x:Key="LightBaseMediumHighColor">#CC000000</Color>  <!--  80 % black -->
+    <Color x:Key="LightBaseMediumColor">#99000000</Color>      <!--  60 % black — secondary text -->
+    <Color x:Key="LightBaseMediumLowColor">#66000000</Color>   <!--  40 % black — hint text -->
+    <Color x:Key="LightBaseLowColor">#33000000</Color>         <!--  20 % black — dividers -->
+    
+    <Color x:Key="LightChromeAltLowColor">#FF1A1F28</Color>         <!-- Near-black chrome accent -->
+    <Color x:Key="LightChromeBlackHighColor">#FF000000</Color>      <!-- 100 % black -->
+    <Color x:Key="LightChromeBlackMediumColor">#CC000000</Color>    <!--  80 % black -->
+    <Color x:Key="LightChromeBlackMediumLowColor">#66000000</Color> <!--  40 % black -->
+    <Color x:Key="LightChromeBlackLowColor">#33000000</Color>       <!--  20 % black -->
+    <Color x:Key="LightChromeDisabledHighColor">#FFD0D8E0</Color>   <!-- Disabled surface (muted blue-grey) -->
+    <Color x:Key="LightChromeDisabledLowColor">#FF7A7A7A</Color>    <!-- Disabled text (mid gray) -->
+    <Color x:Key="LightChromeGrayColor">#FF767676</Color>           <!-- Neutral system gray -->
+    <Color x:Key="LightChromeHighColor">#FFA8B4C0</Color>           <!-- Border / separator (cool blue-grey) -->
+    <Color x:Key="LightChromeLowColor">#FFF5F8FA</Color>            <!-- Slightly lighter than RegionColor -->
+    <Color x:Key="LightChromeMediumColor">#FFE2E8EF</Color>         <!-- Between ChromeLow and RegionColor -->
+    <Color x:Key="LightChromeMediumLowColor">#FFE8EEF4</Color>      <!-- Between ChromeMedium and RegionColor -->
+    <Color x:Key="LightChromeWhiteColor">#FFFFFFFF</Color>          <!-- Pure white chrome -->
+    
+    <Color x:Key="LightErrorTextColor">#FFD93025</Color>
+    
+    <Color x:Key="LightListLowColor">#19000000</Color>    <!-- 10 % black — subtle hover -->
+    <Color x:Key="LightListMediumColor">#33000000</Color> <!-- 20 % black — hover / press -->
+    <Color x:Key="LightRegionColor">#FFF0F4F8</Color>
+
+    <SolidColorBrush x:Key="LightAccentBrush"               Color="{StaticResource LightAccentColor}"/>
+    <SolidColorBrush x:Key="LightAltHighBrush"              Color="{StaticResource LightAltHighColor}"/>
+    <SolidColorBrush x:Key="LightAltMediumHighBrush"        Color="{StaticResource LightAltMediumHighColor}"/>
+    <SolidColorBrush x:Key="LightAltMediumBrush"            Color="{StaticResource LightAltMediumColor}"/>
+    <SolidColorBrush x:Key="LightAltMediumLowBrush"         Color="{StaticResource LightAltMediumLowColor}"/>
+    <SolidColorBrush x:Key="LightAltLowBrush"               Color="{StaticResource LightAltLowColor}"/>
+    <SolidColorBrush x:Key="LightBaseHighBrush"             Color="{StaticResource LightBaseHighColor}"/>
+    <SolidColorBrush x:Key="LightBaseMediumHighBrush"       Color="{StaticResource LightBaseMediumHighColor}"/>
+    <SolidColorBrush x:Key="LightBaseMediumBrush"           Color="{StaticResource LightBaseMediumColor}"/>
+    <SolidColorBrush x:Key="LightBaseMediumLowBrush"        Color="{StaticResource LightBaseMediumLowColor}"/>
+    <SolidColorBrush x:Key="LightBaseLowBrush"              Color="{StaticResource LightBaseLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeAltLowBrush"         Color="{StaticResource LightChromeAltLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeBlackHighBrush"      Color="{StaticResource LightChromeBlackHighColor}"/>
+    <SolidColorBrush x:Key="LightChromeBlackMediumBrush"    Color="{StaticResource LightChromeBlackMediumColor}"/>
+    <SolidColorBrush x:Key="LightChromeBlackMediumLowBrush" Color="{StaticResource LightChromeBlackMediumLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeBlackLowBrush"       Color="{StaticResource LightChromeBlackLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeDisabledHighBrush"   Color="{StaticResource LightChromeDisabledHighColor}"/>
+    <SolidColorBrush x:Key="LightChromeDisabledLowBrush"    Color="{StaticResource LightChromeDisabledLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeGrayBrush"           Color="{StaticResource LightChromeGrayColor}"/>
+    <SolidColorBrush x:Key="LightChromeHighBrush"           Color="{StaticResource LightChromeHighColor}"/>
+    <SolidColorBrush x:Key="LightChromeLowBrush"            Color="{StaticResource LightChromeLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeMediumBrush"         Color="{StaticResource LightChromeMediumColor}"/>
+    <SolidColorBrush x:Key="LightChromeMediumLowBrush"      Color="{StaticResource LightChromeMediumLowColor}"/>
+    <SolidColorBrush x:Key="LightChromeWhiteBrush"          Color="{StaticResource LightChromeWhiteColor}"/>
+    <SolidColorBrush x:Key="LightErrorTextBrush"            Color="{StaticResource LightErrorTextColor}"/>
+    <SolidColorBrush x:Key="LightListLowBrush"              Color="{StaticResource LightListLowColor}"/>
+    <SolidColorBrush x:Key="LightListMediumBrush"           Color="{StaticResource LightListMediumColor}"/>
+    <SolidColorBrush x:Key="LightRegionBrush"               Color="{StaticResource LightRegionColor}"/>
 
 </ResourceDictionary>

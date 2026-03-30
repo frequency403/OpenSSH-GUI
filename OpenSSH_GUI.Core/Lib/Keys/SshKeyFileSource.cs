@@ -10,4 +10,9 @@ public record SshKeyFileSource
 
     public static SshKeyFileSource FromConfig(string absolutePath) =>
         new() { AbsolutePath = absolutePath, ProvidedByConfig = true };
+
+    public override string ToString()
+    {
+        return $"{AbsolutePath} | Referenced by Config: {ProvidedByConfig}";
+    }
 }

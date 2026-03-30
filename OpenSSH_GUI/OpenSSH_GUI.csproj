@@ -19,9 +19,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.12"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.13" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.13" />
         <PackageReference Include="Material.Icons" Version="3.0.0"/>
         <PackageReference Include="Material.Icons.Avalonia" Version="3.0.0"/>
         <PackageReference Include="ReactiveUI" Version="23.1.8"/>

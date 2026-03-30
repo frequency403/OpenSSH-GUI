@@ -3,7 +3,7 @@
     <!-- Target framework and other specs in Directory.Build.props -->
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.12"/>
+        <PackageReference Include="Avalonia" Version="11.3.13" />
         <PackageReference Include="DryIoc.dll" Version="5.4.3" />
         <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />

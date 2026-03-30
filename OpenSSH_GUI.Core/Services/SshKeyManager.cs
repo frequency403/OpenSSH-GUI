@@ -3,9 +3,11 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DryIoc;
 using DynamicData.Binding;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
@@ -15,6 +17,9 @@ using Org.BouncyCastle.Tls;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
+using Serilog;
+using Serilog.Events;
+using Serilog.Extensions.Logging;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
 using SshNet.Keygen.SshKeyEncryption;
@@ -26,8 +31,10 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
-public class SshKeyManager : ReactiveObject, IDisposable
+public sealed class SshKeyManager : ReactiveObject, IDisposable
 {
+    private const string BackupFileExtension = "bak";
+
     private static readonly FileStreamOptions FileStreamOptions = new()
     {
         BufferSize = 0,
@@ -38,11 +45,80 @@ public class SshKeyManager : ReactiveObject, IDisposable
 
     private readonly DirectoryCrawler _directoryCrawler;
     private readonly ILogger<SshKeyManager> _logger;
+
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly IResolver _resolver;
     private readonly FileSystemWatcher _watcher;
-
     private volatile bool _searching;
+
+    private static readonly string _backupDirectory =
+        Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), AppDomain.CurrentDomain.FriendlyName);
+
+    private SerilogLoggerFactory? _loggerFactory;
+    private ILogger<SshKeyManager>? _backupLogger;
+
+    private static string _backupLogFile =
+        Path.Combine(_backupDirectory, Path.ChangeExtension(nameof(SshKeyManager), "log"));
+
+    private void EnableTempLogger()
+    {
+        if (_backupLogger is not null) return;
+        
+        if (!Directory.Exists(_backupDirectory))
+            Directory.CreateDirectory(_backupDirectory);
+        
+        _backupLogFile = Path.Combine(_backupDirectory,
+            Path.ChangeExtension(
+                "operation_log",
+                "log"));
+        _loggerFactory = new SerilogLoggerFactory(new LoggerConfiguration()
+            .WriteTo.File(_backupLogFile)
+            .MinimumLevel.Verbose()
+            .CreateLogger(), true);
+        _backupLogger = _loggerFactory.CreateLogger<SshKeyManager>();
+    }
+
+    private void DisableTempLogger(bool errorsOccured = false)
+    {
+        if (_backupLogger is null) return;
+        _backupLogger = null;
+        _loggerFactory?.Dispose();
+        _loggerFactory = null;
+        if (!errorsOccured)
+        {
+            try
+            {
+                Directory.Delete(_backupDirectory, true);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while cleaning up backup directory: {directory}", _backupDirectory);
+            }
+        }
+    }
+
+    private static IEnumerable<FileInfo> MoveToBackupDirectory(params FileInfo[] files)
+    {
+        foreach (var file in files)
+        {
+            var destination = Path.Combine(_backupDirectory, string.Join(".", file.Name, BackupFileExtension));
+            file.MoveTo(destination);
+            yield return new FileInfo(destination);
+        }
+    }
+
+    private void Log(LogLevel level, Exception? exception, [StructuredMessageTemplate] string message,
+        params object?[] args)
+    {
+        _logger.Log(level, exception, message, args);
+        _backupLogger?.Log(level, exception, message, args);
+    }
+
+    private void Log(LogLevel level, [StructuredMessageTemplate] string message, params object?[] args)
+    {
+        _logger.Log(level, message, args);
+        _backupLogger?.Log(level, message, args);
+    }
 
     public SshKeyManager(
         ILogger<SshKeyManager> logger,
@@ -68,24 +144,25 @@ public class SshKeyManager : ReactiveObject, IDisposable
         _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
         SshKeys = new ReadOnlyObservableCollection<SshKeyFile>(_sshKeysInternal);
     }
-    
+
     /// <summary>
     ///     Performs the initial SSH key search on disk.
     ///     Must be called after the DI container is fully built.
     /// </summary>
-    public Task InitialSearchAsync(CancellationToken token = default)
-        => SearchForKeysAndUpdateCollection();
-    
+    public void InitialSearchAsync() => SearchForKeysAndUpdateCollection();
+
     private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
-    
+
     /// <summary>
     ///     Gets the collection of detected SSH keys.
     /// </summary>
     public ReadOnlyObservableCollection<SshKeyFile> SshKeys { get; }
 
-    public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key, CancellationToken token = default)
+    public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key,
+        CancellationToken token = default)
     {
-        var success = true;
+        EnableTempLogger();
+        var errrorsOccured = false;
         Exception? exception = null;
         var semaphoreAquired = false;
         try
@@ -95,33 +172,37 @@ public class SshKeyManager : ReactiveObject, IDisposable
             {
                 try
                 {
-                   keyFile.Delete();
+                    keyFile.Delete();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    _logger.LogDebug("Error while deleting key {key}: {ex}", key.AbsoluteFilePath, ex);
+                    Log(LogLevel.Debug, "Error while deleting key {key}: {ex}", key.AbsoluteFilePath, ex);
                     exception = exception is null ? ex : new AggregateException(exception, ex);
-                    success = false;
+                    errrorsOccured = true;
                 }
             }
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error deleting key");
-            success = false;
+            Log(LogLevel.Error, e, "Error deleting key");
+            errrorsOccured = true;
             exception = exception is null ? e : new AggregateException(exception, e);
         }
         finally
         {
             if (semaphoreAquired)
                 _semaphoreSlim.Release();
+            DisableTempLogger(errrorsOccured);
         }
-        return (success, exception);
+
+        return (errrorsOccured, exception);
     }
 
     public async Task RenameKeyAsync(SshKeyFile key, string newFileName, CancellationToken token = default)
     {
         var semaphoreAquired = false;
+        EnableTempLogger();
+        var errorsOccured = false;
         try
         {
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
@@ -129,7 +210,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
                 return;
 
             var files = new List<string>();
-            
+
             foreach (var file in key.KeyFileInfo?.Files ?? [])
             {
                 var newFileNameWithMatchingExtension = Path.ChangeExtension(newFileName,
@@ -147,13 +228,15 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to change filename of {className}", nameof(SshKeyFile));
+            errorsOccured = true;
+            Log(LogLevel.Error, e, "Failed to change filename of {className}", nameof(SshKeyFile));
             throw;
         }
         finally
         {
             if (semaphoreAquired)
                 _semaphoreSlim.Release();
+            DisableTempLogger(errorsOccured);
         }
     }
 
@@ -162,31 +245,30 @@ public class SshKeyManager : ReactiveObject, IDisposable
         if (encoding is null)
         {
             encoding ??= Encoding.UTF8;
-            _logger.LogDebug("Using default encoding:  {encoding}", encoding);
+            Log(LogLevel.Debug, "Using default encoding: {encoding}", encoding.EncodingName);
         }
         else
         {
-            _logger.LogDebug("Using encoding: {encoding}", encoding);
+            Log(LogLevel.Debug, "Using encoding: {encoding}", encoding.EncodingName);
         }
 
         await using var fileStream = new FileStream(filePath, FileStreamOptions);
-        _logger.LogDebug("Opened file {filePath}", filePath);
-        
+        Log(LogLevel.Debug, "Opened file {filePath}", filePath);
+
         byte[]? rented = null;
         var buffer = content.Length <= 256
             ? stackalloc byte[256]
             : (rented = ArrayPool<byte>.Shared.Rent(encoding.GetByteCount(content)));
-        _logger.LogDebug("Allocated {byteCount} bytes", buffer.Length);
+        Log(LogLevel.Debug, "Allocated {byteCount} bytes", buffer.Length);
         try
         {
             var writtenBytes = encoding.GetBytes(content, buffer);
-            _logger.LogDebug("Writing {byteCount} bytes into file {filePath}", writtenBytes, filePath);
+            Log(LogLevel.Debug, "Writing {byteCount} bytes into file {filePath}", writtenBytes, filePath);
             fileStream.Write(buffer[..writtenBytes]);
-            
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while writing file {filePath}", filePath);
+            Log(LogLevel.Error, e, "Error while writing file {filePath}", filePath);
             throw;
         }
         finally
@@ -194,12 +276,13 @@ public class SshKeyManager : ReactiveObject, IDisposable
             if (rented is not null)
             {
                 ArrayPool<byte>.Shared.Return(rented, clearArray: true);
-                _logger.LogDebug("Freeing memory");
+                Log(LogLevel.Debug, "Freeing memory");
             }
         }
-        _logger.LogDebug("Successfully wrote file {filePath}", filePath);
+
+        Log(LogLevel.Debug, "Successfully wrote file {filePath}", filePath);
     }
-    
+
     /// <summary>
     ///     Changes the format of an existing SSH key.
     /// </summary>
@@ -219,50 +302,32 @@ public class SshKeyManager : ReactiveObject, IDisposable
         ArgumentNullException.ThrowIfNull(privateKeyFile);
         ArgumentException.ThrowIfNullOrWhiteSpace(key.AbsoluteFilePath);
 
+        EnableTempLogger();
         var filePath = newFormat.ChangeExtension(Path.GetFullPath(key.AbsoluteFilePath), false);
-
-        var password = key.Password.IsValid
-            ? key.Password.GetPasswordString()
-            : null;
-
         var writtenFiles = new List<string>();
-        var backupDir = Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), AppDomain.CurrentDomain.FriendlyName);
+        IEnumerable<FileInfo> backupFiles = [];
         var semaphoreAquired = false;
+        var errorsOccured = false;
         try
         {
-            foreach (var existingFile in key.KeyFiles)
-            {
-                if(!Directory.Exists(backupDir))
-                    Directory.CreateDirectory(backupDir);
-                var backup =  existingFile.Name + ".bak";
-                existingFile.MoveTo(Path.Combine(backupDir, backup));
-            }
-            
+            backupFiles = MoveToBackupDirectory(key.KeyFiles).ToArray();
+
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
             if (!semaphoreAquired)
                 throw new InvalidOperationException("Another key operation is in progress");
-            
-            var sshKeyEncryption = key.Password is { IsValid: true } keyPassword
-                ? new SshKeyEncryptionAes256(
-                    keyPassword.GetPasswordString(),
-                    (newFormat is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null))
-                : SshKeyGenerateInfo.DefaultSshKeyEncryption;
 
-            var files = await WriteToFileInSpecificFormat(newFormat,
-                sshKeyEncryption,
+            writtenFiles.AddRange(await WriteToFileInSpecificFormat(newFormat,
+                key.Password.ToSshKeyEncryption(),
                 privateKeyFile,
-                filePath);
-            writtenFiles.AddRange(files);
-            
+                filePath));
+
             key.Load(SshKeyFileSource.FromDisk(filePath));
-            
-            if(Directory.Exists(backupDir))
-                Directory.Delete(backupDir, true);
         }
         catch (Exception e)
         {
             var exc = e;
-            _logger.LogError(e, "Error changing format of key – attempting rollback");
+            errorsOccured = true;
+            Log(LogLevel.Error, e, "Error changing format of key – attempting rollback");
             foreach (var writtenFile in writtenFiles)
             {
                 try
@@ -278,11 +343,11 @@ public class SshKeyManager : ReactiveObject, IDisposable
                         not null => new AggregateException(exc, ex),
                         _ => ex
                     };
-                    _logger.LogWarning(ex, "Could not delete backup file '{path}'", writtenFile);
+                    Log(LogLevel.Warning, ex, "Could not delete backup file '{path}'", writtenFile);
                 }
             }
 
-            foreach (var backupFileInfo in Directory.EnumerateFiles(backupDir, "*.bak", SearchOption.AllDirectories).Select(file => new FileInfo(file)))
+            foreach (var backupFileInfo in backupFiles)
             {
                 if (backupFileInfo.Directory?.Parent?.FullName is { } parentDirectory)
                 {
@@ -290,7 +355,7 @@ public class SshKeyManager : ReactiveObject, IDisposable
                     {
                         var destination = Path.Combine(parentDirectory, backupFileInfo.Name.Replace(".bak", ""));
                         backupFileInfo.MoveTo(destination);
-                        _logger.LogWarning("Restored backup file {backupFile} to its original location {original}",
+                        Log(LogLevel.Warning, "Restored backup file {backupFile} to its original location {original}",
                             backupFileInfo.FullName, destination);
                         continue;
                     }
@@ -305,15 +370,20 @@ public class SshKeyManager : ReactiveObject, IDisposable
                         };
                     }
                 }
-                _logger.LogWarning("Could not move backup file {backupFile} to its original location", backupFileInfo.FullName);
+
+                Log(LogLevel.Warning, "Could not move backup file {backupFile} to its original location",
+                    backupFileInfo.FullName);
                 break;
             }
+
             throw exc;
         }
         finally
         {
             if (semaphoreAquired)
                 _semaphoreSlim.Release();
+
+            DisableTempLogger(errorsOccured);
         }
     }
 
@@ -332,13 +402,14 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    private async ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(SshKeyFormat format, ISshKeyEncryption encryption,
+    private async ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(SshKeyFormat format,
+        ISshKeyEncryption encryption,
         IPrivateKeySource privateKeySource, string filePath)
     {
-        var privateKeyFileContent = encryption is SshKeyEncryptionAes256
-            ? format is SshKeyFormat.OpenSSH ? privateKeySource.ToOpenSshFormat(encryption) : privateKeySource.ToPuttyFormat(encryption, format)
-            : format is SshKeyFormat.OpenSSH ? privateKeySource.ToOpenSshFormat() : privateKeySource.ToPuttyFormat(format);
-        var writtenFiles  = new List<string>();
+        var privateKeyFileContent = format is SshKeyFormat.OpenSSH
+            ? privateKeySource.ToOpenSshFormat(encryption)
+            : privateKeySource.ToPuttyFormat(encryption, format);
+        var writtenFiles = new List<string>();
         switch (format)
         {
             case SshKeyFormat.PuTTYv2:
@@ -358,7 +429,8 @@ public class SshKeyManager : ReactiveObject, IDisposable
         return writtenFiles;
     }
 
-    private ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(SshKeyGenerateInfo generateInfo, GeneratedPrivateKey createdKey, string filePath) => 
+    private ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(SshKeyGenerateInfo generateInfo,
+        GeneratedPrivateKey createdKey, string filePath) =>
         WriteToFileInSpecificFormat(generateInfo.KeyFormat, generateInfo.Encryption, createdKey, filePath);
 
     /// <summary>
@@ -378,35 +450,34 @@ public class SshKeyManager : ReactiveObject, IDisposable
         try
         {
             GeneratedPrivateKey? createdKey = null;
-
             try
             {
                 await using var privateStream = new MemoryStream();
                 createdKey = SshKey.Generate(privateStream, generateParamsInfo);
-                if(createdKey is null)
+                if (createdKey is null)
                     throw new InvalidOperationException("Could not generate new key");
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while generating key file {filePath}", fullFilePath);
+                Log(LogLevel.Error, e, "Error while generating key file {filePath}", fullFilePath);
                 throw;
             }
 
             var filePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath, false);
 
             await WriteToFileInSpecificFormat(generateParamsInfo, createdKey, filePath);
-            
+
             var keyFileSource = SshKeyFileSource.FromDisk(filePath);
-            if(string.IsNullOrWhiteSpace(generateParamsInfo.Encryption.Passphrase))
+            if (string.IsNullOrWhiteSpace(generateParamsInfo.Encryption.Passphrase))
                 keyFile.Load(keyFileSource);
             else
                 keyFile.Load(keyFileSource, Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
-            
+
             _sshKeysInternal.Add(keyFile);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error generating key");
+            Log(LogLevel.Error, e, "Error generating key");
             throw;
         }
         finally
@@ -423,16 +494,14 @@ public class SshKeyManager : ReactiveObject, IDisposable
     {
         if (!await _semaphoreSlim.WaitAsync(100))
             throw new InvalidOperationException("Another key operation is in progress");
-        if (_searching)
-            throw new InvalidOperationException("Can't rerun search while searching");
         try
         {
             _sshKeysInternal.Clear();
-            await SearchForKeysAndUpdateCollection();
+            SearchForKeysAndUpdateCollection();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Unhandled error during key re-search");
+            Log(LogLevel.Error, e, "Unhandled error during key re-search");
         }
         finally
         {
@@ -444,20 +513,29 @@ public class SshKeyManager : ReactiveObject, IDisposable
     {
         if (!await _semaphoreSlim.WaitAsync(100))
             return;
+        EnableTempLogger();
+        var errorsOccured = false;
         try
         {
-            if (_sshKeysInternal.SingleOrDefault(k => k.AbsoluteFilePath == Path.ChangeExtension(e.OldFullPath, null)) is
-                { } oldKey)
-                SshKeyGotDeleted(oldKey, EventArgs.Empty);
-            AddKey(SshKeyFileSource.FromDisk(Path.ChangeExtension(e.FullPath, null)));
+            if (SshKeys.FirstOrDefault(key =>
+                    key.KeyFileInfo is { KeyFileSource: { AbsolutePath: { } absolutePath } } &&
+                    string.Equals(absolutePath, Path.ChangeExtension(e.OldFullPath, null))) is { } keyFile)
+            {
+                Log(LogLevel.Debug, "Reloading keyfile because it was renamed externally");
+                keyFile.Load((keyFile.KeyFileInfo?.KeyFileSource.ProvidedByConfig ?? false)
+                    ? SshKeyFileSource.FromConfig(Path.ChangeExtension(e.FullPath, null))
+                    : SshKeyFileSource.FromDisk(Path.ChangeExtension(e.OldFullPath, null)));
+            }
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Error handling renamed key");
+            errorsOccured = true;
+            Log(LogLevel.Error, exception, "Error handling renamed key");
         }
         finally
         {
             _semaphoreSlim.Release();
+            DisableTempLogger(errorsOccured);
         }
     }
 
@@ -465,6 +543,8 @@ public class SshKeyManager : ReactiveObject, IDisposable
     {
         if (!_semaphoreSlim.Wait(100))
             return;
+        EnableTempLogger();
+        var errorsOccured = false;
         try
         {
             var normalizedPath = Path.ChangeExtension(
@@ -477,16 +557,18 @@ public class SshKeyManager : ReactiveObject, IDisposable
             if (key is null)
                 return;
 
-            _logger.LogDebug("Key {key} deleted", key.AbsoluteFilePath);
-            SshKeyGotDeleted(key, EventArgs.Empty);
+            Log(LogLevel.Debug, "Key {key} got deleted externally", key.AbsoluteFilePath);
+            _sshKeysInternal.Remove(key);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error handling deleted key");
+            errorsOccured = true;
+            Log(LogLevel.Error, e, "Error handling deleted key");
         }
         finally
         {
             _semaphoreSlim.Release();
+            DisableTempLogger(errorsOccured);
         }
     }
 
@@ -494,6 +576,8 @@ public class SshKeyManager : ReactiveObject, IDisposable
     {
         if (!await _semaphoreSlim.WaitAsync(100))
             return;
+        EnableTempLogger();
+        var errorsOccured = false;
         try
         {
             var keyFilePath = string.Equals(
@@ -512,11 +596,13 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Error adding key");
+            errorsOccured = true;
+            Log(LogLevel.Error, exception, "Error adding key");
         }
         finally
         {
             _semaphoreSlim.Release();
+            DisableTempLogger(errorsOccured);
         }
     }
 
@@ -531,11 +617,17 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error resolving generic SshKeyFile");
+            Log(LogLevel.Error, e, "Error resolving generic SshKeyFile");
         }
+
         return null;
     }
-    
+
+    private void AddKeyRange(params IEnumerable<SshKeyFileSource> keyFiles)
+    {
+        foreach (var keyFile in keyFiles)
+            AddKey(keyFile);
+    }
     private void AddKey(SshKeyFileSource keyFileSource)
     {
         if (_sshKeysInternal.Any(k =>
@@ -552,28 +644,31 @@ public class SshKeyManager : ReactiveObject, IDisposable
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error loading keyfile {filePath}", keyFileSource.AbsolutePath);
+            Log(LogLevel.Error, e, "Error loading keyfile {filePath}", keyFileSource.AbsolutePath);
         }
     }
 
-    private async Task SearchForKeysAndUpdateCollection()
+    private void SearchForKeysAndUpdateCollection()
     {
-        Interlocked.Exchange(ref _searching, true);
+        if (_directoryCrawler.IsSearching) return;
+        var semaphoreAquired = false;
+        var errorsOccured = false;
+        EnableTempLogger();
         try
         {
-            foreach (var key in await _directoryCrawler.GetPossibleKeyFilesOnDisk())
-                AddKey(key);
+            semaphoreAquired = _semaphoreSlim.Wait(TimeSpan.FromSeconds(5));
+            AddKeyRange(_directoryCrawler.GetPossibleKeyFilesOnDisk());
+        }
+        catch (Exception e)
+        {
+            Log(LogLevel.Error, e, "Error searching for keys");
         }
         finally
         {
-            Interlocked.Exchange(ref _searching, false);
+            if(semaphoreAquired)
+                _semaphoreSlim.Release();
+            DisableTempLogger(errorsOccured);
         }
-    }
-
-    private void SshKeyGotDeleted(object? sender, EventArgs e)
-    {
-        if (sender is not SshKeyFile key) return;
-        _sshKeysInternal.Remove(key);
     }
 
     public void Dispose()
@@ -584,6 +679,5 @@ public class SshKeyManager : ReactiveObject, IDisposable
         {
             sshKeyFile.Dispose();
         }
-        GC.SuppressFinalize(this);
     }
 }

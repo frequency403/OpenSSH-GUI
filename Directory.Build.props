@@ -6,6 +6,7 @@
         <LangVersion>default</LangVersion>
         <PackageProjectUrl>https://github.com/frequency403/OpenSSH-GUI</PackageProjectUrl>
         <BaseVersion>3.1.0</BaseVersion>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 
     <ItemGroup>

@@ -10,6 +10,8 @@ using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
+using SshNet.Keygen;
+using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
@@ -118,4 +120,11 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
         chars.Clear();
         return result;
     }
+
+    public ISshKeyEncryption ToSshKeyEncryption(SshKeyFormat? format = null) =>
+        this is { IsValid: true } keyPassword
+            ? new SshKeyEncryptionAes256(
+                keyPassword.GetPasswordString(),
+                (format is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null))
+            : SshKeyGenerateInfo.DefaultSshKeyEncryption;
 }

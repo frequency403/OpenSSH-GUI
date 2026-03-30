@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DryIoc;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -16,6 +17,7 @@ using Svg.Skia;
 
 namespace OpenSSH_GUI;
 
+[UsedImplicitly]
 public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator) : Application
 {
     private static readonly Dictionary<float, float> IconSizes = new()
@@ -108,7 +110,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
     /// Triggers the initial SSH key search after the main window has been presented,
     /// ensuring the UI is fully ready before background work begins.
     /// </summary>
-    private async void OnMainWindowOpened(object? sender, EventArgs e)
+    private void OnMainWindowOpened(object? sender, EventArgs e)
     {
         try
         {
@@ -117,7 +119,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
 
             try
             {
-                await resolver.Resolve<SshKeyManager>().InitialSearchAsync();
+                resolver.Resolve<SshKeyManager>().InitialSearchAsync();
             }
             catch (Exception ex)
             {

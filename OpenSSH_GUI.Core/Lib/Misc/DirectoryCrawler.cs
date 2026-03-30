@@ -1,70 +1,74 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.SshConfig.Models;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
 /// <summary>
 ///     Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public class DirectoryCrawler(
+public partial class DirectoryCrawler(
     ILogger<DirectoryCrawler> logger,
-    IConfiguration configuration)
+    IConfiguration configuration) : ReactiveObject
 {
     private static readonly string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
+    private static readonly List<SshKeyFileSource> keyFileSources = new();
+
+    [Reactive] private bool _isSearching;
     
     /// <summary>
     ///     Asynchronously retrieves a collection of new SSH keys from the disk.
     /// </summary>
-    /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation.</param>
-    /// <returns>An asynchronous enumerable containing the file paths of the discovered SSH keys.</returns>
-    public ValueTask<IEnumerable<SshKeyFileSource>> GetPossibleKeyFilesOnDisk(CancellationToken token = default)
+    /// <returns>An enumerable containing the file paths of the discovered SSH keys.</returns>
+    public IEnumerable<SshKeyFileSource> GetPossibleKeyFilesOnDisk()
     {
-        try
+        IsSearching = true;
+        if (configuration.GetSection("SshConfig").Get<SshConfiguration>() is { } sshConfig)
         {
-            var possibleKeyFiles = new List<SshKeyFileSource>();
-
-            try
+            foreach (var hostSetting in sshConfig.Hosts.Concat(sshConfig.Blocks).Append(sshConfig.Global))
             {
-                if (configuration.GetSection("SshConfig").Get<SshConfiguration>() is { } sshConfig)
+                if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
+                foreach (var hostIdentityFile in hostIdentityFiles.Select(path => path.ResolvePath()))
                 {
-                    foreach (var hostSetting in sshConfig.Hosts.Concat(sshConfig.Blocks).Append(sshConfig.Global))
+                    if (!keyFileSources.Any(e =>
+                            e.AbsolutePath.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) &&
+                        File.Exists(hostIdentityFile))
                     {
-                        if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
-                        foreach (var hostIdentityFile in hostIdentityFiles.Select(path => path.ResolvePath()))
-                        {
-                            if(!possibleKeyFiles.Any(e => e.AbsolutePath.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) && File.Exists(hostIdentityFile))
-                                possibleKeyFiles.Add(SshKeyFileSource.FromConfig(hostIdentityFile));
-                        }
+                        var source = SshKeyFileSource.FromConfig(hostIdentityFile);
+                        logger.LogDebug("Adding key file source {Source}", source);
+                        keyFileSources.Add(source);
+                        yield return source;
                     }
                 }
             }
-            catch (Exception e)
-            {
-                logger.LogDebug(e, "Config not readable");
-            }
-
-            possibleKeyFiles = possibleKeyFiles.Concat(
-                Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions
-                    {
-                        IgnoreInaccessible = true,
-                        RecurseSubdirectories = false
-                    }).Select(e => new FileInfo(e))
-                    .Where(e => !ImportantFileNames.Any(ifn => ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-                    .Where(e => !possibleKeyFiles.Any(k => k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
-                    .Where(e => string.IsNullOrWhiteSpace(e.Extension) || e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
-                    .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase).Select(e => SshKeyFileSource.FromDisk(e.FullName))
-            ).ToList();
-
-            logger.LogInformation("Found {count} keys", possibleKeyFiles.Count);
-            return ValueTask.FromResult<IEnumerable<SshKeyFileSource>>(possibleKeyFiles);
         }
-        catch (Exception exception)
+        
+        foreach (var keyFileSource in Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*",
+                         new EnumerationOptions
+                         {
+                             IgnoreInaccessible = true,
+                             RecurseSubdirectories = false
+                         }).Select(e => new FileInfo(e))
+                     .Where(e => !ImportantFileNames.Any(ifn =>
+                         ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
+                     .Where(e => !keyFileSources.Any(k =>
+                         k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
+                     .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
+                                 e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
+                     .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase)
+                     .Select(e => SshKeyFileSource.FromDisk(e.FullName)))
         {
-            return ValueTask.FromException<IEnumerable<SshKeyFileSource>>(exception);
+            logger.LogDebug("Adding keyfile {keyFile}", keyFileSource);
+            keyFileSources.Add(keyFileSource);
+            yield return keyFileSource;
         }
+        keyFileSources.Clear();
+        IsSearching = false;
     }
 }

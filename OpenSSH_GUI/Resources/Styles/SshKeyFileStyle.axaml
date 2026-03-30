@@ -7,27 +7,16 @@
                     xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core">
     <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="keys:SshKeyFile">
         <StackPanel Orientation="Horizontal" Spacing="15">
-            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="5">
-                <Panel Margin="0" IsVisible="{Binding Password.IsValid}">
-                    <Border BorderBrush="Transparent" IsVisible="{Binding NeedsPassword}">
-                        <avalonia:MaterialIcon Kind="ShieldLockOutline" Foreground="Yellow" />
-                    </Border>
-                    <Border BorderBrush="Transparent" IsVisible="{Binding !NeedsPassword}">
-                        <avalonia:MaterialIcon Kind="ShieldLockOpenOutline" Foreground="Green" />
-                    </Border>
+            <StackPanel HorizontalAlignment="Left" Spacing="10" Margin="0" Orientation="Horizontal">
+                <Panel IsVisible="{Binding !Password.IsValid}">
+                    <avalonia:MaterialIcon Kind="EncryptionOffOutline" Foreground="DarkGray"
+                                           IsVisible="{Binding !NeedsPassword}" />
+                    <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="DarkKhaki"
+                                           IsVisible="{Binding NeedsPassword}" />
                 </Panel>
-                <Border
-                    BorderBrush="Transparent"
-                    IsVisible="{Binding !Password.IsValid}"
-                    IsEnabled="False">
-                    <avalonia:MaterialIcon Kind="LockOffOutline" Foreground="DimGray" />
-                </Border>
-                <Border BorderBrush="Transparent" IsVisible="{Binding IsPuttyKey}">
-                    <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
-                </Border>
-                <Border BorderBrush="Transparent" IsVisible="{Binding !IsPuttyKey}">
-                    <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
-                </Border>
+                <avalonia:MaterialIcon IsVisible="{Binding Password.IsValid}" Kind="EncryptionCheck" Foreground="DarkGreen"/>
+                <avalonia:MaterialIcon IsVisible="{Binding IsPuttyKey}" Kind="KeyChain" Foreground="DarkOrange" />
+                <avalonia:MaterialIcon IsVisible="{Binding !IsPuttyKey}" Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
             </StackPanel>
             <StackPanel HorizontalAlignment="Left">
                 <StackPanel.Styles>
@@ -38,7 +27,7 @@
                     </Style>
                 </StackPanel.Styles>
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText"
-                           Text="{Binding Format, Converter={x:Static converters:Converter.KeyTypeToStringConverter}}" />
+                           Text="{Binding Format, Converter={x:Static converters:Converter.FormatToStringConverter}}" />
                 <Separator Margin="0" />
                 <TextBlock HorizontalAlignment="Left" Margin="0" Classes="MiniText" Text="{Binding FileName}" />
             </StackPanel>

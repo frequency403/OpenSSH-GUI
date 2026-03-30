@@ -126,6 +126,9 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// </summary>
     [Reactive]
     private BasicSshKeyFileInformation _basicSshKeyFileInformation;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _fileChangesAllowed;
     
     /// <summary>
     ///     Initializes a new instance of <see cref="SshKeyFile" />, wires up all reactive
@@ -192,6 +195,17 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 HashAlgorithmName = tuple.Item2.HashAlgorithmName;
 
             }).DisposeWith(_disposables);
+
+        this.WhenAnyValue(
+                vm => vm.NeedsPassword,
+                vm => vm.Password,
+                vm => vm.KeyFileInfo,
+                (needsPassword, password, keyFileInfo) =>
+                    keyFileInfo is { KeyFileSource.ProvidedByConfig: false } &&
+                    (!needsPassword || password.IsValid))
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Subscribe(result => FileChangesAllowed = result)
+            .DisposeWith(_disposables);
 
         this.WhenAnyValue(vm => vm.PrivateKeyFile, vm => vm.KeyFileInfo)
             .ObserveOn(AvaloniaScheduler.Instance)

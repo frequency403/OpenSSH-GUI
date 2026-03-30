@@ -48,7 +48,6 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         ILogger<MainWindowViewModel> logger,
         SshKeyManager sshKeyManager,
         ServerConnectionService serverConnectionService,
-        Application application,
         IResolver serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
