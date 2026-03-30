@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System.Collections.Specialized;
+using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -60,13 +61,15 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         _dialogHost = dialogHost;
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
         WindowTitle = string.Join("-", Program.AppName, Version);
-
-        this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys)
+        
+        Observable
+            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged += h,
+                h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged -= h)
+            .Select(_ => SshKeyManager.SshKeys.Count)
+            .StartWith(SshKeyManager.SshKeys.Count)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(keyFiles =>
-            {
-                ItemsCountIcon = GetMaterialNumericIcon(keyFiles.Count);
-            })
+            .Subscribe(count => ItemsCountIcon = GetMaterialNumericIcon(count))
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.KeyTypeSort)

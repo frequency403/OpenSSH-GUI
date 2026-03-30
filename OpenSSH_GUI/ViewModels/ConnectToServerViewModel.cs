@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System.Collections.ObjectModel;
+using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using Avalonia.Media;
 using JetBrains.Annotations;
@@ -168,7 +169,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
                 .Select(f => f.ResolvePath())
                 .ToHashSet(StringComparer.Ordinal);
 
-            var keys = (SshKeyManager.SshKeys ?? [])
+            var keys = SshKeyManager.SshKeys
                 .Where(e => e.KeyFileInfo?.KeyFileSource?.AbsolutePath is { } path
                             && resolvedPaths.Contains(path));
 

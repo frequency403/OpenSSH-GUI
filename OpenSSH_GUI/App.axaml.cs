@@ -17,8 +17,9 @@ namespace OpenSSH_GUI;
 
 public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator) : Application
 {
-    private static Dictionary<float, float> iconSizes = new()
+    private static readonly Dictionary<float, float> IconSizes = new()
     {
+        { 16, 16 },
         { 32, 32 },
         { 48, 48 },
         { 64, 64},
@@ -37,9 +38,10 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         try
         {
             base.OnFrameworkInitializationCompleted();
+            
             try
             {
-                foreach (var (width, height) in iconSizes)
+                foreach (var (width, height) in IconSizes)
                 {
                     await using var svgStream =
                         AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/openssh-gui.svg"));
@@ -49,6 +51,10 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                     var bitmap = new SKBitmap((int)width, (int)height, true);
                     using (var canvas = new SKCanvas(bitmap))
                     {
+                        if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width), height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
+                        {
+                            canvas.Scale(scale);
+                        }
                         canvas.Clear(SKColors.Transparent);
                         canvas.DrawPicture(svg.Picture);
                     }
@@ -69,7 +75,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                     registrator.RegisterInstance(bm, serviceKey: serviceKey,
                         ifAlreadyRegistered: IfAlreadyRegistered.Replace);
                 }
-                registrator.RegisterInstance(new WindowIcon(resolver.Resolve<Bitmap>(serviceKey: "appicon_64")));
+                registrator.RegisterInstance(new WindowIcon(resolver.Resolve<Bitmap>(serviceKey: "appicon_32")));
             }
             catch (Exception e)
             {

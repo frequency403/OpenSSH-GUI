@@ -26,7 +26,7 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
-public partial class SshKeyManager : ReactiveObject, IDisposable
+public class SshKeyManager : ReactiveObject, IDisposable
 {
     private static readonly FileStreamOptions FileStreamOptions = new()
     {
@@ -66,12 +66,7 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         _watcher.Created += async (_, eventArgs) => await WatcherOnCreated(eventArgs);
         _watcher.Deleted += WatcherOnDeleted;
         _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
-        
-        _sshKeysInternal.CollectionChanged += (_, _) =>
-        {
-            this.RaisePropertyChanging(nameof(SshKeys));
-            this.RaisePropertyChanged(nameof(SshKeys));
-        };
+        SshKeys = new ReadOnlyObservableCollection<SshKeyFile>(_sshKeysInternal);
     }
     
     /// <summary>
@@ -82,10 +77,11 @@ public partial class SshKeyManager : ReactiveObject, IDisposable
         => SearchForKeysAndUpdateCollection();
     
     private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
+    
     /// <summary>
     ///     Gets the collection of detected SSH keys.
     /// </summary>
-    public IReadOnlyCollection<SshKeyFile> SshKeys => _sshKeysInternal;
+    public ReadOnlyObservableCollection<SshKeyFile> SshKeys { get; }
 
     public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key, CancellationToken token = default)
     {
