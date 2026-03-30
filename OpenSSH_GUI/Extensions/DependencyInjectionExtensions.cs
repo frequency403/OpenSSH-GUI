@@ -25,8 +25,6 @@ namespace OpenSSH_GUI.Extensions;
 
 public static class DependencyInjectionExtensions
 {
-    private const string IconUri = "avares://OpenSSH_GUI/Assets/appicon.ico";
-
     extension(IContainer container)
     {
         internal void ConfigureServicesInternal()
@@ -56,8 +54,6 @@ public static class DependencyInjectionExtensions
                 resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)).StorageProvider);
             container.RegisterDelegate<ILauncher>(resolver =>
                 resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)).Launcher);
-            container.RegisterDelegate(_ => new Bitmap(AssetLoader.Open(new Uri(IconUri))),
-                serviceKey: Program.IconServiceKey);
 
             container.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
             container.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();

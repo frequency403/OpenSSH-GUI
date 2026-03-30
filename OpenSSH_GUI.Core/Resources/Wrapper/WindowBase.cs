@@ -3,21 +3,18 @@ using Avalonia.Media.Imaging;
 using DryIoc;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
-using ReactiveUI;
 using ReactiveUI.Avalonia;
-using Serilog;
-
 namespace OpenSSH_GUI.Core.Resources.Wrapper;
 
 public abstract class WindowBase<TViewModel, TViewModelInitializer> : WindowBase<TViewModel>
     where TViewModel : ViewModelBase<TViewModel, TViewModelInitializer>
     where TViewModelInitializer : class, IInitializerParameters<TViewModel> 
 {
-    public ValueTask InitializeAsync(TViewModelInitializer initializer, WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen,  CancellationToken cancellationToken = default)
+    public async ValueTask InitializeAsync(TViewModelInitializer initializer, WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen,  CancellationToken cancellationToken = default)
     {
-        WindowInitialize(startupLocation);
+        await WindowInitialize(startupLocation);
         ArgumentNullException.ThrowIfNull(ViewModel);
-        return ViewModel.InitializeAsync(initializer,cancellationToken);
+        await ViewModel.InitializeAsync(initializer,cancellationToken);
     }
 }
 
@@ -26,7 +23,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel> where 
     public required ILogger<WindowBase<TViewModel>> Logger { get; set; }
     public required IResolver Resolver { get; set; }
 
-    protected void WindowInitialize(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen)
+    protected async Task WindowInitialize(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen)
     {
         EnsureInitialized();
         try
@@ -41,7 +38,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel> where 
 
         try
         {
-            Icon = new WindowIcon(Resolver.Resolve<Bitmap>(serviceKey: "AppIcon"));
+            Icon = Resolver.Resolve<WindowIcon>();
         }
         catch (Exception e)
         {
@@ -52,11 +49,11 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel> where 
         ViewModel.Close += RequestClose;
     }
     
-    public ValueTask InitializeAsync(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen, CancellationToken cancellationToken = default)
+    public async ValueTask InitializeAsync(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen, CancellationToken cancellationToken = default)
     {
-        WindowInitialize(startupLocation);
+        await WindowInitialize(startupLocation);
         ArgumentNullException.ThrowIfNull(ViewModel);
-        return ViewModel!.InitializeAsync(cancellationToken);
+        await ViewModel!.InitializeAsync(cancellationToken);
     }
 
     private void RequestClose(object? sender, EventArgs e)

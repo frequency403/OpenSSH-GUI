@@ -29,7 +29,7 @@
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
         <PackageReference Include="System.Reactive" Version="6.1.0"/>
     </ItemGroup>
-
+    
     <ItemGroup>
         <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj"/>
     </ItemGroup>

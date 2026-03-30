@@ -2,17 +2,31 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using DryIoc;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
+using SkiaSharp;
+using Svg.Skia;
 
 namespace OpenSSH_GUI;
 
-public class App(ILogger<App> logger, IResolver resolver) : Application
+public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator) : Application
 {
+    private static Dictionary<float, float> iconSizes = new()
+    {
+        { 32, 32 },
+        { 48, 48 },
+        { 64, 64},
+        { 128, 128 },
+        { 256, 256 },
+        { 512, 512 }
+    };
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -23,14 +37,61 @@ public class App(ILogger<App> logger, IResolver resolver) : Application
         try
         {
             base.OnFrameworkInitializationCompleted();
-            if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
-            desktop.MainWindow = await resolver.ResolveViewAsync<MainWindow, MainWindowViewModel>();
-            logger.LogInformation("MainWindow created");
-            desktop.MainWindow.Opened += OnMainWindowOpened;
+            try
+            {
+                foreach (var (width, height) in iconSizes)
+                {
+                    await using var svgStream =
+                        AssetLoader.Open(new Uri("avares://OpenSSH_GUI/Assets/openssh-gui.svg"));
+                    var memoryStream = new MemoryStream();
+                    using var svg = new SKSvg();
+                    svg.Load(svgStream);
+                    var bitmap = new SKBitmap((int)width, (int)height, true);
+                    using (var canvas = new SKCanvas(bitmap))
+                    {
+                        canvas.Clear(SKColors.Transparent);
+                        canvas.DrawPicture(svg.Picture);
+                    }
+
+                    using (var data = SKImage.FromBitmap(bitmap))
+                    {
+                        if (data != null)
+                        {
+                            using var dataToEncode = data.Encode(SKEncodedImageFormat.Png, 100);
+                            if (dataToEncode is null) continue;
+                            memoryStream.Write(dataToEncode.AsSpan());
+                            memoryStream.Seek(0, SeekOrigin.Begin);
+                        }
+                    }
+
+                    var bm = new Bitmap(memoryStream);
+                    var serviceKey = $"appicon_{width}".ToLower();
+                    registrator.RegisterInstance(bm, serviceKey: serviceKey,
+                        ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                }
+                registrator.RegisterInstance(new WindowIcon(resolver.Resolve<Bitmap>(serviceKey: "appicon_64")));
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error creating app icons");
+                throw;
+            }
+
+            try
+            {
+                if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+                desktop.MainWindow = await resolver.ResolveViewAsync<MainWindow, MainWindowViewModel>();
+                logger.LogInformation("MainWindow created");
+                desktop.MainWindow.Opened += OnMainWindowOpened;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error during application initialization");
+            }
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error during application initialization");
+            logger.LogError(e, "Unhandled error during application initialization");
         }
     }
     

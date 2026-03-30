@@ -24,7 +24,6 @@ internal sealed class Program
     public const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
     public const string AppName = "OpenSSH GUI";
     public const string VersionEnvVar = "RUNNING_VERSION";
-    public const string IconServiceKey = "AppIcon";
 
     private static string GetHostVersion()
     {
