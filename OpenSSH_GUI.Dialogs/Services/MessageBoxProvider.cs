@@ -60,9 +60,9 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
             if (showTryCountInTitle)
                 title = string.Join(" ", title, string.Join("/", tryCount, retries));
             if (await tryActionAsync())
-                break;
+                return true;
             if (await ShowMessageBoxAsync(title, message, MessageBoxButtons.OkCancel, icon) is MessageBoxResult.Cancel)
-                break;
+                return true;
             tryCount++;
         }
         return tryCount <= retries;

@@ -322,7 +322,15 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                        StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
                        string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
                            Path.GetFileName(key.AbsoluteFilePath)));
-                   return secureInputResult != null && key.SetPassword(secureInputResult.Value.Span);
+                   var operationResult = secureInputResult switch
+                   {
+                       null => false,
+                       { Value.Length: <= 0 } => true,
+                       { Value.Length: > 0 } => key.SetPassword(secureInputResult.Value.Span)
+                   };
+                   if(!operationResult)
+                       key.Reset();
+                   return operationResult;
                }, title: StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
                message: StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
                retries: 3, showTryCountInTitle: true, icon: MaterialIconKind.WarningOutline)))

@@ -253,13 +253,13 @@
         <value>Passwort eingeben:</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
-        <value>Passwürt für {0} Schlüsseldatei bereitstellen</value>
+        <value>Passwort für {0} Schlüsseldatei bereitstellen</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
         <value>Falsches Passwort!</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordErrorContent" xml:space="preserve">
-        <value>Sie haben ein falsches passwort eingegeben. Dies ist Versuch {0} von {1} möglichen Versuchen. Möchten sie es erneut versuchen?</value>
+        <value>Sie haben ein falsches passwort eingegeben. Möchten sie es erneut versuchen?</value>
     </data>
     <data name="MainWindowViewModelChangeFilename" xml:space="preserve">
         <value>Dateinamen ändern</value>

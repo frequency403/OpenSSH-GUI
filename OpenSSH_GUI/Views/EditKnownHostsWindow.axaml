@@ -102,7 +102,7 @@
             </Expander>
         </DataTemplate>
     </Window.DataTemplates>
-    <Grid RowDefinitions="10* *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <Grid RowDefinitions="* Auto" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <TabControl Grid.Row="0" VerticalAlignment="Stretch" TabStripPlacement="Left">
             <TabItem Header="Local" Padding="5">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
@@ -125,7 +125,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <controls:SubmitButtons Grid.Row="1" Margin="10 0" HorizontalAlignment="Stretch"
+        <controls:SubmitButtons Grid.Row="1" Margin="0 10" HorizontalAlignment="Stretch"
                                 BooleanSubmit="{Binding BooleanSubmitCommand}"
                                 AbortButtonTooltip="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}"
                                 SubmitButtonTooltip="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}"
