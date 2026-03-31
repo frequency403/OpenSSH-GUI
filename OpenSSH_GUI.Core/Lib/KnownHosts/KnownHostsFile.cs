@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
-using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
 /// Represents a known hosts file.
 /// /
-public class KnownHostsFile : ReactiveObject, IKnownHostsFile
+public record KnownHostsFile : ReactiveRecord
 {
     /// Represents the path to the known hosts file.
     /// /
@@ -46,7 +45,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// <param name="fromServer">Indicates whether the content is from a server.</param>
     /// <param name="token">A cancellation token.</param>
     /// <returns>A <see cref="ValueTask{IKnownHostsFile}" /> representing the initialized object.</returns>
-    public async ValueTask<IKnownHostsFile> InitializeAsync(string knownHostsPathOrContent, bool fromServer = false,
+    public async ValueTask<KnownHostsFile> InitializeAsync(string knownHostsPathOrContent, bool fromServer = false,
         CancellationToken token = default)
     {
         _isFromServer = fromServer;
@@ -71,7 +70,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// <summary>
     ///     Represents a known hosts file.
     /// </summary>
-    public ObservableCollection<IKnownHost> KnownHosts
+    public ObservableCollection<KnownHost> KnownHosts
     {
         get;
         private set => this.RaiseAndSetIfChanged(ref field, value);
@@ -106,9 +105,9 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     ///     Synchronizes the known hosts with the given list of new known hosts.
     /// </summary>
     /// <param name="newKnownHosts">The new known hosts to synchronize.</param>
-    public void SyncKnownHosts(IEnumerable<IKnownHost> newKnownHosts)
+    public void SyncKnownHosts(IEnumerable<KnownHost> newKnownHosts)
     {
-        KnownHosts = new ObservableCollection<IKnownHost>(newKnownHosts);
+        KnownHosts = new ObservableCollection<KnownHost>(newKnownHosts);
     }
 
     /// <summary>
@@ -150,7 +149,7 @@ public class KnownHostsFile : ReactiveObject, IKnownHostsFile
     /// <param name="fileContent">The contents of the known hosts file.</param>
     private void SetKnownHosts(string fileContent)
     {
-        KnownHosts = new ObservableCollection<IKnownHost>(fileContent
+        KnownHosts = new ObservableCollection<KnownHost>(fileContent
             .Split(LineEnding)
             .Where(e => !string.IsNullOrEmpty(e))
             .GroupBy(e => e.Split(' ')[0])

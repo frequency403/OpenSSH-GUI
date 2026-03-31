@@ -1,5 +1,5 @@
-﻿using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using ReactiveUI;
+﻿using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -7,7 +7,7 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// <summary>
 ///     Represents a known host key in the OpenSSH GUI.
 /// </summary>
-public class KnownHostKey : ReactiveObject, IKnownHostKey
+public partial record KnownHostKey : ReactiveRecord
 {
     /// <summary>
     ///     Represents a known host key in the OpenSSH GUI.
@@ -47,9 +47,6 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
     /// <summary>
     ///     Gets or sets a value indicating whether the known host key is marked for deletion.
     /// </summary>
-    public bool MarkedForDeletion
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    [Reactive]
+    private bool _markedForDeletion;
 }

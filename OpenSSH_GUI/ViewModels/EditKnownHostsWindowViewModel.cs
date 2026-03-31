@@ -3,11 +3,9 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
-using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.ViewModels;
@@ -18,14 +16,14 @@ public partial class EditKnownHostsWindowViewModel(
     ServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
     public ServerConnectionService ServerConnectionService => serverConnectionService;
-    private IKnownHostsFile? KnownHostsFileLocal { get; set; }
-    private IKnownHostsFile? KnownHostsFileRemote { get; set; }
+    private KnownHostsFile? KnownHostsFileLocal { get; set; }
+    private KnownHostsFile? KnownHostsFileRemote { get; set; }
 
     [Reactive]
-    private ObservableCollection<IKnownHost> _knownHostsRemote = [];
+    private ObservableCollection<KnownHost> _knownHostsRemote = [];
     
     [Reactive]
-    private ObservableCollection<IKnownHost> _knownHostsLocal = [];
+    private ObservableCollection<KnownHost> _knownHostsLocal = [];
 
     protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
@@ -51,8 +49,8 @@ public partial class EditKnownHostsWindowViewModel(
         if (serverConnectionService.IsConnected)
             KnownHostsFileRemote =
                 await serverConnectionService.ServerConnection.GetKnownHostsFromServerAsync(cancellationToken);
-        KnownHostsLocal = new ObservableCollection<IKnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
-        KnownHostsRemote = serverConnectionService.IsConnected ? new ObservableCollection<IKnownHost>(KnownHostsFileRemote!.KnownHosts.OrderBy(e => e.Host)) : [];
+        KnownHostsLocal = new ObservableCollection<KnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
+        KnownHostsRemote = serverConnectionService.IsConnected ? new ObservableCollection<KnownHost>(KnownHostsFileRemote!.KnownHosts.OrderBy(e => e.Host)) : [];
         await base.InitializeAsync(cancellationToken);
     }
 }

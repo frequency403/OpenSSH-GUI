@@ -1,12 +1,12 @@
-﻿using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using ReactiveUI;
+﻿using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
 /// <summary>
 ///     Represents a known host in the OpenSSH GUI.
 /// </summary>
-public class KnownHost : ReactiveObject, IKnownHost
+public partial record KnownHost : ReactiveRecord
 {
     /// <summary>
     ///     Represents a known host entry in the known_hosts file.
@@ -14,7 +14,7 @@ public class KnownHost : ReactiveObject, IKnownHost
     public KnownHost(IGrouping<string, string> knownHosts)
     {
         Host = knownHosts.Key;
-        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim()) as IKnownHostKey).ToList();
+        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim()) as KnownHostKey).ToList();
     }
 
     /// <summary>
@@ -40,14 +40,11 @@ public class KnownHost : ReactiveObject, IKnownHost
     /// <summary>
     ///     Represents a known host in the OpenSSH_GUI.
     /// </summary>
-    public List<IKnownHostKey> Keys
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
+    [Reactive]
+    private List<KnownHostKey> _keys;
 
     /// <summary>
-    ///     Toggles the marked for deletion flag of each <see cref="IKnownHostKey" /> within the <see cref="Keys" /> list.
+    ///     Toggles the marked for deletion flag of each <see cref="KnownHostKey" /> within the <see cref="Keys" /> list.
     ///     If the <see cref="SwitchToggled" /> property is true, it sets the flag to false for all keys. Otherwise, it sets
     ///     the flag to true for all keys.
     /// </summary>
@@ -77,11 +74,11 @@ public class KnownHost : ReactiveObject, IKnownHost
     public string GetAllEntries()
     {
         return DeleteWholeHost
-            ? IKnownHostsFile.LineEnding
+            ? KnownHostsFile.LineEnding
             : Keys
                 .Where(e => !e.MarkedForDeletion)
                 .Aggregate("",
                     (current, knownHostsKey) =>
-                        current + $"{Host} {knownHostsKey.EntryWithoutHost}{IKnownHostsFile.LineEnding}");
+                        current + $"{Host} {knownHostsKey.EntryWithoutHost}{KnownHostsFile.LineEnding}");
     }
 }

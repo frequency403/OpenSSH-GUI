@@ -5,9 +5,8 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Interfaces.KnownHosts;assembly=OpenSSH_GUI.Core"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+        xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Lib.KnownHosts;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d"
         x:Class="OpenSSH_GUI.Views.EditKnownHostsWindow"
         x:DataType="viewModels:EditKnownHostsWindowViewModel"
@@ -35,7 +34,7 @@
         </Style>
     </Window.Styles>
     <Window.DataTemplates>
-        <DataTemplate DataType="knownHosts:IKnownHost">
+        <DataTemplate DataType="knownHosts:KnownHost">
             <Expander HorizontalAlignment="Stretch" Margin="5">
                 <Expander.Header>
                     <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
@@ -72,7 +71,7 @@
                     <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}"
                                   HorizontalAlignment="Stretch">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="knownHosts:IKnownHostKey">
+                            <DataTemplate DataType="knownHosts:KnownHostKey">
                                 <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Padding="5">
                                     <Grid ColumnDefinitions="* * *">
                                         <TextBlock Grid.Column="0" Text="{Binding KeyType }"

@@ -1,7 +1,6 @@
 ﻿using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Interfaces.KnownHosts;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -96,29 +95,27 @@ public class ServerConnection : ReactiveObject, IDisposable
         }
     }
 
-    public async ValueTask<IKnownHostsFile> GetKnownHostsFromServerAsync(CancellationToken token = default)
+    public async ValueTask<KnownHostsFile> GetKnownHostsFromServerAsync(CancellationToken token = default)
     {
         if (!IsConnected) return new KnownHostsFile("", true);
 
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
             token);
-        var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
-        var result = await Task.Run(() => command.Execute(), token);
-
-        return new KnownHostsFile(result, true);
+        using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
+        await command.ExecuteAsync(token);
+        return new KnownHostsFile(command.Result, true);
     }
 
-    public async ValueTask<bool> WriteKnownHostsToServerAsync(IKnownHostsFile knownHostsFile,
+    public async ValueTask<bool> WriteKnownHostsToServerAsync(KnownHostsFile knownHostsFile,
         CancellationToken token = default)
     {
         if (!IsConnected) return false;
 
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
             token);
-        var command =
+        using var command =
             ClientConnection.CreateCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {path}");
-        var result = await Task.Run(() => command.Execute(), token);
-
+        await command.ExecuteAsync(token);
         return command.ExitStatus == 0;
     }
 
