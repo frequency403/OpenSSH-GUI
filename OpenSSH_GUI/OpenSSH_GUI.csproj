@@ -54,6 +54,10 @@
             <AutoGen>True</AutoGen>
             <DependentUpon>StringsAndTexts.resx</DependentUpon>
         </Compile>
+        <Compile Update="Resources\Controls\SubmitButtons.axaml.cs">
+          <DependentUpon>SubmitButtons.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <PropertyGroup> <!-- OSX Settings -->

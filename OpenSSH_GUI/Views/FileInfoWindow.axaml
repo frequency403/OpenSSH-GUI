@@ -60,7 +60,6 @@
                         <avalonia:MaterialIcon Kind="FileEditOutline"/>
                     </Button>
                     <Button Padding="5" 
-                            IsEnabled="{Binding KeyFile.FileChangesAllowed}"
                             Command="{Binding DeleteKeyCommand}"
                             CommandParameter="{Binding KeyFile}"
                             Background="DarkRed">

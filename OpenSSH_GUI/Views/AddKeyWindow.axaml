@@ -2,10 +2,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:assets="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
         Height="375"
@@ -23,7 +22,7 @@
                    Target="KeyFileNameTextBox" />
             <Separator />
             <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
-            <TextBlock x:Name="KeyFileNameValidation" Foreground="Red" FontSize="12" />
+            <TextBlock x:Name="KeyFileNameValidation" Foreground="{DynamicResource DangerBrush}" FontSize="12" />
         </StackPanel>
         <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="* *"
               VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="20 5">
@@ -68,31 +67,15 @@
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
                       SelectedItem="{Binding KeyFormat}" />
         </StackPanel>
-        <Button Grid.Row="5" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom"
-                Command="{Binding BooleanSubmitCommand}"
-                IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
-            <Button.CommandParameter>
-                <system:Boolean>True</system:Boolean>
-            </Button.CommandParameter>
-            <ToolTip.Tip>
-                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
-            </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="KeyAdd" />
-        </Button>
-
-        <Button Grid.Row="5" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom"
-                Command="{Binding BooleanSubmitCommand}">
-            <Button.CommandParameter>
-                <system:Boolean>False</system:Boolean>
-            </Button.CommandParameter>
-            <ToolTip.Tip>
-                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
-            </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="Cancel" />
-        </Button>
-
+        
+        <controls:SubmitButtons Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" 
+                              Margin="20 10" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                              BooleanSubmit="{Binding BooleanSubmitCommand}"
+                              SubmitButtonEnabled="{Binding KeyNameValidationHelper.IsValid}"
+                              SubmitButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}"
+                              SubmitButtonIconKind="KeyAdd"
+                              
+                              AbortButtonIconKind="Cancel"
+                              AbortButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}"/>
     </Grid>
-
 </Window>

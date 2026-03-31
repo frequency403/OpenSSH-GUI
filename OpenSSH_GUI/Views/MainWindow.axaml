@@ -21,7 +21,7 @@
             <Setter Property="Template">
                 <ControlTemplate>
                     <Border Background="Transparent"
-                            BorderBrush="DimGray"
+                            BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="0 0 1 1"
                             CornerRadius="0">
                         <ContentPresenter Content="{TemplateBinding Content}"
@@ -104,7 +104,7 @@
                     Command="{Binding OpenCreateKeyWindowCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
-                    Background="ForestGreen">
+                    Background="{DynamicResource VerifiedBrush}">
                 <ToolTip.Tip>
                     <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowAddKeyToolTip}" />
                 </ToolTip.Tip>
@@ -119,13 +119,13 @@
                     Command="{Binding OpenEditKnownHostsWindowCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
-                    Background="CornflowerBlue">
+                    Background="{DynamicResource InfoColor}">
                 <ToolTip.Tip>
                     <StackPanel>
                         <TextBlock Margin="2"
                                    Text="{x:Static openSshGui:StringsAndTexts.MainWindowEditKnownHostsFileToolTip}" />
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
-                               Foreground="OrangeRed"
+                               Foreground="{DynamicResource RevokedBrush}"
                                IsVisible="{Binding !ServerConnectionService.IsConnected}" />
                     </StackPanel>
                 </ToolTip.Tip>
@@ -139,13 +139,13 @@
             <Button Grid.Column="2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
-                    Background="DarkOliveGreen"
+                    Background="{DynamicResource ModifiedBrush}"
                     Command="{Binding OpenEditAuthorizedKeysWindowCommand}">
                 <ToolTip.Tip>
                     <StackPanel>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowEditAuthorizedKeys}" />
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowIsNotRemoteTooltipText}"
-                               Foreground="OrangeRed"
+                               Foreground="{DynamicResource DangerBrush}"
                                IsVisible="{Binding !ServerConnectionService.IsConnected}" />
                     </StackPanel>
                 </ToolTip.Tip>
@@ -157,13 +157,13 @@
 
         <!-- Status Panel -->
         <Border Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10 5"
-                Background="#8c656c73" CornerRadius="5">
+                Background="{DynamicResource DisconnectedBrush}" CornerRadius="5">
             <Grid ColumnDefinitions="* * * *">
 
                 <!-- Connection -->
 
                 <Border Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                        Background="Gray" Margin="10 5" Padding="7" CornerRadius="5">
+                        Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7" CornerRadius="5">
                     <ToolTip.Tip>
                         <StackPanel>
                             <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
@@ -209,33 +209,31 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     IsVisible="{Binding ServerConnectionService.IsConnected}">
-                            <materialIcons:MaterialIcon Kind="Signal" Foreground="Green" />
+                            <materialIcons:MaterialIcon Kind="Signal" Foreground="{DynamicResource ConnectedBrush}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     IsVisible="{Binding !ServerConnectionService.IsConnected}">
-                            <materialIcons:MaterialIcon Kind="SignalOff" Foreground="Red" />
+                            <materialIcons:MaterialIcon Kind="SignalOff" Foreground="{DynamicResource RevokedBrush}" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
                 <!-- Item Count -->
 
-                <Border Grid.Column="1" Background="Gray" Margin="10 5" Padding="5" HorizontalAlignment="Stretch"
+                <Border Grid.Column="1" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="5" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5" Child="{Binding ItemsCountIcon}">
                     <ToolTip.Tip>
-                        <StackPanel Orientation="Horizontal">
-                            <Label
-                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                            <Label Content="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
-                            <Label
-                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
+                            <TextBlock Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
+                            <TextBlock Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>
                     </ToolTip.Tip>
                 </Border>
 
                 <!-- Settings -->
 
-                <Border Grid.Column="2" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
+                <Border Grid.Column="2" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickOptions}" />
@@ -299,7 +297,7 @@
 
                 <!-- Help -->
 
-                <Border Grid.Column="3" Background="Gray" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
+                <Border Grid.Column="3" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickHelp}" />

@@ -1,0 +1,49 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OpenSSH_GUI.Resources.Controls.SubmitButtons"
+             x:Name="Self">
+    <Grid ColumnDefinitions="* *">
+        <Button Grid.Column="0" Margin="0 0 5 0" Background="{DynamicResource RevokedColor}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                IsEnabled="{Binding AbortButtonEnabled, ElementName=Self}"
+                Command="{Binding BooleanSubmit, ElementName=Self}">
+            <Button.CommandParameter>
+                <system:Boolean>False</system:Boolean>
+            </Button.CommandParameter>
+            <ToolTip.Tip>
+                <Label Content="{Binding AbortButtonTooltip, ElementName=Self}" />
+            </ToolTip.Tip>
+            <Panel>
+                <ContentPresenter IsVisible="{Binding AbortButtonContentEnabled, ElementName=Self}"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                  Content="{Binding AbortButtonContent, ElementName=Self}" />
+                <avalonia:MaterialIcon IsVisible="{Binding !AbortButtonContentEnabled, ElementName=Self}"
+                                       Kind="{Binding AbortButtonIconKind, ElementName=Self}" />
+            </Panel>
+        </Button>
+
+        <Button Grid.Column="1" Margin="5 0 0 0" Background="{DynamicResource VerifiedColor}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                Command="{Binding BooleanSubmit, ElementName=Self}"
+                IsEnabled="{Binding SubmitButtonEnabled, ElementName=Self}">
+            <Button.CommandParameter>
+                <system:Boolean>True</system:Boolean>
+            </Button.CommandParameter>
+            <ToolTip.Tip>
+                <Label Content="{Binding SubmitButtonTooltip, ElementName=Self}" />
+            </ToolTip.Tip>
+            <Panel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ContentPresenter IsVisible="{Binding SubmitButtonContentEnabled, ElementName=Self}" 
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                  Content="{Binding SubmitButtonContent, ElementName=Self}" />
+                <avalonia:MaterialIcon IsVisible="{Binding !SubmitButtonContentEnabled, ElementName=Self}" 
+                                       Kind="{Binding SubmitButtonIconKind, ElementName=Self}" />
+            </Panel>
+        </Button>
+    </Grid>
+</UserControl>

@@ -9,12 +9,26 @@
                 <ResourceInclude Source="Resources/Styles/SshKeyFileStyle.axaml" />
                 <ResourceInclude Source="Resources/Styles/ThemeResource.axaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceInclude Source="Resources/Styles/ColorsDark.axaml"/>
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Light">
+                    <ResourceDictionary.MergedDictionaries>
+                        <ResourceInclude Source="Resources/Styles/ColorsLight.axaml"/>
+                    </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
         <FluentTheme DensityStyle="Compact">
             <FluentTheme.Palettes>
+
                 <ColorPaletteResources x:Key="Dark"
                                        Accent="{StaticResource DarkAccentColor}"
                                        AltHigh="{StaticResource DarkAltHighColor}"
@@ -43,7 +57,7 @@
                                        ErrorText="{StaticResource DarkErrorTextColor}"
                                        ListLow="{StaticResource DarkListLowColor}"
                                        ListMedium="{StaticResource DarkListMediumColor}"
-                                       RegionColor="{StaticResource DarkRegionColor}" />
+                                       RegionColor="{StaticResource DarkRegionColor}"/>
 
                 <ColorPaletteResources x:Key="Light"
                                        Accent="{StaticResource LightAccentColor}"
@@ -73,9 +87,10 @@
                                        ErrorText="{StaticResource LightErrorTextColor}"
                                        ListLow="{StaticResource LightListLowColor}"
                                        ListMedium="{StaticResource LightListMediumColor}"
-                                       RegionColor="{StaticResource LightRegionColor}" />
+                                       RegionColor="{StaticResource LightRegionColor}"/>
+
             </FluentTheme.Palettes>
         </FluentTheme>
-        <avalonia:MaterialIconStyles />
+        <avalonia:MaterialIconStyles/>
     </Application.Styles>
 </Application>

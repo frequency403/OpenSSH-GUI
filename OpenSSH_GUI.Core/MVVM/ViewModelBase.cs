@@ -33,6 +33,7 @@ public abstract class ViewModelBase<TViewModel, TParameters>(ILogger<TViewModel>
         CancellationToken cancellationToken = default)
     {
         IsInitialized = true;
+        Activator.Activate().DisposeWith(Disposables);
         return ValueTask.CompletedTask;
     }
 }
@@ -47,15 +48,10 @@ public abstract class ViewModelBase<TViewModel, TParameters>(ILogger<TViewModel>
 /// Integrates with ILogger for logging purposes and supports exception handling via a reactive subscription.
 /// Defines commands and methods that assist in the management of ViewModel-specific operations.
 /// </remarks>
-public abstract class ViewModelBase<TViewModel> : ViewModelBase, IActivatableViewModel, IViewFor<TViewModel>
+public abstract class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = null)
+    : ViewModelBase(logger), IActivatableViewModel, IViewFor<TViewModel>
     where TViewModel : ViewModelBase
 {
-    public ViewModelBase(ILogger<TViewModel>? logger = null) : base(logger)
-    {
-        Activator = new ViewModelActivator();
-    }
-    
-    
     /// <summary>
     /// Asynchronously initializes the view model, performing necessary setup operations.
     /// </summary>
@@ -64,6 +60,7 @@ public abstract class ViewModelBase<TViewModel> : ViewModelBase, IActivatableVie
     public virtual ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         IsInitialized = true;
+        Activator.Activate().DisposeWith(Disposables);
         return ValueTask.CompletedTask;
     }
     
@@ -74,7 +71,7 @@ public abstract class ViewModelBase<TViewModel> : ViewModelBase, IActivatableVie
         set => ViewModel = value as TViewModel;
     }
 
-    public ViewModelActivator Activator { get; }
+    public ViewModelActivator Activator { get; } = new();
 }
 
 /// <summary>

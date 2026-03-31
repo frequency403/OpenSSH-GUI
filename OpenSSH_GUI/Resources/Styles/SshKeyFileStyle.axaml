@@ -9,14 +9,14 @@
         <StackPanel Orientation="Horizontal" Spacing="15">
             <StackPanel HorizontalAlignment="Left" Spacing="10" Margin="0" Orientation="Horizontal">
                 <Panel IsVisible="{Binding !Password.IsValid}">
-                    <avalonia:MaterialIcon Kind="EncryptionOffOutline" Foreground="DarkGray"
+                    <avalonia:MaterialIcon Kind="EncryptionOffOutline" Foreground="{DynamicResource DisconnectedBrush}"
                                            IsVisible="{Binding !NeedsPassword}" />
-                    <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="DarkKhaki"
+                    <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="{DynamicResource CodeForegroundBrush}"
                                            IsVisible="{Binding NeedsPassword}" />
                 </Panel>
-                <avalonia:MaterialIcon IsVisible="{Binding Password.IsValid}" Kind="EncryptionCheck" Foreground="DarkGreen"/>
-                <avalonia:MaterialIcon IsVisible="{Binding IsPuttyKey}" Kind="KeyChain" Foreground="DarkOrange" />
-                <avalonia:MaterialIcon IsVisible="{Binding !IsPuttyKey}" Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                <avalonia:MaterialIcon IsVisible="{Binding Password.IsValid}" Kind="EncryptionCheck" Foreground="{DynamicResource ConnectedBrush}"/>
+                <avalonia:MaterialIcon IsVisible="{Binding IsPuttyKey}" Kind="KeyChain" Foreground="{DynamicResource ConnectingBrush}" />
+                <avalonia:MaterialIcon IsVisible="{Binding !IsPuttyKey}" Kind="FileKeyOutline" Foreground="{DynamicResource VerifiedBrush}" />
             </StackPanel>
             <StackPanel HorizontalAlignment="Left">
                 <StackPanel.Styles>
@@ -39,7 +39,7 @@
                 <Border.Styles>
                     <Style Selector="Border.MainDisplay:pointerover">
                         <Setter Property="RenderTransform" Value="scale(1.001)" />
-                        <Setter Property="Background" Value="#20adadad" />
+                        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
                     </Style>
                 </Border.Styles>
                 <ToolTip.Tip>
@@ -57,12 +57,12 @@
                                 BorderBrush="Transparent" CornerRadius="25" Classes="WithContextMenu">
                             <Border.Styles>
                                 <Style Selector="Border.WithContextMenu:pointerover">
-                                    <Setter Property="BorderBrush" Value="LightGreen" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}" />
                                 </Style>
                             </Border.Styles>
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" IsVisible="{Binding Password.IsValid}">
-                                    <Button Background="DarkViolet"
+                                    <Button Background="{DynamicResource NavigationActiveBrush}"
                                             Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ResetKeyCommand}"
                                             CommandParameter="{Binding .}">
                                         <ToolTip.Tip>
@@ -72,9 +72,9 @@
                                     </Button>
                                 </StackPanel>
                                 <StackPanel IsVisible="{Binding !Password.IsValid}">
-                                    <avalonia:MaterialIcon Kind="EncryptionOffOutline" Foreground="DarkGray"
+                                    <avalonia:MaterialIcon Kind="EncryptionOffOutline" Foreground="{DynamicResource DisconnectedBrush}"
                                                            IsVisible="{Binding !NeedsPassword}" />
-                                    <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="DarkKhaki"
+                                    <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="{DynamicResource CodeForegroundBrush}"
                                                            IsVisible="{Binding NeedsPassword}" />
                                 </StackPanel>
                             </StackPanel>
@@ -82,18 +82,18 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" HorizontalAlignment="Left">
                             <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding IsPuttyKey}">
-                                <avalonia:MaterialIcon Kind="KeyChain" Foreground="DarkOrange" />
+                                <avalonia:MaterialIcon Kind="KeyChain" Foreground="{DynamicResource AccentHoverBrush}" />
                             </Border>
                             <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding !IsPuttyKey}">
-                                <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="DarkSeaGreen" />
+                                <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="{DynamicResource VerifiedBrush}" />
                             </Border>
                             <TextBlock Padding="5" Text="{Binding KeyType}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Grid>
                     <TextBlock Padding="5" Grid.Column="1" Text="{Binding FingerprintString}" Margin="5"
                                HorizontalAlignment="Center" IsVisible="{Binding !NeedsPassword}" />
-                    <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch" Background="YellowGreen"
-                            Foreground="IndianRed"
+                    <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource AccentHoverBrush}"
+                            Foreground="{DynamicResource AccentForegroundBrush}"
                             HorizontalContentAlignment="Center" IsVisible="{Binding NeedsPassword}"
                             Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePasswordCommand}"
                             CommandParameter="{Binding .}">
@@ -105,9 +105,10 @@
                         <Button Padding="5" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 CornerRadius="20"
+                                IsEnabled="{Binding !NeedsPassword}"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPublicKeyExportWindowCommand}"
                                 CommandParameter="{Binding .}"
-                                Background="LightCoral">
+                                Background="{DynamicResource RevokedBrush}">
                             <ToolTip.Tip>
                                 <Label
                                     Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
@@ -123,7 +124,7 @@
                                 IsEnabled="{Binding !NeedsPassword}"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPrivateKeyExportWindowCommand}"
                                 CommandParameter="{Binding .}"
-                                Background="DarkOrange">
+                                Background="{DynamicResource ExpiredBrush}">
                             <ToolTip.Tip>
                                 <Label
                                     Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
@@ -138,7 +139,7 @@
                                 CornerRadius="20"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindowCommand}"
                                 CommandParameter="{Binding FingerprintString}"
-                                Background="DarkSlateBlue">
+                                Background="{DynamicResource NavigationActiveBrush}">
                             <ToolTip.Tip>
                                 <Label
                                     Content="Open Fileinfo Window" />

@@ -7,6 +7,7 @@
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:models="clr-namespace:OpenSSH_GUI.SshConfig.Models;assembly=OpenSSH_GUI.SshConfig"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -120,38 +121,9 @@
                 <avalonia:MaterialIcon Kind="Replay" />
             </Button>
         </TextBlock>
-        <Grid ColumnDefinitions="* *" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
-            <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
-                    Background="Red"
-                    Command="{Binding BooleanSubmitCommand}"
-                    HotKey="Escape">
-                <Button.CommandParameter>
-                    <system:Boolean>False</system:Boolean>
-                </Button.CommandParameter>
-                <ToolTip.Tip>
-                    <Label Content="{x:Static openSshGui:StringsAndTexts.CancelAndClose}" />
-                </ToolTip.Tip>
-                <avalonia:MaterialIcon Kind="Cancel" />
-            </Button>
-            <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
-                    Background="LimeGreen" 
-                    IsEnabled="{Binding CanConnectToServer}"
-                    Command="{Binding BooleanSubmitCommand}"
-                    HotKey="Enter">
-                <Button.Styles>
-                    <Style Selector="Button:enabled">
-                        <Setter Property="ToolTip.Tip" Value="TEST A VALID CONNECTION FIRST B" />
-                    </Style>
-                    <Style Selector="Button:disabled">
-                        <Setter Property="ToolTip.Tip"
-                                Value="{x:Static openSshGui:StringsAndTexts.ConnectWindowAcceptConnection}" />
-                    </Style>
-                </Button.Styles>
-                <Button.CommandParameter>
-                    <system:Boolean>True</system:Boolean>
-                </Button.CommandParameter>
-                <avalonia:MaterialIcon Kind="Check" />
-            </Button>
-        </Grid>
+        <controls:SubmitButtons Margin="5" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" 
+                                BooleanSubmit="{Binding BooleanSubmitCommand}"
+                                SubmitButtonEnabled="{Binding CanConnectToServer}"
+                                SubmitButtonIconKind="CheckOutline" />
     </Grid>
 </Window>

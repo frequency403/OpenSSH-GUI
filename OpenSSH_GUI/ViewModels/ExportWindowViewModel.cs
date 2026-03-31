@@ -1,4 +1,5 @@
-﻿using Avalonia.Input.Platform;
+﻿using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.MVVM;
@@ -26,8 +27,15 @@ public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger
     protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
-        if (inputParameter)
-            await clipboard.SetTextAsync(Export);
+        try
+        {
+            if (inputParameter)
+                await clipboard.SetTextAsync(Export);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error submitting export to clipboard");
+        }
     }
 }
 
