@@ -19,53 +19,59 @@
         WindowStartupLocation="CenterOwner"
         Title="{Binding WindowTitle}">
     <Window.Styles>
+
         <Style Selector="MenuFlyoutPresenter">
-            <Setter Property="Background" Value="DarkCyan" />
-            <Setter Property="BorderBrush" Value="#006064" />
+            <Setter Property="Background" Value="{DynamicResource SplitButtonRemoteBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonRemoteDividerBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="CornerRadius" Value="4" />
             <Setter Property="MinWidth" Value="120" />
         </Style>
+
         <Style Selector="SplitButton">
             <Setter Property="MinHeight" Value="0" />
         </Style>
+
         <Style Selector="SplitButton /template/ Button#PART_PrimaryButton">
             <Setter Property="MinHeight" Value="0" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
+
         <Style Selector="SplitButton /template/ Button#PART_SecondaryButton">
             <Setter Property="MinHeight" Value="0" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="Padding" Value="2 0" />
         </Style>
+
     </Window.Styles>
     <Grid RowDefinitions="* * * * *" Margin="20">
         <StackPanel Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
             <UniformGrid Rows="1" Columns="2" ColumnSpacing="50">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
-                    <TextBlock Text="Found"/>
-                    <TextBlock Text="{Binding KeyFile.KeyFiles.Length, FallbackValue=0}" FontWeight="Bold"/>
+                    <TextBlock Text="Found" />
+                    <TextBlock Text="{Binding KeyFile.KeyFiles.Length, FallbackValue=0}" FontWeight="Bold" />
                     <TextBlock Text="associated Files" />
                 </StackPanel>
                 <UniformGrid Rows="1" Columns="2" ColumnSpacing="5" HorizontalAlignment="Right">
-                    <Button Padding="5" 
+                    <Button Padding="5"
                             IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
                             Command="{Binding ChangeFileNameCommand}"
                             CommandParameter="{Binding KeyFile}"
-                            Background="Purple">
+                            Background="{DynamicResource AdminBrush}">
                         <ToolTip.Tip>
-                            <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}"/>
+                            <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}" />
                         </ToolTip.Tip>
-                        <avalonia:MaterialIcon Kind="FileEditOutline"/>
+                        <avalonia:MaterialIcon Kind="FileEditOutline" />
                     </Button>
-                    <Button Padding="5" 
+                    <Button Padding="5"
                             Command="{Binding DeleteKeyCommand}"
                             CommandParameter="{Binding KeyFile}"
-                            Background="DarkRed">
+                            Background="{DynamicResource RevokedBrush}">
                         <Button.Styles>
                             <Style Selector="Button:disabled">
-                                <Setter Property="ToolTip.Tip" Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
+                                <Setter Property="ToolTip.Tip"
+                                        Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
                             </Style>
                         </Button.Styles>
                         <ToolTip.Tip>
@@ -81,8 +87,8 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type io:FileInfo}">
                         <StackPanel Margin="0 5">
-                            <TextBlock Text="{Binding FullName}"/>
-                            <Separator Margin="0 5 10 0 "/>
+                            <TextBlock Text="{Binding FullName}" />
+                            <Separator Margin="0 5 10 0 " />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -91,97 +97,116 @@
         <Grid Grid.Row="2" HorizontalAlignment="Stretch" Margin="10 5"
               RowDefinitions="Auto *" ColumnDefinitions="* Auto">
             <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                <TextBlock Text="Key format"/>
+                <TextBlock Text="Key format" />
                 <Separator />
             </StackPanel>
-            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="10" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                <TextBlock Text="Current:"/>
-                <TextBlock Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}"/>
+            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="10" Orientation="Horizontal"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                <TextBlock Text="Current:" />
+                <TextBlock
+                    Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}" />
             </StackPanel>
-            <SplitButton Grid.Row="1" Grid.Column="1" Padding="5" 
-                                     HorizontalAlignment="Stretch"
-                                     VerticalAlignment="Center"
-                                     MinHeight="0"
-                                     IsEnabled="{Binding KeyFile.FileChangesAllowed}"
-                                     Command="{Binding ChangeFormatOfKeyFileCommand}"
-                                     CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
-                            <SplitButton.Resources>
-                                <SolidColorBrush x:Key="SplitButtonBackground">DarkCyan</SolidColorBrush>
-                                <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver">#00838F</SolidColorBrush>
-                                <SolidColorBrush x:Key="SplitButtonBackgroundPressed">#006064</SolidColorBrush>
-                                <SolidColorBrush x:Key="SplitButtonBackgroundDisabled">#004F4F</SolidColorBrush>
-                            
-                                <SolidColorBrush x:Key="SplitButtonDividerBackground">#006064</SolidColorBrush>
-                            
-                                <SolidColorBrush x:Key="SplitButtonForeground">White</SolidColorBrush>
-                                <SolidColorBrush x:Key="SplitButtonForegroundPointerOver">White</SolidColorBrush>
-                                <SolidColorBrush x:Key="SplitButtonForegroundPressed">White</SolidColorBrush>
-                            </SplitButton.Resources>
+            <SplitButton Grid.Row="1" Grid.Column="1" Padding="5"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Center"
+                         MinHeight="0"
+                         IsEnabled="{Binding KeyFile.FileChangesAllowed}"
+                         Command="{Binding ChangeFormatOfKeyFileCommand}"
+                         CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
 
-                            <SplitButton.Flyout>
-                                <MenuFlyout Placement="BottomEdgeAlignedLeft"
-                                            ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">
-                                    <MenuFlyout.ItemContainerTheme>
-                                        <ControlTheme TargetType="MenuItem"
-                                                      BasedOn="{StaticResource {x:Type MenuItem}}"
-                                                      x:DataType="keygen:SshKeyFormat">
-                                            
-                                            <Setter Property="ToolTip.Tip">
-                                                    <Template>
-                                                        <StackPanel Orientation="Horizontal" Spacing="2">
-                                                            <TextBlock Text="Change format to the"/>
-                                                            <TextBlock Text="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" FontWeight="ExtraBold"/>
-                                                            <TextBlock Text="format"/>
-                                                        </StackPanel>
-                                                    </Template>
-                                            </Setter>
-                                            <Setter Property="ToolTip.ShowDelay" Value="0" />
-                                            <Setter Property="Background" Value="DarkCyan" />
-                                            <Setter Property="Foreground" Value="White" />
-                                            <Setter Property="Padding" Value="12,8" />
-                                            <Setter Property="HorizontalAlignment" Value="Stretch" />
-                                            <Setter Property="Header"
-                                                    Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
-                                            <Setter Property="Command"
-                                                    Value="{Binding $parent[Window].((viewModels:FileInfoWindowViewModel)DataContext).ChangeFormatOfKeyFileCommand}" />
-                                            <Setter Property="CommandParameter"
-                                                    Value="{Binding}" />
+                <SplitButton.Resources>
+                    <SolidColorBrush x:Key="SplitButtonBackground"
+                                     Color="{DynamicResource SplitButtonRemoteBackgroundColor}" />
+                    <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver"
+                                     Color="{DynamicResource SplitButtonRemotePointerOverColor}" />
+                    <SolidColorBrush x:Key="SplitButtonBackgroundPressed"
+                                     Color="{DynamicResource SplitButtonRemotePressedColor}" />
+                    <SolidColorBrush x:Key="SplitButtonBackgroundDisabled"
+                                     Color="{DynamicResource SplitButtonRemoteDisabledColor}" />
+                    <SolidColorBrush x:Key="SplitButtonDividerBackground"
+                                     Color="{DynamicResource SplitButtonRemoteDividerColor}" />
+                    <SolidColorBrush x:Key="SplitButtonForeground"
+                                     Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+                    <SolidColorBrush x:Key="SplitButtonForegroundPointerOver"
+                                     Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+                    <SolidColorBrush x:Key="SplitButtonForegroundPressed"
+                                     Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+                </SplitButton.Resources>
 
-                                            <Style Selector="^:pointerover /template/ Border#PART_LayoutRoot">
-                                                <Setter Property="Background" Value="#00838F" />
-                                            </Style>
-                                            <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
-                                                <Setter Property="Background" Value="#006064" />
-                                            </Style>
+                <SplitButton.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedLeft"
+                                ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">
+                        <MenuFlyout.ItemContainerTheme>
+                            <ControlTheme TargetType="MenuItem"
+                                          BasedOn="{StaticResource {x:Type MenuItem}}"
+                                          x:DataType="keygen:SshKeyFormat">
 
-                                        </ControlTheme>
-                                    </MenuFlyout.ItemContainerTheme>
-                                </MenuFlyout>
-                            </SplitButton.Flyout>
+                                <Setter Property="ToolTip.Tip">
+                                    <Template>
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <TextBlock Text="Change format to the" />
+                                            <TextBlock
+                                                Text="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}"
+                                                FontWeight="ExtraBold" />
+                                            <TextBlock Text="format" />
+                                        </StackPanel>
+                                    </Template>
+                                </Setter>
+                                <Setter Property="ToolTip.ShowDelay" Value="0" />
+                                <Setter Property="Background"
+                                        Value="{DynamicResource SplitButtonRemoteBackgroundBrush}" />
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource SplitButtonRemoteForegroundBrush}" />
+                                <Setter Property="Padding" Value="12,8" />
+                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                <Setter Property="Header"
+                                        Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
+                                <Setter Property="Command"
+                                        Value="{Binding $parent[Window].((viewModels:FileInfoWindowViewModel)DataContext).ChangeFormatOfKeyFileCommand}" />
+                                <Setter Property="CommandParameter" Value="{Binding}" />
 
-                            <ToolTip.Tip>
-                                <StackPanel Orientation="Horizontal" Spacing="2">
-                                    <TextBlock Text="Change format to the"/>
-                                    <TextBlock Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat, Converter={x:Static converters:Converter.FormatToStringConverter}}" FontWeight="ExtraBold"/>
-                                    <TextBlock Text="format"/>
-                                </StackPanel>
-                            </ToolTip.Tip>
-                            <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
+                                <Style Selector="^:pointerover /template/ Border#PART_LayoutRoot">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SplitButtonRemotePointerOverBrush}" />
+                                </Style>
+                                <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SplitButtonRemotePressedBrush}" />
+                                </Style>
 
-                        </SplitButton>
+                            </ControlTheme>
+                        </MenuFlyout.ItemContainerTheme>
+                    </MenuFlyout>
+                </SplitButton.Flyout>
+
+                <ToolTip.Tip>
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <TextBlock Text="Change format to the" />
+                        <TextBlock
+                            Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat,
+                              Converter={x:Static converters:Converter.FormatToStringConverter}}"
+                            FontWeight="ExtraBold" />
+                        <TextBlock Text="format" />
+                    </StackPanel>
+                </ToolTip.Tip>
+
+                <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
+
+            </SplitButton>
         </Grid>
         <Grid Grid.Row="3" RowDefinitions="* *" ColumnDefinitions="5* Auto">
             <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Spacing="2">
-                <TextBlock Text="Password"/>    
+                <TextBlock Text="Password" />
                 <Separator />
             </StackPanel>
-            <controls:PasswordDisplay Grid.Row="1" Grid.Column="0" Name="PasswordBox" SecurePassword="{Binding KeyFile.Password}"/>
+            <controls:PasswordDisplay Grid.Row="1" Grid.Column="0" Name="PasswordBox"
+                                      SecurePassword="{Binding KeyFile.Password}" />
             <Button Grid.Row="1" Grid.Column="1" IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }"
                     Command="{Binding CopyPasswordIntoClipboardCommand}"
                     CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}"
                     Height="{Binding Height, ElementName=PasswordBox}"
                     HorizontalAlignment="Stretch"
-                    Background="LightSeaGreen">
+                    Background="{DynamicResource PrimaryHoverBrush}">
                 <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
             </Button>
         </Grid>

@@ -41,7 +41,7 @@
 
             <!-- Error hint, shown only on validation failure -->
             <TextBlock x:Name="PART_Error"
-                       Foreground="Crimson"
+                       Foreground="{DynamicResource DangerBrush}"
                        FontSize="12"
                        IsVisible="False"
                        TextWrapping="Wrap" />

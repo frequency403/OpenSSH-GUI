@@ -127,5 +127,19 @@
 
     <Color x:Key="SuccessColor">#FF28C840</Color>
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    
+    <Color x:Key="SplitButtonRemoteBackgroundColor">#FF1A7A7A</Color>
+    <Color x:Key="SplitButtonRemotePointerOverColor">#FF1D8E8E</Color>
+    <Color x:Key="SplitButtonRemotePressedColor">#FF155F5F</Color>
+    <Color x:Key="SplitButtonRemoteDisabledColor">#FF0F4040</Color>
+    <Color x:Key="SplitButtonRemoteDividerColor">#FF155F5F</Color>
+    <Color x:Key="SplitButtonRemoteForegroundColor">#FFE6EDF3</Color>
+
+    <SolidColorBrush x:Key="SplitButtonRemoteBackgroundBrush"   Color="{StaticResource SplitButtonRemoteBackgroundColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemotePointerOverBrush"  Color="{StaticResource SplitButtonRemotePointerOverColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemotePressedBrush"      Color="{StaticResource SplitButtonRemotePressedColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemoteDisabledBrush"     Color="{StaticResource SplitButtonRemoteDisabledColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemoteDividerBrush"      Color="{StaticResource SplitButtonRemoteDividerColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemoteForegroundBrush"   Color="{StaticResource SplitButtonRemoteForegroundColor}"/>
 
 </ResourceDictionary>

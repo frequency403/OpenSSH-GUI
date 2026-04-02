@@ -112,7 +112,7 @@
                 <Label Content="{Binding StatusButtonToolTip}" />
             </ToolTip.Tip>
             <TextBlock Text="{Binding StatusButtonText}" VerticalAlignment="Center" />
-            <Button HorizontalAlignment="Right" Background="DarkSlateGray"
+            <Button HorizontalAlignment="Right" Background="{DynamicResource ForegroundSecondaryBrush}"
                     Command="{Binding ResetCommand}"
                     IsVisible="{Binding CanConnectToServer}">
                 <ToolTip.Tip>

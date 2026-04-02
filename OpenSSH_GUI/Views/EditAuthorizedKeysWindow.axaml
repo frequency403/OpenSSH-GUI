@@ -44,7 +44,7 @@
     <Window.Styles>
         <Style Selector="ToggleButton materialIcons|MaterialIcon.stay">
             <Setter Property="IsVisible" Value="True" />
-            <Setter Property="Foreground" Value="Green" />
+            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
         </Style>
         <Style Selector="ToggleButton materialIcons|MaterialIcon.delete">
             <Setter Property="IsVisible" Value="False" />
@@ -54,7 +54,7 @@
         </Style>
         <Style Selector="ToggleButton:checked materialIcons|MaterialIcon.delete">
             <Setter Property="IsVisible" Value="True" />
-            <Setter Property="Foreground" Value="Red" />
+            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
         </Style>
     </Window.Styles>
     <Grid RowDefinitions="10* *" ColumnDefinitions="* *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -91,7 +91,7 @@
                             Command="{Binding AddKey}"
                             CommandParameter="{Binding SelectedKey}"
                             Margin="5"
-                            Background="YellowGreen">
+                            Background="{DynamicResource TagBrush}">
                         <ToolTip.Tip>
                             <StackPanel Orientation="Horizontal">
                                 <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysAddKeyToFileOf}" />

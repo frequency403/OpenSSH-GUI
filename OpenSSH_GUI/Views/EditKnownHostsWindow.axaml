@@ -20,7 +20,7 @@
         </Style>
         <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
             <Setter Property="IsVisible" Value="True" />
-            <Setter Property="Foreground" Value="Green" />
+            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
         </Style>
         <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
             <Setter Property="IsVisible" Value="False" />
@@ -30,7 +30,7 @@
         </Style>
         <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
             <Setter Property="IsVisible" Value="True" />
-            <Setter Property="Foreground" Value="Red" />
+            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
         </Style>
     </Window.Styles>
     <Window.DataTemplates>
