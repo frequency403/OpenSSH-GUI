@@ -19,7 +19,7 @@
         WindowStartupLocation="CenterOwner">
     <Window.DataTemplates>
         <DataTemplate DataType="authorizedKeys:AuthorizedKey">
-            <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Margin="5">
+            <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 0 0 1" Margin="5">
                 <Grid ColumnDefinitions="* 3* 2* *">
                     <TextBlock Grid.Column="0"
                                Text="{Binding KeyType}"

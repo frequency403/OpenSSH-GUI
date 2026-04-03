@@ -54,7 +54,7 @@
                     </Grid>
                 </Expander.Header>
                 <Grid RowDefinitions="* *" ColumnDefinitions="* * *">
-                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="DimGray"
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="{DynamicResource BorderSubtleBrush}"
                             BorderThickness="0 0 0 1" Margin="0 5">
                         <Grid ColumnDefinitions="* * *">
                             <TextBlock Grid.Column="0"
@@ -72,7 +72,7 @@
                                   HorizontalAlignment="Stretch">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="knownHosts:KnownHostKey">
-                                <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Padding="5">
+                                <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 0 0 1" Padding="5">
                                     <Grid ColumnDefinitions="* * *">
                                         <TextBlock Grid.Column="0" Text="{Binding KeyType }"
                                                    HorizontalAlignment="Center" />
