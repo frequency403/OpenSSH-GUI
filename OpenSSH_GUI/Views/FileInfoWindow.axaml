@@ -79,6 +79,9 @@
                         </ToolTip.Tip>
                         <avalonia:MaterialIcon Kind="DeleteOutline" />
                     </Button>
+                    <Button Command="{Binding ChangePasswordOfKeyFileCommand}">
+                        <avalonia:MaterialIcon Kind="KeyAlertOutline"></avalonia:MaterialIcon>
+                    </Button>
                 </UniformGrid>
             </UniformGrid>
             <Separator />

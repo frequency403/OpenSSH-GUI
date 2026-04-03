@@ -58,6 +58,20 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     }
 
     [ReactiveCommand]
+    private async Task ChangePasswordOfKeyFileAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _keyManager.ChangePasswordOfKeyAsync(KeyFile, "54321", token: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error changing password of key file");
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(e);
+        }
+    }
+
+    [ReactiveCommand]
     private async Task ChangeFormatOfKeyFileAsync(SshKeyFormat format, CancellationToken cancellationToken = default)
     {
         try

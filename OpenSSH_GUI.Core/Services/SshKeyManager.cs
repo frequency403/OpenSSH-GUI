@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -97,6 +98,33 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
+    private static IEnumerable<BackedUpFile> BackupFiles(params FileInfo[] files)
+    {
+        foreach (var file in files)
+        {
+            var destination = Path.Combine(_backupDirectory, string.Join(".", file.Name, BackupFileExtension));
+            var backup = new BackedUpFile { InitialFile = file, BackupFile = new FileInfo(destination) };
+            backup.Backup();
+            yield return backup;
+        }
+    }
+    
+    private static void RestoreBackupFiles(params BackedUpFile[] files)
+    {
+        foreach (var file in files)
+        {
+            file.Restore();
+        }
+    }
+    
+    private static void DeleteBackupFiles(params BackedUpFile[] files)
+    {
+        foreach (var file in files)
+        {
+            file.Delete();
+        }
+    }
+
     private static IEnumerable<FileInfo> MoveToBackupDirectory(params FileInfo[] files)
     {
         foreach (var file in files)
@@ -157,6 +185,68 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
     ///     Gets the collection of detected SSH keys.
     /// </summary>
     public ReadOnlyObservableCollection<SshKeyFile> SshKeys { get; }
+
+    public async Task ChangePasswordOfKeyAsync(SshKeyFile key, string newPassword, Encoding? encoding = null, CancellationToken token = default)
+    {
+        EnableTempLogger();
+        encoding ??= Encoding.UTF8;
+        
+        var backupFiles = BackupFiles(key.KeyFiles).ToArray();
+        if (!await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token))
+        {
+            _logger.LogError("Failed to acquire semaphore within 5 seconds");
+            throw new TimeoutException("Failed to acquire semaphore within 5 seconds");
+        }
+
+        var semaphoreAquired = true;
+        var errorsOccured = false;
+        try
+        {
+            using var process = new Process();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = "ssh-keygen",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            process.StartInfo.ArgumentList.Add("-p");
+            process.StartInfo.ArgumentList.Add(string.Join(" ", "-f", key.AbsoluteFilePath));
+            process.StartInfo.ArgumentList.Add(string.Join(" ", "-P", $"\"{key.Password.GetPasswordString()}\""));
+            process.StartInfo.ArgumentList.Add(string.Join(" ", "-N", $"\"{newPassword}\""));
+
+            if (process.Start())
+            {
+                await process.WaitForExitAsync(token);
+                if (process.ExitCode != 0)
+                {
+                    var message = await process.StandardError.ReadToEndAsync(token);
+                    _logger.LogError("ssh-keygen exited with code {exitCode} and message: {message}", process.ExitCode,
+                        message);
+                    throw new Exception($"ssh-keygen exited with code {process.ExitCode}");
+                }
+            }
+
+            key.Load(SshKeyFileSource.FromDisk(key.AbsoluteFilePath), encoding.GetBytes(newPassword));
+            DeleteBackupFiles(backupFiles);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error changing password of key {key}", key.AbsoluteFilePath);
+            RestoreBackupFiles(backupFiles);
+        }
+        finally
+        {
+            if (semaphoreAquired)
+                _semaphoreSlim.Release();
+            DisableTempLogger(errorsOccured);
+        }
+        
+        // key.Password.Set(encoding.GetBytes(newPassword), encoding);
+        // return ChangeFormatOfKeyAsync(key, key.Format ?? SshKeyFormat.OpenSSH, token);
+    }
+    
 
     public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key,
         CancellationToken token = default)
