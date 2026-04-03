@@ -40,13 +40,15 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             .Subscribe(e =>
             {
                 WindowTitle = string.Join(" ", e.FileName, e.Format, e.Comment);
+                Password = e.Password.IsValid 
+                    ? e.Password.GetPasswordString() 
+                    : string.Empty;
             }).DisposeWith(Disposables);
     }
     
-    [Reactive]
-    private SshKeyFile _keyFile;
-    
+    [Reactive] private SshKeyFile _keyFile;
     [Reactive] private string _windowTitle = "Key info";
+    [Reactive] private string _password = string.Empty;
     
     
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)

@@ -7,7 +7,6 @@
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         xmlns:keygen="clr-namespace:SshNet.Keygen;assembly=SshNet.Keygen"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.FileInfoWindow"
@@ -45,7 +44,7 @@
         </Style>
 
     </Window.Styles>
-    <Grid RowDefinitions="* * * * *" Margin="20">
+    <Grid RowDefinitions="* * * Auto" Margin="20">
         <StackPanel Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
             <UniformGrid Rows="1" Columns="2" ColumnSpacing="50">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
@@ -194,21 +193,46 @@
 
             </SplitButton>
         </Grid>
-        <Grid Grid.Row="3" RowDefinitions="* *" ColumnDefinitions="5* Auto">
-            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Spacing="2">
+        <UniformGrid Grid.Row="3" Grid.ColumnSpan="2" Rows="2" RowSpacing="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10">
+            <StackPanel HorizontalAlignment="Stretch" Spacing="2">
                 <TextBlock Text="Password" />
                 <Separator />
             </StackPanel>
-            <controls:PasswordDisplay Grid.Row="1" Grid.Column="0" Name="PasswordBox"
-                                      SecurePassword="{Binding KeyFile.Password}" />
-            <Button Grid.Row="1" Grid.Column="1" IsEnabled="{Binding PasswordVisible, ElementName=PasswordBox }"
+            <Grid ColumnDefinitions="* Auto" ColumnSpacing="5">
+                <TextBox Grid.Column="0" Name="PasswordBox" LetterSpacing="2"
+                     Text="{Binding Password}"
+                     IsEnabled="{Binding KeyFile.Password.IsValid}"
+                     PasswordChar="*"
+                                 IsUndoEnabled="False"
+                                 IsReadOnly="True"
+                                 AcceptsReturn="False"
+                                 AcceptsTab="False"
+                                 Focusable="False"
+                                 MaxLines="1"
+                                 SelectionBrush="Transparent">
+                <TextBox.InnerRightContent>
+                    <ToggleButton IsChecked="{Binding RevealPassword, ElementName=PasswordBox}"
+                                  IsThreeState="False">
+                        <StackPanel>
+                            <avalonia:MaterialIcon Kind="EyeOutline"
+                                                   IsVisible="{Binding RevealPassword, ElementName=PasswordBox}" />
+                            <avalonia:MaterialIcon Kind="EyeOffOutline"
+                                                   IsVisible="{Binding !RevealPassword, ElementName=PasswordBox}" />
+                        </StackPanel>
+                    </ToggleButton>
+                </TextBox.InnerRightContent>
+            </TextBox>
+            <Button Grid.Column="1" IsEnabled="{Binding RevealPassword, ElementName=PasswordBox }"
                     Command="{Binding CopyPasswordIntoClipboardCommand}"
-                    CommandParameter="{Binding SecurePassword, ElementName=PasswordBox}"
+                    CommandParameter="{Binding KeyFile.Password}"
                     Height="{Binding Height, ElementName=PasswordBox}"
                     HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
                     Background="{DynamicResource PrimaryHoverBrush}">
                 <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
             </Button>
-        </Grid>
+            </Grid>
+            
+        </UniformGrid>
     </Grid>
 </Window>
