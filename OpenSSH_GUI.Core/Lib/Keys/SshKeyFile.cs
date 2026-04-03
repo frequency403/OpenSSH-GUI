@@ -138,10 +138,10 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     An <see cref="ILogger{SshKeyFile}" /> used for diagnostic output throughout the
     ///     lifetime of this instance.
     /// </param>
-    public SshKeyFile(ILogger<SshKeyFile> logger, ILoggerFactory loggerFactory)
+    public SshKeyFile(ILogger<SshKeyFile> logger)
     {
         _logger = logger;
-        Password = new SshKeyFilePassword(loggerFactory.CreateLogger<SshKeyFilePassword>());
+        Password = new SshKeyFilePassword();
         this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(tuple =>
@@ -256,7 +256,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     password properties and operations while supporting password validation.
     /// </summary>
     [Reactive(SetModifier = AccessModifier.Private)]
-    private SshKeyFilePassword _password = new(NullLogger<SshKeyFilePassword>.Instance);
+    private SshKeyFilePassword _password = new();
     
     /// <summary>
     ///     Asynchronously releases the unmanaged resources used by the SshKeyFile instance

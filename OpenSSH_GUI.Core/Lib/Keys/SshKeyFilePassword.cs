@@ -38,13 +38,11 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     ///     Initialises the state machine and wires all derived properties
     ///     to the internal mutation subject.
     /// </summary>
-    public SshKeyFilePassword(ILogger<SshKeyFilePassword> logger)
+    public SshKeyFilePassword()
     {
          _bufferWriter.WhenAnyValue(vm => vm.WrittenCount)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Do(count => logger.LogDebug("WrittenCount changed to {count}",  count))
             .Select(e => e != 0)
-            .Do(isValid => logger.LogDebug("IsValid will be pushed as {isValid}", isValid))
             .Subscribe(eval =>
             {
                 this.RaisePropertyChanging(nameof(WrittenSpan));
