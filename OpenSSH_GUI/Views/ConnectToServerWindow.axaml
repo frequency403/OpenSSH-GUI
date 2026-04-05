@@ -8,6 +8,7 @@
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:models="clr-namespace:OpenSSH_GUI.SshConfig.Models;assembly=OpenSSH_GUI.SshConfig"
         xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -78,12 +79,14 @@
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
                      Text="{Binding Password}" Watermark="Password" PasswordChar="*"
+                     RevealPassword="False"
                      IsEnabled="{Binding !CanConnectToServer}"
                      IsVisible="{Binding !AuthWithPublicKey}" />
             <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
                       ItemsSource="{Binding SshKeyManager.SshKeys}"
                       SelectedItem="{Binding SelectedPublicKey}"
+                      ItemContainerTheme="{StaticResource SshKeyItemContainerTheme}"
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
