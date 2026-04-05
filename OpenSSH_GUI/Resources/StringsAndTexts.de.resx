@@ -253,7 +253,7 @@
         <value>Passwort eingeben:</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
-        <value>Passwort für {0} Schlüsseldatei bereitstellen</value>
+        <value>Passwort für Schlüsseldatei eingeben</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
         <value>Falsches Passwort!</value>

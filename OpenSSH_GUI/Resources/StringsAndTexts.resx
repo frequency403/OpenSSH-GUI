@@ -265,7 +265,7 @@
         <value>Enter the password:</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordPromptBodyHeading" xml:space="preserve">
-        <value>Provide password for key {0}</value>
+        <value>Provide password for key</value>
     </data>
     <data name="MainWindowViewModelProvidePasswordErrorHeading" xml:space="preserve">
         <value>Password incorrect!</value>

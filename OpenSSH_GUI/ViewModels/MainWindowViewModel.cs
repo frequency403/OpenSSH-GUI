@@ -319,16 +319,18 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         if(!(await _messageBoxProvider.ShowRetryMessageBoxAsync(tryActionAsync: async () =>
                {
                    using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
-                       StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
-                       string.Format(StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
-                           Path.GetFileName(key.AbsoluteFilePath)));
-                   var operationResult = secureInputResult switch
+                       new SecureInputParams()
+                       {
+                           Title = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
+                           Prompt = string.Join(Environment.NewLine, StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading, Path.GetFileName(key.AbsoluteFilePath))
+                       });
+                   bool? operationResult = secureInputResult switch
                    {
-                       null => false,
+                       null => null,
                        { Value.Length: <= 0 } => true,
                        { Value.Length: > 0 } => key.SetPassword(secureInputResult.Value.Span)
                    };
-                   if(!operationResult)
+                   if(operationResult is false)
                        key.Reset();
                    return operationResult;
                }, title: StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,

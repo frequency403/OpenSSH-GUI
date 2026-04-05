@@ -37,7 +37,7 @@ public interface IMessageBoxProvider
 
     public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null);
 
-    public Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool>> tryActionAsync, string title, string message,
+    public Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message,
         MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true);
     
     /// <summary>

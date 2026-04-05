@@ -51,7 +51,7 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
             Icon = MaterialIconKind.ErrorOutline,
         });
 
-    public async Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool>> tryActionAsync, string title, string message, MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true)
+    public async Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message, MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true)
     {
         var tryCount = 1;
         
@@ -59,7 +59,7 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         {
             if (showTryCountInTitle)
                 title = string.Join(" ", title, string.Join("/", tryCount, retries));
-            if (await tryActionAsync())
+            if (await tryActionAsync() is null or true)
                 return true;
             if (await ShowMessageBoxAsync(title, message, MessageBoxButtons.OkCancel, icon) is MessageBoxResult.Cancel)
                 return true;
