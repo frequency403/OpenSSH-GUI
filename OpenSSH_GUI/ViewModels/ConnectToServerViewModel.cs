@@ -1,8 +1,10 @@
-﻿using System.Reactive;
+﻿using System.Collections.ObjectModel;
+using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using Avalonia;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
+using DynamicData;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -65,8 +67,6 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         _serverConnectionService = serverConnectionService;
         SshKeyManager = sshKeyManager;
         SelectedPublicKey = SshKeyManager.SshKeys.FirstOrDefault();
-        TestConnection = ReactiveCommand.CreateFromTask(TestConnectionAsync);
-        ResetCommand = ReactiveCommand.Create(Reset);
 
         this
             .WhenAnyValue<ConnectToServerViewModel, SshHostSettings?>(viewModel => viewModel.SelectedHostSettings)
@@ -95,22 +95,22 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         try
         {
             var config = configuration.GetSection("SshConfig").Get<SshConfiguration>();
-            SshHostSettings = config?.Hosts.Distinct() ?? [];
+            SshHostSettings.AddRange(config?.Hosts.Distinct() ?? []);
         }
         catch (Exception e)
         {
-            SshHostSettings = [];
             logger.LogDebug(e, "Config not readable");
         }
     }
-
-    public ReactiveCommand<Unit, Unit> TestConnection { get; }
-    public ReactiveCommand<Unit, Unit> ResetCommand { get; }
+    
+    
+    
     public SshKeyManager SshKeyManager { get; }
 
     public bool EnablePreConfiguredHosts => SshHostSettings.Any();
 
-    public IEnumerable<SshHostSettings> SshHostSettings { get; }
+    [ReactiveCollection]
+    private ObservableCollection<SshHostSettings> _sshHostSettings = new();
 
     private async Task TestConnectionAsyncBase(CancellationToken cancellationToken = default)
     {
@@ -186,6 +186,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         await TestConnectionAsyncBase(cancellationToken);
     }
 
+    [ReactiveCommand]
     private async Task TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -231,6 +232,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         }
     }
 
+    [ReactiveCommand]
     private void Reset()
     {
         HostName = string.Empty;

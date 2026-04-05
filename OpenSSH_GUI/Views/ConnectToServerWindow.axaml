@@ -91,7 +91,7 @@
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
-                Command="{Binding TestConnection}"
+                Command="{Binding TestConnectionCommand}"
                 IsEnabled="{Binding !CanConnectToServer}"
                 HotKey="Enter">
             <ToolTip.Tip>
