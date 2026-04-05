@@ -62,7 +62,25 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     {
         try
         {
-            await _keyManager.ChangePasswordOfKeyAsync(KeyFile, "54321", token: cancellationToken);
+            using var si = await _messageBoxProvider.ShowSecureInputAsync(new SecureInputParams
+            {
+                Buttons = MessageBoxButtons.OkCancel,
+                Icon = MaterialIconKind.KeyOutline,
+                MinLength = 0,
+                Prompt = $"Enter a new password for key {KeyFile.FileName}",
+                Title = "Change password",
+            });
+            switch (si)
+            {
+                case null:
+                    return;
+                case { Value: { Length: > 0 } password } when !KeyFile.Password.WrittenSpan.SequenceEqual(password.Span):
+                    await _keyManager.ChangePasswordOfKeyAsync(KeyFile, password, token: cancellationToken);
+                    break;
+                default:
+                    await _messageBoxProvider.ShowMessageBoxAsync("Password cannot be empty or equal to current password", "Password cannot be empty or equal", MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
+                    break;
+            }
         }
         catch (Exception e)
         {

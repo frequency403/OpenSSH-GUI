@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace OpenSSH_GUI.Dialogs.Models;
 
 /// <summary>
@@ -21,4 +23,9 @@ public class SecureInputParams : MessageBoxParams
     ///     Defaults to 0 (unlimited).
     /// </summary>
     public int MaxLength { get; set; } = 0;
+    
+    /// <summary>
+    /// Gets or sets the character encoding used for input.
+    /// </summary>
+    public Encoding Encoding { get; set; } = Encoding.UTF8;
 }

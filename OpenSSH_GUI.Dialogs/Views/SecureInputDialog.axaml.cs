@@ -43,7 +43,7 @@ namespace OpenSSH_GUI.Dialogs.Views;
 public partial class SecureInputDialog : Window
 {
     private readonly int _maxLength;
-
+    private readonly Encoding _encoding = Encoding.UTF8;
     private readonly int _minLength;
 
     // Each entry represents the UTF-8 encoding of one logical character typed
@@ -93,6 +93,7 @@ public partial class SecureInputDialog : Window
     {
         InitializeComponent();
 
+        _encoding = @params.Encoding;  
         Title = @params.Title;
         PART_Prompt.Text = @params.Prompt;
         PART_Prompt.IsVisible = !string.IsNullOrWhiteSpace(@params.Prompt);
@@ -144,9 +145,8 @@ public partial class SecureInputDialog : Window
 
         // Encode each character individually so Backspace can remove exactly
         // one logical character at a time.
-        foreach (var ch in e.Text)
+        foreach (var encoded in e.Text.Select(ch => _encoding.GetBytes([ch])))
         {
-            var encoded = Encoding.UTF8.GetBytes(new[] { ch });
             _segments.Add(encoded);
         }
 

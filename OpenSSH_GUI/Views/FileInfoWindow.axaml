@@ -44,15 +44,24 @@
         </Style>
 
     </Window.Styles>
-    <Grid RowDefinitions="* * * Auto" Margin="20">
-        <StackPanel Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
+    <UniformGrid Columns="1" Rows="0" RowSpacing="10" Margin="20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <StackPanel HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
             <UniformGrid Rows="1" Columns="2" ColumnSpacing="50">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
                     <TextBlock Text="Found" />
                     <TextBlock Text="{Binding KeyFile.KeyFiles.Length, FallbackValue=0}" FontWeight="Bold" />
                     <TextBlock Text="associated Files" />
                 </StackPanel>
-                <UniformGrid Rows="1" Columns="2" ColumnSpacing="5" HorizontalAlignment="Right">
+                <UniformGrid Rows="1" Columns="3" ColumnSpacing="5" HorizontalAlignment="Right">
+                    <Button Padding="5"
+                            Background="{DynamicResource NavigationActiveBrush}"
+                            IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
+                            Command="{Binding ChangePasswordOfKeyFileCommand}">
+                        <ToolTip.Tip>
+                            <Label Content="Change password of this key" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="KeyAlertOutline" />
+                    </Button>
                     <Button Padding="5"
                             IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
                             Command="{Binding ChangeFileNameCommand}"
@@ -79,9 +88,6 @@
                         </ToolTip.Tip>
                         <avalonia:MaterialIcon Kind="DeleteOutline" />
                     </Button>
-                    <Button Command="{Binding ChangePasswordOfKeyFileCommand}">
-                        <avalonia:MaterialIcon Kind="KeyAlertOutline"></avalonia:MaterialIcon>
-                    </Button>
                 </UniformGrid>
             </UniformGrid>
             <Separator />
@@ -96,7 +102,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
-        <Grid Grid.Row="2" HorizontalAlignment="Stretch" Margin="10 5"
+        <Grid HorizontalAlignment="Stretch" Margin="10 5"
               RowDefinitions="Auto *" ColumnDefinitions="* Auto">
             <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                 <TextBlock Text="Key format" />
@@ -196,7 +202,7 @@
 
             </SplitButton>
         </Grid>
-        <UniformGrid Grid.Row="3" Grid.ColumnSpan="2" Rows="2" RowSpacing="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10">
+        <UniformGrid Rows="2" RowSpacing="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10">
             <StackPanel HorizontalAlignment="Stretch" Spacing="2">
                 <TextBlock Text="Password" />
                 <Separator />
@@ -237,5 +243,5 @@
             </Grid>
             
         </UniformGrid>
-    </Grid>
+    </UniformGrid>
 </Window>
