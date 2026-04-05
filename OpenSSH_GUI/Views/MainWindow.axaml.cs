@@ -1,13 +1,10 @@
 using Avalonia.Controls;
-using Avalonia.Media.Imaging;
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
-using ReactiveUI;
 
 namespace OpenSSH_GUI.Views;
 
@@ -18,7 +15,7 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>, IDialogHost
     {
         InitializeComponent();
     }
-    
+
     public Task ShowDialog<TWindow>(TWindow dialogWindow) where TWindow : Window
     {
         Logger.LogDebug("Showing dialog {nameOfWindow}", typeof(TWindow).Name);

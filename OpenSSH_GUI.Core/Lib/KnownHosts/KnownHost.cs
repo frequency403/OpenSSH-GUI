@@ -9,12 +9,17 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 public partial record KnownHost : ReactiveRecord
 {
     /// <summary>
+    ///     Represents a known host in the OpenSSH_GUI.
+    /// </summary>
+    [Reactive] private List<KnownHostKey> _keys;
+
+    /// <summary>
     ///     Represents a known host entry in the known_hosts file.
     /// </summary>
     public KnownHost(IGrouping<string, string> knownHosts)
     {
         Host = knownHosts.Key;
-        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim()) as KnownHostKey).ToList();
+        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim())).ToList();
     }
 
     /// <summary>
@@ -36,12 +41,6 @@ public partial record KnownHost : ReactiveRecord
     ///     Represents a known host that can be deleted in its entirety.
     /// </summary>
     public bool DeleteWholeHost => Keys.All(e => e.MarkedForDeletion);
-
-    /// <summary>
-    ///     Represents a known host in the OpenSSH_GUI.
-    /// </summary>
-    [Reactive]
-    private List<KnownHostKey> _keys;
 
     /// <summary>
     ///     Toggles the marked for deletion flag of each <see cref="KnownHostKey" /> within the <see cref="Keys" /> list.

@@ -1,5 +1,4 @@
-﻿using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
+﻿using OpenSSH_GUI.Core.Interfaces.Credentials;
 using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Credentials;

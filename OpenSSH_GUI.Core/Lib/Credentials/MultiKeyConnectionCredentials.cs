@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using Renci.SshNet;
@@ -38,6 +37,8 @@ public class MultiKeyConnectionCredentials : ConnectionCredentials, IMultiKeyCon
     {
         if (Keys is not { } keys) return new ConnectionInfo(Hostname, Port, Username);
         var sources = keys.Select(e => e.PrivateKeyFile).ToArray();
-        return sources.All(s => s is not null) ? new PrivateKeyConnectionInfo(Hostname, Port, Username, sources as PrivateKeyFile[]) : new ConnectionInfo(Hostname, Port, Username);
+        return sources.All(s => s is not null)
+            ? new PrivateKeyConnectionInfo(Hostname, Port, Username, sources as PrivateKeyFile[])
+            : new ConnectionInfo(Hostname, Port, Username);
     }
 }

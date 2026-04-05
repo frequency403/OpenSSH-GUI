@@ -34,7 +34,8 @@ public static class SshConfigurationExtensions
         /// </param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
-        public IConfigurationBuilder AddSshConfig(string path, bool optional, Action<string, Exception>? loggingAction = null)
+        public IConfigurationBuilder AddSshConfig(string path, bool optional,
+            Action<string, Exception>? loggingAction = null)
         {
             return builder.AddSshConfig(null, path, optional, false, loggingAction);
         }
@@ -87,7 +88,8 @@ public static class SshConfigurationExtensions
         /// </summary>
         /// <param name="configureSource">Configures the source.</param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
-        public IConfigurationBuilder AddSshConfig(Action<SshConfigurationSource>? configureSource, Action<string, Exception>? loggingAction)
+        public IConfigurationBuilder AddSshConfig(Action<SshConfigurationSource>? configureSource,
+            Action<string, Exception>? loggingAction)
         {
             var source = new SshConfigurationSource
             {

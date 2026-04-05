@@ -5,10 +5,8 @@
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:authorizedKeys="clr-namespace:OpenSSH_GUI.Core.Lib.AuthorizedKeys;assembly=OpenSSH_GUI.Core"
         xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
-        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.EditAuthorizedKeysWindow"
         x:DataType="viewModels:EditAuthorizedKeysViewModel"
@@ -105,8 +103,9 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <controls:SubmitButtons Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="10" 
+        <controls:SubmitButtons Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Stretch"
+                                VerticalAlignment="Bottom" Margin="10"
                                 BooleanSubmit="{Binding BooleanSubmitCommand}"
-                                SubmitButtonIconKind="FloppyDisk"/>
+                                SubmitButtonIconKind="FloppyDisk" />
     </Grid>
 </Window>

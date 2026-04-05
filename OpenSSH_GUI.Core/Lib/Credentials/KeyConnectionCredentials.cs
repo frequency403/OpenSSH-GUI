@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using Renci.SshNet;

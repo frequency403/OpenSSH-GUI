@@ -14,7 +14,7 @@ public class ViewModelBaseTests
         var vm = new TestViewModel();
 
         // Act
-        await vm.InitializeAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await vm.InitializeAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(vm.IsInitialized);

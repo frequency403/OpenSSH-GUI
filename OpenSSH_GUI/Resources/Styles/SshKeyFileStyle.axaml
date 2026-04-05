@@ -6,7 +6,8 @@
                     xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
                     xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core">
     <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
-    <ControlTheme x:Key="SshKeyItemContainerTheme" BasedOn="{StaticResource {x:Type ComboBoxItem}}" TargetType="{x:Type ComboBoxItem}">
+    <ControlTheme x:Key="SshKeyItemContainerTheme" BasedOn="{StaticResource {x:Type ComboBoxItem}}"
+                  TargetType="{x:Type ComboBoxItem}">
         <ControlTheme.Setters>
             <Setter Property="IsEnabled" Value="{Binding IsInitialized, DataType=keys:SshKeyFile}" />
         </ControlTheme.Setters>
@@ -20,9 +21,12 @@
                     <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="{DynamicResource CodeForegroundBrush}"
                                            IsVisible="{Binding NeedsPassword}" />
                 </Panel>
-                <avalonia:MaterialIcon IsVisible="{Binding Password.IsValid}" Kind="EncryptionCheck" Foreground="{DynamicResource ConnectedBrush}"/>
-                <avalonia:MaterialIcon IsVisible="{Binding IsPuttyKey}" Kind="KeyChain" Foreground="{DynamicResource ConnectingBrush}" />
-                <avalonia:MaterialIcon IsVisible="{Binding !IsPuttyKey}" Kind="FileKeyOutline" Foreground="{DynamicResource VerifiedBrush}" />
+                <avalonia:MaterialIcon IsVisible="{Binding Password.IsValid}" Kind="EncryptionCheck"
+                                       Foreground="{DynamicResource ConnectedBrush}" />
+                <avalonia:MaterialIcon IsVisible="{Binding IsPuttyKey}" Kind="KeyChain"
+                                       Foreground="{DynamicResource ConnectingBrush}" />
+                <avalonia:MaterialIcon IsVisible="{Binding !IsPuttyKey}" Kind="FileKeyOutline"
+                                       Foreground="{DynamicResource VerifiedBrush}" />
             </StackPanel>
             <StackPanel HorizontalAlignment="Left">
                 <StackPanel.Styles>
@@ -41,7 +45,8 @@
     </DataTemplate>
     <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:SshKeyFile">
         <StackPanel IsEnabled="{Binding !Changing}">
-            <Border CornerRadius="25" Padding="5" Classes="MainDisplay" ToolTip.ShowDelay="0" ToolTip.ShowOnDisabled="True">
+            <Border CornerRadius="25" Padding="5" Classes="MainDisplay" ToolTip.ShowDelay="0"
+                    ToolTip.ShowOnDisabled="True">
                 <Border.Styles>
                     <Style Selector="Border.MainDisplay:pointerover">
                         <Setter Property="RenderTransform" Value="scale(1.001)" />
@@ -51,14 +56,17 @@
                 <ToolTip.Tip>
                     <StackPanel>
                         <StackPanel IsVisible="{Binding !Password.IsValid}">
-                        <Label IsVisible="{Binding !NeedsPassword}" Content="Key is not password protected" />
-                        <Label IsVisible="{Binding NeedsPassword}" Content="Key is password proteced and cannot be uses until a password is provided" />
+                            <Label IsVisible="{Binding !NeedsPassword}" Content="Key is not password protected" />
+                            <Label IsVisible="{Binding NeedsPassword}"
+                                   Content="Key is password proteced and cannot be uses until a password is provided" />
                         </StackPanel>
-                        <Label IsVisible="{Binding Password.IsValid}" Content="Key is password protected and opened with correct password"/>
+                        <Label IsVisible="{Binding Password.IsValid}"
+                               Content="Key is password protected and opened with correct password" />
                     </StackPanel>
                 </ToolTip.Tip>
                 <Grid ColumnDefinitions="* 3* * *">
-                    <Grid Grid.Column="0" ColumnDefinitions="* 3*" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <Grid Grid.Column="0" ColumnDefinitions="* 3*" VerticalAlignment="Center"
+                          HorizontalAlignment="Stretch">
                         <Border Grid.Column="0" HorizontalAlignment="Left" Padding="5" BorderThickness="1"
                                 BorderBrush="Transparent" CornerRadius="25" Classes="WithContextMenu">
                             <Border.Styles>
@@ -78,9 +86,11 @@
                                     </Button>
                                 </StackPanel>
                                 <StackPanel IsVisible="{Binding !Password.IsValid}">
-                                    <avalonia:MaterialIcon Kind="EncryptionOffOutline" Foreground="{DynamicResource DisconnectedBrush}"
+                                    <avalonia:MaterialIcon Kind="EncryptionOffOutline"
+                                                           Foreground="{DynamicResource DisconnectedBrush}"
                                                            IsVisible="{Binding !NeedsPassword}" />
-                                    <avalonia:MaterialIcon Kind="EncryptionOutline" Foreground="{DynamicResource CodeForegroundBrush}"
+                                    <avalonia:MaterialIcon Kind="EncryptionOutline"
+                                                           Foreground="{DynamicResource CodeForegroundBrush}"
                                                            IsVisible="{Binding NeedsPassword}" />
                                 </StackPanel>
                             </StackPanel>
@@ -91,14 +101,16 @@
                                 <avalonia:MaterialIcon Kind="KeyChain" Foreground="{DynamicResource AccentHoverBrush}" />
                             </Border>
                             <Border Padding="5" BorderBrush="Transparent" IsVisible="{Binding !IsPuttyKey}">
-                                <avalonia:MaterialIcon Kind="FileKeyOutline" Foreground="{DynamicResource VerifiedBrush}" />
+                                <avalonia:MaterialIcon Kind="FileKeyOutline"
+                                                       Foreground="{DynamicResource VerifiedBrush}" />
                             </Border>
                             <TextBlock Padding="5" Text="{Binding KeyType}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Grid>
                     <TextBlock Padding="5" Grid.Column="1" Text="{Binding FingerprintString}" Margin="5"
                                HorizontalAlignment="Center" IsVisible="{Binding !NeedsPassword}" />
-                    <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource AccentHoverBrush}"
+                    <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch"
+                            Background="{DynamicResource AccentHoverBrush}"
                             Foreground="{DynamicResource AccentForegroundBrush}"
                             HorizontalContentAlignment="Center" IsVisible="{Binding NeedsPassword}"
                             Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePasswordCommand}"

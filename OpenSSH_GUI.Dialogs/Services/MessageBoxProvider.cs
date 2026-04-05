@@ -25,7 +25,7 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
             Title = title,
             Message = message,
             Buttons = buttons,
-            Icon =  icon
+            Icon = icon
         });
     }
 
@@ -36,8 +36,9 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         return dialog.ShowDialog<MessageBoxResult>(owner);
     }
 
-    public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null) =>
-        ShowMessageBoxAsync(new MessageBoxParams()
+    public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null)
+    {
+        return ShowMessageBoxAsync(new MessageBoxParams
         {
             Title = e?.GetType().Name ?? "Error",
             Message = e switch
@@ -48,13 +49,15 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
                 _ => string.Empty
             },
             Buttons = MessageBoxButtons.Ok,
-            Icon = MaterialIconKind.ErrorOutline,
+            Icon = MaterialIconKind.ErrorOutline
         });
+    }
 
-    public async Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message, MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true)
+    public async Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message,
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true)
     {
         var tryCount = 1;
-        
+
         while (tryCount <= retries)
         {
             if (showTryCountInTitle)
@@ -65,6 +68,7 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
                 return true;
             tryCount++;
         }
+
         return tryCount <= retries;
     }
 
@@ -73,14 +77,16 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         string title,
         string prompt,
         int minLength = 1,
-        int maxLength = 0) =>
-        ShowSecureInputAsync(new SecureInputParams
+        int maxLength = 0)
+    {
+        return ShowSecureInputAsync(new SecureInputParams
         {
             Title = title,
             Prompt = prompt,
             MinLength = minLength,
             MaxLength = maxLength
         });
+    }
 
     /// <inheritdoc />
     public Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params)

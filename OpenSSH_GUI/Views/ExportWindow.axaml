@@ -14,7 +14,7 @@
         Title="{Binding WindowTitle}">
     <Grid RowDefinitions="* Auto" Margin="20 10">
         <ScrollViewer Grid.Row="0">
-            <SelectableTextBlock 
+            <SelectableTextBlock
                 Background="{DynamicResource OverlayBrush}"
                 Foreground="{DynamicResource ForegroundPrimaryBrush}"
                 SelectionBrush="{DynamicResource ForegroundSecondaryBrush}"
@@ -22,9 +22,9 @@
                 Name="ExportedText"
                 Text="{Binding Export}" TextWrapping="Wrap" />
         </ScrollViewer>
-        <controls:SubmitButtons Grid.Row="1" 
-            BooleanSubmit="{Binding BooleanSubmitCommand}"
-            SubmitButtonTooltip="{x:Static openSshGui:StringsAndTexts.ExportWindowCopyToClipboardToolTipText}">
+        <controls:SubmitButtons Grid.Row="1"
+                                BooleanSubmit="{Binding BooleanSubmitCommand}"
+                                SubmitButtonTooltip="{x:Static openSshGui:StringsAndTexts.ExportWindowCopyToClipboardToolTipText}">
             <controls:SubmitButtons.SubmitButtonContent>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <avalonia:MaterialIcon Kind="ContentCopy" />

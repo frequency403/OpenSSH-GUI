@@ -1,35 +1,42 @@
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media.Imaging;
 using DryIoc;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI.Avalonia;
+
 namespace OpenSSH_GUI.Core.Resources.Wrapper;
 
 public abstract class WindowBase<TViewModel, TViewModelInitializer> : WindowBase<TViewModel>
     where TViewModel : ViewModelBase<TViewModel, TViewModelInitializer>
-    where TViewModelInitializer : class, IInitializerParameters<TViewModel> 
+    where TViewModelInitializer : class, IInitializerParameters<TViewModel>
 {
-    public async ValueTask InitializeAsync(TViewModelInitializer initializer, WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen,  CancellationToken cancellationToken = default)
+    public async ValueTask InitializeAsync(TViewModelInitializer initializer,
+        WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen,
+        CancellationToken cancellationToken = default)
     {
-        await WindowInitialize(startupLocation);
+        WindowInitialize(startupLocation);
         ArgumentNullException.ThrowIfNull(ViewModel);
-        await ViewModel.InitializeAsync(initializer,cancellationToken);
+        await ViewModel.InitializeAsync(initializer, cancellationToken);
     }
 }
 
-public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisposable where TViewModel : ViewModelBase<TViewModel>
+public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisposable
+    where TViewModel : ViewModelBase<TViewModel>
 {
     private CompositeDisposable Disposables { get; } = new();
     public required ILogger<WindowBase<TViewModel>> Logger { get; set; }
     public required IResolver Resolver { get; set; }
 
-    protected async Task WindowInitialize(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen)
+    public void Dispose()
+    {
+        Disposables.Dispose();
+    }
+
+    protected void WindowInitialize(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen)
     {
         EnsureInitialized();
         Observable.FromEventPattern(
@@ -40,15 +47,15 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
             .DisposeWith(Disposables);
         try
         {
-            ViewModel = Resolver.Resolve<TViewModel>(serviceKey: typeof(TViewModel).Name);
+            ViewModel = Resolver.Resolve<TViewModel>(typeof(TViewModel).Name);
         }
         catch (Exception e)
         {
             Logger.LogError(e, "Failed to resolve {className}", nameof(TViewModel));
             throw;
         }
-    
-        SetIcon();    
+
+        SetIcon();
         WindowStartupLocation = startupLocation;
         ViewModel.Close += RequestClose;
     }
@@ -58,13 +65,9 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
         try
         {
             if (Enum.TryParse<ThemeVariant>(ActualThemeVariant.Key.ToString(), true, out var themeVariant))
-            {
-                Icon = Resolver.Resolve<WindowIcon>(serviceKey: string.Join("_", nameof(WindowIcon), 32, themeVariant).ToLower());
-            }
+                Icon = Resolver.Resolve<WindowIcon>(string.Join("_", nameof(WindowIcon), 32, themeVariant).ToLower());
             else
-            {
                 Logger.LogWarning("Could not resolve theme variant {themeVariant}", ActualThemeVariant);
-            }
         }
         catch (Exception e)
         {
@@ -72,10 +75,11 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
             throw;
         }
     }
-    
-    public async ValueTask InitializeAsync(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen, CancellationToken cancellationToken = default)
+
+    public async ValueTask InitializeAsync(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen,
+        CancellationToken cancellationToken = default)
     {
-        await WindowInitialize(startupLocation);
+        WindowInitialize(startupLocation);
         ArgumentNullException.ThrowIfNull(ViewModel);
         await ViewModel!.InitializeAsync(cancellationToken);
     }
@@ -84,10 +88,5 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
     {
         Logger.LogDebug("RequestClose from {sender}", sender);
         Close();
-    }
-
-    public void Dispose()
-    {
-        Disposables.Dispose();
     }
 }

@@ -1,7 +1,4 @@
-using System.Reactive;
 using System.Reactive.Disposables.Fluent;
-using System.Reactive.Linq;
-using System.Text;
 using Avalonia.Input.Platform;
 using DryIoc;
 using JetBrains.Annotations;
@@ -19,16 +16,22 @@ using ReactiveUI.SourceGenerators;
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
+
 [UsedImplicitly]
 public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewModel, FileInfoViewModelInitializer>
 {
+    private readonly IClipboard _clipboard;
+    private readonly SshKeyManager _keyManager;
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _resolver;
-    private readonly IClipboard _clipboard;
-    private readonly SshKeyManager _keyManager;
 
-    public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider, IResolver resolver, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
+    [Reactive] private SshKeyFile _keyFile;
+    [Reactive] private string _password = string.Empty;
+    [Reactive] private string _windowTitle = "Key info";
+
+    public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
+        IResolver resolver, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
@@ -40,20 +43,18 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             .Subscribe(e =>
             {
                 WindowTitle = string.Join(" ", e.FileName, e.Format, e.Comment);
-                Password = e.Password.IsValid 
-                    ? e.Password.GetPasswordString() 
+                Password = e.Password.IsValid
+                    ? e.Password.GetPasswordString()
                     : string.Empty;
             }).DisposeWith(Disposables);
     }
-    
-    [Reactive] private SshKeyFile _keyFile;
-    [Reactive] private string _windowTitle = "Key info";
-    [Reactive] private string _password = string.Empty;
-    
-    
-    public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters, CancellationToken cancellationToken = default)
+
+
+    public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters,
+        CancellationToken cancellationToken = default)
     {
-        KeyFile = _keyManager.SshKeys.SingleOrDefault(x => x.FingerprintString == parameters.KeyFingerprint) ?? _resolver.Resolve<SshKeyFile>();
+        KeyFile = _keyManager.SshKeys.SingleOrDefault(x => x.FingerprintString == parameters.KeyFingerprint) ??
+                  _resolver.Resolve<SshKeyFile>();
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
@@ -68,17 +69,20 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 Icon = MaterialIconKind.KeyOutline,
                 MinLength = 0,
                 Prompt = $"Enter a new password for key {KeyFile.FileName}",
-                Title = "Change password",
+                Title = "Change password"
             });
             switch (si)
             {
                 case null:
                     return;
-                case { Value: { Length: > 0 } password } when !KeyFile.Password.WrittenSpan.SequenceEqual(password.Span):
+                case { Value: { Length: > 0 } password }
+                    when !KeyFile.Password.WrittenSpan.SequenceEqual(password.Span):
                     await _keyManager.ChangePasswordOfKeyAsync(KeyFile, password, token: cancellationToken);
                     break;
                 default:
-                    await _messageBoxProvider.ShowMessageBoxAsync("Password cannot be empty or equal to current password", "Password cannot be empty or equal", MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
+                    await _messageBoxProvider.ShowMessageBoxAsync(
+                        "Password cannot be empty or equal to current password", "Password cannot be empty or equal",
+                        MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
                     break;
             }
         }
@@ -102,6 +106,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             await _messageBoxProvider.ShowErrorMessageBoxAsync(e);
         }
     }
+
     [ReactiveCommand]
     private async Task ChangeFileNameAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
     {
@@ -116,11 +121,12 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             Validator = argument =>
             {
                 ArgumentException.ThrowIfNullOrWhiteSpace(argument);
-                return _keyManager.SshKeys.Any(k => string.Equals(k.FileName, argument, StringComparison.Ordinal)) ? "Filename already exists" : null;
+                return _keyManager.SshKeys.Any(k => string.Equals(k.FileName, argument, StringComparison.Ordinal))
+                    ? "Filename already exists"
+                    : null;
             }
         });
         if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
-        {
             try
             {
                 await _keyManager.RenameKeyAsync(keyFile, filename, cancellationToken);
@@ -130,7 +136,6 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 _logger.LogError(e, "Error renaming key file");
                 await _messageBoxProvider.ShowErrorMessageBoxAsync(e);
             }
-        }
     }
 
     [ReactiveCommand]
@@ -140,7 +145,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
                 MaterialIconKind.QuestionMarkCircleOutline) is MessageBoxResult.Yes)
-            if((await _keyManager.TryDeleteKeyAsync(keyFile, cancellationToken)) is { success: false, exception: { } error})
+            if (await _keyManager.TryDeleteKeyAsync(keyFile, cancellationToken) is
+                { success: false, exception: { } error })
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName)
                     , error.Message);
@@ -154,7 +160,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         {
             await _clipboard.SetTextAsync(password.GetPasswordString());
             await _clipboard.FlushAsync();
-            await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard", "Password copied to clipboard", MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
+            await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard",
+                "Password copied to clipboard", MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
         }
         catch (Exception e)
         {

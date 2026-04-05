@@ -39,7 +39,7 @@ public interface IMessageBoxProvider
 
     public Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message,
         MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true);
-    
+
     /// <summary>
     ///     Shows a modal secure-input (password) prompt and returns the result.
     /// </summary>
@@ -69,7 +69,8 @@ public interface IMessageBoxProvider
     /// <param name="params">The parameters for the secure-input prompt.</param>
     /// <returns>
     ///     A <see cref="SecureInputResult" /> whose <see cref="SecureInputResult.Value" />
-    ///     contains the by the <see cref="SecureInputParams.Encoding"/> encoded password, or <c>null</c> when the user cancels.
+    ///     contains the by the <see cref="SecureInputParams.Encoding" /> encoded password, or <c>null</c> when the user
+    ///     cancels.
     ///     The caller is responsible for disposing the result to zero the buffer.
     /// </returns>
     Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params);

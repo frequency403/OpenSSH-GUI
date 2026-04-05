@@ -22,7 +22,7 @@ public class AuthorizedKeysFile : ReactiveObject
     private AuthorizedKeysFile()
     {
     }
-    
+
     /// <summary>
     ///     Gets a value indicating whether the file is from a server.
     /// </summary>
@@ -37,6 +37,8 @@ public class AuthorizedKeysFile : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
 
+    public static AuthorizedKeysFile Empty { get; } = new();
+
     public bool CanAddKey(SshKeyFile key)
     {
         try
@@ -48,7 +50,7 @@ public class AuthorizedKeysFile : ReactiveObject
             return false;
         }
     }
-    
+
     /// <summary>
     ///     Adds an authorized key to the authorized keys file.
     /// </summary>
@@ -134,8 +136,6 @@ public class AuthorizedKeysFile : ReactiveObject
                 (s, key) => s +=
                     $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
     }
-    
-    public static AuthorizedKeysFile Empty { get; } = new();
 
     public static async ValueTask<AuthorizedKeysFile> OpenAsync(string? filePath = null,
         CancellationToken cancellationToken = default)

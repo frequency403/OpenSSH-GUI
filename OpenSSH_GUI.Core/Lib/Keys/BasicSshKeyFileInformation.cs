@@ -13,7 +13,9 @@ public readonly record struct BasicSshKeyFileInformation()
     public string FingerPrint { get; private init; } = string.Empty;
     public string Comment { get; private init; } = string.Empty;
     public SshKeyType KeyType { get; private init; } = SshKeyType.RSA;
-    private bool IsEmpty => HashAlgorithmName == SshKeyHashAlgorithmName.MD5 && FingerPrint == string.Empty && Comment == string.Empty && KeyType == SshKeyType.RSA;
+
+    private bool IsEmpty => HashAlgorithmName == SshKeyHashAlgorithmName.MD5 && FingerPrint == string.Empty &&
+                            Comment == string.Empty && KeyType == SshKeyType.RSA;
 
     private static BasicSshKeyFileInformation Empty { get; } = new();
 
@@ -25,9 +27,11 @@ public readonly record struct BasicSshKeyFileInformation()
             splitted[1].Split(':') is not { Length: > 1 } fingerprintSplit)
             throw new InvalidOperationException("Invalid public key information");
         if (!Enum.TryParse(fingerprintSplit[0], true, out SshKeyHashAlgorithmName hashAlgorithmName))
-            throw new InvalidOperationException($"Invalid hash algorithm name. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyHashAlgorithmName>())}");
+            throw new InvalidOperationException(
+                $"Invalid hash algorithm name. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyHashAlgorithmName>())}");
         if (!Enum.TryParse(splitted[3][1..^1], true, out SshKeyType keyType))
-            throw new InvalidOperationException($"Invalid key type. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyType>())}");
+            throw new InvalidOperationException(
+                $"Invalid key type. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyType>())}");
         return new BasicSshKeyFileInformation
         {
             HashAlgorithmName = hashAlgorithmName,
@@ -41,7 +45,7 @@ public readonly record struct BasicSshKeyFileInformation()
     {
         if (publicKeyInfo.IsEmpty)
             throw new InvalidOperationException("Invalid public key information");
-        if(new string(publicKeyInfo) is not {Length: > 0} publicKeyInfoString)
+        if (new string(publicKeyInfo) is not { Length: > 0 } publicKeyInfoString)
             throw new InvalidOperationException("Invalid public key information");
         if (publicKeyInfoString.TrimEnd('\r', '\n')
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) is
@@ -49,9 +53,11 @@ public readonly record struct BasicSshKeyFileInformation()
             splitted[1].Split(':') is not { Length: > 1 } fingerprintSplit)
             throw new InvalidOperationException("Invalid public key information");
         if (!Enum.TryParse(fingerprintSplit[0], true, out SshKeyHashAlgorithmName hashAlgorithmName))
-            throw new InvalidOperationException($"Invalid hash algorithm name. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyHashAlgorithmName>())}");
+            throw new InvalidOperationException(
+                $"Invalid hash algorithm name. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyHashAlgorithmName>())}");
         if (!Enum.TryParse(splitted[3][1..^1], true, out SshKeyType keyType))
-            throw new InvalidOperationException($"Invalid key type. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyType>())}");
+            throw new InvalidOperationException(
+                $"Invalid key type. Valid values are: {string.Join(", ", Enum.GetNames<SshKeyType>())}");
         return new BasicSshKeyFileInformation
         {
             HashAlgorithmName = hashAlgorithmName,
@@ -60,7 +66,7 @@ public readonly record struct BasicSshKeyFileInformation()
             KeyType = keyType
         };
     }
-    
+
     /// <summary>
     ///     Extracts basic information from the SSH key file, such as its fingerprint,
     ///     hash algorithm, comment, and key type, using the <c>ssh-keygen</c> command-line tool
@@ -85,7 +91,7 @@ public readonly record struct BasicSshKeyFileInformation()
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            if (!process.Start()) 
+            if (!process.Start())
                 return Empty;
             process.WaitForExit();
             Span<char> buffer = stackalloc char[0xFF];
@@ -95,19 +101,17 @@ public readonly record struct BasicSshKeyFileInformation()
 
         if (keyFileInformation.Files.FirstOrDefault(x =>
                 string.Equals(x.Extension, ".ppk", StringComparison.OrdinalIgnoreCase)) is { } ppkFile)
-        {
             return FromCommandOutput(ReadPpkAsCommandOutput(ppkFile.FullName));
-        }
         return Empty;
     }
 
     /// <summary>
-    /// Reads a PuTTY .ppk file and formats the contained public key information
-    /// as a string compatible with <see cref="FromCommandOutput(string)"/>.
+    ///     Reads a PuTTY .ppk file and formats the contained public key information
+    ///     as a string compatible with <see cref="FromCommandOutput(string)" />.
     /// </summary>
     /// <param name="ppkPath">Path to the .ppk file.</param>
     /// <returns>
-    /// A formatted string in the form: <c>{bits} SHA256:{fingerprint} {comment} ({keyType})</c>
+    ///     A formatted string in the form: <c>{bits} SHA256:{fingerprint} {comment} ({keyType})</c>
     /// </returns>
     /// <exception cref="NotSupportedException">Thrown when the key type in the .ppk file is not supported.</exception>
     private static string ReadPpkAsCommandOutput(string ppkPath)
@@ -118,9 +122,8 @@ public readonly record struct BasicSshKeyFileInformation()
         var keyTypeRaw = "";
         var comment = "";
         var publicKeyInFile = "";
-        
+
         while (streamReader.ReadLine() is { } line)
-        {
             switch (line)
             {
                 case not null when line.StartsWith("PuTTY-User-Key-File"):
@@ -143,7 +146,6 @@ public readonly record struct BasicSshKeyFileInformation()
                     break;
                 }
             }
-        }
 
         var raw = Convert.FromBase64String(publicKeyInFile);
         var fingerprint = Convert.ToBase64String(SHA256.HashData(raw)).TrimEnd('=');
@@ -163,7 +165,7 @@ public readonly record struct BasicSshKeyFileInformation()
     }
 
     /// <summary>
-    /// Parses the SSH wire-format blob of an RSA public key to determine its bit length via the modulus size.
+    ///     Parses the SSH wire-format blob of an RSA public key to determine its bit length via the modulus size.
     /// </summary>
     /// <param name="blob">Raw decoded public key blob.</param>
     /// <returns>Bit length of the RSA modulus.</returns>
@@ -190,6 +192,11 @@ public readonly record struct BasicSshKeyFileInformation()
 
         return (modLen - 1) * 8 + (int)Math.Floor(Math.Log2(span[0]) + 1);
     }
-    
-    public override string ToString() => !IsEmpty ? $"{HashAlgorithmName.ToString()[^3..]} {HashAlgorithmName}:{FingerPrint} {Comment} ({KeyType})" : string.Empty;
+
+    public override string ToString()
+    {
+        return !IsEmpty
+            ? $"{HashAlgorithmName.ToString()[^3..]} {HashAlgorithmName}:{FingerPrint} {Comment} ({KeyType})"
+            : string.Empty;
+    }
 }

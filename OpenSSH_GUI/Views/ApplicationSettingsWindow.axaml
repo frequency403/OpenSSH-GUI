@@ -16,45 +16,51 @@
         Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
         WindowStartupLocation="CenterOwner">
     <Grid RowDefinitions="* * *" ColumnDefinitions="* * * *">
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label Content="LogLevel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label Content="LogLevel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <Separator />
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
                       ItemsSource="{Binding AvailableLogLevels}"
-                      SelectedItem="{Binding CurrentLogLevel}"/>
+                      SelectedItem="{Binding CurrentLogLevel}" />
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label Content="Theme" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Vertical"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label Content="Theme" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <Separator />
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
                       ItemsSource="{Binding ThemeVariants}"
-                      SelectedItem="{Binding CurrentThemeVariant}"/>
+                      SelectedItem="{Binding CurrentThemeVariant}" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Vertical"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
+            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                   Content="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
             <Separator HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
             <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
-                <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch"
                           SelectedItem="{Binding DaysToDeleteSelected}"
-                          ItemsSource="{Binding DaysToDelete}"/>
-                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch" Content="{x:Static resources:StringsAndTexts.Days}"/>
+                          ItemsSource="{Binding DaysToDelete}" />
+                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch"
+                       Content="{x:Static resources:StringsAndTexts.Days}" />
                 <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
                         Command="{Binding DeleteOldLogFilesCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="3">
-                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsCleanup}"/>
-                        <TextBlock Text="{Binding LogFiles.Count}"/>
-                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsFiles}"/>
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsCleanup}" />
+                        <TextBlock Text="{Binding LogFiles.Count}" />
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsFiles}" />
                     </StackPanel>
                 </Button>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
-            <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}"/>
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
+            <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}" />
             <Separator />
             <Button Command="{Binding ClearWholeCacheCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="5">
-                    <avalonia:MaterialIcon Kind="ReportProblem"/>   
-                    <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}"/>
+                    <avalonia:MaterialIcon Kind="ReportProblem" />
+                    <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
                 </StackPanel>
             </Button>
         </StackPanel>

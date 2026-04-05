@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -21,7 +20,7 @@ public partial class DirectoryCrawler(
     private static readonly List<SshKeyFileSource> keyFileSources = new();
 
     [Reactive] private bool _isSearching;
-    
+
     /// <summary>
     ///     Asynchronously retrieves a collection of new SSH keys from the disk.
     /// </summary>
@@ -30,12 +29,10 @@ public partial class DirectoryCrawler(
     {
         IsSearching = true;
         if (configuration.GetSection("SshConfig").Get<SshConfiguration>() is { } sshConfig)
-        {
             foreach (var hostSetting in sshConfig.Hosts.Concat(sshConfig.Blocks).Append(sshConfig.Global))
             {
                 if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
                 foreach (var hostIdentityFile in hostIdentityFiles.Select(path => path.ResolvePath()))
-                {
                     if (!keyFileSources.Any(e =>
                             e.AbsolutePath.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) &&
                         File.Exists(hostIdentityFile))
@@ -45,10 +42,8 @@ public partial class DirectoryCrawler(
                         keyFileSources.Add(source);
                         yield return source;
                     }
-                }
             }
-        }
-        
+
         foreach (var keyFileSource in Directory.EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*",
                          new EnumerationOptions
                          {
@@ -68,6 +63,7 @@ public partial class DirectoryCrawler(
             keyFileSources.Add(keyFileSource);
             yield return keyFileSource;
         }
+
         keyFileSources.Clear();
         IsSearching = false;
     }

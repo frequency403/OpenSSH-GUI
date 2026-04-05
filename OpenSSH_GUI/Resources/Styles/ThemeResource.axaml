@@ -39,7 +39,7 @@
     <!-- List — hover/selection tints derived from Primary (teal) -->
     <Color x:Key="DarkListLowColor">#1A4EC9B0</Color>
     <Color x:Key="DarkListMediumColor">#334EC9B0</Color>
-    
+
     <Color x:Key="LightAccentColor">#FF1A8A75</Color>
     <Color x:Key="LightRegionColor">#FFF0F4F8</Color>
     <Color x:Key="LightErrorTextColor">#FFD93025</Color>

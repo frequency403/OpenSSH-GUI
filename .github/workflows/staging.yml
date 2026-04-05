@@ -121,7 +121,7 @@ jobs:
         with:
           name: OpenSSH-GUI-nightly-x86_64.AppImage
           path: OpenSSH-GUI-nightly-x86_64.AppImage
-          
+
       - name: Upload generated desktop file
         if: matrix.target == 'linux-x64'
         uses: actions/upload-artifact@v4
@@ -156,7 +156,7 @@ jobs:
           echo "GIT_HASH=$HASH"                         >> "$GITHUB_ENV"
           echo "BUILD_DATE=$DATE"                       >> "$GITHUB_ENV"
           echo "VERSION=${BASE_VERSION}+${HASH}"        >> "$GITHUB_ENV"
-      
+
       - name: Force-update nightly tag
         run: |
           git config user.name "github-actions[bot]"
@@ -222,7 +222,7 @@ jobs:
         with:
           name: OpenSSH-GUI-nightly-linux-x64
           path: ./
-          
+
       - name: Download generated desktop file
         uses: actions/download-artifact@v4
         with:

@@ -39,6 +39,20 @@ public record KnownHostsFile : ReactiveRecord
     }
 
     /// <summary>
+    ///     Represents a file that contains known SSH hosts and their keys.
+    /// </summary>
+    public static string LineEnding { get; set; } = "\r\n";
+
+    /// <summary>
+    ///     Represents a known hosts file.
+    /// </summary>
+    public ObservableCollection<KnownHost> KnownHosts
+    {
+        get;
+        private set => this.RaiseAndSetIfChanged(ref field, value);
+    } = [];
+
+    /// <summary>
     ///     Initializes the known hosts file asynchronously.
     /// </summary>
     /// <param name="knownHostsPathOrContent">The path to the file or its content.</param>
@@ -61,20 +75,6 @@ public record KnownHostsFile : ReactiveRecord
 
         return this;
     }
-
-    /// <summary>
-    ///     Represents a file that contains known SSH hosts and their keys.
-    /// </summary>
-    public static string LineEnding { get; set; } = "\r\n";
-
-    /// <summary>
-    ///     Represents a known hosts file.
-    /// </summary>
-    public ObservableCollection<KnownHost> KnownHosts
-    {
-        get;
-        private set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
 
     /// <summary>
     ///     Asynchronously reads the contents of the known hosts file.

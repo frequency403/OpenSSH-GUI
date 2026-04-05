@@ -67,15 +67,15 @@
             <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
                       SelectedItem="{Binding KeyFormat}" />
         </StackPanel>
-        
-        <controls:SubmitButtons Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" 
-                              Margin="20 10" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
-                              BooleanSubmit="{Binding BooleanSubmitCommand}"
-                              SubmitButtonEnabled="{Binding KeyNameValidationHelper.IsValid}"
-                              SubmitButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}"
-                              SubmitButtonIconKind="KeyAdd"
-                              
-                              AbortButtonIconKind="Cancel"
-                              AbortButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}"/>
+
+        <controls:SubmitButtons Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                Margin="20 10" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                                BooleanSubmit="{Binding BooleanSubmitCommand}"
+                                SubmitButtonEnabled="{Binding KeyNameValidationHelper.IsValid}"
+                                SubmitButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}"
+                                SubmitButtonIconKind="KeyAdd"
+
+                                AbortButtonIconKind="Cancel"
+                                AbortButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
     </Grid>
 </Window>

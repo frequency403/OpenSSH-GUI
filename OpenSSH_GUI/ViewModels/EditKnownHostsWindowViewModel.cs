@@ -15,22 +15,20 @@ public partial class EditKnownHostsWindowViewModel(
     ILogger<EditKnownHostsWindowViewModel> logger,
     ServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
 {
+    [Reactive] private ObservableCollection<KnownHost> _knownHostsLocal = [];
+
+    [Reactive] private ObservableCollection<KnownHost> _knownHostsRemote = [];
+
     public ServerConnectionService ServerConnectionService => serverConnectionService;
     private KnownHostsFile? KnownHostsFileLocal { get; set; }
     private KnownHostsFile? KnownHostsFileRemote { get; set; }
-
-    [Reactive]
-    private ObservableCollection<KnownHost> _knownHostsRemote = [];
-    
-    [Reactive]
-    private ObservableCollection<KnownHost> _knownHostsLocal = [];
 
     protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
         if (!inputParameter) return;
         ArgumentNullException.ThrowIfNull(KnownHostsFileLocal);
-        
+
         KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
         if (serverConnectionService.IsConnected)
             KnownHostsFileRemote?.SyncKnownHosts(KnownHostsRemote);
@@ -50,7 +48,9 @@ public partial class EditKnownHostsWindowViewModel(
             KnownHostsFileRemote =
                 await serverConnectionService.ServerConnection.GetKnownHostsFromServerAsync(cancellationToken);
         KnownHostsLocal = new ObservableCollection<KnownHost>(KnownHostsFileLocal.KnownHosts.OrderBy(e => e.Host));
-        KnownHostsRemote = serverConnectionService.IsConnected ? new ObservableCollection<KnownHost>(KnownHostsFileRemote!.KnownHosts.OrderBy(e => e.Host)) : [];
+        KnownHostsRemote = serverConnectionService.IsConnected
+            ? new ObservableCollection<KnownHost>(KnownHostsFileRemote!.KnownHosts.OrderBy(e => e.Host))
+            : [];
         await base.InitializeAsync(cancellationToken);
     }
 }

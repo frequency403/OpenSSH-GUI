@@ -14,6 +14,7 @@ using OpenSSH_GUI.SshConfig.Extensions;
 using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
+using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
@@ -36,11 +37,11 @@ internal sealed class Program
 
     private static Logger? CreateLogger(IContainer container)
     {
-        var logConfiguration = Core.Configuration.LoggerConfiguration.Default;
+        var logConfiguration = LoggerConfiguration.Default;
         if (!Directory.Exists(logConfiguration.LogFilePath))
             Directory.CreateDirectory(logConfiguration.LogFilePath);
 
-        return new LoggerConfiguration()
+        return new Serilog.LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithCaller()
             .MinimumLevel.ControlledBy(container.Resolve<LoggingLevelSwitch>())
@@ -75,7 +76,7 @@ internal sealed class Program
         var host = Host.CreateDefaultBuilder(args)
             .UseServiceProviderFactory(factory)
             .ConfigureServices(services => services.RegisterOpenSshGuiServices())
-            .UseSerilog(logger: CreateLogger(container), dispose: true)
+            .UseSerilog(CreateLogger(container), true)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
 
@@ -89,7 +90,7 @@ internal sealed class Program
                 configure.WithAvalonia();
                 configure.WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
             });
-        
+
         await host.StartAsync(mainCancellationTokenSource.Token);
         appBuilder.StartWithClassicDesktopLifetime(args);
         await host.StopAsync(mainCancellationTokenSource.Token);

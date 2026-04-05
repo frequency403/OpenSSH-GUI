@@ -29,10 +29,12 @@ public static class DependencyInjectionExtensions
             where TViewModelInitializerParameter : class, IInitializerParameters<TViewModel>
         {
             var viewName = typeof(TView).Name;
-            var resolvedView = resolver.Resolve<TView>(serviceKey: viewName);
+            var resolvedView = resolver.Resolve<TView>(viewName);
             await resolvedView.InitializeAsync(initializerParameters, windowStartupLocation, token);
             ArgumentNullException.ThrowIfNull(resolvedView.ViewModel);
-            return !resolvedView.ViewModel.IsInitialized ? throw new InvalidOperationException("ViewModel not properly initialized") : resolvedView;
+            return !resolvedView.ViewModel.IsInitialized
+                ? throw new InvalidOperationException("ViewModel not properly initialized")
+                : resolvedView;
         }
 
         public async ValueTask<TView> ResolveViewAsync<TView, TViewModel>(
@@ -42,10 +44,12 @@ public static class DependencyInjectionExtensions
             where TViewModel : ViewModelBase<TViewModel>
         {
             var viewName = typeof(TView).Name;
-            var resolvedView = resolver.Resolve<TView>(serviceKey: viewName);            
+            var resolvedView = resolver.Resolve<TView>(viewName);
             await resolvedView.InitializeAsync(windowStartupLocation, token);
             ArgumentNullException.ThrowIfNull(resolvedView.ViewModel);
-            return !resolvedView.ViewModel.IsInitialized ? throw new InvalidOperationException("ViewModel not properly initialized") : resolvedView;
+            return !resolvedView.ViewModel.IsInitialized
+                ? throw new InvalidOperationException("ViewModel not properly initialized")
+                : resolvedView;
         }
     }
 
@@ -59,7 +63,8 @@ public static class DependencyInjectionExtensions
                 throw new InvalidOperationException(
                     $"Viewmodels must follow the following convention: $NameOfView + $ViewModel -> in that case your Viewmodel must be renamed to \"{typeof(TView).Name + "ViewModel"}\"");
 
-            container.Register<TView>(serviceKey: typeof(TView).Name, reuse: Reuse.Transient, made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
+            container.Register<TView>(serviceKey: typeof(TView).Name, reuse: Reuse.Transient,
+                made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
             container.Register<TViewModel>(serviceKey: typeof(TViewModel).Name, reuse: Reuse.Transient);
         }
     }

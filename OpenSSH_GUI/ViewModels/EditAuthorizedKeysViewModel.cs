@@ -20,19 +20,16 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
 {
     [Reactive(SetModifier = AccessModifier.Private)]
     private bool _addButtonEnabled;
-    
+
+    [Reactive] private AuthorizedKeysFile _authorizedKeysFileLocal = AuthorizedKeysFile.Empty;
+
+    [Reactive] private AuthorizedKeysFile _authorizedKeysFileRemote = AuthorizedKeysFile.Empty;
+
     [Reactive(SetModifier = AccessModifier.Private)]
     private bool _keyAddPossible;
-    
-    [Reactive]
-    private SshKeyFile? _selectedKey;
-    
-    [Reactive]
-    private AuthorizedKeysFile _authorizedKeysFileRemote = AuthorizedKeysFile.Empty;
-    
-    [Reactive]
-    private AuthorizedKeysFile _authorizedKeysFileLocal = AuthorizedKeysFile.Empty;
-    
+
+    [Reactive] private SshKeyFile? _selectedKey;
+
     public EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> logger,
         SshKeyManager sshKeyManager,
         ServerConnectionService serverConnectionService) : base(logger)
@@ -41,7 +38,7 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
         ServerConnectionService = serverConnectionService;
         SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
         AddKey = ReactiveCommand.CreateFromTask<SshKeyFile>(OnAddKey);
-        
+
         this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
             .DistinctUntilChanged()
             .Subscribe(props =>
@@ -55,20 +52,17 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
                         {
                             Count: > 0
                         }
-                    } col, 
+                    } col,
                     Item3: true
                 } && col.CanAddKey(keyFile);
             }).DisposeWith(Disposables);
-        
+
         this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(keys =>
-            {
-                KeyAddPossible = keys.Count > 0;
-            })
+            .Subscribe(keys => { KeyAddPossible = keys.Count > 0; })
             .DisposeWith(Disposables);
     }
-    
+
     public SshKeyManager SshKeyManager { get; }
     public ServerConnectionService ServerConnectionService { get; }
     public ReactiveCommand<SshKeyFile, Unit> AddKey { get; }

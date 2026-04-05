@@ -163,7 +163,8 @@
                 <!-- Connection -->
 
                 <Border Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                        Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7" CornerRadius="5">
+                        Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7"
+                        CornerRadius="5">
                     <ToolTip.Tip>
                         <StackPanel>
                             <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
@@ -220,20 +221,24 @@
 
                 <!-- Item Count -->
 
-                <Border Grid.Column="1" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="5" HorizontalAlignment="Stretch"
+                <Border Grid.Column="1" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
+                        Padding="5" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5" Child="{Binding ItemsCountIcon}">
                     <ToolTip.Tip>
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
+                            <TextBlock
+                                Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
                             <TextBlock Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
-                            <TextBlock Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
+                            <TextBlock
+                                Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>
                     </ToolTip.Tip>
                 </Border>
 
                 <!-- Settings -->
 
-                <Border Grid.Column="2" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
+                <Border Grid.Column="2" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
+                        Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickOptions}" />
@@ -297,7 +302,8 @@
 
                 <!-- Help -->
 
-                <Border Grid.Column="3" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7" HorizontalAlignment="Stretch"
+                <Border Grid.Column="3" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
+                        Padding="7" HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickHelp}" />

@@ -10,6 +10,11 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 public partial record KnownHostKey : ReactiveRecord
 {
     /// <summary>
+    ///     Gets or sets a value indicating whether the known host key is marked for deletion.
+    /// </summary>
+    [Reactive] private bool _markedForDeletion;
+
+    /// <summary>
     ///     Represents a known host key in the OpenSSH GUI.
     /// </summary>
     public KnownHostKey(string entry)
@@ -43,10 +48,4 @@ public partial record KnownHostKey : ReactiveRecord
     ///     Represents a known host key without the host entry in the OpenSSH GUI.
     /// </summary>
     public string EntryWithoutHost { get; }
-
-    /// <summary>
-    ///     Gets or sets a value indicating whether the known host key is marked for deletion.
-    /// </summary>
-    [Reactive]
-    private bool _markedForDeletion;
 }

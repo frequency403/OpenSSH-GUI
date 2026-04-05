@@ -1,12 +1,9 @@
 ﻿using System.Collections.Specialized;
-using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Text.Encodings.Web;
-using Avalonia;
 using Avalonia.Platform.Storage;
-using Avalonia.Threading;
 using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
@@ -40,9 +37,31 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
     private readonly IDialogHost _dialogHost;
-    private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly ILauncher _launcher;
+    private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _serviceProvider;
+    [Reactive] private bool? _commentSort;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
+
+    [Reactive] private bool? _fingerPrintSort;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private MaterialIcon _itemsCountIcon = new() { Kind = MaterialIconKind.Infinity };
+
+    [Reactive] private bool? _keyTypeSort;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
+
+    [Reactive] private string _version;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private string _windowTitle = string.Empty;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
@@ -62,7 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         _dialogHost = dialogHost;
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
         WindowTitle = string.Join("-", Program.AppName, Version);
-        
+
         Observable
             .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
                 h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged += h,
@@ -73,7 +92,6 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             .Subscribe(count => ItemsCountIcon = GetMaterialNumericIcon(count))
             .DisposeWith(Disposables);
 
-        
 
         this.WhenAnyValue(vm => vm.KeyTypeSort)
             .ObserveOn(AvaloniaScheduler.Instance)
@@ -115,47 +133,47 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 });
             })
             .DisposeWith(Disposables);
-        
     }
 
     public ServerConnectionService ServerConnectionService { get; }
     public SshKeyManager SshKeyManager { get; }
 
-    [Reactive] private string _version;
-    [Reactive] private bool? _keyTypeSort;
-    [Reactive] private bool? _commentSort;
-    [Reactive] private bool? _fingerPrintSort;
-
-    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIcon _itemsCountIcon = new() { Kind = MaterialIconKind.Infinity };
-    [Reactive(SetModifier = AccessModifier.Private)] private string _windowTitle = string.Empty;
-    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
-    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
-    [Reactive(SetModifier = AccessModifier.Private)] private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
+    [ReactiveCommand]
+    private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default)
+    {
+        return OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>(cancellationToken);
+    }
 
     [ReactiveCommand]
-    private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default) =>
-        OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>(cancellationToken);
-
-    [ReactiveCommand]
-    private Task OpenFileInfoWindowAsync(string path, CancellationToken cancellationToken = default) =>
-        OpenWindow<FileInfoWindow, FileInfoWindowViewModel, string, FileInfoViewModelInitializer>(path,
+    private Task OpenFileInfoWindowAsync(string path, CancellationToken cancellationToken = default)
+    {
+        return OpenWindow<FileInfoWindow, FileInfoWindowViewModel, string, FileInfoViewModelInitializer>(path,
             cancellationToken);
+    }
 
     [ReactiveCommand]
-    private Task OpenCreateKeyWindowAsync(CancellationToken cancellationToken = default) =>
-        OpenWindow<AddKeyWindow, AddKeyWindowViewModel>(cancellationToken);
+    private Task OpenCreateKeyWindowAsync(CancellationToken cancellationToken = default)
+    {
+        return OpenWindow<AddKeyWindow, AddKeyWindowViewModel>(cancellationToken);
+    }
 
     [ReactiveCommand]
-    private Task OpenEditAuthorizedKeysWindowAsync(CancellationToken cancellationToken = default) =>
-        OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(cancellationToken);
+    private Task OpenEditAuthorizedKeysWindowAsync(CancellationToken cancellationToken = default)
+    {
+        return OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(cancellationToken);
+    }
 
     [ReactiveCommand]
-    private Task OpenEditKnownHostsWindowAsync(CancellationToken cancellationToken = default) =>
-        OpenWindow<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(cancellationToken);
+    private Task OpenEditKnownHostsWindowAsync(CancellationToken cancellationToken = default)
+    {
+        return OpenWindow<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(cancellationToken);
+    }
 
     [ReactiveCommand]
-    private Task OpenConnectToServerWindowAsync(CancellationToken cancellationToken = default) =>
-        OpenWindow<ConnectToServerWindow, ConnectToServerViewModel>(cancellationToken);
+    private Task OpenConnectToServerWindowAsync(CancellationToken cancellationToken = default)
+    {
+        return OpenWindow<ConnectToServerWindow, ConnectToServerViewModel>(cancellationToken);
+    }
 
     [ReactiveCommand]
     private void ResetKey(SshKeyFile keyFile)
@@ -171,7 +189,10 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
     [ReactiveCommand]
-    private Task ReloadKeysAsync(CancellationToken cancellationToken = default) => SshKeyManager.RerunSearchAsync();
+    private Task ReloadKeysAsync(CancellationToken cancellationToken = default)
+    {
+        return SshKeyManager.RerunSearchAsync();
+    }
 
     [ReactiveCommand]
     private async Task ChangeFilenameAsync(SshKeyFile key, CancellationToken token = default)
@@ -229,7 +250,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         var content = keyFile is not null ? keyFile.ToOpenSshPublicFormat() : string.Empty;
         return ShowExportWindow(key, content, null, token);
     }
-    
+
     private async Task ShowExportWindow(SshKeyFile key, string content, string? windowTitle = null,
         CancellationToken token = default)
     {
@@ -306,7 +327,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName),
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
                 MaterialIconKind.QuestionBoxOutline) is MessageBoxResult.Yes)
-            if ((await SshKeyManager.TryDeleteKeyAsync(sshKeyFile, cancellationToken)) is
+            if (await SshKeyManager.TryDeleteKeyAsync(sshKeyFile, cancellationToken) is
                 { success: false, exception: { } error })
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName)
@@ -316,27 +337,30 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     [ReactiveCommand]
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)
     {
-        if(!(await _messageBoxProvider.ShowRetryMessageBoxAsync(tryActionAsync: async () =>
-               {
-                   using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
-                       new SecureInputParams()
-                       {
-                           Title = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
-                           Prompt = string.Join(Environment.NewLine, StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading, Path.GetFileName(key.AbsoluteFilePath))
-                       });
-                   bool? operationResult = secureInputResult switch
-                   {
-                       null => null,
-                       { Value.Length: <= 0 } => true,
-                       { Value.Length: > 0 } => key.SetPassword(secureInputResult.Value.Span)
-                   };
-                   if(operationResult is false)
-                       key.Reset();
-                   return operationResult;
-               }, title: StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
-               message: StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
-               retries: 3, showTryCountInTitle: true, icon: MaterialIconKind.WarningOutline)))
-            await _messageBoxProvider.ShowErrorMessageBoxAsync(customMessage: string.Join(" ", "Key", key.FileName, "could not be opened correctly"));
+        if (!await _messageBoxProvider.ShowRetryMessageBoxAsync(async () =>
+                {
+                    using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
+                        new SecureInputParams
+                        {
+                            Title = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
+                            Prompt = string.Join(Environment.NewLine,
+                                StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
+                                Path.GetFileName(key.AbsoluteFilePath))
+                        });
+                    bool? operationResult = secureInputResult switch
+                    {
+                        null => null,
+                        { Value.Length: <= 0 } => true,
+                        { Value.Length: > 0 } => key.SetPassword(secureInputResult.Value.Span)
+                    };
+                    if (operationResult is false)
+                        key.Reset();
+                    return operationResult;
+                }, StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
+                StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
+                retries: 3, showTryCountInTitle: true, icon: MaterialIconKind.WarningOutline))
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(customMessage: string.Join(" ", "Key", key.FileName,
+                "could not be opened correctly"));
     }
 
     private async Task OpenWindow<TWindow, TViewModel, TParam, TInitializer>(TParam param,
@@ -364,33 +388,37 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));
     }
 
-    private static MaterialIcon GetMaterialNumericIcon(int count) => new()
+    private static MaterialIcon GetMaterialNumericIcon(int count)
     {
-        Kind = count switch
+        return new MaterialIcon
         {
-            0 => MaterialIconKind.NumericZero,
-            1 => MaterialIconKind.NumericOne,
-            2 => MaterialIconKind.NumericTwo,
-            3 => MaterialIconKind.NumericThree,
-            4 => MaterialIconKind.NumericFour,
-            5 => MaterialIconKind.NumericFive,
-            6 => MaterialIconKind.NumericSix,
-            7 => MaterialIconKind.NumericSeven,
-            8 => MaterialIconKind.NumericEight,
-            9 => MaterialIconKind.NumericNine,
-            10 => MaterialIconKind.Numeric10,
-            _ => MaterialIconKind.Infinity
-        },
-        Width = 20,
-        Height = 20
-    };
+            Kind = count switch
+            {
+                0 => MaterialIconKind.NumericZero,
+                1 => MaterialIconKind.NumericOne,
+                2 => MaterialIconKind.NumericTwo,
+                3 => MaterialIconKind.NumericThree,
+                4 => MaterialIconKind.NumericFour,
+                5 => MaterialIconKind.NumericFive,
+                6 => MaterialIconKind.NumericSix,
+                7 => MaterialIconKind.NumericSeven,
+                8 => MaterialIconKind.NumericEight,
+                9 => MaterialIconKind.NumericNine,
+                10 => MaterialIconKind.Numeric10,
+                _ => MaterialIconKind.Infinity
+            },
+            Width = 20,
+            Height = 20
+        };
+    }
 
-    private static MaterialIconKind EvaluateSortIconKind(bool? value) =>
-        value switch
+    private static MaterialIconKind EvaluateSortIconKind(bool? value)
+    {
+        return value switch
         {
             null => MaterialIconKind.CircleOutline,
             true => MaterialIconKind.ChevronDownCircleOutline,
             false => MaterialIconKind.ChevronUpCircleOutline
         };
-    
+    }
 }

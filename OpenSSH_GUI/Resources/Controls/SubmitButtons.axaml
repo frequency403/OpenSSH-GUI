@@ -38,10 +38,10 @@
                 <Label Content="{Binding SubmitButtonTooltip, ElementName=Self}" />
             </ToolTip.Tip>
             <Panel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <ContentPresenter IsVisible="{Binding SubmitButtonContentEnabled, ElementName=Self}" 
+                <ContentPresenter IsVisible="{Binding SubmitButtonContentEnabled, ElementName=Self}"
                                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                   Content="{Binding SubmitButtonContent, ElementName=Self}" />
-                <avalonia:MaterialIcon IsVisible="{Binding !SubmitButtonContentEnabled, ElementName=Self}" 
+                <avalonia:MaterialIcon IsVisible="{Binding !SubmitButtonContentEnabled, ElementName=Self}"
                                        Kind="{Binding SubmitButtonIconKind, ElementName=Self}" />
             </Panel>
         </Button>

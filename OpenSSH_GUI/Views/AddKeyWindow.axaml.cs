@@ -1,7 +1,4 @@
-﻿using Avalonia.Media.Imaging;
-using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using JetBrains.Annotations;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;

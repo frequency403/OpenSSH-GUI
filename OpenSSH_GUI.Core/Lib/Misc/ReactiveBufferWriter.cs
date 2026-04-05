@@ -5,33 +5,62 @@ using ReactiveUI;
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
 /// <summary>
-/// A thread-safe, reactive wrapper around <see cref="ArrayBufferWriter{T}"/> 
-/// implementing <see cref="ReactiveUI.IReactiveObject"/> for use with ReactiveUI bindings.
+///     A thread-safe, reactive wrapper around <see cref="ArrayBufferWriter{T}" />
+///     implementing <see cref="ReactiveUI.IReactiveObject" /> for use with ReactiveUI bindings.
 /// </summary>
 /// <typeparam name="T">The element type of the buffer.</typeparam>
 public sealed class ReactiveBufferWriter<T> : IReactiveObject, IBufferWriter<T>
 {
-    private readonly Lock _lockObject = new();
     private readonly ArrayBufferWriter<T> _inner;
-    private static readonly string[] PropertyNames = [nameof(WrittenCount), nameof(WrittenMemory)];
+    private readonly Lock _lockObject = new();
+    private readonly string[] _propertyNames = [nameof(WrittenCount), nameof(WrittenMemory)];
 
     /// <summary>
-    /// Initializes a new instance with an optional initial capacity.
+    ///     Initializes a new instance with an optional initial capacity.
     /// </summary>
     /// <param name="initialCapacity">Initial buffer capacity. Defaults to 256.</param>
     public ReactiveBufferWriter(int initialCapacity = 256)
-        => _inner = new ArrayBufferWriter<T>(initialCapacity);
+    {
+        _inner = new ArrayBufferWriter<T>(initialCapacity);
+    }
 
     /// <summary>Gets the portion of the buffer that has been written to.</summary>
-    public ReadOnlyMemory<T> WrittenMemory { get { lock (_lockObject) return _inner.WrittenMemory; } }
+    public ReadOnlyMemory<T> WrittenMemory
+    {
+        get
+        {
+            lock (_lockObject)
+            {
+                return _inner.WrittenMemory;
+            }
+        }
+    }
 
     /// <summary>Gets the written data as a span.</summary>
-    public ReadOnlySpan<T> WrittenSpan { get { lock (_lockObject) return _inner.WrittenSpan; } }
+    public ReadOnlySpan<T> WrittenSpan
+    {
+        get
+        {
+            lock (_lockObject)
+            {
+                return _inner.WrittenSpan;
+            }
+        }
+    }
 
     /// <summary>Gets the number of committed elements.</summary>
-    public int WrittenCount { get { lock (_lockObject) return _inner.WrittenCount; } }
+    public int WrittenCount
+    {
+        get
+        {
+            lock (_lockObject)
+            {
+                return _inner.WrittenCount;
+            }
+        }
+    }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public void Advance(int count)
     {
         RaiseAllChanging();
@@ -39,14 +68,40 @@ public sealed class ReactiveBufferWriter<T> : IReactiveObject, IBufferWriter<T>
         {
             _inner.Advance(count);
         }
+
         RaiseAllChanged();
     }
 
-    /// <inheritdoc/>
-    public Memory<T> GetMemory(int sizeHint = 0) { lock (_lockObject) return _inner.GetMemory(sizeHint); }
+    /// <inheritdoc />
+    public Memory<T> GetMemory(int sizeHint = 0)
+    {
+        lock (_lockObject)
+        {
+            return _inner.GetMemory(sizeHint);
+        }
+    }
 
-    /// <inheritdoc/>
-    public Span<T> GetSpan(int sizeHint = 0) { lock (_lockObject) return _inner.GetSpan(sizeHint); }
+    /// <inheritdoc />
+    public Span<T> GetSpan(int sizeHint = 0)
+    {
+        lock (_lockObject)
+        {
+            return _inner.GetSpan(sizeHint);
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
+    {
+        PropertyChanging?.Invoke(this, args);
+    }
+
+    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
+    {
+        PropertyChanged?.Invoke(this, args);
+    }
 
     /// <summary>Resets the writer and notifies subscribers.</summary>
     public void Clear()
@@ -56,30 +111,17 @@ public sealed class ReactiveBufferWriter<T> : IReactiveObject, IBufferWriter<T>
         {
             _inner.Clear();
         }
+
         RaiseAllChanged();
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
-
     private void RaiseAllChanging()
     {
-        foreach (var publicPropertyName in PropertyNames)
-        {
-            this.RaisePropertyChanging(publicPropertyName);
-        }
+        foreach (var publicPropertyName in _propertyNames) this.RaisePropertyChanging(publicPropertyName);
     }
 
     private void RaiseAllChanged()
     {
-        foreach (var publicPropertyName in PropertyNames)
-        {
-            this.RaisePropertyChanged(publicPropertyName);
-        }
+        foreach (var publicPropertyName in _propertyNames) this.RaisePropertyChanged(publicPropertyName);
     }
-    
-    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) 
-        => PropertyChanging?.Invoke(this, args);
-    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) 
-        => PropertyChanged?.Invoke(this, args);
 }

@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 

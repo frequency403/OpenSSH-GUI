@@ -5,10 +5,8 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:models="clr-namespace:OpenSSH_GUI.SshConfig.Models;assembly=OpenSSH_GUI.SshConfig"
         xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
-        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -43,22 +41,25 @@
                       IsEnabled="{Binding !CanConnectToServer}">
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUsePubKey}" />
             </CheckBox>
-            <CheckBox IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}" IsEnabled="{Binding !CanConnectToServer}">
+            <CheckBox IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}"
+                      IsEnabled="{Binding !CanConnectToServer}">
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUseAllKeys}" />
             </CheckBox>
         </StackPanel>
-        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" RowDefinitions="* *" IsVisible="{Binding EnablePreConfiguredHosts}" Margin="10 20">
-            <Label Target="SelectConnectionFromConfig"  Grid.Row="0" Content="Preconfigured Connections" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-            <ComboBox x:Name="SelectConnectionFromConfig" Grid.Row="1" 
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                ItemsSource="{Binding SshHostSettings}" 
-                SelectedItem="{Binding SelectedHostSettings}">
+        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" RowDefinitions="* *"
+              IsVisible="{Binding EnablePreConfiguredHosts}" Margin="10 20">
+            <Label Target="SelectConnectionFromConfig" Grid.Row="0" Content="Preconfigured Connections"
+                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <ComboBox x:Name="SelectConnectionFromConfig" Grid.Row="1"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      ItemsSource="{Binding SshHostSettings}"
+                      SelectedItem="{Binding SelectedHostSettings}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:SshHostSettings}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding User}"/>
-                            <TextBlock Text="@"/>
-                            <TextBlock Text="{Binding HostName}"/>
+                            <TextBlock Text="{Binding User}" />
+                            <TextBlock Text="@" />
+                            <TextBlock Text="{Binding HostName}" />
                         </StackPanel>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
@@ -124,7 +125,8 @@
                 <avalonia:MaterialIcon Kind="Replay" />
             </Button>
         </TextBlock>
-        <controls:SubmitButtons Margin="5" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" 
+        <controls:SubmitButtons Margin="5" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
                                 BooleanSubmit="{Binding BooleanSubmitCommand}"
                                 SubmitButtonEnabled="{Binding CanConnectToServer}"
                                 SubmitButtonIconKind="CheckOutline" />

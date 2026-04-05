@@ -44,7 +44,8 @@
         </Style>
 
     </Window.Styles>
-    <UniformGrid Columns="1" Rows="0" RowSpacing="10" Margin="20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <UniformGrid Columns="1" Rows="0" RowSpacing="10" Margin="20" HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch">
         <StackPanel HorizontalAlignment="Stretch" Margin="10 5" Spacing="5">
             <UniformGrid Rows="1" Columns="2" ColumnSpacing="50">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
@@ -123,22 +124,6 @@
                          CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
 
                 <SplitButton.Resources>
-                    <SolidColorBrush x:Key="SplitButtonBackground"
-                                     Color="{DynamicResource SplitButtonRemoteBackgroundColor}" />
-                    <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver"
-                                     Color="{DynamicResource SplitButtonRemotePointerOverColor}" />
-                    <SolidColorBrush x:Key="SplitButtonBackgroundPressed"
-                                     Color="{DynamicResource SplitButtonRemotePressedColor}" />
-                    <SolidColorBrush x:Key="SplitButtonBackgroundDisabled"
-                                     Color="{DynamicResource SplitButtonRemoteDisabledColor}" />
-                    <SolidColorBrush x:Key="SplitButtonDividerBackground"
-                                     Color="{DynamicResource SplitButtonRemoteDividerColor}" />
-                    <SolidColorBrush x:Key="SplitButtonForeground"
-                                     Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
-                    <SolidColorBrush x:Key="SplitButtonForegroundPointerOver"
-                                     Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
-                    <SolidColorBrush x:Key="SplitButtonForegroundPressed"
-                                     Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
                 </SplitButton.Resources>
 
                 <SplitButton.Flyout>
@@ -209,39 +194,39 @@
             </StackPanel>
             <Grid ColumnDefinitions="* Auto" ColumnSpacing="5">
                 <TextBox Grid.Column="0" Name="PasswordBox" LetterSpacing="2"
-                     Text="{Binding Password}"
-                     IsEnabled="{Binding KeyFile.Password.IsValid}"
-                     PasswordChar="*"
-                                 IsUndoEnabled="False"
-                                 IsReadOnly="True"
-                                 AcceptsReturn="False"
-                                 AcceptsTab="False"
-                                 Focusable="False"
-                                 MaxLines="1"
-                                 SelectionBrush="Transparent">
-                <TextBox.InnerRightContent>
-                    <ToggleButton IsChecked="{Binding RevealPassword, ElementName=PasswordBox}"
-                                  IsThreeState="False">
-                        <StackPanel>
-                            <avalonia:MaterialIcon Kind="EyeOutline"
-                                                   IsVisible="{Binding RevealPassword, ElementName=PasswordBox}" />
-                            <avalonia:MaterialIcon Kind="EyeOffOutline"
-                                                   IsVisible="{Binding !RevealPassword, ElementName=PasswordBox}" />
-                        </StackPanel>
-                    </ToggleButton>
-                </TextBox.InnerRightContent>
-            </TextBox>
-            <Button Grid.Column="1" IsEnabled="{Binding RevealPassword, ElementName=PasswordBox }"
-                    Command="{Binding CopyPasswordIntoClipboardCommand}"
-                    CommandParameter="{Binding KeyFile.Password}"
-                    Height="{Binding Height, ElementName=PasswordBox}"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Background="{DynamicResource PrimaryHoverBrush}">
-                <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
-            </Button>
+                         Text="{Binding Password}"
+                         IsEnabled="{Binding KeyFile.Password.IsValid}"
+                         PasswordChar="*"
+                         IsUndoEnabled="False"
+                         IsReadOnly="True"
+                         AcceptsReturn="False"
+                         AcceptsTab="False"
+                         Focusable="False"
+                         MaxLines="1"
+                         SelectionBrush="Transparent">
+                    <TextBox.InnerRightContent>
+                        <ToggleButton IsChecked="{Binding RevealPassword, ElementName=PasswordBox}"
+                                      IsThreeState="False">
+                            <StackPanel>
+                                <avalonia:MaterialIcon Kind="EyeOutline"
+                                                       IsVisible="{Binding RevealPassword, ElementName=PasswordBox}" />
+                                <avalonia:MaterialIcon Kind="EyeOffOutline"
+                                                       IsVisible="{Binding !RevealPassword, ElementName=PasswordBox}" />
+                            </StackPanel>
+                        </ToggleButton>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+                <Button Grid.Column="1" IsEnabled="{Binding RevealPassword, ElementName=PasswordBox }"
+                        Command="{Binding CopyPasswordIntoClipboardCommand}"
+                        CommandParameter="{Binding KeyFile.Password}"
+                        Height="{Binding Height, ElementName=PasswordBox}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="{DynamicResource PrimaryHoverBrush}">
+                    <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
+                </Button>
             </Grid>
-            
+
         </UniformGrid>
     </UniformGrid>
 </Window>

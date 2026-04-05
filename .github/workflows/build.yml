@@ -178,7 +178,7 @@ jobs:
         with:
           name: OpenSSH-GUI-linux-x64
           path: ./
-          
+
       - name: Download generated desktop file
         uses: actions/download-artifact@v4
         with:
@@ -216,7 +216,7 @@ jobs:
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ github.ref_name }}"
-          
+  
   winget:
     name: Update Winget Package
     runs-on: ubuntu-latest

@@ -6,15 +6,15 @@ using ReactiveUI.Builder;
 namespace OpenSSH_GUI.Tests;
 
 /// <summary>
-/// Assembly-wide fixture that initializes ReactiveUI core services
-/// before any test runs. Required because <see cref="ReactiveUI.ReactiveCommand"/>
-/// and related types throw if ReactiveUI has not been bootstrapped.
+///     Assembly-wide fixture that initializes ReactiveUI core services
+///     before any test runs. Required because <see cref="ReactiveUI.ReactiveCommand" />
+///     and related types throw if ReactiveUI has not been bootstrapped.
 /// </summary>
 /// <summary>
-/// Assembly-wide fixture that runs a dedicated Avalonia UI thread with a
-/// live dispatcher loop. Required because <see cref="Avalonia.AvaloniaObject"/>
-/// enforces UI-thread access, and <see cref="Dispatcher.UIThread.Invoke"/> deadlocks
-/// without a running message loop.
+///     Assembly-wide fixture that runs a dedicated Avalonia UI thread with a
+///     live dispatcher loop. Required because <see cref="Avalonia.AvaloniaObject" />
+///     enforces UI-thread access, and <see cref="Dispatcher.UIThread.Invoke" /> deadlocks
+///     without a running message loop.
 /// </summary>
 public sealed class ReactiveUiInitFixture : IDisposable
 {
@@ -45,5 +45,8 @@ public sealed class ReactiveUiInitFixture : IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose() => cts.Cancel();
+    public void Dispose()
+    {
+        cts.Cancel();
+    }
 }

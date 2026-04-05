@@ -3,13 +3,13 @@
     <!-- Target framework and other specs in Directory.Build.props -->
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.13" />
-        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
-        <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
-        <PackageReference Include="ReactiveUI" Version="23.2.1" />
+        <PackageReference Include="Avalonia" Version="11.3.13"/>
+        <PackageReference Include="DryIoc.dll" Version="5.4.3"/>
+        <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5"/>
+        <PackageReference Include="ReactiveUI" Version="23.2.1"/>
         <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.12"/>
         <PackageReference Include="ReactiveUI.SourceGenerators" Version="2.6.1"/>
         <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0"/>

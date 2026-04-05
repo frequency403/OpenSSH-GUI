@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.SshConfig.Exceptions;
@@ -19,7 +18,7 @@ public class SshConfigParserTests
     {
         return new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
     }
-    
+
     private string GetEmbeddedResource(string fileName)
     {
         var assembly = typeof(SshConfigParserTests).Assembly;
@@ -60,10 +59,10 @@ public class SshConfigParserTests
 
         var ss = configurationRoot.GetSection("SshConfig").Get<SshConfiguration>();
         Assert.NotNull(ss);
-            
+
         var ifsCount = ss.Hosts.Where(host => host.IdentityFiles is not null).Sum(host => host.IdentityFiles?.Length);
         ifsCount.ShouldNotBe(null);
-        if(ifsCount is {  } count)
+        if (ifsCount is { } count)
             count.ShouldBeGreaterThan(0);
     }
 

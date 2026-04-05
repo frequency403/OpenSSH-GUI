@@ -1,6 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Disposables.Fluent;
+using Avalonia;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,6 @@ using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
-using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
 using OpenSSH_GUI.SshConfig.Models;
@@ -23,8 +23,37 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
-    private readonly ServerConnectionService _serverConnectionService;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly ServerConnectionService _serverConnectionService;
+
+    [Reactive] private bool _authWithAllKeys;
+
+    [Reactive] private bool _authWithPublicKey;
+
+    [Reactive] private bool _canConnectToServer;
+
+    [Reactive] private IConnectionCredentials? _connectionCredentials;
+
+    [Reactive] private string _hostName = string.Empty;
+
+    [Reactive] private bool _keyComboBoxEnabled;
+
+    [Reactive] private string _password = string.Empty;
+    [Reactive] private SshHostSettings? _selectedHostSettings;
+
+    [Reactive] private SshKeyFile? _selectedPublicKey;
+
+    [Reactive] private IBrush _statusButtonBackground = Application.Current?.Resources["OverlayBrush"] as IBrush ?? Brushes.Gray;
+
+    [Reactive] private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUnknown);
+
+    [Reactive] private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StringsAndTexts.ConnectToServerStatusUntested);
+
+    [Reactive] private bool _tryingToConnect;
+
+    [Reactive] private string _username = string.Empty;
 
     public ConnectToServerViewModel(ILogger<ConnectToServerViewModel> logger,
         ServerConnectionService serverConnectionService,
@@ -53,20 +82,16 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
                     logger.LogError(e, "Error testing connection");
                 }
             }).DisposeWith(Disposables);
-        
+
         this
-            .WhenAnyValue(viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys, model => model._serverConnectionService.IsConnected)
-            .Subscribe((tuple) =>
-            {
-                KeyComboBoxEnabled = tuple is { Item3: false, Item1: true, Item2: false };
-            }).DisposeWith(Disposables);
+            .WhenAnyValue(viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys,
+                model => model._serverConnectionService.IsConnected)
+            .Subscribe(tuple => { KeyComboBoxEnabled = tuple is { Item3: false, Item1: true, Item2: false }; })
+            .DisposeWith(Disposables);
 
         this.WhenAnyValue(viewModel => viewModel.ConnectionCredentials)
-            .Subscribe(credentials =>
-            {
-                CanConnectToServer = credentials is not null;
-            }).DisposeWith(Disposables);
-        
+            .Subscribe(credentials => { CanConnectToServer = credentials is not null; }).DisposeWith(Disposables);
+
         try
         {
             var config = configuration.GetSection("SshConfig").Get<SshConfiguration>();
@@ -78,43 +103,14 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
             logger.LogDebug(e, "Config not readable");
         }
     }
-    [Reactive]
-    private IConnectionCredentials? _connectionCredentials;
-
-    [Reactive] private bool _canConnectToServer;
 
     public ReactiveCommand<Unit, Unit> TestConnection { get; }
     public ReactiveCommand<Unit, Unit> ResetCommand { get; }
     public SshKeyManager SshKeyManager { get; }
 
     public bool EnablePreConfiguredHosts => SshHostSettings.Any();
-    [Reactive] private SshHostSettings? _selectedHostSettings;
 
     public IEnumerable<SshHostSettings> SshHostSettings { get; }
-    
-    [Reactive] private bool _authWithPublicKey;
-
-    [Reactive] private bool _authWithAllKeys;
-
-    [Reactive] private SshKeyFile? _selectedPublicKey;
-
-    [Reactive] private string _hostName = string.Empty;
-
-    [Reactive] private string _username = string.Empty;
-
-    [Reactive] private string _password = string.Empty;
-
-    [Reactive] private bool _tryingToConnect;
-
-    [Reactive] private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUntested);
-
-    [Reactive] private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
-        StringsAndTexts.ConnectToServerStatusUnknown);
-
-    [Reactive] private IBrush _statusButtonBackground = Brushes.Gray;
-
-    [Reactive] private bool _keyComboBoxEnabled;
 
     private async Task TestConnectionAsyncBase(CancellationToken cancellationToken = default)
     {
@@ -124,13 +120,13 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
                 StringsAndTexts.ConnectToServerStatusSuccess);
             StatusButtonToolTip =
                 string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, HostName);
-            StatusButtonBackground = Brushes.Green;
+            StatusButtonBackground = Application.Current?.Resources["SuccessBrush"] as IBrush ?? Brushes.Green;
         }
         else
         {
             StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusFailed);
-            StatusButtonBackground = Brushes.Red;
+            StatusButtonBackground = Application.Current?.Resources["ErrorBrush"] as IBrush ?? Brushes.Red;
         }
 
         TryingToConnect = false;
@@ -144,14 +140,15 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         await _messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, StatusButtonToolTip);
     }
 
-    private async Task TestConnectionAsync(SshHostSettings? hostSettings = null, CancellationToken cancellationToken = default)
+    private async Task TestConnectionAsync(SshHostSettings? hostSettings = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(hostSettings);
         if (hostSettings.IdentityFiles is null)
         {
             StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusFailed);
-            StatusButtonBackground = Brushes.Red;
+            StatusButtonBackground = Application.Current?.Resources["ErrorBrush"] as IBrush ?? Brushes.Red;
             return;
         }
 
@@ -177,8 +174,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
                 hostSettings.HostName ?? string.Empty,
                 hostSettings.User ?? string.Empty,
                 keys);
-            
-            if(await _serverConnectionService.EstablishConnection(connectionCredentials, linkedTokenSource.Token))
+
+            if (await _serverConnectionService.EstablishConnection(connectionCredentials, linkedTokenSource.Token))
                 ConnectionCredentials = connectionCredentials;
         }
         catch (Exception exception)
@@ -195,22 +192,18 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
         try
         {
-            if(string.IsNullOrWhiteSpace(HostName) || string.IsNullOrWhiteSpace(Username) || (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
+            if (string.IsNullOrWhiteSpace(HostName) || string.IsNullOrWhiteSpace(Username) ||
+                (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
                 throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
             TryingToConnect = true;
             IConnectionCredentials? connectionCredentials = null;
             if (AuthWithPublicKey)
-            {
                 connectionCredentials = new KeyConnectionCredentials(HostName, Username, SelectedPublicKey);
-            } else if (AuthWithAllKeys)
-            {
+            else if (AuthWithAllKeys)
                 connectionCredentials = new MultiKeyConnectionCredentials(HostName, Username, SshKeyManager.SshKeys);
-            }
             else
-            {
                 connectionCredentials = new PasswordConnectionCredentials(HostName, Username, Password);
-            }
-            if(await _serverConnectionService.EstablishConnection(connectionCredentials, linkedTokenSource.Token))
+            if (await _serverConnectionService.EstablishConnection(connectionCredentials, linkedTokenSource.Token))
                 ConnectionCredentials = connectionCredentials;
         }
         catch (Exception exception)
@@ -228,10 +221,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         if (ConnectionCredentials is null) return;
         try
         {
-            if(!(await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken)))
-            {
+            if (!await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken))
                 await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, "Connection failed");
-            }
         }
         catch (Exception e)
         {
@@ -249,7 +240,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
             StringsAndTexts.ConnectToServerStatusUnknown);
         StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
             StringsAndTexts.ConnectToServerStatusUntested);
-        StatusButtonBackground = Brushes.Gray;
+        StatusButtonBackground = Application.Current?.Resources["OverlayBrush"] as IBrush ?? Brushes.Gray;
         SelectedHostSettings = null;
         AuthWithAllKeys = false;
         AuthWithPublicKey = false;

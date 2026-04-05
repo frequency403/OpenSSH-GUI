@@ -40,10 +40,8 @@ public class SshConfigurationBindingTests
                          path = path.Length == 1 ? home : Path.Combine(home, path[2..]);
                          return Path.GetFullPath(path);
                      }))
-            {
                 if (!possibleKeyFiles.Any(e => e.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)))
                     possibleKeyFiles.Add(hostIdentityFile);
-            }
         }
 
         possibleKeyFiles.ShouldNotBeEmpty();

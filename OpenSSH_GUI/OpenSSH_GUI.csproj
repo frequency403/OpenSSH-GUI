@@ -19,17 +19,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.13" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.13" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.13"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.13"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.13"/>
         <PackageReference Include="Material.Icons" Version="3.0.0"/>
         <PackageReference Include="Material.Icons.Avalonia" Version="3.0.0"/>
-        <PackageReference Include="ReactiveUI" Version="23.2.1" />
+        <PackageReference Include="ReactiveUI" Version="23.2.1"/>
         <PackageReference Include="ReactiveUI.Validation" Version="7.0.5"/>
-        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
         <PackageReference Include="System.Reactive" Version="6.1.0"/>
     </ItemGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj"/>
     </ItemGroup>
@@ -55,8 +55,8 @@
             <DependentUpon>StringsAndTexts.resx</DependentUpon>
         </Compile>
         <Compile Update="Resources\Controls\SubmitButtons.axaml.cs">
-          <DependentUpon>SubmitButtons.axaml</DependentUpon>
-          <SubType>Code</SubType>
+            <DependentUpon>SubmitButtons.axaml</DependentUpon>
+            <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
 

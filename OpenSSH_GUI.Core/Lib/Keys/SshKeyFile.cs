@@ -1,15 +1,9 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Reactive;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
-using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
@@ -28,80 +22,84 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 /// </summary>
 public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDisposable
 {
-    private CompositeDisposable _disposables = new();
-    
+    private readonly CompositeDisposable _disposables = new();
+
     /// <summary>
     ///     A logger instance used for logging events and diagnostic information
     ///     related to the operations and state within the <see cref="SshKeyFile" /> class.
     /// </summary>
     private readonly ILogger<SshKeyFile> _logger;
-    
+
+    /// <summary>
+    ///     Gets the absolute file path of the SSH key file, projected from <see cref="KeyFileInfo" />.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private string? _absoluteFilePath;
+
+    /// <summary>
+    ///     The basic key file information extracted by <c>ssh-keygen</c> or the file itself in case of a PuTTy key.
+    /// </summary>
+    [Reactive] private BasicSshKeyFileInformation _basicSshKeyFileInformation;
+
     /// <summary>
     ///     Holds the comment embedded in the SSH key, derived from either the loaded
     ///     <see cref="PrivateKeyFile" /> or the <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _fileChangesAllowed;
+
+    /// <summary>
+    ///     Gets the file name (without directory) of the SSH key file, projected from <see cref="KeyFileInfo" />.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private string? _fileName;
 
     /// <summary>
     ///     Holds the raw fingerprint hash of the SSH key, derived from either the loaded
     ///     <see cref="PrivateKeyFile" /> or the <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private string _fingerprint = string.Empty;
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private string _fingerprint = string.Empty;
 
     /// <summary>
     ///     Contains a human-readable fingerprint representation (the base64 portion after the
     ///     algorithm prefix), derived from either the loaded <see cref="PrivateKeyFile" /> or
     ///     the <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private string _fingerprintString = string.Empty;
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private string _fingerprintString = string.Empty;
+
+    /// <summary>
+    ///     Gets the current on-disk format of the SSH key file (e.g. OpenSSH or PuTTY),
+    ///     projected from <see cref="KeyFileInfo" />.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private SshKeyFormat? _format;
 
     /// <summary>
     ///     Indicates the hash algorithm (e.g. SHA256, MD5) used for the key's fingerprint,
     ///     resolved from the host key algorithms of the loaded <see cref="PrivateKeyFile" />
     ///     or from <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private SshKeyHashAlgorithmName _hashAlgorithmName = SshKeyHashAlgorithmName.SHA256;
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private SshKeyHashAlgorithmName _hashAlgorithmName = SshKeyHashAlgorithmName.SHA256;
 
     /// <summary>
     ///     Evaluates to <see langword="true" /> when both a valid <see cref="PrivateKeyFile" />
     ///     is loaded and the associated <see cref="KeyFileInfo" /> exists on disk.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private bool _isInitialized;
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _isInitialized;
 
     /// <summary>
     ///     Evaluates to <see langword="true" /> when the current key file format is not
     ///     <see cref="SshKeyFormat.OpenSSH" />, indicating a PuTTY-compatible key format.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private bool _isPuttyKey;
-
-    /// <summary>
-    ///     Represents the cryptographic algorithm of the key (e.g. RSA, ECDSA, ED25519),
-    ///     resolved from the loaded <see cref="PrivateKeyFile" /> or <see cref="BasicSshKeyFileInformation" />.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private SshKeyType _keyType = SshKeyType.RSA;
-
-    /// <summary>
-    ///     Gets the absolute file path of the SSH key file, projected from <see cref="KeyFileInfo" />.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private string? _absoluteFilePath;
-
-    /// <summary>
-    ///     Gets the file name (without directory) of the SSH key file, projected from <see cref="KeyFileInfo" />.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private string? _fileName;
-
-    /// <summary>
-    ///     Gets the current on-disk format of the SSH key file (e.g. OpenSSH or PuTTY),
-    ///     projected from <see cref="KeyFileInfo" />.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private SshKeyFormat? _format;
-
-    /// <summary>
-    ///     Provides access to the collection of associated key files (e.g. private and public)
-    ///     for the current SSH key, projected from <see cref="KeyFileInfo" />.
-    ///     Returns an empty array when no files are associated.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private FileInfo[] _keyFiles = [];
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _isPuttyKey;
 
     /// <summary>
     ///     Holds metadata information about the associated SSH key file, such as file path, name,
@@ -111,25 +109,39 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     [Reactive] private SshKeyFileInformation? _keyFileInfo;
 
     /// <summary>
+    ///     Provides access to the collection of associated key files (e.g. private and public)
+    ///     for the current SSH key, projected from <see cref="KeyFileInfo" />.
+    ///     Returns an empty array when no files are associated.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private FileInfo[] _keyFiles = [];
+
+    /// <summary>
+    ///     Represents the cryptographic algorithm of the key (e.g. RSA, ECDSA, ED25519),
+    ///     resolved from the loaded <see cref="PrivateKeyFile" /> or <see cref="BasicSshKeyFileInformation" />.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private SshKeyType _keyType = SshKeyType.RSA;
+
+    /// <summary>
+    ///     Indicates whether the associated SSH key file requires a password to access.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _needsPassword;
+
+    /// <summary>
+    ///     Represents a password container for an SSH key file, encapsulating related
+    ///     password properties and operations while supporting password validation.
+    /// </summary>
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private SshKeyFilePassword _password = new();
+
+    /// <summary>
     ///     Represents the underlying private key file used to interact with SSH-related
     ///     operations, including authentication and cryptographic functions.
     /// </summary>
     [Reactive] private PrivateKeyFile? _privateKeyFile;
 
-    /// <summary>
-    ///     Indicates whether the associated SSH key file requires a password to access.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)] private bool _needsPassword;
-
-    /// <summary>
-    ///     The basic key file information extracted by <c>ssh-keygen</c> or the file itself in case of a PuTTy key.
-    /// </summary>
-    [Reactive]
-    private BasicSshKeyFileInformation _basicSshKeyFileInformation;
-
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private bool _fileChangesAllowed;
-    
     /// <summary>
     ///     Initializes a new instance of <see cref="SshKeyFile" />, wires up all reactive
     ///     observable property pipelines.
@@ -153,12 +165,12 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 }
                 catch
                 {
-                    Fingerprint =tuple.Item2.FingerPrint;
+                    Fingerprint = tuple.Item2.FingerPrint;
                 }
-                
+
                 try
                 {
-                    FingerprintString =  tuple.Item1?.Fingerprint(SshKeyHashAlgorithmName.SHA256)
+                    FingerprintString = tuple.Item1?.Fingerprint(SshKeyHashAlgorithmName.SHA256)
                         .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                         .Skip(1).FirstOrDefault()
                         ?.Split(':').Skip(1).FirstOrDefault() ?? tuple.Item2.FingerPrint;
@@ -167,7 +179,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 {
                     FingerprintString = tuple.Item2.FingerPrint;
                 }
-                
+
                 try
                 {
                     Comment = tuple.Item1?.Key.Comment ?? tuple.Item2.Comment;
@@ -185,15 +197,15 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                         ED25519Key => SshKeyType.ED25519,
                         _ => SshKeyType.RSA
                     };
-                    HashAlgorithmName =  Enum.TryParse<SshKeyHashAlgorithmName>(pk.HostKeyAlgorithms.FirstOrDefault()?.Name ?? string.Empty,
+                    HashAlgorithmName = Enum.TryParse<SshKeyHashAlgorithmName>(
+                        pk.HostKeyAlgorithms.FirstOrDefault()?.Name ?? string.Empty,
                         out var enumValue)
                         ? enumValue
                         : tuple.Item2.HashAlgorithmName;
                 }
-                
+
                 KeyType = tuple.Item2.KeyType;
                 HashAlgorithmName = tuple.Item2.HashAlgorithmName;
-
             }).DisposeWith(_disposables);
 
         this.WhenAnyValue(
@@ -224,7 +236,6 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 }
                 catch (FileNotFoundException)
                 {
-                    return;
                 }
                 catch (Exception e)
                 {
@@ -232,9 +243,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 }
             })
             .DisposeWith(_disposables);
-        
     }
-    
+
     /// <summary>
     ///     Represents the authorized key associated with an SSH key file.
     /// </summary>
@@ -251,13 +261,6 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
         }
     }
 
-    /// <summary>
-    ///     Represents a password container for an SSH key file, encapsulating related
-    ///     password properties and operations while supporting password validation.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private SshKeyFilePassword _password = new();
-    
     /// <summary>
     ///     Asynchronously releases the unmanaged resources used by the SshKeyFile instance
     ///     and optionally releases the managed resources.
@@ -312,6 +315,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
             _logger.LogError(e, "Failed to Initialize {className}", nameof(SshKeyFile));
             throw;
         }
+
         _logger.LogInformation("Reset {className} successfully", KeyFileInfo?.FileName ?? string.Empty);
     }
 
@@ -326,7 +330,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
         }
         catch (SshPassPhraseNullOrEmptyException passPhraseNullOrEmptyException)
         {
-            _logger.LogInformation(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}", source.AbsolutePath);
+            _logger.LogInformation(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}",
+                source.AbsolutePath);
             if (KeyFileInfo is not null)
                 BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(KeyFileInfo);
         }
@@ -336,7 +341,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
             throw;
         }
     }
-    
+
     /// <summary>
     ///     Loads an SSH key file from the specified file path and initializes it,
     ///     optionally using the provided passphrase for decryption.

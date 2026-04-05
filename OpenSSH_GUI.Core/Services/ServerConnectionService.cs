@@ -3,10 +3,11 @@ using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Services;
 
-public class ServerConnectionService(ILogger<ServerConnectionService> logger) : ReactiveObject
+public partial class ServerConnectionService(ILogger<ServerConnectionService> logger) : ReactiveObject
 {
     /// <summary>
     ///     Indicates whether the current server connection is active.
@@ -16,12 +17,9 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     and is currently active. If the connection is not established or has
     ///     been terminated, it returns <c>false</c>.
     /// </remarks>
-    [MemberNotNullWhen(true, nameof(ServerConnection))]
-    public bool IsConnected
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    [Reactive] 
+    [property: MemberNotNullWhen(true, nameof(ServerConnection))]
+    private bool _isConnected;
 
     /// <summary>
     ///     Gets or sets the server connection instance associated with the service.
@@ -31,15 +29,8 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     to retrieve or update the instance of the server connection. Setting this property
     ///     raises an internal change notification.
     /// </remarks>
-    public ServerConnection? ServerConnection
-    {
-        get;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref field, value);
-            IsConnected = value != null;
-        }
-    }
+    [Reactive]
+    private ServerConnection? _serverConnection;
 
     /// <summary>
     ///     Establishes a connection to a server using the provided connection credentials.
@@ -86,7 +77,7 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     /// </returns>
     public async ValueTask<bool> CloseConnection(bool throwOnNoConnection = true, CancellationToken token = default)
     {
-        if (!IsConnected) 
+        if (!IsConnected)
             return throwOnNoConnection ? throw new InvalidOperationException("No connection to disconnect from") : true;
         var disconnectResult = await ServerConnection.DisconnectFromServerAsync(token);
         if (disconnectResult)

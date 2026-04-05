@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using OpenSSH_GUI.Core.Enums;
-using Renci.SshNet;
+﻿using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 
@@ -9,7 +7,7 @@ namespace OpenSSH_GUI.Core.Interfaces.Credentials;
 /// </summary>
 public interface IConnectionCredentials
 {
-   /// <summary>
+    /// <summary>
     ///     Represents the host name for a connection.
     /// </summary>
     /// <remarks>

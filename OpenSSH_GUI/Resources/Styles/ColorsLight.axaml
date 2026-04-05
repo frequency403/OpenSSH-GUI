@@ -1,113 +1,113 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+
     <!-- ══ Backgrounds ══════════════════════════════════════════════════ -->
     <Color x:Key="BackgroundColor">#FFF0F4F8</Color>
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
 
     <Color x:Key="SurfaceColor">#FFE2E8EF</Color>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
 
     <Color x:Key="SurfaceElevatedColor">#FFFFFFFF</Color>
-    <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}"/>
+    <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}" />
 
     <Color x:Key="OverlayColor">#80F0F4F8</Color>
-    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}"/>
+    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
 
     <!-- Inverted tooltip (dark on light theme) -->
     <Color x:Key="TooltipColor">#FF2D333B</Color>
-    <SolidColorBrush x:Key="TooltipBrush" Color="{StaticResource TooltipColor}"/>
+    <SolidColorBrush x:Key="TooltipBrush" Color="{StaticResource TooltipColor}" />
 
     <!-- ══ Borders & Selection ═══════════════════════════════════════════ -->
     <Color x:Key="BorderColor">#FFB8C5D0</Color>
-    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
 
     <Color x:Key="BorderSubtleColor">#401A8A75</Color>
-    <SolidColorBrush x:Key="BorderSubtleBrush" Color="{StaticResource BorderSubtleColor}"/>
+    <SolidColorBrush x:Key="BorderSubtleBrush" Color="{StaticResource BorderSubtleColor}" />
 
     <Color x:Key="SelectionColor">#401A8A75</Color>
-    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}"/>
+    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}" />
 
     <!-- ══ Foreground / Text ══════════════════════════════════════════════ -->
     <Color x:Key="ForegroundPrimaryColor">#FF1A2332</Color>
-    <SolidColorBrush x:Key="ForegroundPrimaryBrush" Color="{StaticResource ForegroundPrimaryColor}"/>
+    <SolidColorBrush x:Key="ForegroundPrimaryBrush" Color="{StaticResource ForegroundPrimaryColor}" />
 
     <Color x:Key="ForegroundSecondaryColor">#FF5A6A7A</Color>
-    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="{StaticResource ForegroundSecondaryColor}"/>
+    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="{StaticResource ForegroundSecondaryColor}" />
 
     <Color x:Key="CodeForegroundColor">#FF7A6442</Color>
-    <SolidColorBrush x:Key="CodeForegroundBrush" Color="{StaticResource CodeForegroundColor}"/>
+    <SolidColorBrush x:Key="CodeForegroundBrush" Color="{StaticResource CodeForegroundColor}" />
 
     <!-- ══ Primary — Deep teal ════════════════════════════════════════════ -->
     <Color x:Key="PrimaryColor">#FF1A8A75</Color>
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
 
     <Color x:Key="PrimaryHoverColor">#FF157A67</Color>
-    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource PrimaryHoverColor}"/>
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource PrimaryHoverColor}" />
 
     <Color x:Key="PrimaryForegroundColor">#FFFFFFFF</Color>
-    <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="{StaticResource PrimaryForegroundColor}"/>
+    <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="{StaticResource PrimaryForegroundColor}" />
 
     <!-- ══ Accent — Dark amber ════════════════════════════════════════════ -->
     <Color x:Key="AccentColor">#FFC07800</Color>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
 
     <Color x:Key="AccentHoverColor">#FFA06400</Color>
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
 
     <Color x:Key="AccentForegroundColor">#FFFFFFFF</Color>
-    <SolidColorBrush x:Key="AccentForegroundBrush" Color="{StaticResource AccentForegroundColor}"/>
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="{StaticResource AccentForegroundColor}" />
 
     <!-- ══ SSH Connection Status ══════════════════════════════════════════ -->
     <Color x:Key="ConnectedColor">#FF1A7A2F</Color>
-    <SolidColorBrush x:Key="ConnectedBrush" Color="{StaticResource ConnectedColor}"/>
+    <SolidColorBrush x:Key="ConnectedBrush" Color="{StaticResource ConnectedColor}" />
 
     <Color x:Key="ConnectingColor">#FFB86800</Color>
-    <SolidColorBrush x:Key="ConnectingBrush" Color="{StaticResource ConnectingColor}"/>
+    <SolidColorBrush x:Key="ConnectingBrush" Color="{StaticResource ConnectingColor}" />
 
     <Color x:Key="DisconnectedColor">#FF7A8A97</Color>
-    <SolidColorBrush x:Key="DisconnectedBrush" Color="{StaticResource DisconnectedColor}"/>
+    <SolidColorBrush x:Key="DisconnectedBrush" Color="{StaticResource DisconnectedColor}" />
 
     <Color x:Key="VerifiedColor">#FF1E6B47</Color>
-    <SolidColorBrush x:Key="VerifiedBrush" Color="{StaticResource VerifiedColor}"/>
+    <SolidColorBrush x:Key="VerifiedBrush" Color="{StaticResource VerifiedColor}" />
 
     <Color x:Key="RevokedColor">#FF9B2020</Color>
-    <SolidColorBrush x:Key="RevokedBrush" Color="{StaticResource RevokedColor}"/>
+    <SolidColorBrush x:Key="RevokedBrush" Color="{StaticResource RevokedColor}" />
 
     <Color x:Key="ExpiredColor">#FFC05A00</Color>
-    <SolidColorBrush x:Key="ExpiredBrush" Color="{StaticResource ExpiredColor}"/>
+    <SolidColorBrush x:Key="ExpiredBrush" Color="{StaticResource ExpiredColor}" />
 
     <!-- ══ UI Roles ════════════════════════════════════════════════════════ -->
     <Color x:Key="InfoColor">#FF3B6FD4</Color>
-    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}" />
 
     <Color x:Key="DangerColor">#FFD4350A</Color>
-    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
 
     <Color x:Key="AdminColor">#FF6B3A9B</Color>
-    <SolidColorBrush x:Key="AdminBrush" Color="{StaticResource AdminColor}"/>
+    <SolidColorBrush x:Key="AdminBrush" Color="{StaticResource AdminColor}" />
 
     <Color x:Key="TagColor">#FF5A8A1A</Color>
-    <SolidColorBrush x:Key="TagBrush" Color="{StaticResource TagColor}"/>
+    <SolidColorBrush x:Key="TagBrush" Color="{StaticResource TagColor}" />
 
     <Color x:Key="RemoteColor">#FF007A7A</Color>
-    <SolidColorBrush x:Key="RemoteBrush" Color="{StaticResource RemoteColor}"/>
+    <SolidColorBrush x:Key="RemoteBrush" Color="{StaticResource RemoteColor}" />
 
     <Color x:Key="ModifiedColor">#FF6B7A2A</Color>
-    <SolidColorBrush x:Key="ModifiedBrush" Color="{StaticResource ModifiedColor}"/>
+    <SolidColorBrush x:Key="ModifiedBrush" Color="{StaticResource ModifiedColor}" />
 
     <Color x:Key="NavigationActiveColor">#FF4E3FAA</Color>
-    <SolidColorBrush x:Key="NavigationActiveBrush" Color="{StaticResource NavigationActiveColor}"/>
+    <SolidColorBrush x:Key="NavigationActiveBrush" Color="{StaticResource NavigationActiveColor}" />
 
     <!-- ══ Semantic ══════════════════════════════════════════════════════════ -->
     <Color x:Key="ErrorColor">#FFD93025</Color>
-    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}" />
 
     <Color x:Key="WarningColor">#FFC07800</Color>
-    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
 
     <Color x:Key="SuccessColor">#FF1E8C34</Color>
-    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
 
     <Color x:Key="SplitButtonRemoteBackgroundColor">#FF007A7A</Color>
     <Color x:Key="SplitButtonRemotePointerOverColor">#FF006868</Color>
@@ -116,11 +116,12 @@
     <Color x:Key="SplitButtonRemoteDividerColor">#FF005555</Color>
     <Color x:Key="SplitButtonRemoteForegroundColor">#FFFFFFFF</Color>
 
-    <SolidColorBrush x:Key="SplitButtonRemoteBackgroundBrush"   Color="{StaticResource SplitButtonRemoteBackgroundColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemotePointerOverBrush"  Color="{StaticResource SplitButtonRemotePointerOverColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemotePressedBrush"      Color="{StaticResource SplitButtonRemotePressedColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemoteDisabledBrush"     Color="{StaticResource SplitButtonRemoteDisabledColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemoteDividerBrush"      Color="{StaticResource SplitButtonRemoteDividerColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemoteForegroundBrush"   Color="{StaticResource SplitButtonRemoteForegroundColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemoteBackgroundBrush" Color="{StaticResource SplitButtonRemoteBackgroundColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemotePointerOverBrush"
+                     Color="{StaticResource SplitButtonRemotePointerOverColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemotePressedBrush" Color="{StaticResource SplitButtonRemotePressedColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemoteDisabledBrush" Color="{StaticResource SplitButtonRemoteDisabledColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemoteDividerBrush" Color="{StaticResource SplitButtonRemoteDividerColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemoteForegroundBrush" Color="{StaticResource SplitButtonRemoteForegroundColor}" />
 
 </ResourceDictionary>

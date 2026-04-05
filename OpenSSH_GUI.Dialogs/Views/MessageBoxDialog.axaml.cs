@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Material.Icons;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Models;

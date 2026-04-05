@@ -1,7 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using DryIoc;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,19 +39,20 @@ public static class DependencyInjectionExtensions
             container.Register<ServerConnectionService>();
             container.Register<DirectoryCrawler>();
             container.Register<SshKeyManager>();
-            container.Register<MainWindow>(serviceKey: nameof(MainWindow), made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
+            container.Register<MainWindow>(serviceKey: nameof(MainWindow),
+                made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
             container.Register<MainWindowViewModel>(serviceKey: nameof(MainWindowViewModel));
 
             container.RegisterDelegate<IDialogHost>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)));
+                resolver.Resolve<MainWindow>(nameof(MainWindow)));
             container.RegisterDelegate<Window>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)));
+                resolver.Resolve<MainWindow>(nameof(MainWindow)));
             container.RegisterDelegate<IClipboard>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow))!.Clipboard!);
+                resolver.Resolve<MainWindow>(nameof(MainWindow))!.Clipboard!);
             container.RegisterDelegate<IStorageProvider>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)).StorageProvider);
+                resolver.Resolve<MainWindow>(nameof(MainWindow)).StorageProvider);
             container.RegisterDelegate<ILauncher>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)).Launcher);
+                resolver.Resolve<MainWindow>(nameof(MainWindow)).Launcher);
 
             container.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
             container.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();

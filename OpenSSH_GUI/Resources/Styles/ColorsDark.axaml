@@ -1,133 +1,133 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+
     <!-- ══ Backgrounds ══════════════════════════════════════════════════ -->
     <Color x:Key="BackgroundColor">#FF0D1117</Color>
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
 
     <Color x:Key="SurfaceColor">#FF161B22</Color>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
 
     <Color x:Key="SurfaceElevatedColor">#FF1C2128</Color>
-    <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}"/>
+    <SolidColorBrush x:Key="SurfaceElevatedBrush" Color="{StaticResource SurfaceElevatedColor}" />
 
     <!-- Modal / sheet backdrop -->
     <Color x:Key="OverlayColor">#800D1117</Color>
-    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}"/>
+    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource OverlayColor}" />
 
     <!-- Tooltip background -->
     <Color x:Key="TooltipColor">#FF21262D</Color>
-    <SolidColorBrush x:Key="TooltipBrush" Color="{StaticResource TooltipColor}"/>
+    <SolidColorBrush x:Key="TooltipBrush" Color="{StaticResource TooltipColor}" />
 
     <!-- ══ Borders & Selection ═══════════════════════════════════════════ -->
     <Color x:Key="BorderColor">#FF30363D</Color>
-    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
 
     <!-- Subtle border derived from Primary @ ~15 % opacity -->
     <Color x:Key="BorderSubtleColor">#264EC9B0</Color>
-    <SolidColorBrush x:Key="BorderSubtleBrush" Color="{StaticResource BorderSubtleColor}"/>
+    <SolidColorBrush x:Key="BorderSubtleBrush" Color="{StaticResource BorderSubtleColor}" />
 
     <!-- Selected item / row highlight (Primary @ ~20 % opacity) -->
     <Color x:Key="SelectionColor">#334EC9B0</Color>
-    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}"/>
+    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}" />
 
     <!-- ══ Foreground / Text ══════════════════════════════════════════════ -->
     <Color x:Key="ForegroundPrimaryColor">#FFE6EDF3</Color>
-    <SolidColorBrush x:Key="ForegroundPrimaryBrush" Color="{StaticResource ForegroundPrimaryColor}"/>
+    <SolidColorBrush x:Key="ForegroundPrimaryBrush" Color="{StaticResource ForegroundPrimaryColor}" />
 
     <Color x:Key="ForegroundSecondaryColor">#FF8B949E</Color>
-    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="{StaticResource ForegroundSecondaryColor}"/>
+    <SolidColorBrush x:Key="ForegroundSecondaryBrush" Color="{StaticResource ForegroundSecondaryColor}" />
 
     <!-- Inline code, file paths, command text (khaki) -->
     <Color x:Key="CodeForegroundColor">#FFC8A87E</Color>
-    <SolidColorBrush x:Key="CodeForegroundBrush" Color="{StaticResource CodeForegroundColor}"/>
+    <SolidColorBrush x:Key="CodeForegroundBrush" Color="{StaticResource CodeForegroundColor}" />
 
     <!-- ══ Primary — VS Code terminal teal ═══════════════════════════════ -->
     <Color x:Key="PrimaryColor">#FF4EC9B0</Color>
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
 
     <Color x:Key="PrimaryHoverColor">#FF6DD4BE</Color>
-    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource PrimaryHoverColor}"/>
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource PrimaryHoverColor}" />
 
     <Color x:Key="PrimaryForegroundColor">#FF0D1117</Color>
-    <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="{StaticResource PrimaryForegroundColor}"/>
+    <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="{StaticResource PrimaryForegroundColor}" />
 
     <!-- ══ Accent — Amber gold (padlock / "secure" badge) ════════════════ -->
     <Color x:Key="AccentColor">#FFF0A500</Color>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
 
     <Color x:Key="AccentHoverColor">#FFFFB929</Color>
-    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}"/>
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
 
     <Color x:Key="AccentForegroundColor">#FF0D1117</Color>
-    <SolidColorBrush x:Key="AccentForegroundBrush" Color="{StaticResource AccentForegroundColor}"/>
+    <SolidColorBrush x:Key="AccentForegroundBrush" Color="{StaticResource AccentForegroundColor}" />
 
     <!-- ══ SSH Connection Status ══════════════════════════════════════════ -->
 
     <!-- Active SSH session (forest green) -->
     <Color x:Key="ConnectedColor">#FF3FB950</Color>
-    <SolidColorBrush x:Key="ConnectedBrush" Color="{StaticResource ConnectedColor}"/>
+    <SolidColorBrush x:Key="ConnectedBrush" Color="{StaticResource ConnectedColor}" />
 
     <!-- Handshake in progress (orange) -->
     <Color x:Key="ConnectingColor">#FFDB8C00</Color>
-    <SolidColorBrush x:Key="ConnectingBrush" Color="{StaticResource ConnectingColor}"/>
+    <SolidColorBrush x:Key="ConnectingBrush" Color="{StaticResource ConnectingColor}" />
 
     <!-- No active connection (gray) -->
     <Color x:Key="DisconnectedColor">#FF6E7681</Color>
-    <SolidColorBrush x:Key="DisconnectedBrush" Color="{StaticResource DisconnectedColor}"/>
+    <SolidColorBrush x:Key="DisconnectedBrush" Color="{StaticResource DisconnectedColor}" />
 
     <!-- Trusted / known-hosts verified (sea green) -->
     <Color x:Key="VerifiedColor">#FF2EA472</Color>
-    <SolidColorBrush x:Key="VerifiedBrush" Color="{StaticResource VerifiedColor}"/>
+    <SolidColorBrush x:Key="VerifiedBrush" Color="{StaticResource VerifiedColor}" />
 
     <!-- Key has been revoked (dark red) -->
     <Color x:Key="RevokedColor">#FFCF4949</Color>
-    <SolidColorBrush x:Key="RevokedBrush" Color="{StaticResource RevokedColor}"/>
+    <SolidColorBrush x:Key="RevokedBrush" Color="{StaticResource RevokedColor}" />
 
     <!-- Key or certificate has expired (dark orange) -->
     <Color x:Key="ExpiredColor">#FFFF7A1A</Color>
-    <SolidColorBrush x:Key="ExpiredBrush" Color="{StaticResource ExpiredColor}"/>
+    <SolidColorBrush x:Key="ExpiredBrush" Color="{StaticResource ExpiredColor}" />
 
     <!-- ══ UI Roles ════════════════════════════════════════════════════════ -->
 
     <!-- Informational messages / badges (cornflower blue) -->
     <Color x:Key="InfoColor">#FF79B8FF</Color>
-    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource InfoColor}" />
 
     <!-- Destructive / irreversible actions (orange red) -->
     <Color x:Key="DangerColor">#FFFF6B4A</Color>
-    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
 
     <!-- Elevated privilege indicator (purple) -->
     <Color x:Key="AdminColor">#FFBC8CDF</Color>
-    <SolidColorBrush x:Key="AdminBrush" Color="{StaticResource AdminColor}"/>
+    <SolidColorBrush x:Key="AdminBrush" Color="{StaticResource AdminColor}" />
 
     <!-- Labels, tags, key-type badges (yellow green) -->
     <Color x:Key="TagColor">#FF8BC34A</Color>
-    <SolidColorBrush x:Key="TagBrush" Color="{StaticResource TagColor}"/>
+    <SolidColorBrush x:Key="TagBrush" Color="{StaticResource TagColor}" />
 
     <!-- Remote resource / SSH-specific actions (dark cyan) -->
     <Color x:Key="RemoteColor">#FF45D0D0</Color>
-    <SolidColorBrush x:Key="RemoteBrush" Color="{StaticResource RemoteColor}"/>
+    <SolidColorBrush x:Key="RemoteBrush" Color="{StaticResource RemoteColor}" />
 
     <!-- Unsaved or locally modified state (dark olive green) -->
     <Color x:Key="ModifiedColor">#FFB5C77A</Color>
-    <SolidColorBrush x:Key="ModifiedBrush" Color="{StaticResource ModifiedColor}"/>
+    <SolidColorBrush x:Key="ModifiedBrush" Color="{StaticResource ModifiedColor}" />
 
     <!-- Active item in sidebar / navigation (dark slate blue) -->
     <Color x:Key="NavigationActiveColor">#FF8B7EC8</Color>
-    <SolidColorBrush x:Key="NavigationActiveBrush" Color="{StaticResource NavigationActiveColor}"/>
+    <SolidColorBrush x:Key="NavigationActiveBrush" Color="{StaticResource NavigationActiveColor}" />
 
     <!-- ══ Semantic (traffic-light origin) ══════════════════════════════════ -->
     <Color x:Key="ErrorColor">#FFFF5F57</Color>
-    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}" />
 
     <Color x:Key="WarningColor">#FFFFBD2E</Color>
-    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
 
     <Color x:Key="SuccessColor">#FF28C840</Color>
-    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
-    
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
+
     <Color x:Key="SplitButtonRemoteBackgroundColor">#FF1A7A7A</Color>
     <Color x:Key="SplitButtonRemotePointerOverColor">#FF1D8E8E</Color>
     <Color x:Key="SplitButtonRemotePressedColor">#FF155F5F</Color>
@@ -135,11 +135,12 @@
     <Color x:Key="SplitButtonRemoteDividerColor">#FF155F5F</Color>
     <Color x:Key="SplitButtonRemoteForegroundColor">#FFE6EDF3</Color>
 
-    <SolidColorBrush x:Key="SplitButtonRemoteBackgroundBrush"   Color="{StaticResource SplitButtonRemoteBackgroundColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemotePointerOverBrush"  Color="{StaticResource SplitButtonRemotePointerOverColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemotePressedBrush"      Color="{StaticResource SplitButtonRemotePressedColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemoteDisabledBrush"     Color="{StaticResource SplitButtonRemoteDisabledColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemoteDividerBrush"      Color="{StaticResource SplitButtonRemoteDividerColor}"/>
-    <SolidColorBrush x:Key="SplitButtonRemoteForegroundBrush"   Color="{StaticResource SplitButtonRemoteForegroundColor}"/>
+    <SolidColorBrush x:Key="SplitButtonRemoteBackgroundBrush" Color="{StaticResource SplitButtonRemoteBackgroundColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemotePointerOverBrush"
+                     Color="{StaticResource SplitButtonRemotePointerOverColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemotePressedBrush" Color="{StaticResource SplitButtonRemotePressedColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemoteDisabledBrush" Color="{StaticResource SplitButtonRemoteDisabledColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemoteDividerBrush" Color="{StaticResource SplitButtonRemoteDividerColor}" />
+    <SolidColorBrush x:Key="SplitButtonRemoteForegroundBrush" Color="{StaticResource SplitButtonRemoteForegroundColor}" />
 
 </ResourceDictionary>

@@ -25,12 +25,12 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         { 16, 16 },
         { 32, 32 },
         { 48, 48 },
-        { 64, 64},
+        { 64, 64 },
         { 128, 128 },
         { 256, 256 },
         { 512, 512 }
     };
-    
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -41,24 +41,24 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         try
         {
             base.OnFrameworkInitializationCompleted();
-            
+
             try
             {
-                foreach (var variant in new[] {ThemeVariant.Light, ThemeVariant.Dark})
+                foreach (var variant in new[] { ThemeVariant.Light, ThemeVariant.Dark })
                 {
                     foreach (var (width, height) in IconSizes)
                     {
-                        await using var svgStream = AssetLoader.Open(new Uri($"avares://OpenSSH_GUI/Assets/openssh-gui{(variant is ThemeVariant.Light ? "-light" : string.Empty)}.svg"));
+                        await using var svgStream = AssetLoader.Open(new Uri(
+                            $"avares://OpenSSH_GUI/Assets/openssh-gui{(variant is ThemeVariant.Light ? "-light" : string.Empty)}.svg"));
                         var memoryStream = new MemoryStream();
                         using var svg = new SKSvg();
                         svg.Load(svgStream);
                         var bitmap = new SKBitmap((int)width, (int)height, true);
                         using (var canvas = new SKCanvas(bitmap))
                         {
-                            if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width), height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
-                            {
+                            if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width),
+                                    height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
                                 canvas.Scale(scale);
-                            }
                             canvas.Clear(SKColors.Transparent);
                             canvas.DrawPicture(svg.Picture);
                         }
@@ -79,7 +79,10 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                         registrator.RegisterInstance(bm, serviceKey: serviceKey,
                             ifAlreadyRegistered: IfAlreadyRegistered.Replace);
                     }
-                    registrator.RegisterInstance(new WindowIcon(resolver.Resolve<Bitmap>(serviceKey: string.Join("_", nameof(Bitmap), 32).ToLower())), serviceKey: string.Join("_", nameof(WindowIcon), 32, variant).ToLower());
+
+                    registrator.RegisterInstance(
+                        new WindowIcon(resolver.Resolve<Bitmap>(string.Join("_", nameof(Bitmap), 32).ToLower())),
+                        serviceKey: string.Join("_", nameof(WindowIcon), 32, variant).ToLower());
                 }
             }
             catch (Exception e)
@@ -105,10 +108,10 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
             logger.LogError(e, "Unhandled error during application initialization");
         }
     }
-    
+
     /// <summary>
-    /// Triggers the initial SSH key search after the main window has been presented,
-    /// ensuring the UI is fully ready before background work begins.
+    ///     Triggers the initial SSH key search after the main window has been presented,
+    ///     ensuring the UI is fully ready before background work begins.
     /// </summary>
     private void OnMainWindowOpened(object? sender, EventArgs e)
     {
