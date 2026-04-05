@@ -5,11 +5,10 @@
                     xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
                     xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
                     xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core">
-    <ControlTheme x:Key="SshKeyItemContainerTheme" BasedOn="{StaticResource {x:Type ComboBoxItem}}" 
-                  TargetType="{x:Type ComboBoxItem}">
+    <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+    <ControlTheme x:Key="SshKeyItemContainerTheme" BasedOn="{StaticResource {x:Type ComboBoxItem}}" TargetType="{x:Type ComboBoxItem}">
         <ControlTheme.Setters>
-            <Setter Property="ComboBoxItem.IsEnabled" 
-                    Value="{Binding IsInitialized, DataType={x:Type keys:SshKeyFile}}" />
+            <Setter Property="IsEnabled" Value="{Binding IsInitialized, DataType=keys:SshKeyFile}" />
         </ControlTheme.Setters>
     </ControlTheme>
     <DataTemplate x:Key="SshKeyComboBoxStyle" DataType="keys:SshKeyFile">
