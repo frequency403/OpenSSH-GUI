@@ -1,9 +1,9 @@
 ﻿using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
-using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -11,63 +11,69 @@ using Renci.SshNet;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
-public partial class ServerConnection : ReactiveObject, IDisposable
+public sealed partial class ServerConnection : ReactiveObject, IDisposable
 {
-    public ServerConnection(IConnectionCredentials? credentials = null)
-    {
-        credentials ??= new PasswordConnectionCredentials("123", "123", "123");
-        ConnectionCredentials = credentials;
-        ClientConnection = new SshClient(credentials.GetConnectionInfo()) { KeepAliveInterval = TimeSpan.FromSeconds(10) };
-    }
+    private readonly CompositeDisposable _disposables = new();
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private string _connectionString = string.Empty;
 
     [Reactive(SetModifier = AccessModifier.Private)]
-    private SshClient _clientConnection;
-    
-    [Reactive]
     private DateTime _connectionTime = DateTime.Now;
-    
-    [Reactive]
-    private bool _isConnected = false;
-    
-    [Reactive]
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private string _createEmptyFileCommand = string.Empty;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _isConnected;
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private string _readContentsCommand = string.Empty;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
     private PlatformID _serverOs = PlatformID.Other;
-    
-    private string ReadContentsCommand => ServerOs == PlatformID.Win32NT ? "type" : "cat";
-    private string CreateEmptyFileCommand => ServerOs == PlatformID.Win32NT ? "echo. >" : "touch";
-    private IConnectionCredentials ConnectionCredentials { get; }
 
-    public string ConnectionString =>
-        IsConnected ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : "";
+    public ServerConnection(ConnectionCredentials? credentials = null)
+    {
+        ConnectionCredentials = credentials ?? new PasswordConnectionCredentials("123", "123", "123");
+        ClientConnection = new SshClient(ConnectionCredentials.GetConnectionInfo())
+            { KeepAliveInterval = TimeSpan.FromSeconds(10) };
+        _connectionStringHelper = this.WhenAnyValue(obj => obj.IsConnected)
+            .Select(c => c ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : string.Empty)
+            .ToProperty(this, obj => obj.ConnectionString)
+            .DisposeWith(_disposables);
 
+        _readContentsCommandHelper = this.WhenAnyValue(obj => obj.ServerOs)
+            .Select(c => c == PlatformID.Win32NT ? "type" : "cat")
+            .ToProperty(this, obj => obj.ReadContentsCommand)
+            .DisposeWith(_disposables);
 
-    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        _createEmptyFileCommandHelper = this.WhenAnyValue(obj => obj.ServerOs)
+            .Select(c => c == PlatformID.Win32NT ? "echo. >" : "touch")
+            .ToProperty(this, obj => obj.CreateEmptyFileCommand)
+            .DisposeWith(_disposables);
+    }
+
+    private ConnectionCredentials ConnectionCredentials
+    {
+        get;
+        init => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    private SshClient ClientConnection
+    {
+        get;
+        init => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    /// <inheritdoc />
     void IDisposable.Dispose()
     {
-        GC.SuppressFinalize(this);
+        _disposables.Dispose();
     }
 
     public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
     {
-        if (ConnectionCredentials is IMultiKeyConnectionCredentials { Keys: { } keys} mkcc)
-        {
-            foreach (var key in keys)
-            {
-                if (key.PrivateKeyFile is not { } privateKeyFile) 
-                    continue;
-                var connection = new SshClient(mkcc.Hostname, mkcc.Username, privateKeyFile);
-                try
-                {
-                    await connection.ConnectAsync(token);
-                    connection.Disconnect();
-                    ClientConnection = connection;
-                    break;
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
-        }
         await ClientConnection.ConnectAsync(token);
         IsConnected = ClientConnection.IsConnected;
         if (!IsConnected) return ServerOs != PlatformID.Other && IsConnected;
@@ -77,29 +83,30 @@ public partial class ServerConnection : ReactiveObject, IDisposable
         return ServerOs != PlatformID.Other && IsConnected;
     }
 
-    public async ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default)
+    public ValueTask<bool> DisconnectFromServerAsync(CancellationToken token = default)
     {
         try
         {
-            await Task.Run(() => ClientConnection.Disconnect(), token);
-            IsConnected = false;
-            return true;
+            ClientConnection.Disconnect();
+            IsConnected = ClientConnection.IsConnected;
+            return ValueTask.FromResult(true);
         }
         catch (Exception)
         {
-            return false;
+            return ValueTask.FromResult(false);
         }
     }
 
     public async ValueTask<KnownHostsFile> GetKnownHostsFromServerAsync(CancellationToken token = default)
     {
-        if (!IsConnected) return new KnownHostsFile("", true);
+        var knownHostsFile = new KnownHostsFile();
+        if (!IsConnected) throw new InvalidOperationException("No connection to get known hosts from");
 
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
             token);
         using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         await command.ExecuteAsync(token);
-        return new KnownHostsFile(command.Result, true);
+        return await knownHostsFile.InitializeAsync(command.OutputStream, true, false, token);
     }
 
     public async ValueTask<bool> WriteKnownHostsToServerAsync(KnownHostsFile knownHostsFile,
@@ -110,7 +117,8 @@ public partial class ServerConnection : ReactiveObject, IDisposable
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
             token);
         using var command =
-            ClientConnection.CreateCommand($"echo \"{knownHostsFile.GetUpdatedContents(ServerOs)}\" > {path}");
+            ClientConnection.CreateCommand(
+                $"echo \"{await knownHostsFile.GetUpdatedContentsAsync(ServerOs)}\" > {path}");
         await command.ExecuteAsync(token);
         return command.ExitStatus == 0;
     }
@@ -122,7 +130,7 @@ public partial class ServerConnection : ReactiveObject, IDisposable
 
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs),
             token);
-        var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
+        using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         await command.ExecuteAsync(token);
         return await AuthorizedKeysFile.ParseAsync(command.OutputStream, token);
     }
@@ -134,13 +142,13 @@ public partial class ServerConnection : ReactiveObject, IDisposable
 
         var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs),
             token);
-        var command =
+        using var command =
             ClientConnection.CreateCommand(
                 $"echo \"{authorizedKeysFile.ExportFileContent(false, ServerOs)}\" > {path}");
         await command.ExecuteAsync(token);
         return command.ExitStatus == 0;
     }
-    
+
 
     private async ValueTask<string> ResolveRemoteEnvVariablesAsync(string originalPath,
         CancellationToken token = default)
@@ -172,29 +180,29 @@ public partial class ServerConnection : ReactiveObject, IDisposable
         var authKeyPath = SshConfigFiles.Authorized_Keys.GetPathOfFile(false);
         var knownHostPath = SshConfigFiles.Known_Hosts.GetPathOfFile(false);
 
-        var authorizedKeysFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {authKeyPath}");
+        using var authorizedKeysFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {authKeyPath}");
         await authorizedKeysFileCheck.ExecuteAsync(token);
 
-        var knownHostsFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {knownHostPath}");
+        using var knownHostsFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {knownHostPath}");
         await knownHostsFileCheck.ExecuteAsync(token);
 
         if (authorizedKeysFileCheck.ExitStatus != 0)
         {
-            var createAuthCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {authKeyPath}");
+            using var createAuthCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {authKeyPath}");
             await createAuthCmd.ExecuteAsync(token);
         }
 
         if (knownHostsFileCheck.ExitStatus != 0)
         {
-            var createKnownCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {knownHostPath}");
+            using var createKnownCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {knownHostPath}");
             await createKnownCmd.ExecuteAsync(token);
         }
     }
 
     private async ValueTask<PlatformID> GetServerOsAsync(CancellationToken token = default)
     {
-        var linuxCommand = ClientConnection.CreateCommand("uname -s");
-        var windowsCommand = ClientConnection.CreateCommand("ver");
+        using var linuxCommand = ClientConnection.CreateCommand("uname -s");
+        using var windowsCommand = ClientConnection.CreateCommand("ver");
 
         await linuxCommand.ExecuteAsync(token);
         await windowsCommand.ExecuteAsync(token);

@@ -1,17 +1,16 @@
 ﻿using System.Collections.ObjectModel;
-using System.Reactive;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using Avalonia;
-using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
-using DynamicData;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Lib.Credentials;
 using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Interfaces;
@@ -25,6 +24,8 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
 {
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<ConnectToServerViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly ServerConnectionService _serverConnectionService;
 
@@ -34,7 +35,10 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
 
     [Reactive] private bool _canConnectToServer;
 
-    [Reactive] private IConnectionCredentials? _connectionCredentials;
+    [Reactive] private ConnectionCredentials? _connectionCredentials;
+
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private bool _enablePreConfiguredHosts;
 
     [Reactive] private string _hostName = string.Empty;
 
@@ -45,7 +49,12 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
 
     [Reactive] private SshKeyFile? _selectedPublicKey;
 
-    [Reactive] private IBrush _statusButtonBackground = Application.Current?.Resources["OverlayBrush"] as IBrush ?? Brushes.Gray;
+    [ReactiveCollection] private ObservableCollection<SshHostSettings> _sshHostSettings = [];
+
+    [Reactive] private SshKeyManager _sshKeyManager;
+
+    [Reactive] private IBrush _statusButtonBackground =
+        Application.Current?.Resources["OverlayBrush"] as IBrush ?? Brushes.Gray;
 
     [Reactive] private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
         StringsAndTexts.ConnectToServerStatusUnknown);
@@ -63,7 +72,9 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         IConfiguration configuration,
         SshKeyManager sshKeyManager) : base(logger)
     {
+        _logger = logger;
         _messageBoxProvider = messageBoxProvider;
+        _configuration = configuration;
         _serverConnectionService = serverConnectionService;
         SshKeyManager = sshKeyManager;
         SelectedPublicKey = SshKeyManager.SshKeys.FirstOrDefault();
@@ -92,25 +103,35 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         this.WhenAnyValue(viewModel => viewModel.ConnectionCredentials)
             .Subscribe(credentials => { CanConnectToServer = credentials is not null; }).DisposeWith(Disposables);
 
+        Observable
+            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => ((INotifyCollectionChanged)SshHostSettings).CollectionChanged += h,
+                h => ((INotifyCollectionChanged)SshHostSettings).CollectionChanged -= h)
+            .Select(_ => SshHostSettings.Count)
+            .StartWith(SshHostSettings.Count)
+            .Subscribe(count => { EnablePreConfiguredHosts = count > 0; })
+            .DisposeWith(Disposables);
+    }
+
+    public override ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    {
         try
         {
-            var config = configuration.GetSection("SshConfig").Get<SshConfiguration>();
-            SshHostSettings.AddRange(config?.Hosts.Distinct() ?? []);
+            SshHostSettings.Clear();
+            foreach (var hostSettings in _configuration.GetSection("SshConfig").Get<SshConfiguration>()?.Hosts
+                         .Distinct() ?? [])
+            {
+                _logger.LogDebug("Found host {host}", hostSettings.HostName);
+                SshHostSettings.Add(hostSettings);
+            }
         }
         catch (Exception e)
         {
-            logger.LogDebug(e, "Config not readable");
+            _logger.LogDebug(e, "Config not readable");
         }
+
+        return base.InitializeAsync(cancellationToken);
     }
-    
-    
-    
-    public SshKeyManager SshKeyManager { get; }
-
-    public bool EnablePreConfiguredHosts => SshHostSettings.Any();
-
-    [ReactiveCollection]
-    private ObservableCollection<SshHostSettings> _sshHostSettings = new();
 
     private async Task TestConnectionAsyncBase(CancellationToken cancellationToken = default)
     {
@@ -130,14 +151,6 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         }
 
         TryingToConnect = false;
-
-        if (_serverConnectionService.IsConnected)
-        {
-            await _serverConnectionService.CloseConnection(false, cancellationToken);
-            return;
-        }
-
-        await _messageBoxProvider!.ShowMessageBoxAsync(StringsAndTexts.Error, StatusButtonToolTip);
     }
 
     private async Task TestConnectionAsync(SshHostSettings? hostSettings = null,
@@ -153,7 +166,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         }
 
         using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
+        if (!Debugger.IsAttached)
+            linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
 
         try
         {
@@ -197,7 +211,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
                 (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
                 throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
             TryingToConnect = true;
-            IConnectionCredentials? connectionCredentials = null;
+            ConnectionCredentials? connectionCredentials = null;
             if (AuthWithPublicKey)
                 connectionCredentials = new KeyConnectionCredentials(HostName, Username, SelectedPublicKey);
             else if (AuthWithAllKeys)

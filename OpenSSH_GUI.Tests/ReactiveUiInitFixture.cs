@@ -18,8 +18,8 @@ namespace OpenSSH_GUI.Tests;
 /// </summary>
 public sealed class ReactiveUiInitFixture : IDisposable
 {
-    private readonly CancellationTokenSource cts = new();
-    private readonly ManualResetEventSlim initialized = new();
+    private readonly CancellationTokenSource _cts = new();
+    private readonly ManualResetEventSlim _initialized = new();
 
     public ReactiveUiInitFixture()
     {
@@ -33,20 +33,20 @@ public sealed class ReactiveUiInitFixture : IDisposable
                 .WithCoreServices()
                 .BuildApp();
 
-            initialized.Set();
+            _initialized.Set();
 
-            Dispatcher.UIThread.MainLoop(cts.Token);
+            Dispatcher.UIThread.MainLoop(_cts.Token);
         });
 
         uiThread.IsBackground = true;
         uiThread.Start();
 
-        initialized.Wait();
+        _initialized.Wait();
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        cts.Cancel();
+        _cts.Cancel();
     }
 }

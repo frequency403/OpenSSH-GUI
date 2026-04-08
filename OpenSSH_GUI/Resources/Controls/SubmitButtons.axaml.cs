@@ -55,17 +55,17 @@ public partial class SubmitButtons : UserControl
         AvaloniaProperty.RegisterDirect<SubmitButtons, bool>(nameof(SubmitButtonContentEnabled),
             c => c.SubmitButtonContentEnabled, (c, v) => c.SubmitButtonContentEnabled = v);
 
-    private readonly CompositeDisposable disposables = new();
+    private readonly CompositeDisposable _disposables = new();
 
     public SubmitButtons()
     {
         this.WhenAnyValue(x => x.AbortButtonContent)
             .Subscribe(x => AbortButtonContentEnabled = x is not null)
-            .DisposeWith(disposables);
+            .DisposeWith(_disposables);
 
         this.WhenAnyValue(x => x.SubmitButtonContent)
             .Subscribe(x => SubmitButtonContentEnabled = x is not null)
-            .DisposeWith(disposables);
+            .DisposeWith(_disposables);
 
         InitializeComponent();
     }
@@ -146,6 +146,6 @@ public partial class SubmitButtons : UserControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnDetachedFromVisualTree(e);
-        disposables.Dispose();
+        _disposables.Dispose();
     }
 }

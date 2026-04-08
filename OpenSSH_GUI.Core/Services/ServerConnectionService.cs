@@ -1,14 +1,19 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Services;
 
-public partial class ServerConnectionService(ILogger<ServerConnectionService> logger) : ReactiveObject
+public partial class ServerConnectionService : ReactiveObject, IDisposable
 {
+    private readonly CompositeDisposable _disposables = new();
+
+    private readonly ILogger<ServerConnectionService> _logger;
+
     /// <summary>
     ///     Indicates whether the current server connection is active.
     /// </summary>
@@ -17,8 +22,7 @@ public partial class ServerConnectionService(ILogger<ServerConnectionService> lo
     ///     and is currently active. If the connection is not established or has
     ///     been terminated, it returns <c>false</c>.
     /// </remarks>
-    [Reactive] 
-    [property: MemberNotNullWhen(true, nameof(ServerConnection))]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _isConnected;
 
     /// <summary>
@@ -29,8 +33,33 @@ public partial class ServerConnectionService(ILogger<ServerConnectionService> lo
     ///     to retrieve or update the instance of the server connection. Setting this property
     ///     raises an internal change notification.
     /// </remarks>
-    [Reactive]
-    private ServerConnection? _serverConnection;
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private ServerConnection _serverConnection = new();
+
+    public ServerConnectionService(ILogger<ServerConnectionService> logger)
+    {
+        _logger = logger;
+
+        _isConnectedHelper = this.WhenAnyValue(vm => vm.ServerConnection)
+            .Do(e =>
+            {
+                _logger.LogInformation("ServerConnection: {ServerConnection}", e.ConnectionString);
+                _logger.LogInformation("ServerConnection.IsConnected {ServerConnection.IsConnected}", e.IsConnected);
+            })
+            .Select(e => e.WhenAnyValue(sc => sc.IsConnected))
+            .Switch()
+            .ToProperty(this, obj => obj.IsConnected);
+
+        this.WhenAnyValue(vm => vm.IsConnected)
+            .Subscribe(d => _logger.LogInformation("IsConnected: {IsConnected}", d))
+            .DisposeWith(_disposables);
+    }
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
+        ((IDisposable)_serverConnection)?.Dispose();
+    }
 
     /// <summary>
     ///     Establishes a connection to a server using the provided connection credentials.
@@ -47,7 +76,7 @@ public partial class ServerConnectionService(ILogger<ServerConnectionService> lo
     ///     A <see cref="ValueTask{TResult}" /> representing the result of the connection attempt.
     ///     Returns <c>true</c> if the connection is successfully established; otherwise, <c>false</c>.
     /// </returns>
-    public async ValueTask<bool> EstablishConnection(IConnectionCredentials connectionCredentials,
+    public async ValueTask<bool> EstablishConnection(ConnectionCredentials connectionCredentials,
         CancellationToken token = default)
     {
         try
@@ -57,7 +86,7 @@ public partial class ServerConnectionService(ILogger<ServerConnectionService> lo
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error connecting to server");
+            _logger.LogError(e, "Error connecting to server");
             throw;
         }
     }
@@ -81,7 +110,7 @@ public partial class ServerConnectionService(ILogger<ServerConnectionService> lo
             return throwOnNoConnection ? throw new InvalidOperationException("No connection to disconnect from") : true;
         var disconnectResult = await ServerConnection.DisconnectFromServerAsync(token);
         if (disconnectResult)
-            ServerConnection = null;
+            ServerConnection = new ServerConnection();
         return disconnectResult;
     }
 }

@@ -47,13 +47,13 @@ public abstract class ViewModelBase<TViewModel, TParameters>(ILogger<TViewModel>
 ///     Integrates with ILogger for logging purposes and supports exception handling via a reactive subscription.
 ///     Defines commands and methods that assist in the management of ViewModel-specific operations.
 /// </remarks>
-public abstract class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = null)
+public abstract partial class ViewModelBase<TViewModel>(ILogger<TViewModel>? logger = null)
     : ViewModelBase(logger), IActivatableViewModel, IViewFor<TViewModel>
     where TViewModel : ViewModelBase
 {
-    public ViewModelActivator Activator { get; } = new();
+    [Reactive] private TViewModel? _viewModel;
 
-    public TViewModel? ViewModel { get; set; }
+    public ViewModelActivator Activator { get; } = new();
 
     object? IViewFor.ViewModel
     {

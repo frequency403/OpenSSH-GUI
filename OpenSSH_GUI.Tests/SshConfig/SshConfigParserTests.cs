@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Lib.Credentials;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.SshConfig.Exceptions;
 using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;

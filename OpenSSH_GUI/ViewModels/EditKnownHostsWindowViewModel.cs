@@ -42,7 +42,7 @@ public partial class EditKnownHostsWindowViewModel(
     public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         KnownHostsFileLocal =
-            await new KnownHostsFile().InitializeAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(),
+            await new KnownHostsFile().InitializeAsync(new FileInfo(SshConfigFiles.Known_Hosts.GetPathOfFile()),
                 token: cancellationToken);
         if (serverConnectionService.IsConnected)
             KnownHostsFileRemote =

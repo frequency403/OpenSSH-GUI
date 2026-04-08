@@ -17,7 +17,7 @@ public partial class DirectoryCrawler(
     IConfiguration configuration) : ReactiveObject
 {
     private static readonly string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
-    private static readonly List<SshKeyFileSource> keyFileSources = new();
+    private static readonly List<SshKeyFileSource> KeyFileSources = [];
 
     [Reactive] private bool _isSearching;
 
@@ -33,13 +33,13 @@ public partial class DirectoryCrawler(
             {
                 if (hostSetting.IdentityFiles is not { Length: > 0 } hostIdentityFiles) continue;
                 foreach (var hostIdentityFile in hostIdentityFiles.Select(path => path.ResolvePath()))
-                    if (!keyFileSources.Any(e =>
+                    if (!KeyFileSources.Any(e =>
                             e.AbsolutePath.Equals(hostIdentityFile, StringComparison.OrdinalIgnoreCase)) &&
                         File.Exists(hostIdentityFile))
                     {
                         var source = SshKeyFileSource.FromConfig(hostIdentityFile);
                         logger.LogDebug("Adding key file source {Source}", source);
-                        keyFileSources.Add(source);
+                        KeyFileSources.Add(source);
                         yield return source;
                     }
             }
@@ -52,7 +52,7 @@ public partial class DirectoryCrawler(
                          }).Select(e => new FileInfo(e))
                      .Where(e => !ImportantFileNames.Any(ifn =>
                          ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-                     .Where(e => !keyFileSources.Any(k =>
+                     .Where(e => !KeyFileSources.Any(k =>
                          k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
                      .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
                                  e.Extension.Equals(".ppk", StringComparison.OrdinalIgnoreCase))
@@ -60,11 +60,11 @@ public partial class DirectoryCrawler(
                      .Select(e => SshKeyFileSource.FromDisk(e.FullName)))
         {
             logger.LogDebug("Adding keyfile {keyFile}", keyFileSource);
-            keyFileSources.Add(keyFileSource);
+            KeyFileSources.Add(keyFileSource);
             yield return keyFileSource;
         }
 
-        keyFileSources.Clear();
+        KeyFileSources.Clear();
         IsSearching = false;
     }
 }

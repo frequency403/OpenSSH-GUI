@@ -15,7 +15,7 @@ public sealed class CallerEnricher : ILogEventEnricher
     private const string FileNameProperty = "FileName";
 
     // Serilog-internal namespaces to skip when walking the stack
-    private static readonly string[] serilogNamespaces =
+    private static readonly string[] SerilogNamespaces =
     [
         "Serilog.",
         "System.",
@@ -53,7 +53,7 @@ public sealed class CallerEnricher : ILogEventEnricher
             if (typeof(ILogEventEnricher).IsAssignableFrom(declaringType)) continue;
 
             var ns = declaringType.Namespace ?? string.Empty;
-            if (Array.Exists(serilogNamespaces, ns.StartsWith)) continue;
+            if (Array.Exists(SerilogNamespaces, ns.StartsWith)) continue;
 
             return frame;
         }
