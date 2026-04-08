@@ -9,6 +9,8 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// </summary>
 public partial record KnownHostKey : ReactiveRecord
 {
+    private readonly string _entryWithoutHost;
+    
     /// <summary>
     ///     Gets or sets a value indicating whether the known host key is marked for deletion.
     /// </summary>
@@ -19,14 +21,14 @@ public partial record KnownHostKey : ReactiveRecord
     /// </summary>
     public KnownHostKey(string entry)
     {
-        EntryWithoutHost = entry;
-        var splitted = EntryWithoutHost.Split(' ');
+        _entryWithoutHost = entry.Trim();
+        var splitted = _entryWithoutHost.Split(' ');
         TypeDeclarationInFile = splitted[0];
         KeyType = Enum.Parse<SshKeyType>(
             TypeDeclarationInFile.StartsWith("ssh-")
                 ? TypeDeclarationInFile.Replace("ssh-", "")
                 : TypeDeclarationInFile.Split('-')[0], true);
-        Fingerprint = splitted[1].Replace("\n", "").Replace("\r", "");
+        Fingerprint = splitted[1];
     }
 
     /// <summary>
@@ -44,8 +46,5 @@ public partial record KnownHostKey : ReactiveRecord
     /// </summary>
     public string Fingerprint { get; }
 
-    /// <summary>
-    ///     Represents a known host key without the host entry in the OpenSSH GUI.
-    /// </summary>
-    public string EntryWithoutHost { get; }
+    public override string ToString() => _entryWithoutHost;
 }

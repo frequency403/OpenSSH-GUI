@@ -18,14 +18,14 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
 {
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty]
     private bool _addButtonEnabled;
 
     [Reactive] private AuthorizedKeysFile _authorizedKeysFileLocal = AuthorizedKeysFile.Empty;
 
     [Reactive] private AuthorizedKeysFile _authorizedKeysFileRemote = AuthorizedKeysFile.Empty;
 
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty]
     private bool _keyAddPossible;
 
     [Reactive] private SshKeyFile? _selectedKey;
@@ -37,13 +37,11 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
         SshKeyManager = sshKeyManager;
         ServerConnectionService = serverConnectionService;
         SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
-        AddKey = ReactiveCommand.CreateFromTask<SshKeyFile>(OnAddKey);
 
-        this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
+        _addButtonEnabledHelper = this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
             .DistinctUntilChanged()
-            .Subscribe(props =>
-            {
-                AddButtonEnabled = props is
+            .Select(props =>
+                props is
                 {
                     Item1: { } keyFile,
                     Item2:
@@ -54,18 +52,19 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
                         }
                     } col,
                     Item3: true
-                } && col.CanAddKey(keyFile);
-            }).DisposeWith(Disposables);
+                } && col.CanAddKey(keyFile))
+            .ToProperty(this, vm => vm.AddButtonEnabled)
+            .DisposeWith(Disposables);
 
-        this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys)
+        _keyAddPossibleHelper = this.WhenAnyValue(vm => vm.SshKeyManager.SshKeys)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(keys => { KeyAddPossible = keys.Count > 0; })
+            .Select(keys => keys.Count > 0)
+            .ToProperty(this, vm => vm.KeyAddPossible)
             .DisposeWith(Disposables);
     }
 
     public SshKeyManager SshKeyManager { get; }
     public ServerConnectionService ServerConnectionService { get; }
-    public ReactiveCommand<SshKeyFile, Unit> AddKey { get; }
 
     protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
@@ -95,7 +94,8 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
         await base.InitializeAsync(cancellationToken);
     }
 
-    private async Task OnAddKey(SshKeyFile key)
+    [ReactiveCommand]
+    private async Task AddKey(SshKeyFile key, CancellationToken cancellationToken = default)
     {
         await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(key);
     }

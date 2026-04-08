@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using System.Collections.ObjectModel;
+using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -8,18 +9,21 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// </summary>
 public partial record KnownHost : ReactiveRecord
 {
+    private readonly string _lineEnding;
+    
     /// <summary>
     ///     Represents a known host in the OpenSSH_GUI.
     /// </summary>
-    [Reactive] private List<KnownHostKey> _keys;
+    [ReactiveCollection] private ObservableCollection<KnownHostKey> _keys = [];
 
     /// <summary>
     ///     Represents a known host entry in the known_hosts file.
     /// </summary>
-    public KnownHost(IGrouping<string, string> knownHosts)
+    public KnownHost(IGrouping<string, string> knownHosts, string lineEnding)
     {
+        _lineEnding = lineEnding;
         Host = knownHosts.Key;
-        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim())).ToList();
+        Keys = new ObservableCollection<KnownHostKey>(knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim())));
     }
 
     /// <summary>
@@ -73,11 +77,11 @@ public partial record KnownHost : ReactiveRecord
     public string GetAllEntries()
     {
         return DeleteWholeHost
-            ? KnownHostsFile.LineEnding
+            ? _lineEnding
             : Keys
                 .Where(e => !e.MarkedForDeletion)
                 .Aggregate("",
                     (current, knownHostsKey) =>
-                        current + $"{Host} {knownHostsKey.EntryWithoutHost}{KnownHostsFile.LineEnding}");
+                        current + $"{Host} {knownHostsKey}{_lineEnding}");
     }
 }

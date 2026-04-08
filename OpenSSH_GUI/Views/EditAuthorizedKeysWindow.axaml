@@ -88,7 +88,7 @@
                             HorizontalAlignment="Stretch"
                             IsVisible="{Binding KeyAddPossible}"
                             IsEnabled="{Binding AddButtonEnabled}"
-                            Command="{Binding AddKey}"
+                            Command="{Binding AddKeyCommand}"
                             CommandParameter="{Binding SelectedKey}"
                             Margin="5"
                             Background="{DynamicResource TagBrush}">

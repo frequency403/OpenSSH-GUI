@@ -13,26 +13,23 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     /// <summary>
     ///     Gets or sets a boolean value indicating whether the `KnownHostsFile` object is created from a server or not.
     /// </summary>
-    private bool _isFromServer;
+    private readonly bool _isFromServer;
+
+    private readonly string _lineEnding;
 
     /// <summary>
     ///     Represents a known hosts file.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHost> _knownHosts = [];
-
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="KnownHostsFile" /> class.
-    /// </summary>
-    public KnownHostsFile()
-    {
+    
+    private KnownHostsFile(bool isFromServer = false, PlatformID? platformId = null) 
+    { 
+        _isFromServer = isFromServer;
+        _lineEnding = (platformId ?? Environment.OSVersion.Platform).GetLineSeparator();
     }
+    public static KnownHostsFile Empty { get; } = new();
 
-    /// <summary>
-    ///     Represents a file that contains known SSH hosts and their keys.
-    /// </summary>
-    public static string LineEnding { get; set; } = "\r\n";
-
-    public ValueTask<KnownHostsFile> InitializeAsync(FileInfo fileInfo, bool fromServer = false,
+    public static ValueTask<KnownHostsFile> InitializeAsync(FileInfo fileInfo, bool fromServer = false,
         CancellationToken token = default)
     {
         return fileInfo is null
@@ -40,16 +37,16 @@ public sealed partial record KnownHostsFile : ReactiveRecord
             : InitializeAsync(new FileStream(fileInfo.FullName, FileMode.OpenOrCreate), fromServer, true, token);
     }
 
-    public async ValueTask<KnownHostsFile> InitializeAsync(Stream knownHostsContent, bool fromServer = false,
+    public static async ValueTask<KnownHostsFile> InitializeAsync(Stream knownHostsContent, bool fromServer = false,
         bool disposeStream = true, CancellationToken token = default)
     {
-        _isFromServer = fromServer;
-        if (_isFromServer)
-            await SetKnownHostsAsync(knownHostsContent, disposeStream, token);
+        var knownHostsFile = new KnownHostsFile(fromServer);
+        if (fromServer)
+            await knownHostsFile.SetKnownHostsAsync(knownHostsContent, disposeStream, token);
         else
-            await ReadContentAsync(token: token);
+            await knownHostsFile.ReadContentAsync(token: token);
 
-        return this;
+        return knownHostsFile;
     }
 
     /// <summary>
@@ -111,7 +108,6 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     public async ValueTask<string> GetUpdatedContentsAsync(PlatformID platformId)
     {
         if (!_isFromServer) return "";
-        LineEnding = platformId == PlatformID.Unix ? LineEnding : "\r\n";
         var content = KnownHosts
             .Where(e => !e.DeleteWholeHost)
             .Aggregate("", (current, host) => current + host.GetAllEntries());
@@ -128,10 +124,10 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     {
         KnownHosts.Clear();
         using var streamReader = new StreamReader(contentStream, leaveOpen: !disposeStream);
-        foreach (var knownHost in (await streamReader.ReadToEndAsync(token)).Split(LineEnding)
+        foreach (var knownHost in (await streamReader.ReadToEndAsync(token)).Split(_lineEnding)
                  .Where(e => !string.IsNullOrEmpty(e))
                  .GroupBy(e => e.Split(' ')[0])
-                 .Select(e => new KnownHost(e)))
+                 .Select(e => new KnownHost(e, _lineEnding)))
             KnownHosts.Add(knownHost);
     }
 }

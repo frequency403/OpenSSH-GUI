@@ -82,9 +82,9 @@ public class AuthorizedKeysFile : ReactiveObject
     public async ValueTask<AuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
     {
         if (IsFileFromServer) return this;
-        await using var file = new FileStream(_fileContentsOrPath, FileMode.Truncate);
-        await using var streamWriter = new StreamWriter(file);
-        await streamWriter.WriteAsync(ExportFileContent());
+        await using (var file = new FileStream(_fileContentsOrPath, FileMode.Truncate))
+        await using (var streamWriter = new StreamWriter(file))
+            await streamWriter.WriteAsync(ExportFileContent());
         await ReadAndLoadFileContents(_fileContentsOrPath, token);
         return this;
     }
@@ -121,21 +121,16 @@ public class AuthorizedKeysFile : ReactiveObject
     /// <summary>
     ///     Exports the content of the authorized keys file.
     /// </summary>
-    /// <param name="local">Indicates whether to export for the local machine or remote server. Default is true (local).</param>
     /// <param name="platform">
     ///     The platform ID of the server. If null, the current OS platform will be used. Only applicable if
     ///     'local' is set to false.
     /// </param>
     /// <returns>The content of the authorized keys file as a string.</returns>
-    public string ExportFileContent(bool local = true, PlatformID? platform = null)
-    {
-        return local
-            ? AuthorizedKeys.Where(e => !e.MarkedForDeletion)
-                .Aggregate("", (s, key) => s += $"{key.GetFullKeyEntry}\r\n")
-            : AuthorizedKeys.Where(e => !e.MarkedForDeletion).Aggregate("",
+    public string ExportFileContent(PlatformID? platform = null)
+        => AuthorizedKeys.Where(e => !e.MarkedForDeletion)
+            .Aggregate("",
                 (s, key) => s +=
-                    $"{key.GetFullKeyEntry}{((platform ??= Environment.OSVersion.Platform) != PlatformID.Unix ? "`r`n" : "\r\n")}");
-    }
+                    $"{key.GetFullKeyEntry}{((platform ?? Environment.OSVersion.Platform).GetLineSeparator())}");
 
     public static async ValueTask<AuthorizedKeysFile> OpenAsync(string? filePath = null,
         CancellationToken cancellationToken = default)
@@ -195,6 +190,7 @@ public class AuthorizedKeysFile : ReactiveObject
     ///     Reads and loads the contents of a file.
     /// </summary>
     /// <param name="pathToFile">The path to the file to be read and loaded.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
     private async ValueTask ReadAndLoadFileContents(string pathToFile, CancellationToken cancellationToken = default)
     {
         await using var fileStream = File.Open(pathToFile, FileMode.OpenOrCreate);
