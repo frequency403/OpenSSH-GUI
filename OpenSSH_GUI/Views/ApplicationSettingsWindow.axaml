@@ -5,6 +5,7 @@
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:resources="clr-namespace:OpenSSH_GUI.Resources"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
@@ -15,28 +16,20 @@
         ShowActivated="True"
         Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
         WindowStartupLocation="CenterOwner">
-    <Grid RowDefinitions="* * *" ColumnDefinitions="* * * *">
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical"
-                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label Content="LogLevel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-            <Separator />
-            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
-                      ItemsSource="{Binding AvailableLogLevels}"
-                      SelectedItem="{Binding CurrentLogLevel}" />
-        </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Vertical"
-                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label Content="Theme" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-            <Separator />
-            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
-                      ItemsSource="{Binding ThemeVariants}"
-                      SelectedItem="{Binding CurrentThemeVariant}" />
-        </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Vertical"
-                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" Spacing="5">
-            <Label HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                   Content="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
-            <Separator HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+    <UniformGrid Columns="1" Rows="0" Margin="10">
+        <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
+            <controls:HeaderedItem Header="LogLevel">
+                <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                          ItemsSource="{Binding AvailableLogLevels}"
+                          SelectedItem="{Binding CurrentLogLevel}" />
+            </controls:HeaderedItem>
+            <controls:HeaderedItem Header="Theme">
+                <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                          ItemsSource="{Binding ThemeVariants}"
+                          SelectedItem="{Binding CurrentThemeVariant}" />
+            </controls:HeaderedItem>
+        </UniformGrid>
+        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}">
             <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
                 <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch"
                           SelectedItem="{Binding DaysToDeleteSelected}"
@@ -52,17 +45,14 @@
                     </StackPanel>
                 </Button>
             </StackPanel>
-        </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical"
-                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
-            <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}" />
-            <Separator />
+        </controls:HeaderedItem>
+        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}">
             <Button Command="{Binding ClearWholeCacheCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="5">
                     <avalonia:MaterialIcon Kind="ReportProblem" />
                     <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
                 </StackPanel>
             </Button>
-        </StackPanel>
-    </Grid>
+        </controls:HeaderedItem>
+    </UniformGrid>
 </Window>

@@ -96,12 +96,11 @@
 
         <!-- Bottom Controls -->
 
-        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" RowDefinitions="*" ColumnDefinitions="* * * *">
+        <UniformGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Rows="1" Columns="0">
 
             <!-- Open Add Key Window -->
 
-            <Button Grid.Column="0"
-                    Command="{Binding OpenCreateKeyWindowCommand}"
+            <Button Command="{Binding OpenCreateKeyWindowCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="{DynamicResource VerifiedBrush}">
@@ -115,8 +114,7 @@
 
             <!-- Open Edit Known Host Window  -->
 
-            <Button Grid.Column="1"
-                    Command="{Binding OpenEditKnownHostsWindowCommand}"
+            <Button Command="{Binding OpenEditKnownHostsWindowCommand}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="{DynamicResource InfoColor}">
@@ -136,8 +134,7 @@
 
             <!-- Open Edit Authorized Keys Window -->
 
-            <Button Grid.Column="2"
-                    HorizontalAlignment="Center"
+            <Button HorizontalAlignment="Center"
                     VerticalAlignment="Top"
                     Background="{DynamicResource ModifiedBrush}"
                     Command="{Binding OpenEditAuthorizedKeysWindowCommand}">
@@ -153,12 +150,12 @@
                     <materialIcons:MaterialIcon Kind="FileCogOutline" />
                 </StackPanel>
             </Button>
-        </Grid>
+        </UniformGrid>
 
         <!-- Status Panel -->
         <Border Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10 5"
                 Background="{DynamicResource DisconnectedBrush}" CornerRadius="5">
-            <Grid ColumnDefinitions="* * * *">
+            <UniformGrid Columns="0" Rows="1" ColumnSpacing="10">
 
                 <!-- Connection -->
 
@@ -342,7 +339,7 @@
                     </Border.ContextMenu>
                     <materialIcons:MaterialIcon Kind="HelpCircleOutline" />
                 </Border>
-            </Grid>
+            </UniformGrid>
         </Border>
     </Grid>
 </Window>

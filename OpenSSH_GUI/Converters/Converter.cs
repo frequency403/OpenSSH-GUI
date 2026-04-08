@@ -9,8 +9,8 @@ public static class Converter
     private const string WindowsShort = "Win";
 
     public static FuncValueConverter<SshKeyFormat, string?> FormatToStringConverter { get; } = new(EnumToString);
-    public static FuncValueConverter<SshKeyType, string?> KeyTypeToStringConverter { get; } = new(EnumToString);
     public static FuncValueConverter<PlatformID, string?> PlatformIdToStringConverter { get; } = new(ConvertPlatformId);
+    public static FuncValueConverter<object?, int> NullToColumnSpanConverter { get; } = new(o => o is null ? 2 : 1);
 
     private static string? EnumToString<TEnum>(TEnum value) where TEnum : struct, Enum
     {

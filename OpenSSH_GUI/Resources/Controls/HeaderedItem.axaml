@@ -1,0 +1,23 @@
+<ContentControl xmlns="https://github.com/avaloniaui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:c="clr-namespace:OpenSSH_GUI.Converters"
+                x:Class="OpenSSH_GUI.Resources.Controls.HeaderedItem">
+    <ContentControl.Template>
+        <ControlTemplate>
+            <StackPanel>
+                <Grid ColumnDefinitions="*,Auto">
+                    <ContentPresenter Grid.Column="0"
+                                      Grid.ColumnSpan="{TemplateBinding SideHeader, Converter={x:Static c:Converter.NullToColumnSpanConverter}}"
+                                      Content="{TemplateBinding Header}"
+                                      HorizontalAlignment="Left" />
+                    <ContentPresenter Grid.Column="1"
+                                      Content="{TemplateBinding SideHeader}"
+                                      HorizontalAlignment="Right"
+                                      IsVisible="{TemplateBinding SideHeader, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </Grid>
+                <Separator />
+                <ContentPresenter Content="{TemplateBinding Content}" />
+            </StackPanel>
+        </ControlTemplate>
+    </ContentControl.Template>
+</ContentControl>

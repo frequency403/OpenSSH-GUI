@@ -34,6 +34,10 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        
+#if DEBUG
+        this.AttachDeveloperTools();
+#endif
     }
 
     public override async void OnFrameworkInitializationCompleted()
