@@ -73,7 +73,8 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
         {
             if (!inputParameter) return;
             ArgumentNullException.ThrowIfNull(AuthorizedKeysFileLocal);
-            await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
+            // BUG: Only write to file when changes were made
+                await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
             if (ServerConnectionService.IsConnected)
                 await ServerConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(
                     AuthorizedKeysFileRemote, cancellationToken);

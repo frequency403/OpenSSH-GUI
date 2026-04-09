@@ -8,6 +8,8 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// </summary>
 public abstract class ConnectionCredentials
 {
+    private const string Placeholder = "123";
+    
     /// <summary>
     ///     Represents the base class for connection credentials.
     /// </summary>
@@ -27,6 +29,8 @@ public abstract class ConnectionCredentials
 
         Username = username;
     }
+    
+    internal static ConnectionCredentials Empty { get; } = new PasswordConnectionCredentials(Placeholder, Placeholder, Placeholder);
 
     /// <summary>
     ///     Represents the hostname of a server.

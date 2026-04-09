@@ -67,6 +67,7 @@ public static class DependencyInjectionExtensions
         }
     }
 
+    // @REFACTOR: Change to IHostBuilder and chain in Program.cs
     extension(IServiceCollection collection)
     {
         internal IServiceCollection RegisterOpenSshGuiServices()

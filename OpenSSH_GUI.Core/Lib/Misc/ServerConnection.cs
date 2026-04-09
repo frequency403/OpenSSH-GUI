@@ -38,7 +38,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
 
     public ServerConnection(ConnectionCredentials? credentials = null)
     {
-        ConnectionCredentials = credentials ?? new PasswordConnectionCredentials("123", "123", "123");
+        ConnectionCredentials = credentials ?? ConnectionCredentials.Empty;
         ClientConnection = new SshClient(ConnectionCredentials.GetConnectionInfo())
             { KeepAliveInterval = TimeSpan.FromSeconds(10) };
 

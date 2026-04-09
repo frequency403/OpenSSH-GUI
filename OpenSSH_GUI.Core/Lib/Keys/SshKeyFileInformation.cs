@@ -14,6 +14,7 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 ///     Provides access to the associated private and potential public key file information,
 ///     as well as details about key format and available conversion options.
 /// </summary>
+// REFACTOR: Change to OAPH where appropriate
 public partial record SshKeyFileInformation : ReactiveRecord
 {
     private static readonly SshKeyFormat[] AvailableFormats = Enum.GetValues<SshKeyFormat>();

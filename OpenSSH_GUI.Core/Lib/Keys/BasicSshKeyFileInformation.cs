@@ -7,6 +7,8 @@ using SshNet.Keygen.SshKeyEncryption;
 namespace OpenSSH_GUI.Core.Lib.Keys;
 
 [DebuggerDisplay("{ToString()}")]
+// REFACTOR: Make Fingerprintlength changeable
+// REFACTOR: Consider using a more efficient fingerprint calculation algorithm
 public readonly record struct BasicSshKeyFileInformation()
 {
     public SshKeyHashAlgorithmName HashAlgorithmName { get; private init; } = SshKeyHashAlgorithmName.MD5;

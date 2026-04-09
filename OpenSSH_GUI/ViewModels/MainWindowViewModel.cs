@@ -40,7 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private readonly ILauncher _launcher;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _serviceProvider;
-    [Reactive] private bool? _commentSort;
+    [Reactive] private bool? _commentSort; // REFACTOR: Implement a UserControl for all Sortings
 
     [Reactive(SetModifier = AccessModifier.Private)]
     private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;

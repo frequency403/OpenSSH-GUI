@@ -126,6 +126,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
+    // REFACTOR: Use BackedUpFile throughout the file
     private IEnumerable<BackedUpFile> BackupFiles(params FileInfo[] files)
     {
         foreach (var file in files)

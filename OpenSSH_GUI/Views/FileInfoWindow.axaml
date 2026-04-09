@@ -112,6 +112,7 @@
                     <TextBlock
                         Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}" />
                 </StackPanel>
+                <!-- BUG: SplitButton is uncolored, except the flyout -->
                 <SplitButton Padding="5"
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Center"

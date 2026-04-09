@@ -21,10 +21,10 @@ namespace OpenSSH_GUI;
 [UsedImplicitly]
 internal sealed class Program
 {
-    public const SshConfigFiles ConfigFile = SshConfigFiles.Config;
-    public const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
+    private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
+    private const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
     public const string AppName = "OpenSSH GUI";
-    public const string VersionEnvVar = "RUNNING_VERSION";
+    public const string VersionEnvVar = "RUNNING_VERSION"; // REFACTOR: Can be used for config versioning
 
     private static string GetHostVersion()
     {

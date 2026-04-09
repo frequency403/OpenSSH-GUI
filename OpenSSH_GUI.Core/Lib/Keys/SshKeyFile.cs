@@ -20,6 +20,7 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 ///     Represents an SSH key file used in the OpenSSH GUI application, encapsulating properties
 ///     and functionality for managing SSH keys.
 /// </summary>
+// REFACTOR: Change to OAPH where appropriate
 public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDisposable
 {
     private readonly CompositeDisposable _disposables = new();

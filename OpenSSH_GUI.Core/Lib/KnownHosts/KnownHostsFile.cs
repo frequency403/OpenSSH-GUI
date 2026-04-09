@@ -89,6 +89,7 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     /// <returns>A <see cref="ValueTask" /> representing the update operation.</returns>
     public async ValueTask UpdateFileAsync()
     {
+        // BUG: Only write to file when changes were made
         if (_isFromServer) return;
         await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), FileMode.Truncate);
         await using var streamWriter = new StreamWriter(file);

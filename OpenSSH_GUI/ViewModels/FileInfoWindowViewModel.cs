@@ -26,9 +26,9 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _resolver;
 
-    [Reactive] private SshKeyFile _keyFile;
-    [Reactive] private string _password = string.Empty;
-    [Reactive] private string _windowTitle = "Key info";
+    [Reactive] private SshKeyFile _keyFile; // REFACTOR: Setter can be private
+    [Reactive] private string _password = string.Empty; // REFACTOR: TO OAPH
+    [Reactive] private string _windowTitle = "Key info"; // REFACTOR: TO OAPH
 
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
         IResolver resolver, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
@@ -170,6 +170,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     }
 }
 
+// REFACTOR: Finder a better way to do this
 public class FileInfoViewModelInitializer : IInitializerParameters<FileInfoWindowViewModel>
 {
     public required string KeyFingerprint { get; set; }

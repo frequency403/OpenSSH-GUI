@@ -30,10 +30,12 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     [Reactive(SetModifier = AccessModifier.Private)]
     private bool _canChangeKeySize;
 
+    // REFACTOR: Set to Renci's default value
     [Reactive] private string _comment = $"{Environment.UserName}@{Environment.MachineName}";
 
     [Reactive] private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
 
+    // REFACTOR: Use a better default value
     [Reactive] private string _keyName = "id_rsa";
 
     [Reactive] private string _password = "";

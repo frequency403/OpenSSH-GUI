@@ -13,7 +13,7 @@ public static class PrivateKeySourceExtensions
     /// </summary>
     /// <param name="privateKeySource">The private key source.</param>
     /// <returns>The fingerprint hash of the private key source.</returns>
-    public static string FingerprintHash(this IPrivateKeySource privateKeySource)
+    public static string FingerprintHash(this IPrivateKeySource privateKeySource) // TODO: Do we need this?
     {
         return privateKeySource
             .Fingerprint()

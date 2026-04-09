@@ -197,4 +197,7 @@ public class AuthorizedKeysFile : ReactiveObject
         using var streamReader = new StreamReader(fileStream);
         LoadFileContents(await streamReader.ReadToEndAsync(cancellationToken));
     }
+    
+    // REFACTOR: Consider using a more efficient file reading approach, such as reading line by line
+    // REFACTOR: Implement Export(PlatformId) method to return the contents of the file
 }
