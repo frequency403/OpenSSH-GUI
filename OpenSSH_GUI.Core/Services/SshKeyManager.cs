@@ -4,11 +4,15 @@ using System.Diagnostics;
 using System.Text;
 using DryIoc;
 using JetBrains.Annotations;
+using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Dialogs.Enums;
+using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Dialogs.Models;
 using ReactiveUI;
 using Renci.SshNet;
 using Serilog;
@@ -43,6 +47,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         Path.Combine(BackupDirectory, Path.ChangeExtension(nameof(SshKeyManager), "log"));
 
     private readonly DirectoryCrawler _directoryCrawler;
+    private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly ILogger<SshKeyManager> _logger;
     private readonly IResolver _resolver;
 
@@ -57,10 +62,12 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
     public SshKeyManager(
         ILogger<SshKeyManager> logger,
         DirectoryCrawler directoryCrawler,
+        IMessageBoxProvider messageBoxProvider,
         IResolver resolver)
     {
         _logger = logger;
         _directoryCrawler = directoryCrawler;
+        _messageBoxProvider = messageBoxProvider;
         _resolver = resolver;
 
         if (!OperatingSystem.IsWindows())
@@ -84,6 +91,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
     /// </summary>
     public ReadOnlyObservableCollection<SshKeyFile> SshKeys { get; }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _watcher.Dispose();
@@ -126,7 +134,6 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    // REFACTOR: Use BackedUpFile throughout the file
     private IEnumerable<BackedUpFile> BackupFiles(params FileInfo[] files)
     {
         foreach (var file in files)
@@ -161,16 +168,6 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    private static IEnumerable<FileInfo> MoveToBackupDirectory(params FileInfo[] files)
-    {
-        foreach (var file in files)
-        {
-            var destination = Path.Combine(BackupDirectory, string.Join(".", file.Name, BackupFileExtension));
-            file.MoveTo(destination);
-            yield return new FileInfo(destination);
-        }
-    }
-
     /// <summary>
     ///     Performs the initial SSH key search on disk.
     ///     Must be called after the DI container is fully built.
@@ -180,12 +177,30 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         SearchForKeysAndUpdateCollection();
     }
 
+    /// <summary>
+    /// Changes the password of an SSH key file, handling both OpenSSH and PuTTY formats transparently.
+    /// If the key is in PuTTY format, it will be temporarily converted to OpenSSH, the password changed,
+    /// and then converted back to the original format.
+    /// </summary>
+    /// <param name="key">The SSH key file whose password should be changed.</param>
+    /// <param name="newPassword">The new password to set, encoded using <paramref name="encoding"/>.</param>
+    /// <param name="encoding">
+    /// The encoding used to interpret <paramref name="newPassword"/>. Defaults to <see cref="Encoding.UTF8"/> if <c>null</c>.
+    /// </param>
+    /// <param name="token">A cancellation token to observe while waiting for the operation to complete.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the private key file of <paramref name="key"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown if the resolved key file path is null or whitespace.</exception>
+    /// <exception cref="TimeoutException">Thrown if the internal semaphore could not be acquired within 5 seconds.</exception>
+    /// <exception cref="Exception">
+    /// Thrown if <c>ssh-keygen</c> exits with a non-zero code, or if intermediate key file operations fail.
+    /// On failure, all modified files are restored from backup.
+    /// </exception>
     public async Task ChangePasswordOfKeyAsync(SshKeyFile key, ReadOnlyMemory<byte> newPassword,
         Encoding? encoding = null, CancellationToken token = default)
     {
         EnableTempLogger();
         encoding ??= Encoding.UTF8;
-        var semaphoreAquired = false;
+        var semaphoreAcquired = false;
         var errorsOccured = false;
         BackedUpFile[] backupFiles = [];
         string[] additionalDeleteFiles = [];
@@ -202,7 +217,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
                 throw new TimeoutException("Failed to acquire semaphore within 5 seconds");
             }
 
-            semaphoreAquired = true;
+            semaphoreAcquired = true;
             backupFiles = BackupFiles(key.KeyFiles).ToArray();
 
             if (key.Format is { } and not SshKeyFormat.OpenSSH)
@@ -273,23 +288,36 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         }
         finally
         {
-            if (semaphoreAquired)
+            if (semaphoreAcquired)
                 _semaphoreSlim.Release();
             DisableTempLogger(errorsOccured);
         }
     }
 
-
+    /// <summary>
+    /// Attempts to delete all files associated with the given SSH key.
+    /// Unlike <see cref="ChangePasswordOfKeyAsync"/>, this method does not throw on failure —
+    /// instead, all encountered exceptions are aggregated and returned alongside a success flag.
+    /// </summary>
+    /// <param name="key">The SSH key file to delete, including all associated key files.</param>
+    /// <param name="token">A cancellation token to observe while waiting for the semaphore.</param>
+    /// <returns>
+    /// A tuple containing:
+    /// <list type="bullet">
+    ///   <item><description><c>success</c> — <c>true</c> if all files were deleted without error, <c>false</c> otherwise.</description></item>
+    ///   <item><description><c>exception</c> — the exception that occurred, or an <see cref="AggregateException"/> if multiple errors were encountered. <c>null</c> on full success.</description></item>
+    /// </list>
+    /// </returns>
     public async Task<(bool success, Exception? exception)> TryDeleteKeyAsync(SshKeyFile key,
         CancellationToken token = default)
     {
         EnableTempLogger();
-        var errrorsOccured = false;
+        var errorsOccured = false;
         Exception? exception = null;
-        var semaphoreAquired = false;
+        var semaphoreAcquired = false;
         try
         {
-            semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
+            semaphoreAcquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
             foreach (var keyFile in key.KeyFiles)
                 try
                 {
@@ -299,64 +327,134 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
                 {
                     Log(LogLevel.Debug, "Error while deleting key {key}: {ex}", key.AbsoluteFilePath, ex);
                     exception = exception is null ? ex : new AggregateException(exception, ex);
-                    errrorsOccured = true;
+                    errorsOccured = true;
                 }
         }
         catch (Exception e)
         {
             Log(LogLevel.Error, e, "Error deleting key");
-            errrorsOccured = true;
+            errorsOccured = true;
             exception = exception is null ? e : new AggregateException(exception, e);
         }
         finally
         {
-            if (semaphoreAquired)
+            if (semaphoreAcquired)
                 _semaphoreSlim.Release();
-            DisableTempLogger(errrorsOccured);
+            DisableTempLogger(errorsOccured);
         }
 
-        return (errrorsOccured, exception);
+        return (!errorsOccured, exception);
     }
 
+    /// <summary>
+    /// Renames all files associated with the given <see cref="SshKeyFile"/> to a new base file name,
+    /// preserving each file's original extension. If any target file already exists, the user is prompted
+    /// to confirm the overwrite. On failure, all files are restored from backup.
+    /// </summary>
+    /// <param name="key">
+    /// The <see cref="SshKeyFile"/> whose associated files are to be renamed.
+    /// After a successful rename, the key is reloaded from the new primary file.
+    /// </param>
+    /// <param name="newFileName">
+    /// The new base file name (without extension) to assign to all files of the key.
+    /// Each file retains its original extension.
+    /// </param>
+    /// <param name="token">
+    /// A <see cref="CancellationToken"/> to observe while waiting for the semaphore
+    /// and during file move operations.
+    /// </param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when another key operation is already in progress and the semaphore
+    /// could not be acquired within the timeout.
+    /// </exception>
+    /// <exception cref="OperationCanceledException">
+    /// Thrown when the operation is cancelled via <paramref name="token"/>
+    /// or when the user declines the overwrite confirmation dialog.
+    /// </exception>
+    /// <remarks>
+    /// File moves are performed via <see cref="FileInfo.MoveTo(string, bool)"/> wrapped in <see cref="Task.Run(Action, CancellationToken)"/>,
+    /// since no native async move API exists in .NET. On same-volume moves, this is an atomic
+    /// metadata operation. Backups are created before any file is moved and deleted only on full success;
+    /// on any failure the backup is restored.
+    /// </remarks>
     public async Task RenameKeyAsync(SshKeyFile key, string newFileName, CancellationToken token = default)
     {
-        var semaphoreAquired = false;
+        var semaphoreAcquired = false;
         EnableTempLogger();
-        var errorsOccured = false;
+        var errorsOccurred = false;
+        BackedUpFile[] backupFiles = [];
         try
         {
-            semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
-            if (!semaphoreAquired)
-                return;
-
-            var files = new List<string>();
-
-            foreach (var file in key.KeyFileInfo?.Files ?? [])
+            semaphoreAcquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
+            if (!semaphoreAcquired)
+                throw new InvalidOperationException("Another key operation is in progress");
+            
+            backupFiles = BackupFiles(key.KeyFiles).ToArray();
+            var filePairs = (key.KeyFileInfo?.Files ?? []).Select(file =>
             {
-                var newFileNameWithMatchingExtension = Path.ChangeExtension(newFileName,
-                    string.IsNullOrEmpty(file.Extension) ? null : file.Extension);
-                var destination = Path.Combine(
-                    file.DirectoryName ?? SshConfigFilesExtension.GetBaseSshPath(),
-                    newFileNameWithMatchingExtension);
-                if (File.Exists(destination))
-                    throw new InvalidOperationException($"File {destination} already exists");
-                file.MoveTo(destination);
-                files.Add(file.Extension.EndsWith("ppk") ? destination : Path.ChangeExtension(destination, null));
+                ArgumentNullException.ThrowIfNull(file.Directory);
+                var newFileNameForFile = Path.ChangeExtension(newFileName, file.Extension);
+                var destinationForFile = Path.Combine(file.Directory.FullName, newFileNameForFile);
+                Log(LogLevel.Debug, "Renaming file {file} to {newFileName}", file.FullName, newFileNameForFile);
+                Log(LogLevel.Debug, "Destination: {destination}", destinationForFile);
+                return (Source: file, Target: destinationForFile);
+            }).ToArray();
+
+            var existingFiles = filePairs
+                .Where(p => File.Exists(p.Target))
+                .Select(p => p.Target)
+                .ToList();
+
+            if (existingFiles.Count > 0)
+            {
+                var names = string.Join(", ", existingFiles);
+                Log(LogLevel.Debug, "{Count} destination files already exist: {destinations}", existingFiles.Count, names);
+                if (await _messageBoxProvider.ShowMessageBoxAsync(new MessageBoxParams // REFACTOR: Localize
+                    {
+                        Title = "Confirm File Overwrite",
+                        Message =
+                            $"The file{(existingFiles.Count > 1 ? "s" : "")} {names} already exist{(existingFiles.Count == 1 ? "s" : "")}. Do you want to overwrite it?",
+                        Buttons = MessageBoxButtons.YesNo,
+                        Icon = MaterialIconKind.QuestionMarkCircleOutline
+                    }) is not MessageBoxResult.Yes)
+                {
+                    throw new OperationCanceledException("User canceled operation");
+                }
+                Log(LogLevel.Debug, "User confirmed overwrite of files");
             }
 
-            key.Load(SshKeyFileSource.FromDisk(files.Distinct().Single()));
+            foreach (var (source, target) in filePairs)
+            {
+                await Task.Run(() => source.MoveTo(target, overwrite: true), token);
+                Log(LogLevel.Debug, "Successfully renamed file {file} to {newFileName}", source.FullName, source.Name);
+            }
+
+            if (filePairs.Select(p => p.Source).FirstOrDefault(file =>
+                    string.Equals(file.Extension, key.Format?.GetExtension(false), StringComparison.OrdinalIgnoreCase) &&
+                    file.Exists) is { } keyFileToLoad)
+            {
+                Log(LogLevel.Debug, "Loading key file {keyFile}", keyFileToLoad.FullName);
+                key.Load(SshKeyFileSource.FromDisk(keyFileToLoad.FullName));
+                Log(LogLevel.Debug, "Successfully loaded key file {keyFile}", keyFileToLoad.FullName);
+                DeleteBackupFiles(backupFiles);
+            }
+            else
+            {
+                Log(LogLevel.Warning, "No valid key file found for key format {format}", key.Format);
+            }
         }
         catch (Exception e)
         {
-            errorsOccured = true;
+            errorsOccurred = true;
             Log(LogLevel.Error, e, "Failed to change filename of {className}", nameof(SshKeyFile));
+            RestoreBackupFiles(backupFiles);
             throw;
         }
         finally
         {
-            if (semaphoreAquired)
+            if (semaphoreAcquired)
                 _semaphoreSlim.Release();
-            DisableTempLogger(errorsOccured);
+            DisableTempLogger(errorsOccurred);
         }
     }
 
@@ -425,12 +523,12 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         EnableTempLogger();
         var filePath = newFormat.ChangeExtension(Path.GetFullPath(key.AbsoluteFilePath), false);
         var writtenFiles = new List<string>();
-        IEnumerable<FileInfo> backupFiles = [];
+        BackedUpFile[] backupFiles = [];
         var semaphoreAquired = false;
         var errorsOccured = false;
         try
         {
-            backupFiles = MoveToBackupDirectory(key.KeyFiles).ToArray();
+            backupFiles = BackupFiles(key.KeyFiles).ToArray();
 
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
             if (!semaphoreAquired)
@@ -442,6 +540,8 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
                 filePath));
 
             key.Load(SshKeyFileSource.FromDisk(filePath));
+            Log(LogLevel.Debug, "Successfully changed format of key {key} to {format}", key.AbsoluteFilePath, newFormat);
+            DeleteBackupFiles(backupFiles);
         }
         catch (Exception e)
         {
@@ -462,36 +562,25 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
                         not null => new AggregateException(exc, ex),
                         _ => ex
                     };
-                    Log(LogLevel.Warning, ex, "Could not delete backup file '{path}'", writtenFile);
+                    Log(LogLevel.Warning, ex, "Could not delete created file '{path}'", writtenFile);
                 }
 
-            foreach (var backupFileInfo in backupFiles)
+            try
             {
-                if (backupFileInfo.Directory?.Parent?.FullName is { } parentDirectory)
-                    try
-                    {
-                        var destination = Path.Combine(parentDirectory, backupFileInfo.Name.Replace(".bak", ""));
-                        backupFileInfo.MoveTo(destination);
-                        Log(LogLevel.Warning, "Restored backup file {backupFile} to its original location {original}",
-                            backupFileInfo.FullName, destination);
-                        continue;
-                    }
-                    catch (Exception exception)
-                    {
-                        exc = exc switch
-                        {
-                            AggregateException aggregateException => new AggregateException(
-                                aggregateException.InnerExceptions.Append(exception)),
-                            not null => new AggregateException(exc, exception),
-                            _ => exception
-                        };
-                    }
-
-                Log(LogLevel.Warning, "Could not move backup file {backupFile} to its original location",
-                    backupFileInfo.FullName);
-                break;
+                RestoreBackupFiles(backupFiles);
             }
-
+            catch (Exception exception)
+            {
+                exc = exc switch
+                {
+                    AggregateException aggregateException => new AggregateException(
+                        aggregateException.InnerExceptions.Append(exception)),
+                    not null => new AggregateException(exc, exception),
+                    _ => exception
+                };
+                Log(LogLevel.Warning, exception, "Could not restore backup files");
+            }
+            
             throw exc;
         }
         finally

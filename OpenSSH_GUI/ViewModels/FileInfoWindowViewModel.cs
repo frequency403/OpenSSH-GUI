@@ -110,6 +110,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     [ReactiveCommand]
     private async Task ChangeFileNameAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
     {
+        // BUG: Shows the file extension in the prompt
         var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(new ValidatedInputParams
         {
             Buttons = MessageBoxButtons.OkCancel,

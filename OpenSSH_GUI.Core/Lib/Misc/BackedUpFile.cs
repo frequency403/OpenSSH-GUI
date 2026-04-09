@@ -4,9 +4,7 @@ public record BackedUpFile
 {
     public required FileInfo InitialFile { get; init; }
     public required FileInfo BackupFile { get; init; }
-
-    public bool IsBackedUp => InitialFile.Exists && !BackupFile.Exists;
-
+    
     public void Backup()
     {
         InitialFile.CopyTo(BackupFile.FullName);
@@ -21,8 +19,7 @@ public record BackedUpFile
     {
         BackupFile.Delete();
     }
-
-
+    
     public override string ToString()
     {
         return $"{InitialFile.FullName} -> {BackupFile.FullName}";
