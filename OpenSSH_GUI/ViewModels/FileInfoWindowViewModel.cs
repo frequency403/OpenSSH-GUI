@@ -53,7 +53,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters,
         CancellationToken cancellationToken = default)
     {
-        KeyFile = _keyManager.SshKeys.SingleOrDefault(x => x.FingerprintString == parameters.KeyFingerprint) ??
+        KeyFile = _keyManager.SshKeys.SingleOrDefault(x => x.Fingerprint == parameters.KeyFingerprint) ??
                   _resolver.Resolve<SshKeyFile>();
         return base.InitializeAsync(parameters, cancellationToken);
     }

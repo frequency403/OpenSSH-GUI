@@ -27,6 +27,7 @@
         <PackageReference Include="ReactiveUI" Version="23.2.1"/>
         <PackageReference Include="ReactiveUI.Validation" Version="7.0.5"/>
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
+        <PackageReference Include="System.Interactive.Async" Version="7.0.0" />
         <PackageReference Include="System.Reactive" Version="6.1.0"/>
     </ItemGroup>
 

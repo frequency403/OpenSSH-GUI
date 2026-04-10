@@ -20,7 +20,6 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 ///     Represents an SSH key file used in the OpenSSH GUI application, encapsulating properties
 ///     and functionality for managing SSH keys.
 /// </summary>
-// REFACTOR: Change to OAPH where appropriate
 public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDisposable
 {
     private readonly CompositeDisposable _disposables = new();
@@ -34,50 +33,43 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// <summary>
     ///     Gets the absolute file path of the SSH key file, projected from <see cref="KeyFileInfo" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private string? _absoluteFilePath;
 
     /// <summary>
     ///     The basic key file information extracted by <c>ssh-keygen</c> or the file itself in case of a PuTTy key.
     /// </summary>
-    [Reactive] private BasicSshKeyFileInformation _basicSshKeyFileInformation;
+    [Reactive] 
+    private BasicSshKeyFileInformation _basicSshKeyFileInformation;
 
     /// <summary>
     ///     Holds the comment embedded in the SSH key, derived from either the loaded
     ///     <see cref="PrivateKeyFile" /> or the <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
 
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _fileChangesAllowed;
 
     /// <summary>
     ///     Gets the file name (without directory) of the SSH key file, projected from <see cref="KeyFileInfo" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private string? _fileName;
 
     /// <summary>
     ///     Holds the raw fingerprint hash of the SSH key, derived from either the loaded
     ///     <see cref="PrivateKeyFile" /> or the <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private string _fingerprint = string.Empty;
-
-    /// <summary>
-    ///     Contains a human-readable fingerprint representation (the base64 portion after the
-    ///     algorithm prefix), derived from either the loaded <see cref="PrivateKeyFile" /> or
-    ///     the <see cref="BasicSshKeyFileInformation" />.
-    /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private string _fingerprintString = string.Empty;
 
     /// <summary>
     ///     Gets the current on-disk format of the SSH key file (e.g. OpenSSH or PuTTY),
     ///     projected from <see cref="KeyFileInfo" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private SshKeyFormat? _format;
 
     /// <summary>
@@ -85,21 +77,21 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     resolved from the host key algorithms of the loaded <see cref="PrivateKeyFile" />
     ///     or from <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private SshKeyHashAlgorithmName _hashAlgorithmName = SshKeyHashAlgorithmName.SHA256;
 
     /// <summary>
     ///     Evaluates to <see langword="true" /> when both a valid <see cref="PrivateKeyFile" />
     ///     is loaded and the associated <see cref="KeyFileInfo" /> exists on disk.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _isInitialized;
 
     /// <summary>
     ///     Evaluates to <see langword="true" /> when the current key file format is not
     ///     <see cref="SshKeyFormat.OpenSSH" />, indicating a PuTTY-compatible key format.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _isPuttyKey;
 
     /// <summary>
@@ -114,20 +106,20 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     for the current SSH key, projected from <see cref="KeyFileInfo" />.
     ///     Returns an empty array when no files are associated.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private FileInfo[] _keyFiles = [];
 
     /// <summary>
     ///     Represents the cryptographic algorithm of the key (e.g. RSA, ECDSA, ED25519),
     ///     resolved from the loaded <see cref="PrivateKeyFile" /> or <see cref="BasicSshKeyFileInformation" />.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private SshKeyType _keyType = SshKeyType.RSA;
 
     /// <summary>
     ///     Indicates whether the associated SSH key file requires a password to access.
     /// </summary>
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _needsPassword;
 
     /// <summary>
@@ -154,62 +146,58 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     public SshKeyFile(ILogger<SshKeyFile> logger)
     {
         _logger = logger;
-        Password = new SshKeyFilePassword();
-        this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(tuple =>
+
+        var privateKeyFileAndBasicFileInfoObservable = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
+            .ObserveOn(AvaloniaScheduler.Instance);
+        
+        var privateKeyFileAndFileInfoObservable = this.WhenAnyValue(vm => vm.PrivateKeyFile, vm => vm.KeyFileInfo)
+            .ObserveOn(AvaloniaScheduler.Instance);
+        
+        _needsPasswordHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => tuple.Item1 == null)
+            .ToProperty(this, x => x.NeedsPassword).DisposeWith(_disposables);
+        
+        _fingerprintHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => tuple.Item2.FingerPrint)
+            .ToProperty(this, x => x.Fingerprint).DisposeWith(_disposables);
+        
+        _commentHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => tuple.Item1?.Key.Comment ?? tuple.Item2.Comment)
+            .ToProperty(this, x => x.Comment).DisposeWith(_disposables);
+        
+        _keyTypeHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple =>
+            tuple.Item1?.Key switch
             {
-                NeedsPassword = tuple.Item1 == null;
-                try
-                {
-                    Fingerprint = tuple.Item1?.FingerprintHash() ?? tuple.Item2.FingerPrint;
-                }
-                catch
-                {
-                    Fingerprint = tuple.Item2.FingerPrint;
-                }
+                EcdsaKey => SshKeyType.ECDSA,
+                ED25519Key => SshKeyType.ED25519,
+                RsaKey => SshKeyType.RSA,
+                _ => tuple.Item2.KeyType
+            }).ToProperty(this, x => x.KeyType).DisposeWith(_disposables);
+        
+        _hashAlgorithmNameHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => 
+            Enum.TryParse<SshKeyHashAlgorithmName>(
+                tuple.Item1?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? string.Empty,
+                out var enumValue)
+                ? enumValue
+                : tuple.Item2.HashAlgorithmName
+            ).ToProperty(this, x => x.HashAlgorithmName).DisposeWith(_disposables);
 
-                try
-                {
-                    FingerprintString = tuple.Item1?.Fingerprint(SshKeyHashAlgorithmName.SHA256)
-                        .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                        .Skip(1).FirstOrDefault()
-                        ?.Split(':').Skip(1).FirstOrDefault() ?? tuple.Item2.FingerPrint;
-                }
-                catch
-                {
-                    FingerprintString = tuple.Item2.FingerPrint;
-                }
-
-                try
-                {
-                    Comment = tuple.Item1?.Key.Comment ?? tuple.Item2.Comment;
-                }
-                catch
-                {
-                    Comment = tuple.Item2.Comment;
-                }
-
-                if (tuple.Item1 is { } pk)
-                {
-                    KeyType = pk.Key switch
-                    {
-                        EcdsaKey => SshKeyType.ECDSA,
-                        ED25519Key => SshKeyType.ED25519,
-                        _ => SshKeyType.RSA
-                    };
-                    HashAlgorithmName = Enum.TryParse<SshKeyHashAlgorithmName>(
-                        pk.HostKeyAlgorithms.FirstOrDefault()?.Name ?? string.Empty,
-                        out var enumValue)
-                        ? enumValue
-                        : tuple.Item2.HashAlgorithmName;
-                }
-
-                KeyType = tuple.Item2.KeyType;
-                HashAlgorithmName = tuple.Item2.HashAlgorithmName;
-            }).DisposeWith(_disposables);
-
-        this.WhenAnyValue(
+        _absoluteFilePathHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.FullFileName)
+            .ToProperty(this, obj => obj.AbsoluteFilePath);
+        
+        _isInitializedHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item1 is not null && tuple.Item2 is { Exists: true })
+            .ToProperty(this, x => x.IsInitialized).DisposeWith(_disposables);
+        
+        _isPuttyKeyHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.CurrentFormat is not SshKeyFormat.OpenSSH)
+            .ToProperty(this, x => x.IsPuttyKey).DisposeWith(_disposables);
+        
+        _keyFilesHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2 is not null ? tuple.Item2.Files : [])
+            .ToProperty(this, x => x.KeyFiles).DisposeWith(_disposables);
+        
+        _fileNameHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.FileName)
+            .ToProperty(this, x => x.FileName).DisposeWith(_disposables);
+        
+        _formatHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.CurrentFormat)
+            .ToProperty(this, x => x.Format).DisposeWith(_disposables);
+        
+        _fileChangesAllowedHelper = this.WhenAnyValue(
                 vm => vm.NeedsPassword,
                 vm => vm.Password,
                 vm => vm.KeyFileInfo,
@@ -217,23 +205,16 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     keyFileInfo is { KeyFileSource.ProvidedByConfig: false } &&
                     (!needsPassword || password.IsValid))
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(result => FileChangesAllowed = result)
-            .DisposeWith(_disposables);
-
-        this.WhenAnyValue(vm => vm.PrivateKeyFile, vm => vm.KeyFileInfo)
+            .ToProperty(this, x => x.FileChangesAllowed).DisposeWith(_disposables);
+        
+        this.WhenAnyValue(vm => vm.KeyFileInfo)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(tuple =>
+            .Subscribe(keyFileInfo =>
             {
-                IsInitialized = tuple.Item1 is not null && tuple.Item2 is { Exists: true };
-                IsPuttyKey = tuple.Item2?.CurrentFormat is not SshKeyFormat.OpenSSH;
-                KeyFiles = tuple.Item2 is not null ? tuple.Item2.Files : [];
-                AbsoluteFilePath = tuple.Item2?.FullFileName;
-                FileName = tuple.Item2?.FileName;
-                Format = tuple.Item2?.CurrentFormat;
                 try
                 {
-                    if (tuple.Item2 is not null)
-                        BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(tuple.Item2);
+                    if (keyFileInfo is not null)
+                        BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(keyFileInfo);
                 }
                 catch (FileNotFoundException)
                 {

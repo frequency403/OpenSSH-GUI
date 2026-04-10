@@ -107,7 +107,7 @@
                             <TextBlock Padding="5" Text="{Binding KeyType}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Grid>
-                    <TextBlock Padding="5" Grid.Column="1" Text="{Binding FingerprintString}" Margin="5"
+                    <TextBlock Padding="5" Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
                                HorizontalAlignment="Center" IsVisible="{Binding !NeedsPassword}" />
                     <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch"
                             Background="{DynamicResource AccentHoverBrush}"
@@ -149,7 +149,7 @@
                         <Button Padding="5" Background="{DynamicResource NavigationActiveBrush}"
                                 HorizontalAlignment="Stretch"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindowCommand}"
-                                CommandParameter="{Binding FingerprintString}">
+                                CommandParameter="{Binding Fingerprint}">
                             <ToolTip.Tip>
                                 <Label
                                     Content="Open Fileinfo Window" />
