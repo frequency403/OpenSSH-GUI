@@ -134,7 +134,7 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     ///     after the execution of the <see cref="BooleanSubmitCommand" /> command. This behavior
     ///     enables automatic closure of the view upon certain operations.
     /// </remarks>
-    private protected bool CloseOnBooleanSubmit { get; set; } = true;
+    protected bool CloseOnBooleanSubmit { get; set; } = true;
 
     /// <inheritdoc />
     public ValueTask DisposeAsync()

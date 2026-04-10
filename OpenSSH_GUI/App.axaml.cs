@@ -6,6 +6,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DryIoc;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
@@ -19,8 +20,10 @@ using Svg.Skia;
 namespace OpenSSH_GUI;
 
 [UsedImplicitly]
-public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator) : Application
+public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator, IHostApplicationLifetime hostApplicationLifetime) : Application
 {
+    private const string RessourceUri = "avares://OpenSSH_GUI/Assets/openssh-gui{0}.svg";
+    private const string Underline = "_";
     private static readonly Dictionary<float, float> IconSizes = new()
     {
         { 16, 16 },
@@ -54,7 +57,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                     foreach (var (width, height) in IconSizes)
                     {
                         await using var svgStream = AssetLoader.Open(new Uri(
-                            $"avares://OpenSSH_GUI/Assets/openssh-gui{(variant is ThemeVariant.Light ? "-light" : string.Empty)}.svg"));
+                            string.Format(RessourceUri, variant is ThemeVariant.Light ? "-light" : string.Empty)));
                         var memoryStream = new MemoryStream();
                         using var svg = new SKSvg();
                         svg.Load(svgStream);
@@ -80,14 +83,14 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                         }
 
                         var bm = new Bitmap(memoryStream);
-                        var serviceKey = string.Join("_", nameof(Bitmap), width).ToLower();
+                        var serviceKey = string.Join(Underline, nameof(Bitmap), width).ToLower();
                         registrator.RegisterInstance(bm, serviceKey: serviceKey,
                             ifAlreadyRegistered: IfAlreadyRegistered.Replace);
                     }
 
                     registrator.RegisterInstance(
-                        new WindowIcon(resolver.Resolve<Bitmap>(string.Join("_", nameof(Bitmap), 32).ToLower())),
-                        serviceKey: string.Join("_", nameof(WindowIcon), 32, variant).ToLower());
+                        new WindowIcon(resolver.Resolve<Bitmap>(string.Join(Underline, nameof(Bitmap), 32).ToLower())),
+                        serviceKey: string.Join(Underline, nameof(WindowIcon), 32, variant).ToLower());
                 }
             }
             catch (Exception e)
@@ -118,7 +121,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
     ///     Triggers the initial SSH key search after the main window has been presented,
     ///     ensuring the UI is fully ready before background work begins.
     /// </summary>
-    private void OnMainWindowOpened(object? sender, EventArgs e)
+    private async void OnMainWindowOpened(object? sender, EventArgs e)
     {
         try
         {
@@ -127,7 +130,8 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
 
             try
             {
-                resolver.Resolve<SshKeyManager>().InitialSearchAsync();
+                await resolver.Resolve<SshKeyManager>().InitialSearchAsync(hostApplicationLifetime.ApplicationStopping);
+                logger.LogInformation("Initial key search completed");
             }
             catch (Exception ex)
             {

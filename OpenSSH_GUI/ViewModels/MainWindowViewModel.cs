@@ -189,30 +189,17 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
     [ReactiveCommand]
-    private Task ReloadKeysAsync(CancellationToken cancellationToken = default)
+    private async Task ReloadKeysAsync(CancellationToken cancellationToken = default)
     {
-        return SshKeyManager.RerunSearchAsync();
-    }
-
-    [ReactiveCommand]
-    private async Task ChangeFilenameAsync(SshKeyFile key, CancellationToken token = default)
-    {
-        var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(new ValidatedInputParams
+        switch (await SshKeyManager.RerunSearchAsync(cancellationToken))
         {
-            Buttons = MessageBoxButtons.OkCancel,
-            Icon = MaterialIconKind.FileEditOutline,
-            InitialValue = key.FileName ?? string.Empty,
-            Message = "ChangeMe",
-            Prompt = "EnterNewFilename",
-            Watermark = "Enter new filename",
-            Validator = argument =>
-            {
-                ArgumentException.ThrowIfNullOrWhiteSpace(argument);
-                return SshKeyManager.SshKeys.Any(k => k.FileName == argument) ? "Filename already exists" : null;
-            }
-        });
-        if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
-            await SshKeyManager.RenameKeyAsync(key, filename, token);
+            case { IsSuccess: false } x:
+                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, x.Exception.Message);
+                break;
+            default:
+                Logger.LogInformation("Keys reloaded");
+                break;
+        }
     }
 
     [ReactiveCommand]
@@ -283,13 +270,22 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     [ReactiveCommand]
     private async Task OpenBrowserAsync(int commandTypeParameter, CancellationToken cancellationToken = default)
     {
-        if (commandTypeParameter switch
-            {
-                1 => string.Join("/", ProjectUrl, "issues"),
-                2 => string.Join("#", ProjectUrl, "authors"),
-                _ => ProjectUrl
-            } is { Length: > 0 } url)
-            await _launcher.LaunchUriAsync(new Uri(HtmlEncoder.Default.Encode(url)));
+        if (ProjectUrl is null)
+            return;
+        var uriBuilder = new UriBuilder(ProjectUrl);
+        switch (commandTypeParameter)
+        {
+            case 1:
+                uriBuilder.Path = "issues";
+                break;
+            case 2:
+                uriBuilder.Query = "tab=readme-ov-file";
+                uriBuilder.Fragment = "authors";
+                break;
+            default:
+                return;
+        }
+        await _launcher.LaunchUriAsync(uriBuilder.Uri);
     }
 
     [ReactiveCommand]
@@ -328,7 +324,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 StringsAndTexts.MainWindowViewModelDeleteKeyQuestionTextPair, MessageBoxButtons.YesNo,
                 MaterialIconKind.QuestionBoxOutline) is MessageBoxResult.Yes)
             if (await SshKeyManager.TryDeleteKeyAsync(sshKeyFile, cancellationToken) is
-                { success: false, exception: { } error })
+                { IsSuccess: false, Exception: { } error })
                 await _messageBoxProvider.ShowMessageBoxAsync(
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, sshKeyFile.FileName)
                     , error.Message);

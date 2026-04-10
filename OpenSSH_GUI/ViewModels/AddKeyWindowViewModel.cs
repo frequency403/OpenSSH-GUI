@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
@@ -7,6 +8,7 @@ using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
@@ -24,25 +26,23 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly SshKeyManager _sshKeyManager;
 
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private int[] _avaliableKeySizes = [];
 
-    [Reactive(SetModifier = AccessModifier.Private)]
+    [ObservableAsProperty(ReadOnly = true)]
     private bool _canChangeKeySize;
 
-    // REFACTOR: Set to Renci's default value
-    [Reactive] private string _comment = $"{Environment.UserName}@{Environment.MachineName}";
+    [Reactive] private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
 
-    [Reactive] private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
+    [Reactive] private SshKeyFormat _keyFormat = SshKeyGenerateInfo.DefaultSshKeyFormat;
 
-    // REFACTOR: Use a better default value
-    [Reactive] private string _keyName = "id_rsa";
+    [Reactive] private string _keyName = string.Empty;
 
     [Reactive] private string _password = "";
 
     [Reactive] private int _selectedKeySize;
 
-    [Reactive] private SshKeyType _selectedKeyType;
+    [Reactive] private SshKeyType _selectedKeyType = SshKeyGenerateInfo.DefaultSshKeyType;
 
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
@@ -51,25 +51,51 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         _sshKeyManager = sshKeyManager;
         _messageBoxProvider = messageBoxProvider;
 
-        this.WhenAnyValue(vm => vm.SelectedKeyType)
+        var selectedKeyTypeChanged = this.WhenAnyValue(vm => vm.SelectedKeyType)
+            .ObserveOn(AvaloniaScheduler.Instance);
+        
+        _avaliableKeySizesHelper = selectedKeyTypeChanged
+            .Select(e => e.SupportedKeySizes.OrderDescending().ToArray())
+            .ToProperty(this, vm => vm.AvaliableKeySizes, initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.OrderDescending().ToArray())
+            .DisposeWith(Disposables);
+        
+        selectedKeyTypeChanged
             .Subscribe(e =>
             {
-                if (SshKeyTypes.Select(kt => string.Join("_", KeyPrefix, Enum.GetName(kt)!.ToLower()))
-                    .Any(ktp => KeyName.EndsWith(ktp, StringComparison.Ordinal)))
-                    KeyName = string.Join("_", KeyPrefix, Enum.GetName(e)!.ToLower());
-
-                AvaliableKeySizes = e.SupportedKeySizes.OrderDescending().ToArray();
-                SelectedKeySize = AvaliableKeySizes.FirstOrDefault();
-                CanChangeKeySize = AvaliableKeySizes.Length > 1;
+                if(DefaultKeyNames.Values.Any(keyName => string.IsNullOrWhiteSpace(KeyName) || string.Equals(keyName, KeyName, StringComparison.OrdinalIgnoreCase)))
+                   if(DefaultKeyNames.TryGetValue(e, out var defaultKeyName))
+                       KeyName = defaultKeyName;
+                
+                SelectedKeySize = e switch
+                {
+                    SshKeyType.ECDSA => SshKeyGenerateInfo.DefaultEcdsaSshKeyLength,
+                    SshKeyType.ED25519 => SshKeyGenerateInfo.DefaultEd25519SshKeyLength,
+                    SshKeyType.RSA => SshKeyGenerateInfo.DefaultRsaSshKeyLength,
+                    _ => SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Max()
+                };
             })
             .DisposeWith(Disposables);
+        
+        _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvaliableKeySizes)
+            .Select(e => e.Length > 1)
+            .ToProperty(this, vm => vm.CanChangeKeySize, initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Any())
+            .DisposeWith(Disposables);
 
+        this.WhenAnyValue(vm => vm.KeyName)
+                .ObserveOn(AvaloniaScheduler.Instance)
+                .Subscribe(name =>
+                {
+                    if(string.IsNullOrWhiteSpace(name) && DefaultKeyNames.TryGetValue(SelectedKeyType, out var value))
+                        KeyName = value;
+                    
+                }).DisposeWith(Disposables);
+        
         KeyNameValidationHelper =
             this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError)
                 .DisposeWith(Disposables);
-        SelectedKeyType = SshKeyTypes.First();
     }
 
+    public static IDictionary<SshKeyType, string> DefaultKeyNames { get; } = Enum.GetValues<SshKeyType>().Select(type => new KeyValuePair<SshKeyType, string>(type, string.Join("_", KeyPrefix, Enum.GetName(type)!.ToLower()))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
@@ -110,12 +136,15 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
             if (!string.IsNullOrWhiteSpace(Comment))
                 genParm.Comment = Comment;
 
-            await _sshKeyManager.GenerateNewKey(fullNewFilePath, genParm);
+            var genResult = await _sshKeyManager.GenerateNewKey(fullNewFilePath, genParm, true);
+            genResult.ThrowIfFailure();
+            CloseOnBooleanSubmit = true;
         }
         catch (Exception e)
         {
             Logger.LogError(e, "Error creating key");
             await _messageBoxProvider.ShowErrorMessageBoxAsync(e, StringsAndTexts.Error);
+            CloseOnBooleanSubmit = false;
         }
     }
 }
