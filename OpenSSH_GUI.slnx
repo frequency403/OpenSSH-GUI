@@ -1,5 +1,4 @@
 <Solution>
-    <!-- REFACTOR: Change Readme.MD accordingly to new Project functionality; Implement a "Config" from JSON Format and Provider/Applyer via IConfiguration -->
     <Configurations>
         <Platform Name="Any CPU"/>
         <Platform Name="x64"/>

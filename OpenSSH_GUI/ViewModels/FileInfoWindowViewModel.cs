@@ -215,7 +215,6 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     }
 }
 
-// REFACTOR: Finder a better way to do this
 public class FileInfoViewModelInitializer : IInitializerParameters<FileInfoWindowViewModel>
 {
     public required SshKeyFileSource KeySource { get; init; }
