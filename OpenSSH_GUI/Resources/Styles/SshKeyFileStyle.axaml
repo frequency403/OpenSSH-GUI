@@ -149,7 +149,7 @@
                         <Button Padding="5" Background="{DynamicResource NavigationActiveBrush}"
                                 HorizontalAlignment="Stretch"
                                 Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindowCommand}"
-                                CommandParameter="{Binding Fingerprint}">
+                                CommandParameter="{Binding KeyFileInfo.KeyFileSource}">
                             <ToolTip.Tip>
                                 <Label
                                     Content="Open Fileinfo Window" />

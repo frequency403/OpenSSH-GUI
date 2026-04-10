@@ -3,6 +3,7 @@ using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using DryIoc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
@@ -67,13 +68,15 @@ public static class DependencyInjectionExtensions
         }
     }
 
-    // @REFACTOR: Change to IHostBuilder and chain in Program.cs
-    extension(IServiceCollection collection)
+    extension(IHostBuilder builder)
     {
-        internal IServiceCollection RegisterOpenSshGuiServices()
+        internal IHostBuilder RegisterOpenSshGuiServices()
         {
-            collection.AddHostedService<FileSystemAnalyzer>();
-            return collection;
+            builder.ConfigureServices((_, services) =>
+            {
+                services.AddHostedService<FileSystemAnalyzer>();
+            });
+            return builder;
         }
     }
 }

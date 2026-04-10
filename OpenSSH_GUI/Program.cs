@@ -75,7 +75,7 @@ internal sealed class Program
         using var mainCancellationTokenSource = new CancellationTokenSource();
         var host = Host.CreateDefaultBuilder(args)
             .UseServiceProviderFactory(factory)
-            .ConfigureServices(services => services.RegisterOpenSshGuiServices())
+            .RegisterOpenSshGuiServices()
             .UseSerilog(CreateLogger(container), true)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();

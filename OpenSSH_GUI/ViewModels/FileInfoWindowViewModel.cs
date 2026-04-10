@@ -58,16 +58,18 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             .DisposeWith(Disposables);
     }
 
-    private void SetKeyOrDefault(string? fingerprint = null)
+    private void SetKeyOrDefault(SshKeyFileSource? source = null)
     {
-        KeyFile = _keyManager.SshKeys.SingleOrDefault(x => x.Fingerprint == (fingerprint ?? string.Empty)) ??
-                  _resolver.Resolve<SshKeyFile>();
+        KeyFile = (source is not null
+                      ? _keyManager.SshKeys.SingleOrDefault(x => x.KeyFileInfo?.KeyFileSource == source)
+                      : null)
+                  ?? _resolver.Resolve<SshKeyFile>();
     }
 
     public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters,
         CancellationToken cancellationToken = default)
     {
-        SetKeyOrDefault(parameters.KeyFingerprint);
+        SetKeyOrDefault(parameters.KeySource);
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
@@ -92,7 +94,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
 
             (await _keyManager.ChangePasswordOfKeyAsync(KeyFile, si.Value, token: cancellationToken)).ThrowIfFailure();
             _logger.LogInformation("Key file password changed");
-            SetKeyOrDefault(KeyFile.Fingerprint);
+            SetKeyOrDefault(KeyFile.KeyFileInfo?.KeyFileSource);
         }
         catch (Exception e)
         {
@@ -108,7 +110,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         {
             (await _keyManager.ChangeFormatOfKeyAsync(KeyFile, format, cancellationToken)).ThrowIfFailure();
             _logger.LogInformation("Key file format changed");
-            SetKeyOrDefault(KeyFile.Fingerprint);
+            SetKeyOrDefault(KeyFile.KeyFileInfo?.KeyFileSource);
         }
         catch (Exception e)
         {
@@ -154,7 +156,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                     result = await _keyManager.RenameKeyAsync(keyFile, filename, true, cancellationToken);
                 }
                 _logger.LogInformation("Key file renamed");
-                SetKeyOrDefault(keyFile.Fingerprint);
+                SetKeyOrDefault(KeyFile.KeyFileInfo?.KeyFileSource);
             }
             catch (Exception e)
             {
@@ -216,5 +218,5 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
 // REFACTOR: Finder a better way to do this
 public class FileInfoViewModelInitializer : IInitializerParameters<FileInfoWindowViewModel>
 {
-    public required string KeyFingerprint { get; set; }
+    public required SshKeyFileSource KeySource { get; init; }
 }

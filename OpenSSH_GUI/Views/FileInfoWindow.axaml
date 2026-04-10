@@ -112,7 +112,6 @@
                     <TextBlock
                         Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}" />
                 </StackPanel>
-                <!-- BUG: SplitButton is uncolored, except the flyout -->
                 <SplitButton Padding="5"
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Center"
@@ -120,10 +119,22 @@
                              IsEnabled="{Binding KeyFile.FileChangesAllowed}"
                              Command="{Binding ChangeFormatOfKeyFileCommand}"
                              CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
-
                     <SplitButton.Resources>
-                    </SplitButton.Resources>
+                        <!-- ReSharper disable Xaml.RedundantResource -->
+                        <SolidColorBrush x:Key="SplitButtonBackground" Color="{DynamicResource SplitButtonRemoteBackgroundColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver" Color="{DynamicResource SplitButtonRemotePointerOverColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonBackgroundPressed" Color="{DynamicResource SplitButtonRemotePressedColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonBackgroundDisabled" Color="{DynamicResource SplitButtonRemoteDisabledColor}"/>
 
+                        <SolidColorBrush x:Key="SplitButtonDividerBackground" Color="{DynamicResource SplitButtonRemoteDividerColor}"/>
+
+                        <SolidColorBrush x:Key="SplitButtonForeground" Color="{DynamicResource SplitButtonRemoteForegroundColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonForegroundPointerOver" Color="{DynamicResource SplitButtonRemoteForegroundColor}"/>
+                       
+                        <SolidColorBrush x:Key="SplitButtonForegroundPressed" Color="{DynamicResource SplitButtonRemoteForegroundColor}"/>
+                        <!-- ReSharper enable Xaml.RedundantResource -->
+                    </SplitButton.Resources>
+                    
                     <SplitButton.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                     ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">

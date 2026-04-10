@@ -145,9 +145,9 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
     [ReactiveCommand]
-    private Task OpenFileInfoWindowAsync(string path, CancellationToken cancellationToken = default)
+    private Task OpenFileInfoWindowAsync(SshKeyFileSource source, CancellationToken cancellationToken = default)
     {
-        return OpenWindow<FileInfoWindow, FileInfoWindowViewModel, string, FileInfoViewModelInitializer>(path,
+        return OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource, FileInfoViewModelInitializer>(source,
             cancellationToken);
     }
 

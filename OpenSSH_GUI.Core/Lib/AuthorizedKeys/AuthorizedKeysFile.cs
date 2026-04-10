@@ -130,7 +130,7 @@ public class AuthorizedKeysFile : ReactiveObject
         => AuthorizedKeys.Where(e => !e.MarkedForDeletion)
             .Aggregate("",
                 (s, key) => s +=
-                    $"{key.GetFullKeyEntry}{((platform ?? Environment.OSVersion.Platform).GetLineSeparator())}");
+                    $"{key}{((platform ?? Environment.OSVersion.Platform).GetLineSeparator())}");
 
     public static async ValueTask<AuthorizedKeysFile> OpenAsync(string? filePath = null,
         CancellationToken cancellationToken = default)

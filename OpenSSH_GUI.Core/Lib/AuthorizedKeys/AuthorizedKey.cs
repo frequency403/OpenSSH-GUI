@@ -61,7 +61,7 @@ public record AuthorizedKey
     ///     The full key entry string consists of the key type, fingerprint, and comment separated by spaces.
     /// </remarks>
     /// <returns>The full key entry string.</returns>
-    public string GetFullKeyEntry => $"{KeyTypeDeclarationInFile} {Fingerprint} {Comment}"; // REFACTOR: Change to ToString()
+    public override string ToString() => $"{KeyTypeDeclarationInFile} {Fingerprint} {Comment}";
 
     internal static AuthorizedKey Parse(string keyEntry)
     {
