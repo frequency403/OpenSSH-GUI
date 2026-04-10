@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
@@ -36,7 +37,10 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     [Reactive(SetModifier = AccessModifier.Private)]
     private PlatformID _serverOs = PlatformID.Other;
 
-    public ServerConnection(ConnectionCredentials? credentials = null)
+    public static ServerConnection Empty { get; } = new();
+    public static ServerConnection WithCredentials(ConnectionCredentials credentials) => new(credentials);
+    
+    private ServerConnection(ConnectionCredentials? credentials = null)
     {
         ConnectionCredentials = credentials ?? ConnectionCredentials.Empty;
         ClientConnection = new SshClient(ConnectionCredentials.GetConnectionInfo())
@@ -76,7 +80,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     }
 
     /// <inheritdoc />
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         _disposables.Dispose();
     }

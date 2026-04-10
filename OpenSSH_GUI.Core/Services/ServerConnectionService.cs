@@ -8,7 +8,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Services;
 
-public partial class ServerConnectionService : ReactiveObject, IDisposable
+public sealed partial class ServerConnectionService : ReactiveObject, IDisposable
 {
     private readonly CompositeDisposable _disposables = new();
 
@@ -34,31 +34,22 @@ public partial class ServerConnectionService : ReactiveObject, IDisposable
     ///     raises an internal change notification.
     /// </remarks>
     [Reactive(SetModifier = AccessModifier.Private)]
-    private ServerConnection _serverConnection = new();
+    private ServerConnection _serverConnection = ServerConnection.Empty;
 
     public ServerConnectionService(ILogger<ServerConnectionService> logger)
     {
         _logger = logger;
 
         _isConnectedHelper = this.WhenAnyValue(vm => vm.ServerConnection)
-            .Do(e =>
-            {
-                _logger.LogInformation("ServerConnection: {ServerConnection}", e.ConnectionString);
-                _logger.LogInformation("ServerConnection.IsConnected {ServerConnection.IsConnected}", e.IsConnected);
-            })
             .Select(e => e.WhenAnyValue(sc => sc.IsConnected))
             .Switch()
             .ToProperty(this, obj => obj.IsConnected);
-
-        this.WhenAnyValue(vm => vm.IsConnected)
-            .Subscribe(d => _logger.LogInformation("IsConnected: {IsConnected}", d))
-            .DisposeWith(_disposables);
     }
 
     public void Dispose()
     {
         _disposables.Dispose();
-        ((IDisposable)_serverConnection)?.Dispose();
+        _serverConnection.Dispose();
     }
 
     /// <summary>
@@ -81,7 +72,7 @@ public partial class ServerConnectionService : ReactiveObject, IDisposable
     {
         try
         {
-            ServerConnection = new ServerConnection(connectionCredentials);
+            ServerConnection = ServerConnection.WithCredentials(connectionCredentials);
             return await ServerConnection.ConnectToServerAsync(token);
         }
         catch (Exception e)
@@ -109,8 +100,9 @@ public partial class ServerConnectionService : ReactiveObject, IDisposable
         if (!IsConnected)
             return throwOnNoConnection ? throw new InvalidOperationException("No connection to disconnect from") : true;
         var disconnectResult = await ServerConnection.DisconnectFromServerAsync(token);
+        ServerConnection.Dispose();
         if (disconnectResult)
-            ServerConnection = new ServerConnection();
+            ServerConnection = ServerConnection.Empty;
         return disconnectResult;
     }
 }

@@ -12,6 +12,7 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
+using Renci.SshNet;
 using SkiaSharp;
 using Svg.Skia;
 
@@ -45,7 +46,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         try
         {
             base.OnFrameworkInitializationCompleted();
-
+            SshNetLoggingConfiguration.InitializeLogging(resolver.Resolve<ILoggerFactory>());
             try
             {
                 foreach (var variant in new[] { ThemeVariant.Light, ThemeVariant.Dark })
