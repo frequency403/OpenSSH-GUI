@@ -1,0 +1,25 @@
+<ToggleButton xmlns="https://github.com/avaloniaui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+              xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+              mc:Ignorable="d"
+              x:Name="Root"
+              x:DataType="controls:Sorter"
+              x:Class="OpenSSH_GUI.Resources.Controls.Sorter"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Spacing="3"
+                Margin="5">
+        <materialIcons:MaterialIcon Kind="{Binding #Root.HeaderIcon}"
+                                    Margin="0"
+                                    Padding="0" />
+        <Label Content="{Binding #Root.Header}" />
+        <materialIcons:MaterialIcon Kind="{Binding #Root.SortDirectionIcon}"
+                                    Margin="5 0"
+                                    Padding="0" />
+    </StackPanel>
+</ToggleButton>
