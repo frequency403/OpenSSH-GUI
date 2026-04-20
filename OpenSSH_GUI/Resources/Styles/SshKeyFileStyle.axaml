@@ -43,29 +43,65 @@
             </StackPanel>
         </StackPanel>
     </DataTemplate>
-    <DataTemplate x:Key="SshKeyFullStyle" DataType="keys:SshKeyFile">
-        <StackPanel IsEnabled="{Binding !Changing}">
-            <Border CornerRadius="25" Padding="5" Classes="MainDisplay" ToolTip.ShowDelay="0"
-                    ToolTip.ShowOnDisabled="True">
-                <Border.Styles>
-                    <Style Selector="Border.MainDisplay:pointerover">
-                        <Setter Property="RenderTransform" Value="scale(1.001)" />
-                        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
-                    </Style>
-                </Border.Styles>
-                <ToolTip.Tip>
-                    <StackPanel>
-                        <StackPanel IsVisible="{Binding !Password.IsValid}">
-                            <Label IsVisible="{Binding !NeedsPassword}" Content="Key is not password protected" />
-                            <Label IsVisible="{Binding NeedsPassword}"
-                                   Content="Key is password proteced and cannot be uses until a password is provided" />
-                        </StackPanel>
-                        <Label IsVisible="{Binding Password.IsValid}"
-                               Content="Key is password protected and opened with correct password" />
-                    </StackPanel>
-                </ToolTip.Tip>
-                <Grid ColumnDefinitions="* 3* * *">
-                    <Grid Grid.Column="0" ColumnDefinitions="* 3*" VerticalAlignment="Center"
+    <DataTemplate x:Key="SshKeyExportButtons" DataType="keys:SshKeyFile">
+        <UniformGrid Rows="1" Columns="0" ColumnSpacing="10" HorizontalAlignment="Center">
+                        <Button Padding="5" Background="{DynamicResource RevokedBrush}"
+                                HorizontalAlignment="Stretch" IsEnabled="{Binding !NeedsPassword}"
+                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPublicKeyExportWindowCommand}"
+                                CommandParameter="{Binding .}">
+                            <ToolTip.Tip>
+                                <Label
+                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
+                            </ToolTip.Tip>
+                            <StackPanel Orientation="Horizontal">
+                                <avalonia:MaterialIcon Kind="Publish" />
+                                <avalonia:MaterialIcon Kind="KeyOutline" />
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="5" Background="{DynamicResource ExpiredBrush}"
+                                HorizontalAlignment="Stretch"  IsEnabled="{Binding !NeedsPassword}"
+                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPrivateKeyExportWindowCommand}"
+                                CommandParameter="{Binding .}">
+                            <ToolTip.Tip>
+                                <Label
+                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
+                            </ToolTip.Tip>
+                            <StackPanel Orientation="Horizontal">
+                                <avalonia:MaterialIcon Kind="Publish" />
+                                <avalonia:MaterialIcon Kind="ShieldKeyOutline" />
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="5" Background="{DynamicResource NavigationActiveBrush}"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindowCommand}"
+                                CommandParameter="{Binding KeyFileInfo.KeyFileSource}">
+                            <ToolTip.Tip>
+                                <Label
+                                    Content="Open Fileinfo Window" />
+                            </ToolTip.Tip>
+                            <StackPanel>
+                                <avalonia:MaterialIcon Kind="Settings" />
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+    </DataTemplate>
+    <DataTemplate x:Key="SshKeyFingerprintStyle" DataType="keys:SshKeyFile">
+        <Panel VerticalAlignment="Center" IsEnabled="{Binding !Changing}">
+            <TextBlock Padding="5" Text="{Binding Fingerprint}" Margin="5"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       IsVisible="{Binding !NeedsPassword}" />
+            <Button Padding="5" HorizontalAlignment="Stretch"
+                    Background="{DynamicResource AccentHoverBrush}"
+                    Foreground="{DynamicResource AccentForegroundBrush}"
+                    HorizontalContentAlignment="Center"
+                    IsVisible="{Binding NeedsPassword}"
+                    Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePasswordCommand}"
+                    CommandParameter="{Binding .}"
+                    Content="Provide Password" />
+        </Panel>
+    </DataTemplate>
+    <DataTemplate x:Key="SshKeyTypeStyle" DataType="keys:SshKeyFile">
+        <Grid ColumnDefinitions="* 3*" VerticalAlignment="Center"
                           HorizontalAlignment="Stretch">
                         <Border Grid.Column="0" HorizontalAlignment="Left" Padding="5" BorderThickness="1"
                                 BorderBrush="Transparent" CornerRadius="25" Classes="WithContextMenu">
@@ -107,61 +143,5 @@
                             <TextBlock Padding="5" Text="{Binding KeyType}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </Grid>
-                    <TextBlock Padding="5" Grid.Column="1" Text="{Binding Fingerprint}" Margin="5"
-                               HorizontalAlignment="Center" IsVisible="{Binding !NeedsPassword}" />
-                    <Button Padding="5" Grid.Column="1" HorizontalAlignment="Stretch"
-                            Background="{DynamicResource AccentHoverBrush}"
-                            Foreground="{DynamicResource AccentForegroundBrush}"
-                            HorizontalContentAlignment="Center" IsVisible="{Binding NeedsPassword}"
-                            Command="{Binding Path=$parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePasswordCommand}"
-                            CommandParameter="{Binding .}">
-                        Provide Password
-                    </Button>
-                    <TextBlock Padding="5" Grid.Column="2" Text="{Binding Comment}" Margin="5"
-                               HorizontalAlignment="Center" IsEnabled="{Binding !NeedsPassword}" />
-                    <UniformGrid Grid.Column="3" Rows="1" Columns="0" ColumnSpacing="10" HorizontalAlignment="Center">
-                        <Button Padding="5" Background="{DynamicResource RevokedBrush}"
-                                HorizontalAlignment="Stretch" IsEnabled="{Binding !NeedsPassword}"
-                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPublicKeyExportWindowCommand}"
-                                CommandParameter="{Binding .}">
-                            <ToolTip.Tip>
-                                <Label
-                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPublicKeyToolTipText}" />
-                            </ToolTip.Tip>
-                            <StackPanel Orientation="Horizontal">
-                                <avalonia:MaterialIcon Kind="Publish" />
-                                <avalonia:MaterialIcon Kind="KeyOutline" />
-                            </StackPanel>
-                        </Button>
-                        <Button Padding="5" Background="{DynamicResource ExpiredBrush}"
-                                HorizontalAlignment="Stretch"  IsEnabled="{Binding !NeedsPassword}"
-                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ShowPrivateKeyExportWindowCommand}"
-                                CommandParameter="{Binding .}">
-                            <ToolTip.Tip>
-                                <Label
-                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsExportPrivateKeyToolTipText}" />
-                            </ToolTip.Tip>
-                            <StackPanel Orientation="Horizontal">
-                                <avalonia:MaterialIcon Kind="Publish" />
-                                <avalonia:MaterialIcon Kind="ShieldKeyOutline" />
-                            </StackPanel>
-                        </Button>
-                        <Button Padding="5" Background="{DynamicResource NavigationActiveBrush}"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).OpenFileInfoWindowCommand}"
-                                CommandParameter="{Binding KeyFileInfo.KeyFileSource}">
-                            <ToolTip.Tip>
-                                <Label
-                                    Content="Open Fileinfo Window" />
-                            </ToolTip.Tip>
-                            <StackPanel>
-                                <avalonia:MaterialIcon Kind="Settings" />
-                            </StackPanel>
-                        </Button>
-                    </UniformGrid>
-                </Grid>
-            </Border>
-            <Separator Padding="5" />
-        </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

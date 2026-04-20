@@ -7,7 +7,7 @@
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+        xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -15,31 +15,47 @@
         Height="450"
         Title="{Binding WindowTitle}">
     <Window.Styles>
-        <Style Selector="ToggleButton.Sorter:pressed">
-            <Setter Property="RenderTransform" Value="{x:Null}" />
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="RowBackground" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
-        <Style Selector="ToggleButton.Sorter">
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <Border Background="Transparent"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="0 0 1 1"
-                            CornerRadius="0">
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                    </Border>
-                </ControlTemplate>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontSize" Value="{DynamicResource SystemFontSize}" />
+            <Setter Property="Padding" Value="8 6" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource BorderBrush}" />
+        </Style>
+        <Style Selector="DataGridColumnHeader:pointerover /template/ Grid#PART_ColumnHeaderRoot">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="DataGridRow">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="MinHeight" Value="60" />
+            <Setter Property="ToolTip.ShowDelay" Value="0" />
+            <Setter Property="ToolTip.ShowOnDisabled" Value="True" />
+            <Setter Property="ToolTip.Tip">
+                <Template>
+                    <StackPanel x:DataType="keys:SshKeyFile">
+                        <StackPanel IsVisible="{Binding !Password.IsValid}">
+                            <Label IsVisible="{Binding !NeedsPassword}"
+                                   Content="Key is not password protected" />
+                            <Label IsVisible="{Binding NeedsPassword}"
+                                   Content="Key is password protected and cannot be used until a password is provided" />
+                        </StackPanel>
+                        <Label IsVisible="{Binding Password.IsValid}"
+                               Content="Key is password protected and opened with correct password" />
+                    </StackPanel>
+                </Template>
             </Setter>
-            <Setter Property="IsThreeState" Value="True" />
-            <Setter Property="ClickMode" Value="Release" />
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="Margin" Value="0 0" />
-            <Setter Property="CornerRadius" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Padding" Value="0 10" />
+        </Style>
+        <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="Fill" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="Padding" Value="8 6" />
         </Style>
     </Window.Styles>
 
@@ -47,59 +63,85 @@
 
         <!-- Key List -->
 
-        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" ColumnDefinitions="* 3* * *"
-              RowDefinitions="* 10*">
+        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2"
+                  IsReadOnly="True"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="True"
+                  AutoGenerateColumns="False"
+                  GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column"
+                  ItemsSource="{Binding SshKeyManager.SshKeys}">
+            <DataGrid.Columns>
 
-            <!-- Heading  -->
-            <!-- <ToggleButton Grid.Row="0" Grid.Column="0" Classes="Sorter" IsChecked="{Binding KeyTypeSort}"> -->
-            <!--     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5"> -->
-            <!--         <materialIcons:MaterialIcon Kind="KeyVariant" Margin="0" Padding="0" /> -->
-            <!--         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" /> -->
-            <!--         <materialIcons:MaterialIcon Kind="{Binding KeyTypeSortDirectionIcon}" Margin="5 0" Padding="0" /> -->
-            <!--     </StackPanel> -->
-            <!-- </ToggleButton> -->
-            <!-- SortDirection="{Binding KeyTypeSort}" -->
-            <controls:Sorter Grid.Row="0" Grid.Column="0" 
-                             
-                             Header="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}"
-                             HeaderIcon="KeyVariant"
-                             />  
+                <!-- Key Type column -->
+                <DataGridTemplateColumn Width="*"
+                                        CanUserSort="True"
+                                        CanUserResize="False"
+                                        CanUserReorder="False"
+                                        SortMemberPath="KeyType"
+                                        CellTemplate="{StaticResource SshKeyTypeStyle}">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                            <materialIcons:MaterialIcon Kind="KeyVariant" />
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingKeyTypeText}" />
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
 
-            <ToggleButton Grid.Row="0" Grid.Column="1" Classes="Sorter" IsChecked="{Binding FingerPrintSort}">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
-                    <materialIcons:MaterialIcon Kind="Fingerprint" Margin="0" Padding="0" />
-                    <Label
-                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
-                    <materialIcons:MaterialIcon Kind="{Binding FingerPrintSortDirectionIcon}" Margin="5 0" Padding="0" />
-                </StackPanel>
-            </ToggleButton>
+                </DataGridTemplateColumn>
 
-            <ToggleButton Grid.Row="0" Grid.Column="2" Classes="Sorter" IsChecked="{Binding CommentSort}">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
-                    <materialIcons:MaterialIcon Kind="Comment" Margin="0" Padding="0" />
-                    <TextPresenter
-                        Text="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingCommentText}" />
-                    <materialIcons:MaterialIcon Kind="{Binding CommentSortDirectionIcon}" Margin="5 0" Padding="0" />
-                </StackPanel>
-            </ToggleButton>
+                <!-- Fingerprint column-->
+                <DataGridTemplateColumn Width="3*"
+                                        CanUserSort="True"
+                                        CanUserResize="False"
+                                        CanUserReorder="False"
+                                        SortMemberPath="Fingerprint"
+                                        CellTemplate="{StaticResource SshKeyFingerprintStyle}">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                            <materialIcons:MaterialIcon Kind="Fingerprint" />
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingFingerprintText}" />
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                </DataGridTemplateColumn>
 
-            <ToggleButton Grid.Row="0" Grid.Column="3" Classes="Sorter" IsEnabled="False">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
-                    <materialIcons:MaterialIcon Kind="FileExportOutline" />
-                    <Label
-                        Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}" />
-                </StackPanel>
-            </ToggleButton>
+                <!-- Comment column -->
+                <DataGridTemplateColumn Width="Auto"
+                                        CanUserSort="True"
+                                        CanUserResize="False"
+                                        CanUserReorder="False"
+                                        SortMemberPath="Comment">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                            <materialIcons:MaterialIcon Kind="Comment" />
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingCommentText}" />
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="keys:SshKeyFile">
+                            <TextBlock Padding="5" Text="{Binding Comment}" Margin="5"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       IsEnabled="{Binding !NeedsPassword}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-            <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" VerticalAlignment="Top">
-                <ItemsControl ItemsSource="{Binding SshKeyManager.SshKeys}"
-                              Margin="5"
-                              VerticalAlignment="Stretch"
-                              Name="TheItemsGrid"
-                              ItemTemplate="{DynamicResource SshKeyFullStyle}" />
+                <!-- Export / Actions column -->
+                <DataGridTemplateColumn Width="Auto" CanUserSort="False" CanUserResize="False"
+                                        CanUserReorder="False" CellTemplate="{StaticResource SshKeyExportButtons}">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="3" Margin="5">
+                            <materialIcons:MaterialIcon Kind="FileExportOutline" />
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridColumnHeadingExportDeleteText}" />
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
 
-            </ScrollViewer>
-        </Grid>
 
         <!-- Bottom Controls -->
 
@@ -166,7 +208,7 @@
 
                 <!-- Connection -->
 
-                <Border Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                <Border HorizontalAlignment="Stretch" VerticalAlignment="Center"
                         Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7"
                         CornerRadius="5">
                     <ToolTip.Tip>
@@ -225,9 +267,10 @@
 
                 <!-- Item Count -->
 
-                <Border Grid.Column="1" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
+                <Border Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
                         Padding="5" HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" CornerRadius="5" Child="{Binding ItemsCountIcon}">
+                        VerticalAlignment="Stretch" CornerRadius="5">
+                    <materialIcons:MaterialIcon Kind="{Binding ItemsCountIcon}"/>
                     <ToolTip.Tip>
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock

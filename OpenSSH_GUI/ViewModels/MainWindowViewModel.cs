@@ -40,26 +40,9 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private readonly ILauncher _launcher;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _serviceProvider;
-    [Reactive] private bool? _commentSort; // REFACTOR: Implement a UserControl for all Sortings
-
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private MaterialIconKind _commentSortDirectionIcon = MaterialIconKind.CircleOutline;
-
-    [Reactive] private bool? _fingerPrintSort;
-
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private MaterialIconKind _fingerPrintSortDirectionIcon = MaterialIconKind.CircleOutline;
-
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private MaterialIcon _itemsCountIcon = new() { Kind = MaterialIconKind.Infinity };
-
-    [Reactive] private bool? _keyTypeSort;
-
-    [Reactive(SetModifier = AccessModifier.Private)]
-    private MaterialIconKind _keyTypeSortDirectionIcon = MaterialIconKind.CircleOutline;
-
     [Reactive] private string _version;
-
+    [ObservableAsProperty]
+    private MaterialIconKind _itemsCountIcon = MaterialIconKind.Infinity;
     [Reactive(SetModifier = AccessModifier.Private)]
     private string _windowTitle = string.Empty;
 
@@ -82,56 +65,16 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
         WindowTitle = string.Join("-", Program.AppName, Version);
 
-        Observable
+        _itemsCountIconHelper = Observable
             .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
                 h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged += h,
                 h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged -= h)
             .Select(_ => SshKeyManager.SshKeys.Count)
             .StartWith(SshKeyManager.SshKeys.Count)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(count => ItemsCountIcon = GetMaterialNumericIcon(count))
-            .DisposeWith(Disposables);
-
-
-        this.WhenAnyValue(vm => vm.KeyTypeSort)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(sort =>
-            {
-                KeyTypeSortDirectionIcon = EvaluateSortIconKind(sort);
-                SshKeyManager.ChangeOrder(sort switch
-                {
-                    null => key => key.OrderBy(e => e.FileName),
-                    true => key => key.OrderBy(e => e.KeyType),
-                    false => key => key.OrderByDescending(e => e.KeyType)
-                });
-            })
-            .DisposeWith(Disposables);
-
-        this.WhenAnyValue(vm => vm.CommentSort)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(sort =>
-            {
-                CommentSortDirectionIcon = EvaluateSortIconKind(sort);
-                SshKeyManager.ChangeOrder(sort switch
-                {
-                    null => key => key.OrderBy(e => e.FileName),
-                    true => key => key.OrderBy(e => e.Comment),
-                    false => key => key.OrderByDescending(e => e.Comment)
-                });
-            }).DisposeWith(Disposables);
-
-        this.WhenAnyValue(vm => vm.FingerPrintSort)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(sort =>
-            {
-                FingerPrintSortDirectionIcon = EvaluateSortIconKind(sort);
-                SshKeyManager.ChangeOrder(sort switch
-                {
-                    null => key => key.OrderBy(e => e.FileName),
-                    true => key => key.OrderBy(e => e.Fingerprint),
-                    false => key => key.OrderByDescending(e => e.Fingerprint)
-                });
-            })
+            .Select(GetMaterialNumericIcon)
+            .Do(icon => logger.LogDebug($"Updated items count icon to {icon}"))
+            .ToProperty(this, vm => vm.ItemsCountIcon)
             .DisposeWith(Disposables);
     }
 
@@ -384,37 +327,20 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));
     }
 
-    private static MaterialIcon GetMaterialNumericIcon(int count)
-    {
-        return new MaterialIcon
+    private static MaterialIconKind GetMaterialNumericIcon(int count)
+        => count switch
         {
-            Kind = count switch
-            {
-                0 => MaterialIconKind.NumericZero,
-                1 => MaterialIconKind.NumericOne,
-                2 => MaterialIconKind.NumericTwo,
-                3 => MaterialIconKind.NumericThree,
-                4 => MaterialIconKind.NumericFour,
-                5 => MaterialIconKind.NumericFive,
-                6 => MaterialIconKind.NumericSix,
-                7 => MaterialIconKind.NumericSeven,
-                8 => MaterialIconKind.NumericEight,
-                9 => MaterialIconKind.NumericNine,
-                10 => MaterialIconKind.Numeric10,
-                _ => MaterialIconKind.Infinity
-            },
-            Width = 20,
-            Height = 20
+            0 => MaterialIconKind.NumericZero,
+            1 => MaterialIconKind.NumericOne,
+            2 => MaterialIconKind.NumericTwo,
+            3 => MaterialIconKind.NumericThree,
+            4 => MaterialIconKind.NumericFour,
+            5 => MaterialIconKind.NumericFive,
+            6 => MaterialIconKind.NumericSix,
+            7 => MaterialIconKind.NumericSeven,
+            8 => MaterialIconKind.NumericEight,
+            9 => MaterialIconKind.NumericNine,
+            10 => MaterialIconKind.Numeric10,
+            _ => MaterialIconKind.Infinity
         };
-    }
-
-    private static MaterialIconKind EvaluateSortIconKind(bool? value)
-    {
-        return value switch
-        {
-            null => MaterialIconKind.CircleOutline,
-            true => MaterialIconKind.ChevronDownCircleOutline,
-            false => MaterialIconKind.ChevronUpCircleOutline
-        };
-    }
 }

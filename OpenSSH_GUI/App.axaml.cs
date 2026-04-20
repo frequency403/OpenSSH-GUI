@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DryIoc;
@@ -103,6 +104,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
             {
                 if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
                 desktop.MainWindow = await resolver.ResolveViewAsync<MainWindow, MainWindowViewModel>();
+                Current?.Resources["SystemFontSize"] = double.Parse(Current?.Resources["BaseFontSize"]?.ToString() ?? string.Empty) * desktop.MainWindow.RenderScaling;
                 logger.LogInformation("MainWindow created");
                 desktop.MainWindow.Opened += OnMainWindowOpened;
             }
@@ -115,6 +117,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         {
             logger.LogError(e, "Unhandled error during application initialization");
         }
+        
     }
 
     /// <summary>
