@@ -8,6 +8,7 @@
         xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:keys="clr-namespace:OpenSSH_GUI.Core.Lib.Keys;assembly=OpenSSH_GUI.Core"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -22,6 +23,7 @@
         </Style>
         <Style Selector="DataGridColumnHeader">
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimaryBrush}"/>
             <Setter Property="FontSize" Value="{DynamicResource SystemFontSize}" />
             <Setter Property="Padding" Value="8 6" />
             <Setter Property="MinHeight" Value="40" />
@@ -208,9 +210,9 @@
 
                 <!-- Connection -->
 
-                <Border HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                        Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5" Padding="7"
-                        CornerRadius="5">
+                <controls:FlyoutButton HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10 5"
+                                       Padding="7" Classes="Clickable"
+                                       CornerRadius="5">
                     <ToolTip.Tip>
                         <StackPanel>
                             <Grid ColumnDefinitions="* 2*" RowDefinitions="* * *"
@@ -235,8 +237,8 @@
 
 
                     </ToolTip.Tip>
-                    <Border.ContextMenu>
-                        <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                    <controls:FlyoutButton.Flyout>
+                        <MenuFlyout PlacementAnchor="Top" Placement="Top">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowConnectMenuConnect}"
                                       IsEnabled="{Binding !ServerConnectionService.IsConnected}"
                                       Command="{Binding OpenConnectToServerWindowCommand}">
@@ -251,8 +253,8 @@
                                     <materialIcons:MaterialIconExt Kind="LanDisconnect" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                        </ContextMenu>
-                    </Border.ContextMenu>
+                        </MenuFlyout>
+                    </controls:FlyoutButton.Flyout>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     IsVisible="{Binding ServerConnectionService.IsConnected}">
@@ -263,13 +265,14 @@
                             <materialIcons:MaterialIcon Kind="SignalOff" Foreground="{DynamicResource RevokedBrush}" />
                         </StackPanel>
                     </StackPanel>
-                </Border>
+                </controls:FlyoutButton>
+
 
                 <!-- Item Count -->
 
-                <Border Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
-                        Padding="5" HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" CornerRadius="5">
+                <controls:FlyoutButton Margin="10 5"
+                                       Padding="5" HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch" CornerRadius="5">
                     <materialIcons:MaterialIcon Kind="{Binding ItemsCountIcon}"/>
                     <ToolTip.Tip>
                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -280,18 +283,17 @@
                                 Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
                         </StackPanel>
                     </ToolTip.Tip>
-                </Border>
-
+                </controls:FlyoutButton>
                 <!-- Settings -->
 
-                <Border Grid.Column="2" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
-                        Padding="7" HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" CornerRadius="5">
+                <controls:FlyoutButton Margin="10 5" Classes="Clickable"
+                                       Padding="7" HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickOptions}" />
                     </ToolTip.Tip>
-                    <Border.ContextMenu>
-                        <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                    <controls:FlyoutButton.Flyout>
+                        <MenuFlyout PlacementAnchor="Top" Placement="Top">
                             <MenuItem
                                 Header="{x:Static openSshGui:StringsAndTexts.MainWindowSettingsMenuReloadKeysFromDisk}"
                                 Command="{Binding ReloadKeysCommand}">
@@ -342,21 +344,20 @@
                                     <materialIcons:MaterialIcon Kind="LocalOffer" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                        </ContextMenu>
-                    </Border.ContextMenu>
+                        </MenuFlyout>
+                    </controls:FlyoutButton.Flyout>
                     <materialIcons:MaterialIcon Kind="CogOutline" />
-                </Border>
-
+                </controls:FlyoutButton>
                 <!-- Help -->
 
-                <Border Grid.Column="3" Background="{DynamicResource ForegroundSecondaryBrush}" Margin="10 5"
-                        Padding="7" HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch" CornerRadius="5">
+                <controls:FlyoutButton Margin="10 5" Classes="Clickable"
+                                       Padding="7" HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowRightClickHelp}" />
                     </ToolTip.Tip>
-                    <Border.ContextMenu>
-                        <ContextMenu PlacementAnchor="Top" Placement="Top" WindowManagerAddShadowHint="True">
+                    <controls:FlyoutButton.Flyout>
+                        <MenuFlyout PlacementAnchor="Top" Placement="Top">
                             <MenuItem Header="{x:Static openSshGui:StringsAndTexts.MainWindowHelpMenuWebsite}"
                                       Command="{Binding OpenBrowserCommand}">
                                 <MenuItem.CommandParameter>
@@ -385,10 +386,10 @@
                                     <materialIcons:MaterialIcon Kind="Help" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                        </ContextMenu>
-                    </Border.ContextMenu>
+                        </MenuFlyout>
+                    </controls:FlyoutButton.Flyout>
                     <materialIcons:MaterialIcon Kind="HelpCircleOutline" />
-                </Border>
+                </controls:FlyoutButton>
             </UniformGrid>
         </Border>
     </Grid>

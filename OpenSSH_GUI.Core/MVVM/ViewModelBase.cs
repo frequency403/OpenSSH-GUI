@@ -1,5 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ReactiveUI;
@@ -176,6 +178,13 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     protected virtual Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
+    }
+
+    [ReactiveCommand]
+    private void OpenFlyout(object? parameter)
+    {
+        if(parameter is Control control)
+            FlyoutBase.ShowAttachedFlyout(control);
     }
 }
 

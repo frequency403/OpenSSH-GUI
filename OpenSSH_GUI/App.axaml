@@ -22,13 +22,14 @@
                     </ResourceDictionary.MergedDictionaries>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
-            <x:Double x:Key="SystemFontSize">16</x:Double>
-            <x:Double x:Key="BaseFontSize">16</x:Double>
+            <x:Double x:Key="SystemFontSize">14</x:Double>
+            <x:Double x:Key="BaseFontSize">14</x:Double>
         </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="Resources/Styles/FlyoutButtonStyles.axaml"/>
         <Style Selector="Control">
             <Setter Property="ToolTip.ShowDelay" Value="0" />
         </Style>

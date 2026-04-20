@@ -1,0 +1,17 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls">
+    <Style Selector="controls|FlyoutButton.Clickable:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
+    </Style>
+
+    <Style Selector="controls|FlyoutButton.Clickable:pressed">
+        <Setter Property="Background" Value="{DynamicResource BorderSubtleBrush}" />
+    </Style>
+    
+    <Style Selector="controls|FlyoutButton">
+        <Setter Property="Background" Value="{DynamicResource ForegroundSecondaryBrush}" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+</Styles>
