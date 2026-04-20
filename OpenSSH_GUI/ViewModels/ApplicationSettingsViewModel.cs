@@ -33,6 +33,8 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     [Reactive] private ThemeVariant _currentThemeVariant;
 
     [Reactive] private int _daysToDeleteSelected;
+    
+    [Reactive] private double fontSize = 12;
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMessageBoxProvider messageBoxProvider,
@@ -80,6 +82,18 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
             .DistinctUntilChanged()
             .Subscribe(OnNextTheme)
             .DisposeWith(Disposables);
+        
+        this.WhenAnyValue(vm => vm.FontSize)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .DistinctUntilChanged()
+            .Subscribe(OnNextFontSize)
+            .DisposeWith(Disposables);
+    }
+
+    [ReactiveCommand]
+    private void OnNextFontSize(double obj)
+    {
+        _application.Resources["SystemFontSize"] = obj;
     }
 
     public static LogEventLevel[] AvailableLogLevels { get; } = Enum.GetValues<LogEventLevel>();

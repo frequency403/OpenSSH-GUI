@@ -29,7 +29,8 @@
                           SelectedItem="{Binding CurrentThemeVariant}" />
             </controls:HeaderedItem>
         </UniformGrid>
-        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}">
+        <controls:HeaderedItem
+            Header="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}">
             <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
                 <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch"
                           SelectedItem="{Binding DaysToDeleteSelected}"
@@ -46,13 +47,32 @@
                 </Button>
             </StackPanel>
         </controls:HeaderedItem>
-        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}">
-            <Button Command="{Binding ClearWholeCacheCommand}">
-                <StackPanel Orientation="Horizontal" Spacing="5">
-                    <avalonia:MaterialIcon Kind="ReportProblem" />
-                    <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
-                </StackPanel>
-            </Button>
-        </controls:HeaderedItem>
+        <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
+            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}">
+                <Button Command="{Binding ClearWholeCacheCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <avalonia:MaterialIcon Kind="ReportProblem" />
+                        <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
+                    </StackPanel>
+                </Button>
+            </controls:HeaderedItem>
+            <controls:HeaderedItem Header="Font Size">
+                <UniformGrid Columns="1" Rows="2">
+                    <StackPanel>
+                        <TextBlock Text="{Binding #Slider.Value}" HorizontalAlignment="Center" />
+                        <Slider x:Name="Slider" Minimum="8" Maximum="48" IsSnapToTickEnabled="True" TickFrequency="2" Value="{Binding FontSize}" />
+                    </StackPanel>
+                    <Button Command="{Binding OnNextFontSizeCommand}" CommandParameter="{StaticResource BaseFontSize}">
+                        <StackPanel Orientation="Horizontal" Spacing="2">
+                            <avalonia:MaterialIcon Kind="Reload" />
+                            <TextBlock Text="Reset to default"/>
+                        </StackPanel>
+                    </Button>
+                </UniformGrid>
+
+            </controls:HeaderedItem>
+        </UniformGrid>
+
+
     </UniformGrid>
 </Window>
