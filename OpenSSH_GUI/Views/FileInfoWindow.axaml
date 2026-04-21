@@ -135,6 +135,7 @@
                         <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                     ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">
                             <MenuFlyout.ItemContainerTheme>
+                                <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
                                 <ControlTheme TargetType="MenuItem"
                                               BasedOn="{StaticResource {x:Type MenuItem}}"
                                               x:DataType="keygen:SshKeyFormat">

@@ -81,7 +81,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
 
         this
             .WhenAnyValue<ConnectToServerViewModel, SshHostSettings?>(viewModel => viewModel.SelectedHostSettings)
-            .Subscribe(async settings =>
+            .SelectMany(async settings =>
             {
                 try
                 {
@@ -92,7 +92,10 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
                 {
                     logger.LogError(e, "Error testing connection");
                 }
-            }).DisposeWith(Disposables);
+                return System.Reactive.Unit.Default;
+            })
+            .Subscribe()
+            .DisposeWith(Disposables);
 
         this
             .WhenAnyValue(viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys,
@@ -133,7 +136,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         return base.InitializeAsync(cancellationToken);
     }
 
-    private async Task TestConnectionAsyncBase(CancellationToken cancellationToken = default)
+    private void TestConnectionAsyncBase()
     {
         if (ConnectionCredentials is not null)
         {
@@ -153,7 +156,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         TryingToConnect = false;
     }
 
-    private async Task TestConnectionAsync(SshHostSettings? hostSettings = null,
+    private async ValueTask TestConnectionAsync(SshHostSettings? hostSettings = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(hostSettings);
@@ -181,7 +184,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
                 .ToHashSet(StringComparer.Ordinal);
 
             var keys = SshKeyManager.SshKeys
-                .Where(e => e.KeyFileInfo?.KeyFileSource?.AbsolutePath is { } path
+                .Where(e => e.KeyFileInfo?.KeyFileSource.AbsolutePath is { } path
                             && resolvedPaths.Contains(path));
 
             var connectionCredentials = new MultiKeyConnectionCredentials(
@@ -197,11 +200,11 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
             StatusButtonToolTip = exception.Message;
         }
 
-        await TestConnectionAsyncBase(cancellationToken);
+        TestConnectionAsyncBase();
     }
 
     [ReactiveCommand]
-    private async Task TestConnectionAsync(CancellationToken cancellationToken = default)
+    private async ValueTask TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
@@ -211,7 +214,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
                 (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
                 throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
             TryingToConnect = true;
-            ConnectionCredentials? connectionCredentials = null;
+            ConnectionCredentials? connectionCredentials;
             if (AuthWithPublicKey)
                 connectionCredentials = new KeyConnectionCredentials(HostName, Username, SelectedPublicKey);
             else if (AuthWithAllKeys)
@@ -226,7 +229,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
             StatusButtonToolTip = exception.Message;
         }
 
-        await TestConnectionAsyncBase(cancellationToken);
+        TestConnectionAsyncBase();
     }
 
     protected override async Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)

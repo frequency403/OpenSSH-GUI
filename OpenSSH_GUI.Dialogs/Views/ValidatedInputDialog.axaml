@@ -11,7 +11,7 @@
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="False"
         Opened="OnOpened">
-
+    <!-- ReSharper disable InconsistentNaming -->
     <Border Padding="24 20 24 16">
         <StackPanel Spacing="12">
 
@@ -31,7 +31,7 @@
             <!-- Text input -->
             <TextBox x:Name="PART_Input"
                      FontSize="14"
-                     Watermark="Enter value…"
+                     PlaceholderText="Enter value…"
                      KeyDown="OnInputKeyDown" />
 
             <!-- Validation error hint -->

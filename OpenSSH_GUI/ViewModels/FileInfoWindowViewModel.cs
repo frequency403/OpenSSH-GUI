@@ -5,7 +5,6 @@ using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;

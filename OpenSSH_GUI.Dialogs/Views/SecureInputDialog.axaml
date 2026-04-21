@@ -11,7 +11,7 @@
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="False"
         Opened="OnOpened">
-
+    <!-- ReSharper disable InconsistentNaming -->
     <Border Padding="24 20 24 16">
         <StackPanel Spacing="12">
 
@@ -35,7 +35,7 @@
             <TextBox x:Name="PART_Input"
                      PasswordChar="●"
                      FontSize="14"
-                     Watermark="Enter password…"
+                     PlaceholderText="Enter password…"
                      KeyDown="OnInputKeyDown"
                      TextInput="OnInputTextInput" />
 

@@ -104,7 +104,7 @@ public static class SshConfigSerializer
         if (opts.RoundTrip && block.RawHeaderText.Length > 0)
             sb.Append(block.RawHeaderText);
         else
-            sb.Append(BuildBlockHeader(block, opts));
+            sb.Append(BuildBlockHeader(block));
 
         sb.Append(opts.NewLine);
 
@@ -112,7 +112,7 @@ public static class SshConfigSerializer
             WriteItem(sb, item, opts.Indent, opts);
     }
 
-    private static string BuildBlockHeader(SshBlock block, SshSerializerOptions opts)
+    private static string BuildBlockHeader(SshBlock block)
     {
         var header = block switch
         {

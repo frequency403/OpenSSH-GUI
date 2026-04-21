@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
 
@@ -41,7 +40,7 @@ public class ViewModelBaseTests
         // Arrange
         var vm = new TestViewModel();
         var closeInvoked = false;
-        vm.Close += (s, e) => closeInvoked = true;
+        vm.Close += (_, _) => closeInvoked = true;
 
         // Act
         vm.TriggerClose();
@@ -51,7 +50,7 @@ public class ViewModelBaseTests
         Assert.False(vm.IsInitialized);
     }
 
-    private class TestViewModel() : ViewModelBase
+    private class TestViewModel : ViewModelBase
     {
         public bool OnBooleanSubmitCalled { get; private set; }
         public bool InputParam { get; private set; }

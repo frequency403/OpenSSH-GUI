@@ -33,7 +33,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase{
 
     [Reactive] private int _daysToDeleteSelected;
     
-    [Reactive] private double fontSize = 12;
+    [Reactive] private double _fontSize = 12;
 
     [ObservableAsProperty] private string _cleanupFilesButtonText = string.Empty;
 

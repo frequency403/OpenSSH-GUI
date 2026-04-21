@@ -1,7 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Metadata;
 
 namespace OpenSSH_GUI.Resources.Controls;
 

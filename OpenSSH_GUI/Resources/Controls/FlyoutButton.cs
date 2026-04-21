@@ -21,8 +21,8 @@ public class FlyoutButton : ContentControl
     {
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Tunnel);
         AddHandler(PointerReleasedEvent, OnPointerReleased, RoutingStrategies.Tunnel);
-        AddHandler(PointerEnteredEvent, (_, __) => PseudoClasses.Set(":pointerover", true));
-        AddHandler(PointerExitedEvent, (_, __) =>
+        AddHandler(PointerEnteredEvent, (_, _) => PseudoClasses.Set(":pointerover", true));
+        AddHandler(PointerExitedEvent, (_, _) =>
         {
             PseudoClasses.Set(":pointerover", false);
             PseudoClasses.Set(":pressed", false);

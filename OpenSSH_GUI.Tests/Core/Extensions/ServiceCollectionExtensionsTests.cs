@@ -3,7 +3,6 @@ using Avalonia.Threading;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
@@ -42,7 +41,7 @@ public class DependencyInjectionExtensionsTests
 
     private class MockWindow : Window;
 
-    private class MockWindowViewModel() : ViewModelBase;
+    private class MockWindowViewModel : ViewModelBase;
 
-    private class InvalidVm() : ViewModelBase;
+    private class InvalidVm : ViewModelBase;
 }

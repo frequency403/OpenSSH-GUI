@@ -54,7 +54,7 @@ public partial class ValidatedInputDialog : Window
         Title = title;
         PART_Prompt.Text = prompt;
         PART_Prompt.IsVisible = !string.IsNullOrWhiteSpace(prompt);
-        PART_Input.Watermark = watermark;
+        PART_Input.PlaceholderText = watermark;
         PART_Input.Text = initialValue;
 
         // Subscribe to live text changes for real-time validation.
@@ -84,7 +84,7 @@ public partial class ValidatedInputDialog : Window
             PART_MaterialIcon.Kind = @params.Icon.Value;
         }
 
-        PART_Input.Watermark = @params.Watermark;
+        PART_Input.PlaceholderText = @params.Watermark;
         PART_Input.Text = @params.InitialValue;
 
         // Subscribe to live text changes for real-time validation.

@@ -43,7 +43,8 @@ public sealed partial class ServerConnectionService : ReactiveObject, IDisposabl
         _isConnectedHelper = this.WhenAnyValue(vm => vm.ServerConnection)
             .Select(e => e.WhenAnyValue(sc => sc.IsConnected))
             .Switch()
-            .ToProperty(this, obj => obj.IsConnected);
+            .ToProperty(this, obj => obj.IsConnected)
+            .DisposeWith(_disposables);
     }
 
     public void Dispose()
@@ -83,7 +84,7 @@ public sealed partial class ServerConnectionService : ReactiveObject, IDisposabl
     }
 
     /// <summary>
-    ///     Closes the current connection to the server, if a connection exists.
+    ///     Closes the current connection to the server if a connection exists.
     /// </summary>
     /// <param name="throwOnNoConnection">Indicates whether to throw an exception if no connection exists.</param>
     /// <param name="token">

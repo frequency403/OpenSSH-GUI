@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -11,9 +10,7 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class EditKnownHostsWindowViewModel(
-    ILogger<EditKnownHostsWindowViewModel> logger,
-    ServerConnectionService serverConnectionService) : ViewModelBase
+public partial class EditKnownHostsWindowViewModel(ServerConnectionService serverConnectionService) : ViewModelBase
 {
     [Reactive] private ObservableCollection<KnownHost> _knownHostsLocal = [];
 

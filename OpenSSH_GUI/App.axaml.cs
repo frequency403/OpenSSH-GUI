@@ -5,7 +5,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using DryIoc;
@@ -23,17 +22,10 @@ using Svg.Skia;
 
 namespace OpenSSH_GUI;
 
-internal class DoubleToleranceComparer : IEqualityComparer<double>
+internal class DoubleToleranceComparer(double epsilon) : IEqualityComparer<double>
 {
-    private readonly double _epsilon;
-
-    public DoubleToleranceComparer(double epsilon)
-    {
-        _epsilon = epsilon;
-    }
-
     public bool Equals(double x, double y)
-        => Math.Abs(x - y) < _epsilon;
+        => Math.Abs(x - y) < epsilon;
 
     public int GetHashCode(double obj)
         => 0;
@@ -134,7 +126,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                         .GetResourceObservable(SystemFontSize)
                         .Select(fs => fs as double?)
                         .Where(fs => fs.HasValue)
-                        .Select(fs => fs.Value)
+                        .Select(fs => fs!.Value)
                         .DistinctUntilChanged(new DoubleToleranceComparer(0.1))
                         .Subscribe(FontSizeChanged)
                         .DisposeWith(Disposables);

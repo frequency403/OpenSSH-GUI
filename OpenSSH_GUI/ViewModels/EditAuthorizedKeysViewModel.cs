@@ -1,5 +1,4 @@
-﻿using System.Reactive;
-using System.Reactive.Disposables.Fluent;
+﻿using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;

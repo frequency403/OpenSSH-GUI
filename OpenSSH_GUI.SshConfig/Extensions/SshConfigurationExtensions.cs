@@ -19,6 +19,7 @@ public static class SshConfigurationExtensions
         ///     Path relative to the base path stored in <see cref="IConfigurationBuilder.Properties" /> of
         ///     <paramref name="builder" />.
         /// </param>
+        /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(string path, Action<string, Exception>? loggingAction = null)
         {
@@ -33,6 +34,7 @@ public static class SshConfigurationExtensions
         ///     <paramref name="builder" />.
         /// </param>
         /// <param name="optional">Whether the file is optional.</param>
+        /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(string path, bool optional,
             Action<string, Exception>? loggingAction = null)
@@ -49,6 +51,7 @@ public static class SshConfigurationExtensions
         /// </param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
+        /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(string path, bool optional,
             bool reloadOnChange, Action<string, Exception>? loggingAction = null)
@@ -66,6 +69,7 @@ public static class SshConfigurationExtensions
         /// </param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>
+        /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(IFileProvider? fileProvider,
             string path, bool optional, bool reloadOnChange, Action<string, Exception>? loggingAction = null)
@@ -87,6 +91,7 @@ public static class SshConfigurationExtensions
         ///     Adds an SSH configuration source to the <paramref name="builder" />.
         /// </summary>
         /// <param name="configureSource">Configures the source.</param>
+        /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(Action<SshConfigurationSource>? configureSource,
             Action<string, Exception>? loggingAction)

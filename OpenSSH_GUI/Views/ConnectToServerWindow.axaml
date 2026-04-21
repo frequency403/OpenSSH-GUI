@@ -65,12 +65,12 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </Grid>
-        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding HostName}" Watermark="{x:Static openSshGui:StringsAndTexts.ConnectToServerHostname}" Margin="5 10"
+        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding HostName}" PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerHostname}" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
 
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" Watermark="{x:Static openSshGui:StringsAndTexts.ConnectToServerUsername}" Margin="5 10"
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerUsername}" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
@@ -79,7 +79,7 @@
                     VerticalAlignment="Top">
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
-                     Text="{Binding Password}" Watermark="{x:Static openSshGui:StringsAndTexts.ConnectToServerPassword}" PasswordChar="*"
+                     Text="{Binding Password}" PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerPassword}" PasswordChar="*"
                      RevealPassword="False"
                      IsEnabled="{Binding !CanConnectToServer}"
                      IsVisible="{Binding !AuthWithPublicKey}" />
@@ -91,7 +91,7 @@
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
-                Command="{Binding TestConnectionCommand}"
+                Command="{Binding TestConnectionAsyncCommand}"
                 IsEnabled="{Binding !CanConnectToServer}"
                 HotKey="Enter">
             <ToolTip.Tip>

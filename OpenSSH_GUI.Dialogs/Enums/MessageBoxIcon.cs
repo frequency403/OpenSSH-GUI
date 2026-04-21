@@ -1,3 +1,5 @@
+using OpenSSH_GUI.Dialogs.Views;
+
 namespace OpenSSH_GUI.Dialogs.Enums;
 
 /// <summary>

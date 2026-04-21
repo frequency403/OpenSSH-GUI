@@ -62,8 +62,10 @@ public class SshHostSettingsTests
         Assert.Equal("new.example.com", reserializedSettings.HostName);
         Assert.Equal("bob", reserializedSettings.User);
         Assert.Equal(22, reserializedSettings.Port);
+        Assert.NotNull(reserializedSettings.IdentityFiles);
         Assert.Single(reserializedSettings.IdentityFiles);
         Assert.Equal("~/.ssh/id_new", reserializedSettings.IdentityFiles[0]);
+        Assert.NotNull(reserializedSettings.LocalForwards);
         Assert.Single(reserializedSettings.LocalForwards);
         Assert.Equal("9000 localhost:90", reserializedSettings.LocalForwards[0]);
     }

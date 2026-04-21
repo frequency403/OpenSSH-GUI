@@ -36,7 +36,7 @@ internal sealed class Program
                ?? "0.0.0";
     }
 
-    private static Logger? CreateLogger(IContainer container)
+    private static Logger CreateLogger(IContainer container)
     {
         var logConfiguration = LoggerConfiguration.Default;
         if (!Directory.Exists(logConfiguration.LogFilePath))

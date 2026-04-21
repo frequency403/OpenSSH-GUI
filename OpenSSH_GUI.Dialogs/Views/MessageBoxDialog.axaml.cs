@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using Material.Icons;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Models;
+using OpenSSH_GUI.Dialogs.Services;
 
 namespace OpenSSH_GUI.Dialogs.Views;
 

@@ -78,7 +78,7 @@ public class AuthorizedKeysFile : ReactiveObject
     /// <summary>
     ///     Persists the changes made to the authorized keys file.
     /// </summary>
-    /// <returns>The modified <see cref="IAuthorizedKeysFile" /> object.</returns>
+    /// <returns>The modified <see cref="AuthorizedKeysFile" /> object.</returns>
     public async ValueTask<AuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
     {
         if (IsFileFromServer) return this;
@@ -129,8 +129,11 @@ public class AuthorizedKeysFile : ReactiveObject
     public string ExportFileContent(PlatformID? platform = null)
         => AuthorizedKeys.Where(e => !e.MarkedForDeletion)
             .Aggregate("",
-                (s, key) => s +=
-                    $"{key}{((platform ?? Environment.OSVersion.Platform).GetLineSeparator())}");
+                (s, key) =>
+                {
+                    s += $"{key}{((platform ?? Environment.OSVersion.Platform).GetLineSeparator())}";
+                    return s;
+                });
 
     public static async ValueTask<AuthorizedKeysFile> OpenAsync(string? filePath = null,
         CancellationToken cancellationToken = default)

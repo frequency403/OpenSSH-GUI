@@ -13,7 +13,7 @@ namespace OpenSSH_GUI.Tests;
 /// <summary>
 ///     Assembly-wide fixture that runs a dedicated Avalonia UI thread with a
 ///     live dispatcher loop. Required because <see cref="Avalonia.AvaloniaObject" />
-///     enforces UI-thread access, and <see cref="Dispatcher.UIThread.Invoke" /> deadlocks
+///     enforces UI-thread access, deadlocks
 ///     without a running message loop.
 /// </summary>
 public sealed class ReactiveUiInitFixture : IDisposable

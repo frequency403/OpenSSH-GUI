@@ -2,12 +2,10 @@
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Text.Encodings.Web;
 using Avalonia.Platform.Storage;
 using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
-using Material.Icons.Avalonia;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;

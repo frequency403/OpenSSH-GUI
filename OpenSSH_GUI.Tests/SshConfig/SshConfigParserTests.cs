@@ -38,12 +38,10 @@ public class SshConfigParserTests
         var doc = SshConfigParser.Parse(content);
 
         doc.Blocks.Length.ShouldBeGreaterThan(0);
-        // "Host *" sollte vorhanden sein
         var allHosts = doc.Blocks.OfType<SshHostBlock>().ToList();
         allHosts.ShouldContain(b => b.Patterns.Contains("*"));
 
-        // Suche nach "ConnectTimeout 20" im globalen Kontext oder im Host * Block
-        var globalEntries = doc.GetGlobalEntries().ToArray();
+        _ = doc.GetGlobalEntries().ToArray();
         var hostStar = allHosts.FirstOrDefault(b => b.Patterns.Contains("*"));
         hostStar.ShouldNotBeNull();
         hostStar.GetEntries().ShouldContain(e => e.Key == "ConnectTimeout" && e.Value == "20");
@@ -282,6 +280,7 @@ Host key-host
         // Assert
         Assert.Null(settings.Port);
         // Note: In SshHostBlockExtensions.GetSettings, unparseable "Port" is added to otherEntries
+        Assert.NotNull(settings.OtherEntries);
         Assert.Single(settings.OtherEntries);
         Assert.Equal("Port", settings.OtherEntries[0].Key);
     }
@@ -300,6 +299,7 @@ Host key-host
         // Assert
         Assert.Equal("quoted server", block.Patterns[0]);
         Assert.Equal("alice", settings.User);
+        Assert.NotNull(settings.IdentityFiles);
         Assert.Contains("~/.ssh/id rsa", settings.IdentityFiles);
     }
 

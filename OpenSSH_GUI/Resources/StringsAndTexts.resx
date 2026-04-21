@@ -195,6 +195,7 @@
     <data name="AddKeyWindowFilenameError" xml:space="preserve">
         <value>Filename does already exist!</value>
     </data>
+    <!-- ReSharper disable once NotOverriddenInSpecificCulture -->
     <data name="ConnectToServerStatusBase" xml:space="preserve">
         <value>Status: {0}</value>
     </data>
