@@ -32,6 +32,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     [Reactive(SetModifier = AccessModifier.Private)] private SshKeyFile _keyFile;
     [ObservableAsProperty(ReadOnly = true)] private string _password = string.Empty;
     [ObservableAsProperty(ReadOnly = true)] private string _windowTitle = "Key info";
+    [ObservableAsProperty(ReadOnly = true)] private string _associatedFilesHeader = string.Empty;
 
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
         IResolver resolver, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
@@ -55,6 +56,11 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         _windowTitleHelper = keyFileChanged
             .Select(e => string.Join(" ", e.FileName, e.Format, e.Comment))
             .ToProperty(this, vm => vm.WindowTitle)
+            .DisposeWith(Disposables);
+
+        _associatedFilesHeaderHelper = keyFileChanged
+            .Select(e => string.Format(StringsAndTexts.FileInfoWindowFoundAssociatedFiles, e.KeyFiles.Length))
+            .ToProperty(this, vm => vm.AssociatedFilesHeader)
             .DisposeWith(Disposables);
     }
 
@@ -83,8 +89,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 Buttons = MessageBoxButtons.OkCancel,
                 Icon = MaterialIconKind.KeyOutline,
                 MinLength = 0,
-                Prompt = $"Enter a new password for key {KeyFile.FileName}",
-                Title = "Change password"
+                Prompt = string.Format(StringsAndTexts.FileInfoWindowEnterNewPassword, KeyFile.FileName),
+                Title = StringsAndTexts.FileInfoWindowChangePassword
             });
             if (si is null)
             {
@@ -127,10 +133,10 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             Buttons = MessageBoxButtons.OkCancel,
             Icon = MaterialIconKind.FileEditOutline,
             InitialValue = Path.GetFileNameWithoutExtension(keyFile.FileName) ?? string.Empty,
-            Message = "ChangeMe",
-            Prompt = "EnterNewFilename",
-            Watermark = "Enter new filename",
-            Validator = argument => string.IsNullOrWhiteSpace(argument) ? "Filename cannot be empty" : null
+            Message = StringsAndTexts.FileInfoWindowChangeMessage,
+            Prompt = StringsAndTexts.FileInfoWindowEnterNewFilename,
+            Watermark = StringsAndTexts.FileInfoWindowEnterNewFilename,
+            Validator = argument => string.IsNullOrWhiteSpace(argument) ? StringsAndTexts.FileInfoWindowFilenameCannotBeEmpty : null
         });
         if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
         {
@@ -141,11 +147,11 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                 {
                     result.ThrowIfFailure();
                     
-                    if (await _messageBoxProvider.ShowMessageBoxAsync(new MessageBoxParams // REFACTOR: Localize
+                    if (await _messageBoxProvider.ShowMessageBoxAsync(new MessageBoxParams
                         {
-                            Title = "Confirm File Overwrite",
+                            Title = StringsAndTexts.FileInfoWindowConfirmFileOverwrite,
                             Message =
-                                $"The keyfile {filename} already exist. Do you want to overwrite it?",
+                                string.Format(StringsAndTexts.FileInfoWindowFileAlreadyExists, filename),
                             Buttons = MessageBoxButtons.YesNo,
                             Icon = MaterialIconKind.QuestionMarkCircleOutline
                         }) is not MessageBoxResult.Yes)
@@ -204,8 +210,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
         {
             await _clipboard.SetTextAsync(password.GetPasswordString());
             await _clipboard.FlushAsync();
-            await _messageBoxProvider.ShowMessageBoxAsync("Password copied to clipboard",
-                "Password copied to clipboard", MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
+            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.FileInfoWindowPasswordCopied,
+                StringsAndTexts.FileInfoWindowPasswordCopied, MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
         }
         catch (Exception e)
         {

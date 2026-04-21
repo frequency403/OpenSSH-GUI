@@ -43,6 +43,8 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     [Reactive] private string _version;
     [ObservableAsProperty]
     private MaterialIconKind _itemsCountIcon = MaterialIconKind.Infinity;
+    [ObservableAsProperty]
+    private string _itemsCountTooltip = string.Empty;
     [Reactive(SetModifier = AccessModifier.Private)]
     private string _windowTitle = string.Empty;
 
@@ -65,16 +67,23 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
         WindowTitle = string.Join("-", Program.AppName, Version);
 
-        _itemsCountIconHelper = Observable
+        var sshKeysCountChanged = Observable
             .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
                 h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged += h,
                 h => ((INotifyCollectionChanged)SshKeyManager.SshKeys).CollectionChanged -= h)
             .Select(_ => SshKeyManager.SshKeys.Count)
             .StartWith(SshKeyManager.SshKeys.Count)
-            .ObserveOn(AvaloniaScheduler.Instance)
+            .ObserveOn(AvaloniaScheduler.Instance);
+
+        _itemsCountIconHelper = sshKeysCountChanged
             .Select(GetMaterialNumericIcon)
             .Do(icon => logger.LogDebug($"Updated items count icon to {icon}"))
             .ToProperty(this, vm => vm.ItemsCountIcon)
+            .DisposeWith(Disposables);
+
+        _itemsCountTooltipHelper = sshKeysCountChanged
+            .Select(count => string.Format(StringsAndTexts.MainWindowFoundKeyPairsCountLabel, count))
+            .ToProperty(this, vm => vm.ItemsCountTooltip)
             .DisposeWith(Disposables);
     }
 

@@ -36,6 +36,8 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     
     [Reactive] private double fontSize = 12;
 
+    [ObservableAsProperty] private string _cleanupFilesButtonText = string.Empty;
+
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMessageBoxProvider messageBoxProvider,
         Application application,
@@ -75,6 +77,12 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
             .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
             .Subscribe(count => { CanDeleteOldLogFiles = count > 0; })
+            .DisposeWith(Disposables);
+
+        _cleanupFilesButtonTextHelper = this.WhenAnyValue(vm => vm.LogFiles.Count)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Select(count => string.Format(StringsAndTexts.ApplicationSettingsCleanupFiles, count))
+            .ToProperty(this, vm => vm.CleanupFilesButtonText)
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.CurrentThemeVariant)

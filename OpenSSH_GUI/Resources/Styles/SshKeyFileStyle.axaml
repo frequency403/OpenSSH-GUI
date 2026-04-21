@@ -77,7 +77,7 @@
                                 CommandParameter="{Binding KeyFileInfo.KeyFileSource}">
                             <ToolTip.Tip>
                                 <Label
-                                    Content="Open Fileinfo Window" />
+                                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowOpenFileInfoWindow}" />
                             </ToolTip.Tip>
                             <StackPanel>
                                 <avalonia:MaterialIcon Kind="Settings" />
@@ -97,7 +97,7 @@
                     IsVisible="{Binding NeedsPassword}"
                     Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).ProvidePasswordCommand}"
                     CommandParameter="{Binding .}"
-                    Content="Provide Password" />
+                    Content="{x:Static openSshGui:StringsAndTexts.MainWindowProvidePassword}" />
         </Panel>
     </DataTemplate>
     <DataTemplate x:Key="SshKeyTypeStyle" DataType="keys:SshKeyFile">

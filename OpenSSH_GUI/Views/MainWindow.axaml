@@ -42,12 +42,12 @@
                     <StackPanel x:DataType="keys:SshKeyFile">
                         <StackPanel IsVisible="{Binding !Password.IsValid}">
                             <Label IsVisible="{Binding !NeedsPassword}"
-                                   Content="Key is not password protected" />
+                                   Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyNotPasswordProtected}" />
                             <Label IsVisible="{Binding NeedsPassword}"
-                                   Content="Key is password protected and cannot be used until a password is provided" />
+                                   Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyPasswordProtectedLocked}" />
                         </StackPanel>
                         <Label IsVisible="{Binding Password.IsValid}"
-                               Content="Key is password protected and opened with correct password" />
+                               Content="{x:Static openSshGui:StringsAndTexts.MainWindowKeyPasswordProtectedUnlocked}" />
                     </StackPanel>
                 </Template>
             </Setter>
@@ -296,13 +296,7 @@
                         <Panel IsVisible="{Binding !SshKeyManager.Processing}">
                             <materialIcons:MaterialIcon Kind="{Binding ItemsCountIcon}"/>
                             <ToolTip.Tip>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <TextBlock
-                                        Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart1}" />
-                                    <TextBlock Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
-                                    <TextBlock
-                                        Text="{x:Static openSshGui:StringsAndTexts.MainWindowFoundKeyPairsCountLabelPart2}" />
-                                </StackPanel>
+                                <Label Content="{Binding ItemsCountTooltip}" />
                             </ToolTip.Tip>
                         </Panel>
                         <Panel IsVisible="{Binding SshKeyManager.Processing}">
@@ -310,7 +304,7 @@
                                                         Kind="Reload"
                                                         RenderTransformOrigin="50%,50%">
                                 <ToolTip.Tip>
-                                    <TextBlock Text="Reloading keys..." />
+                                    <TextBlock Text="{x:Static openSshGui:StringsAndTexts.MainWindowReloadingKeys}" />
                                 </ToolTip.Tip>
                             </materialIcons:MaterialIcon>
                         </Panel>

@@ -106,7 +106,7 @@
     </Window.DataTemplates>
     <Grid RowDefinitions="* Auto" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <TabControl Grid.Row="0" VerticalAlignment="Stretch" TabStripPlacement="Left">
-            <TabItem Header="Local" Padding="5">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditKnownHostsLocal}" Padding="5">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"
@@ -116,7 +116,7 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnectionService.IsConnected}">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditKnownHostsRemote}" Padding="5" IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"

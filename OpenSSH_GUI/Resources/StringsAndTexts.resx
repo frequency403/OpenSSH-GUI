@@ -102,11 +102,8 @@
     <data name="MainWindowEditKnownHostsFileToolTip" xml:space="preserve">
         <value>Edit "known_hosts" file</value>
     </data>
-    <data name="MainWindowFoundKeyPairsCountLabelPart1" xml:space="preserve">
-        <value>Found</value>
-    </data>
-    <data name="MainWindowFoundKeyPairsCountLabelPart2" xml:space="preserve">
-        <value>keypairs in SSH directory</value>
+    <data name="MainWindowFoundKeyPairsCountLabel" xml:space="preserve">
+        <value>Found {0} keypairs in SSH directory</value>
     </data>
     <data name="MainWindowViewModelDeleteKeyTitleText" xml:space="preserve">
         <value>Delete {0}?</value>
@@ -288,12 +285,6 @@
     <data name="Days" xml:space="preserve">
         <value>Days</value>
     </data>
-    <data name="ApplicationSettingsCleanup" xml:space="preserve">
-        <value>Cleanup</value>
-    </data>
-    <data name="ApplicationSettingsFiles" xml:space="preserve">
-        <value>files</value>
-    </data>
     <data name="ApplicationSettingsClearWholeCache" xml:space="preserve">
         <value>Clear whole cache</value>
     </data>
@@ -311,5 +302,104 @@
     </data>
     <data name="ApplicationSettingsViewModelConfirmationError" xml:space="preserve">
         <value>Provide the correct phrase to continue</value>
+    </data>
+    <data name="MainWindowReloadingKeys" xml:space="preserve">
+        <value>Reloading keys...</value>
+    </data>
+    <data name="MainWindowKeyNotPasswordProtected" xml:space="preserve">
+        <value>Key is not password protected</value>
+    </data>
+    <data name="MainWindowKeyPasswordProtectedLocked" xml:space="preserve">
+        <value>Key is password protected and cannot be used until a password is provided</value>
+    </data>
+    <data name="MainWindowKeyPasswordProtectedUnlocked" xml:space="preserve">
+        <value>Key is password protected and opened with correct password</value>
+    </data>
+    <data name="MainWindowProvidePassword" xml:space="preserve">
+        <value>Provide Password</value>
+    </data>
+    <data name="MainWindowOpenFileInfoWindow" xml:space="preserve">
+        <value>Open Fileinfo Window</value>
+    </data>
+    <data name="FileInfoWindowFoundAssociatedFiles" xml:space="preserve">
+        <value>Found {0} associated Files</value>
+    </data>
+    <data name="FileInfoWindowChangePasswordTooltip" xml:space="preserve">
+        <value>Change password of this key</value>
+    </data>
+    <data name="FileInfoWindowKeyFormat" xml:space="preserve">
+        <value>KeyFormat</value>
+    </data>
+    <data name="FileInfoWindowCurrent" xml:space="preserve">
+        <value>Current:</value>
+    </data>
+    <data name="FileInfoWindowChangeFormatTo" xml:space="preserve">
+        <value>Change format to the {0} format</value>
+    </data>
+    <data name="FileInfoWindowPassword" xml:space="preserve">
+        <value>Password</value>
+    </data>
+    <data name="FileInfoWindowChangePassword" xml:space="preserve">
+        <value>Change password</value>
+    </data>
+    <data name="FileInfoWindowEnterNewPassword" xml:space="preserve">
+        <value>Enter a new password for key {0}</value>
+    </data>
+    <data name="FileInfoWindowConfirmFileOverwrite" xml:space="preserve">
+        <value>Confirm File Overwrite</value>
+    </data>
+    <data name="FileInfoWindowFileAlreadyExists" xml:space="preserve">
+        <value>The keyfile {0} already exist. Do you want to overwrite it?</value>
+    </data>
+    <data name="FileInfoWindowChangeMessage" xml:space="preserve">
+        <value>ChangeMe</value>
+    </data>
+    <data name="FileInfoWindowEnterNewFilename" xml:space="preserve">
+        <value>Enter new filename</value>
+    </data>
+    <data name="FileInfoWindowFilenameCannotBeEmpty" xml:space="preserve">
+        <value>Filename cannot be empty</value>
+    </data>
+    <data name="FileInfoWindowPasswordCopied" xml:space="preserve">
+        <value>Password copied to clipboard</value>
+    </data>
+    <data name="ApplicationSettingsLogLevel" xml:space="preserve">
+        <value>LogLevel</value>
+    </data>
+    <data name="ApplicationSettingsTheme" xml:space="preserve">
+        <value>Theme</value>
+    </data>
+    <data name="ApplicationSettingsFontSize" xml:space="preserve">
+        <value>Font Size</value>
+    </data>
+    <data name="ApplicationSettingsCleanupFiles" xml:space="preserve">
+        <value>Cleanup {0} files</value>
+    </data>
+    <data name="ConnectToServerPreconfiguredConnections" xml:space="preserve">
+        <value>Preconfigured Connections</value>
+    </data>
+    <data name="ConnectToServerHostname" xml:space="preserve">
+        <value>Hostname</value>
+    </data>
+    <data name="ConnectToServerUsername" xml:space="preserve">
+        <value>Username</value>
+    </data>
+    <data name="ConnectToServerPassword" xml:space="preserve">
+        <value>Password</value>
+    </data>
+    <data name="ConnectToServerConnectionFailed" xml:space="preserve">
+        <value>Connection failed</value>
+    </data>
+    <data name="EditKnownHostsLocal" xml:space="preserve">
+        <value>Local</value>
+    </data>
+    <data name="EditKnownHostsRemote" xml:space="preserve">
+        <value>Remote</value>
+    </data>
+    <data name="EditAuthorizedKeysLocal" xml:space="preserve">
+        <value>Local</value>
+    </data>
+    <data name="EditAuthorizedKeysServer" xml:space="preserve">
+        <value>Server</value>
     </data>
 </root>

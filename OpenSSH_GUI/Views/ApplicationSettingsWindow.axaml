@@ -18,12 +18,12 @@
         WindowStartupLocation="CenterOwner">
     <UniformGrid Columns="1" Rows="0" Margin="10">
         <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
-            <controls:HeaderedItem Header="LogLevel">
+            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLogLevel}">
                 <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
                           ItemsSource="{Binding AvailableLogLevels}"
                           SelectedItem="{Binding CurrentLogLevel}" />
             </controls:HeaderedItem>
-            <controls:HeaderedItem Header="Theme">
+            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsTheme}">
                 <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
                           ItemsSource="{Binding ThemeVariants}"
                           SelectedItem="{Binding CurrentThemeVariant}" />
@@ -39,11 +39,7 @@
                        Content="{x:Static resources:StringsAndTexts.Days}" />
                 <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
                         Command="{Binding DeleteOldLogFilesCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsCleanup}" />
-                        <TextBlock Text="{Binding LogFiles.Count}" />
-                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsFiles}" />
-                    </StackPanel>
+                    <TextBlock Text="{Binding CleanupFilesButtonText}" />
                 </Button>
             </StackPanel>
         </controls:HeaderedItem>
@@ -56,7 +52,7 @@
                     </StackPanel>
                 </Button>
             </controls:HeaderedItem>
-            <controls:HeaderedItem Header="Font Size">
+            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}">
                 <UniformGrid Rows="1" ColumnSpacing="5" HorizontalAlignment="Stretch">
                     <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
                     <Button Command="{Binding OnNextFontSizeCommand}" Background="{DynamicResource InfoBrush}" CommandParameter="{StaticResource BaseFontSize}">

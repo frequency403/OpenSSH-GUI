@@ -48,11 +48,7 @@
                  VerticalAlignment="Stretch">
         <controls:HeaderedItem>
             <controls:HeaderedItem.Header>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="5">
-                    <TextBlock Text="Found" />
-                    <TextBlock Text="{Binding KeyFile.KeyFiles.Length, FallbackValue=0}" FontWeight="Bold" />
-                    <TextBlock Text="associated Files" />
-                </StackPanel>
+                <TextBlock Text="{Binding AssociatedFilesHeader}" HorizontalAlignment="Left" />
             </controls:HeaderedItem.Header>
             <controls:HeaderedItem.SideHeader>
                 <UniformGrid Rows="1" Columns="3" ColumnSpacing="5">
@@ -61,7 +57,7 @@
                             IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
                             Command="{Binding ChangePasswordOfKeyFileCommand}">
                         <ToolTip.Tip>
-                            <Label Content="Change password of this key" />
+                            <Label Content="{x:Static openSshGui:StringsAndTexts.FileInfoWindowChangePasswordTooltip}" />
                         </ToolTip.Tip>
                         <avalonia:MaterialIcon Kind="KeyAlertOutline" />
                     </Button>
@@ -104,11 +100,11 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </controls:HeaderedItem>
-        <controls:HeaderedItem Header="KeyFormat">
+        <controls:HeaderedItem Header="{x:Static openSshGui:StringsAndTexts.FileInfoWindowKeyFormat}">
             <UniformGrid Rows="1" Columns="0" HorizontalAlignment="Stretch">
                 <StackPanel Spacing="10" Orientation="Horizontal"
                             HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                    <TextBlock Text="Current:" />
+                    <TextBlock Text="{x:Static openSshGui:StringsAndTexts.FileInfoWindowCurrent}" />
                     <TextBlock
                         Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}" />
                 </StackPanel>
@@ -145,13 +141,7 @@
 
                                     <Setter Property="ToolTip.Tip">
                                         <Template>
-                                            <StackPanel Orientation="Horizontal" Spacing="2">
-                                                <TextBlock Text="Change format to the" />
-                                                <TextBlock
-                                                    Text="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}"
-                                                    FontWeight="ExtraBold" />
-                                                <TextBlock Text="format" />
-                                            </StackPanel>
+                                            <TextBlock Text="{Binding Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
                                         </Template>
                                     </Setter>
                                     <Setter Property="ToolTip.ShowDelay" Value="0" />
@@ -182,14 +172,8 @@
                     </SplitButton.Flyout>
 
                     <ToolTip.Tip>
-                        <StackPanel Orientation="Horizontal" Spacing="2">
-                            <TextBlock Text="Change format to the" />
-                            <TextBlock
-                                Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat,
-                              Converter={x:Static converters:Converter.FormatToStringConverter}}"
-                                FontWeight="ExtraBold" />
-                            <TextBlock Text="format" />
-                        </StackPanel>
+                        <TextBlock Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat,
+                              Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
                     </ToolTip.Tip>
 
                     <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
@@ -197,7 +181,7 @@
                 </SplitButton>
             </UniformGrid>
         </controls:HeaderedItem>
-        <controls:HeaderedItem Header="Password">
+        <controls:HeaderedItem Header="{x:Static openSshGui:StringsAndTexts.FileInfoWindowPassword}">
             <Grid ColumnDefinitions="* Auto" ColumnSpacing="5">
                 <TextBox Grid.Column="0" Name="PasswordBox" LetterSpacing="2"
                          Text="{Binding Password}"

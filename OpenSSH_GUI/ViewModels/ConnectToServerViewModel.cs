@@ -237,7 +237,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         try
         {
             if (!await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken))
-                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, "Connection failed");
+                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, StringsAndTexts.ConnectToServerConnectionFailed);
         }
         catch (Exception e)
         {

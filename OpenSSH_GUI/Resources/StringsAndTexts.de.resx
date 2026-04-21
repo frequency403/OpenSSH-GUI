@@ -138,8 +138,8 @@
     <data name="MainWindowEditKnownHostsFileToolTip" xml:space="preserve">
         <value>"known_hosts"-Datei bearbeiten</value>
     </data>
-    <data name="MainWindowFoundKeyPairsCountLabelPart2" xml:space="preserve">
-        <value>Schlüsselpaare im SSH-Verzeichnis gefunden</value>
+    <data name="MainWindowFoundKeyPairsCountLabel" xml:space="preserve">
+        <value>{0} Schlüsselpaare im SSH-Verzeichnis gefunden</value>
     </data>
     <data name="MainWindowIsNotRemoteTooltipText" xml:space="preserve">
         <value>Mit einem Server verbinden, um die Datei auf dem Server zu bearbeiten!</value>
@@ -164,9 +164,6 @@
     </data>
     <data name="SaveAndClose" xml:space="preserve">
         <value>Änderungen speichern und schließen</value>
-    </data>
-    <data name="MainWindowFoundKeyPairsCountLabelPart1" xml:space="preserve">
-        <value>Es wurden</value>
     </data>
     <data name="MainWindowDisconnectBoxTextNone" xml:space="preserve">
         <value>Keine Verbindung zum schließen!</value>
@@ -276,12 +273,6 @@
     <data name="Days" xml:space="preserve">
         <value>Tage</value>
     </data>
-    <data name="ApplicationSettingsCleanup" xml:space="preserve">
-        <value>Räume</value>
-    </data>
-    <data name="ApplicationSettingsFiles" xml:space="preserve">
-        <value>Dateien auf</value>
-    </data>
     <data name="ApplicationSettingsClearWholeCache" xml:space="preserve">
         <value>Gesamtes cache aufräumen</value>
     </data>
@@ -299,5 +290,104 @@
     </data>
     <data name="ApplicationSettingsViewModelConfirmationError" xml:space="preserve">
         <value>Bitte den richtigen Bestätigungswert eingeben</value>
+    </data>
+    <data name="MainWindowReloadingKeys" xml:space="preserve">
+        <value>Schlüssel werden neu geladen...</value>
+    </data>
+    <data name="MainWindowKeyNotPasswordProtected" xml:space="preserve">
+        <value>Schlüssel ist nicht passwortgeschützt</value>
+    </data>
+    <data name="MainWindowKeyPasswordProtectedLocked" xml:space="preserve">
+        <value>Schlüssel ist passwortgeschützt und kann erst nach Eingabe des Passworts verwendet werden</value>
+    </data>
+    <data name="MainWindowKeyPasswordProtectedUnlocked" xml:space="preserve">
+        <value>Schlüssel ist passwortgeschützt und mit korrektem Passwort geöffnet</value>
+    </data>
+    <data name="MainWindowProvidePassword" xml:space="preserve">
+        <value>Passwort eingeben</value>
+    </data>
+    <data name="MainWindowOpenFileInfoWindow" xml:space="preserve">
+        <value>Dateiinfo-Fenster öffnen</value>
+    </data>
+    <data name="FileInfoWindowFoundAssociatedFiles" xml:space="preserve">
+        <value>{0} zugehörige Dateien gefunden</value>
+    </data>
+    <data name="FileInfoWindowChangePasswordTooltip" xml:space="preserve">
+        <value>Passwort dieses Schlüssels ändern</value>
+    </data>
+    <data name="FileInfoWindowKeyFormat" xml:space="preserve">
+        <value>Schlüsselformat</value>
+    </data>
+    <data name="FileInfoWindowCurrent" xml:space="preserve">
+        <value>Aktuell:</value>
+    </data>
+    <data name="FileInfoWindowChangeFormatTo" xml:space="preserve">
+        <value>Format zu {0} ändern</value>
+    </data>
+    <data name="FileInfoWindowPassword" xml:space="preserve">
+        <value>Passwort</value>
+    </data>
+    <data name="FileInfoWindowChangePassword" xml:space="preserve">
+        <value>Passwort ändern</value>
+    </data>
+    <data name="FileInfoWindowEnterNewPassword" xml:space="preserve">
+        <value>Neues Passwort für Schlüssel {0} eingeben</value>
+    </data>
+    <data name="FileInfoWindowConfirmFileOverwrite" xml:space="preserve">
+        <value>Dateiüberschreibung bestätigen</value>
+    </data>
+    <data name="FileInfoWindowFileAlreadyExists" xml:space="preserve">
+        <value>Die Schlüsseldatei {0} existiert bereits. Möchten Sie sie überschreiben?</value>
+    </data>
+    <data name="FileInfoWindowChangeMessage" xml:space="preserve">
+        <value>Ändern</value>
+    </data>
+    <data name="FileInfoWindowEnterNewFilename" xml:space="preserve">
+        <value>Neuen Dateinamen eingeben</value>
+    </data>
+    <data name="FileInfoWindowFilenameCannotBeEmpty" xml:space="preserve">
+        <value>Dateiname darf nicht leer sein</value>
+    </data>
+    <data name="FileInfoWindowPasswordCopied" xml:space="preserve">
+        <value>Passwort in Zwischenablage kopiert</value>
+    </data>
+    <data name="ApplicationSettingsLogLevel" xml:space="preserve">
+        <value>Log-Stufe</value>
+    </data>
+    <data name="ApplicationSettingsTheme" xml:space="preserve">
+        <value>Design</value>
+    </data>
+    <data name="ApplicationSettingsFontSize" xml:space="preserve">
+        <value>Schriftgröße</value>
+    </data>
+    <data name="ApplicationSettingsCleanupFiles" xml:space="preserve">
+        <value>{0} Dateien aufräumen</value>
+    </data>
+    <data name="ConnectToServerPreconfiguredConnections" xml:space="preserve">
+        <value>Vorkonfigurierte Verbindungen</value>
+    </data>
+    <data name="ConnectToServerHostname" xml:space="preserve">
+        <value>Hostname</value>
+    </data>
+    <data name="ConnectToServerUsername" xml:space="preserve">
+        <value>Benutzername</value>
+    </data>
+    <data name="ConnectToServerPassword" xml:space="preserve">
+        <value>Passwort</value>
+    </data>
+    <data name="ConnectToServerConnectionFailed" xml:space="preserve">
+        <value>Verbindung fehlgeschlagen</value>
+    </data>
+    <data name="EditKnownHostsLocal" xml:space="preserve">
+        <value>Lokal</value>
+    </data>
+    <data name="EditKnownHostsRemote" xml:space="preserve">
+        <value>Entfernt</value>
+    </data>
+    <data name="EditAuthorizedKeysLocal" xml:space="preserve">
+        <value>Lokal</value>
+    </data>
+    <data name="EditAuthorizedKeysServer" xml:space="preserve">
+        <value>Server</value>
     </data>
 </root>

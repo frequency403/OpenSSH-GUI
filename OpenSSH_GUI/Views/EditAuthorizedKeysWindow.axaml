@@ -59,13 +59,13 @@
     <Grid RowDefinitions="10* *" ColumnDefinitions="* *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <TabControl Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" TabStripPlacement="Left"
                     HorizontalContentAlignment="Stretch">
-            <TabItem Header="Local" Margin="10">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditAuthorizedKeysLocal}" Margin="10">
                 <ToolTip.Tip>
                     <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentLocal}" />
                 </ToolTip.Tip>
                 <ItemsControl ItemsSource="{Binding AuthorizedKeysFileLocal.AuthorizedKeys}" />
             </TabItem>
-            <TabItem Header="Server" Margin="10" IsEnabled="{Binding ServerConnectionService.IsConnected}">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditAuthorizedKeysServer}" Margin="10" IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <ToolTip.Tip>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentFrom}" />
