@@ -98,4 +98,9 @@ public partial class MessageBoxDialog : Window
     {
         Close(MessageBoxResult.Cancel);
     }
+
+    private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        Close(MessageBoxResult.Cancel);
+    }
 }

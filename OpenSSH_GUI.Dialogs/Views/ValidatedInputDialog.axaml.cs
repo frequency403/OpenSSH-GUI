@@ -194,4 +194,9 @@ public partial class ValidatedInputDialog : Window
         PART_Error.IsVisible = false;
         PART_Error.Text = string.Empty;
     }
+
+    private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        Close(new ValidatedInputResult(null));
+    }
 }

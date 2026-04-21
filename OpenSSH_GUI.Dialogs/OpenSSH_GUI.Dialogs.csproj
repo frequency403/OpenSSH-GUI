@@ -10,4 +10,13 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6"/>
         <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.3"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="ReactiveUI">
+        <HintPath>..\..\..\home\olli\.nuget\packages\reactiveui\23.2.1\lib\net10.0\ReactiveUI.dll</HintPath>
+      </Reference>
+      <Reference Include="ReactiveUI.Avalonia">
+        <HintPath>..\..\..\home\olli\.nuget\packages\reactiveui.avalonia\11.4.12\lib\net10.0\ReactiveUI.Avalonia.dll</HintPath>
+      </Reference>
+    </ItemGroup>
 </Project>

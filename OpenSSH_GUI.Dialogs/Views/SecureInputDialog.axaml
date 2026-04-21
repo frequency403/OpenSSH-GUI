@@ -3,14 +3,16 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="OpenSSH_GUI.Dialogs.Views.SecureInputDialog"
         Title="Secure Input"
-        Width="380"
-        SizeToContent="Height"
+        MinWidth="380"
+        SizeToContent="WidthAndHeight"
         CanResize="False"
+        CanMaximize="False"
+        CanMinimize="False"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="False"
-        Opened="OnOpened">
+        Opened="OnOpened"
+        Closing="Window_OnClosing">
     <!-- ReSharper disable InconsistentNaming -->
     <Border Padding="24 20 24 16">
         <StackPanel Spacing="12">
