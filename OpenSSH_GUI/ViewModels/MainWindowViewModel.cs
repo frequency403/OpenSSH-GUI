@@ -40,12 +40,17 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private readonly ILauncher _launcher;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IResolver _serviceProvider;
-    [Reactive] private string _version;
-    [ObservableAsProperty]
-    private MaterialIconKind _itemsCountIcon = MaterialIconKind.Infinity;
-    [ObservableAsProperty]
-    private string _itemsCountTooltip = string.Empty;
+
     [Reactive(SetModifier = AccessModifier.Private)]
+    private string _version;
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private MaterialIconKind _itemsCountIcon = MaterialIconKind.Infinity;
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private string _itemsCountTooltip = string.Empty;
+
+    [ObservableAsProperty(ReadOnly = true)]
     private string _windowTitle = string.Empty;
 
     public MainWindowViewModel(
@@ -65,7 +70,11 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         _launcher = launcher;
         _dialogHost = dialogHost;
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
-        WindowTitle = string.Join("-", Program.AppName, Version);
+
+        _windowTitleHelper = this.WhenAnyValue(vm => vm.Version)
+            .Select(v => string.Join(" v", Program.AppName, v))
+            .ToProperty(this, vm => vm.WindowTitle)
+            .DisposeWith(Disposables);
 
         var sshKeysCountChanged = Observable
             .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
@@ -91,41 +100,30 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     public SshKeyManager SshKeyManager { get; }
 
     [ReactiveCommand]
-    private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>(cancellationToken);
-    }
+    private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenFileInfoWindowAsync(SshKeyFileSource source, CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource, FileInfoViewModelInitializer>(source,
+    private Task OpenFileInfoWindowAsync(SshKeyFileSource source, CancellationToken cancellationToken = default) =>
+        OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource, FileInfoViewModelInitializer>(
+            source,
             cancellationToken);
-    }
 
     [ReactiveCommand]
-    private Task OpenCreateKeyWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<AddKeyWindow, AddKeyWindowViewModel>(cancellationToken);
-    }
+    private Task OpenCreateKeyWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<AddKeyWindow, AddKeyWindowViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenEditAuthorizedKeysWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(cancellationToken);
-    }
+    private Task OpenEditAuthorizedKeysWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenEditKnownHostsWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(cancellationToken);
-    }
+    private Task OpenEditKnownHostsWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenConnectToServerWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<ConnectToServerWindow, ConnectToServerViewModel>(cancellationToken);
-    }
+    private Task OpenConnectToServerWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<ConnectToServerWindow, ConnectToServerViewModel>(cancellationToken);
 
     [ReactiveCommand]
     private void ResetKey(SshKeyFile keyFile)
@@ -187,7 +185,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         PrivateKeyFile? keyFile = key;
         return keyFile != null
             ? ShowExportWindow(key, keyFile.ToOpenSshFormat(), null, token)
-                : _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+            : _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
                 StringsAndTexts.MainWindowViewModelExportKeyErrorMessage);
     }
 
@@ -214,11 +212,9 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     }
 
     [ReactiveCommand]
-    private async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default)
-    {
+    private async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default) =>
         await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.NotImplementedBoxTitle,
             StringsAndTexts.NotImplementedBoxText, MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
-    }
 
     [ReactiveCommand]
     private async Task OpenBrowserAsync(int commandTypeParameter, CancellationToken cancellationToken = default)
@@ -238,6 +234,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             default:
                 return;
         }
+
         await _launcher.LaunchUriAsync(uriBuilder.Uri);
     }
 
@@ -331,11 +328,9 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     private async Task OpenWindow<TWindow, TViewModel>(CancellationToken token = default)
         where TWindow : WindowBase<TViewModel>
-        where TViewModel : ViewModelBase<TViewModel>
-    {
+        where TViewModel : ViewModelBase<TViewModel> =>
         await _dialogHost.ShowDialog<TWindow, TViewModel>(
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));
-    }
 
     private static MaterialIconKind GetMaterialNumericIcon(int count)
         => count switch
