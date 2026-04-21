@@ -23,7 +23,7 @@ using Svg.Skia;
 
 namespace OpenSSH_GUI;
 
-class DoubleToleranceComparer : IEqualityComparer<double>
+internal class DoubleToleranceComparer : IEqualityComparer<double>
 {
     private readonly double _epsilon;
 
@@ -165,8 +165,9 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
     {
         if (Current is not null)
         {
-            Current.Resources[MaterialIconSize] = fontSize + 6;
-            logger.LogInformation("{MaterialIconSize} set to {fontSize}", MaterialIconSize, fontSize + 6);
+            var materialIconSize = fontSize + 4;
+            Current.Resources[MaterialIconSize] = materialIconSize;
+            logger.LogInformation("{MaterialIconSize} set to {fontSize}", MaterialIconSize, materialIconSize);
         }
     }
     
