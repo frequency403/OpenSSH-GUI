@@ -51,7 +51,7 @@ public class ViewModelBaseTests
         Assert.False(vm.IsInitialized);
     }
 
-    private class TestViewModel() : ViewModelBase<TestViewModel>(NullLogger<TestViewModel>.Instance)
+    private class TestViewModel() : ViewModelBase
     {
         public bool OnBooleanSubmitCalled { get; private set; }
         public bool InputParam { get; private set; }

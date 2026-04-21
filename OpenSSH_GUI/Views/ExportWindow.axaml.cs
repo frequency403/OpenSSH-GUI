@@ -5,7 +5,7 @@ using OpenSSH_GUI.ViewModels;
 namespace OpenSSH_GUI.Views;
 
 [UsedImplicitly]
-public partial class ExportWindow : WindowBase<ExportWindowViewModel, ExportWindowViewModelInitializerParameters>
+public partial class ExportWindow : WindowBase<ExportWindowViewModel, (string WindowTitle, string Export)>
 {
     public ExportWindow()
     {

@@ -42,7 +42,7 @@ public class DependencyInjectionExtensionsTests
 
     private class MockWindow : Window;
 
-    private class MockWindowViewModel() : ViewModelBase<MockWindowViewModel>(NullLogger<MockWindowViewModel>.Instance);
+    private class MockWindowViewModel() : ViewModelBase;
 
-    private class InvalidVm() : ViewModelBase<InvalidVm>(NullLogger<InvalidVm>.Instance);
+    private class InvalidVm() : ViewModelBase;
 }

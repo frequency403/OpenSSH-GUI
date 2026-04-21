@@ -13,7 +13,7 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public partial class EditKnownHostsWindowViewModel(
     ILogger<EditKnownHostsWindowViewModel> logger,
-    ServerConnectionService serverConnectionService) : ViewModelBase<EditKnownHostsWindowViewModel>(logger)
+    ServerConnectionService serverConnectionService) : ViewModelBase
 {
     [Reactive] private ObservableCollection<KnownHost> _knownHostsLocal = [];
 

@@ -21,7 +21,7 @@ using SshNet.Keygen;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewModel, FileInfoViewModelInitializer>
+public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
 {
     private readonly IClipboard _clipboard;
     private readonly SshKeyManager _keyManager;
@@ -35,7 +35,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
     [ObservableAsProperty(ReadOnly = true)] private string _associatedFilesHeader = string.Empty;
 
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
-        IResolver resolver, IClipboard clipboard, SshKeyManager keyManager) : base(logger)
+        IResolver resolver, IClipboard clipboard, SshKeyManager keyManager)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
@@ -72,10 +72,10 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
                   ?? _resolver.Resolve<SshKeyFile>();
     }
 
-    public override ValueTask InitializeAsync(FileInfoViewModelInitializer parameters,
+    public override ValueTask InitializeAsync(SshKeyFileSource? parameters,
         CancellationToken cancellationToken = default)
     {
-        SetKeyOrDefault(parameters.KeySource);
+        SetKeyOrDefault(parameters);
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
@@ -219,9 +219,4 @@ public partial class FileInfoWindowViewModel : ViewModelBase<FileInfoWindowViewM
             await _messageBoxProvider.ShowErrorMessageBoxAsync(e);
         }
     }
-}
-
-public class FileInfoViewModelInitializer : IInitializerParameters<FileInfoWindowViewModel>
-{
-    public required SshKeyFileSource KeySource { get; init; }
 }

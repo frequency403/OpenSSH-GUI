@@ -25,8 +25,7 @@ public static class DependencyInjectionExtensions
             WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
             CancellationToken token = default)
             where TView : WindowBase<TViewModel, TViewModelInitializerParameter>
-            where TViewModel : ViewModelBase<TViewModel, TViewModelInitializerParameter>
-            where TViewModelInitializerParameter : class, IInitializerParameters<TViewModel>
+            where TViewModel : ViewModelBase<TViewModelInitializerParameter>
         {
             var viewName = typeof(TView).Name;
             var resolvedView = resolver.Resolve<TView>(viewName);
@@ -41,8 +40,7 @@ public static class DependencyInjectionExtensions
             WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
             CancellationToken token = default)
             where TView : WindowBase<TViewModel>
-            where TViewModel : ViewModelBase<TViewModel>
-        {
+            where TViewModel : ViewModelBase        {
             var viewName = typeof(TView).Name;
             var resolvedView = resolver.Resolve<TView>(viewName);
             await resolvedView.InitializeAsync(windowStartupLocation, token);
@@ -56,8 +54,7 @@ public static class DependencyInjectionExtensions
     extension(IContainer container)
     {
         public void RegisterViewWithViewModel<TView, TViewModel>()
-            where TViewModel : ViewModelBase<TViewModel>
-            where TView : Window
+            where TViewModel : ViewModelBase            where TView : Window
         {
             if (!ValidateNamingConvention<TView, TViewModel>())
                 throw new InvalidOperationException(

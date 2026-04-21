@@ -30,7 +30,7 @@ using SshNet.Keygen.Extensions;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
+public partial class MainWindowViewModel : ViewModelBase
 {
     private static readonly string? ProjectUrl = Assembly.GetExecutingAssembly()
         .GetCustomAttributes<AssemblyMetadataAttribute>()
@@ -39,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private readonly IDialogHost _dialogHost;
     private readonly ILauncher _launcher;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly ILogger<MainWindowViewModel> _logger;
     private readonly IResolver _serviceProvider;
 
     [Reactive(SetModifier = AccessModifier.Private)]
@@ -61,10 +62,11 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
         ILauncher launcher,
-        IDialogHost dialogHost) : base(logger)
+        IDialogHost dialogHost)
     {
         SshKeyManager = sshKeyManager;
         ServerConnectionService = serverConnectionService;
+        _logger = logger;
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
         _launcher = launcher;
@@ -105,7 +107,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
 
     [ReactiveCommand]
     private Task OpenFileInfoWindowAsync(SshKeyFileSource source, CancellationToken cancellationToken = default) =>
-        OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource, FileInfoViewModelInitializer>(
+        OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource>(
             source,
             cancellationToken);
 
@@ -134,7 +136,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Unhandled error during key reset");
+            _logger.LogError(e, "Unhandled error during key reset");
         }
     }
 
@@ -147,7 +149,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, x.Exception.Message);
                 break;
             default:
-                Logger.LogInformation("Keys reloaded");
+                _logger.LogInformation("Keys reloaded");
                 break;
         }
     }
@@ -160,7 +162,7 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         switch (key)
         {
             case null or { NeedsPassword: true, Password.IsValid: false }:
-                Logger.LogError("Keyfile is null");
+                _logger.LogError("Keyfile is null");
                 return Task.CompletedTask;
             case { NeedsPassword: false, Password.IsValid: true }:
             {
@@ -202,11 +204,11 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
         }
 
         var view = await _serviceProvider
-            .ResolveViewAsync<ExportWindow, ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(
-                new ExportWindowViewModelInitializerParameters
+            .ResolveViewAsync<ExportWindow, ExportWindowViewModel, (string WindowTitle, string Export)>(
+                initializerParameters: new ValueTuple<string, string>
                 {
-                    Export = content,
-                    WindowTitle = windowTitle
+                    Item1 =  windowTitle,
+                    Item2 = content
                 }, token: token);
         await _dialogHost.ShowDialog(view);
     }
@@ -309,26 +311,17 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
                 "could not be opened correctly"));
     }
 
-    private async Task OpenWindow<TWindow, TViewModel, TParam, TInitializer>(TParam param,
+    private async Task OpenWindow<TWindow, TViewModel, TInitializer>(TInitializer param,
         CancellationToken token = default)
         where TWindow : WindowBase<TViewModel, TInitializer>
-        where TViewModel : ViewModelBase<TViewModel, TInitializer>
-        where TInitializer : class, IInitializerParameters<TViewModel>
-
-    {
-        var initializer = System.Activator.CreateInstance<TInitializer>();
-        foreach (var property in initializer.GetType().GetProperties()
-                     .Where(pi => pi.PropertyType == typeof(TParam) && pi.CanWrite))
-            property.SetValue(initializer, param);
-
+        where TViewModel : ViewModelBase<TInitializer> =>
         await _dialogHost.ShowDialog<TWindow, TViewModel>(
-            await _serviceProvider.ResolveViewAsync<TWindow, TViewModel, TInitializer>(initializer, token: token)
+            await _serviceProvider.ResolveViewAsync<TWindow, TViewModel, TInitializer>(param, token: token)
         );
-    }
 
     private async Task OpenWindow<TWindow, TViewModel>(CancellationToken token = default)
         where TWindow : WindowBase<TViewModel>
-        where TViewModel : ViewModelBase<TViewModel> =>
+        where TViewModel : ViewModelBase =>
         await _dialogHost.ShowDialog<TWindow, TViewModel>(
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));
 

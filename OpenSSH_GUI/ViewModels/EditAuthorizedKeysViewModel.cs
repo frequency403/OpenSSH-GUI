@@ -16,8 +16,10 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedKeysViewModel>
+public partial class EditAuthorizedKeysViewModel : ViewModelBase
 {
+    private readonly ILogger<EditAuthorizedKeysViewModel> _logger;
+
     [ObservableAsProperty]
     private bool _addButtonEnabled;
 
@@ -30,10 +32,12 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
 
     [Reactive] private SshKeyFile? _selectedKey;
 
-    public EditAuthorizedKeysViewModel(ILogger<EditAuthorizedKeysViewModel> logger,
+    public EditAuthorizedKeysViewModel(
+        ILogger<EditAuthorizedKeysViewModel> logger,
         SshKeyManager sshKeyManager,
-        ServerConnectionService serverConnectionService) : base(logger)
+        ServerConnectionService serverConnectionService)
     {
+        _logger = logger;
         SshKeyManager = sshKeyManager;
         ServerConnectionService = serverConnectionService;
         SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
@@ -81,7 +85,7 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase<EditAuthorizedK
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error while editing authorized keys");
+            _logger.LogError(e, "Error while editing authorized keys");
         }
     }
 

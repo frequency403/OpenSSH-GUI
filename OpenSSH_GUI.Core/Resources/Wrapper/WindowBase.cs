@@ -11,8 +11,7 @@ using ReactiveUI.Avalonia;
 namespace OpenSSH_GUI.Core.Resources.Wrapper;
 
 public abstract class WindowBase<TViewModel, TViewModelInitializer> : WindowBase<TViewModel>
-    where TViewModel : ViewModelBase<TViewModel, TViewModelInitializer>
-    where TViewModelInitializer : class, IInitializerParameters<TViewModel>
+    where TViewModel : ViewModelBase<TViewModelInitializer>
 {
     public async ValueTask InitializeAsync(TViewModelInitializer initializer,
         WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen,
@@ -25,8 +24,7 @@ public abstract class WindowBase<TViewModel, TViewModelInitializer> : WindowBase
 }
 
 public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisposable
-    where TViewModel : ViewModelBase<TViewModel>
-{
+    where TViewModel : ViewModelBase{
     private CompositeDisposable Disposables { get; } = new();
     public required ILogger<WindowBase<TViewModel>> Logger { get; set; }
     public required IResolver Resolver { get; set; }

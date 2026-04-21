@@ -20,10 +20,11 @@ using SshNet.Keygen.SshKeyEncryption;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
+public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 {
     private const string KeyPrefix = "id";
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly ILogger<AddKeyWindowViewModel> _logger;
     private readonly SshKeyManager _sshKeyManager;
 
     [ObservableAsProperty(ReadOnly = true)]
@@ -46,8 +47,9 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
 
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
-        IMessageBoxProvider messageBoxProvider) : base(logger)
+        IMessageBoxProvider messageBoxProvider)
     {
+        _logger = logger;
         _sshKeyManager = sshKeyManager;
         _messageBoxProvider = messageBoxProvider;
 
@@ -142,7 +144,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error creating key");
+            _logger.LogError(e, "Error creating key");
             await _messageBoxProvider.ShowErrorMessageBoxAsync(e, StringsAndTexts.Error);
             CloseOnBooleanSubmit = false;
         }

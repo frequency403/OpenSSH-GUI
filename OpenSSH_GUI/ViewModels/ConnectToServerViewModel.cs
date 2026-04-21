@@ -22,7 +22,7 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToServerViewModel>
+public sealed partial class ConnectToServerViewModel : ViewModelBase
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<ConnectToServerViewModel> _logger;
@@ -70,7 +70,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         ServerConnectionService serverConnectionService,
         IMessageBoxProvider messageBoxProvider,
         IConfiguration configuration,
-        SshKeyManager sshKeyManager) : base(logger)
+        SshKeyManager sshKeyManager)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
@@ -237,11 +237,12 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase<ConnectToSe
         try
         {
             if (!await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken))
-                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, StringsAndTexts.ConnectToServerConnectionFailed);
+                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+                    StringsAndTexts.ConnectToServerConnectionFailed);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Unhandled error during connection");
+            _logger.LogError(e, "Unhandled error during connection");
             await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error, e.Message);
         }
     }

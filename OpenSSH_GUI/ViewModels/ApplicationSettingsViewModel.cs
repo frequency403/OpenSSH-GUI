@@ -19,8 +19,7 @@ using Serilog.Events;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSettingsViewModel>
-{
+public partial class ApplicationSettingsViewModel : ViewModelBase{
     private readonly Application _application;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
