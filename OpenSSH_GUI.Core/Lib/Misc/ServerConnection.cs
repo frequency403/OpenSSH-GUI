@@ -153,6 +153,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFile authorizedKeysFile,
         CancellationToken token = default)
     {
+        if (!authorizedKeysFile.ChangesMade) return false;
         if (!IsConnected) return false;
 
         var path = await ResolveRemoteEnvVariablesAsync(

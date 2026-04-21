@@ -37,6 +37,10 @@ public class AuthorizedKeysFile : ReactiveObject
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
+    
+    private AuthorizedKey[] _authorizedKeys = [];
+    
+    public bool ChangesMade => !_authorizedKeys.SequenceEqual(AuthorizedKeys);
 
     public static AuthorizedKeysFile Empty { get; } = new();
 
@@ -70,6 +74,7 @@ public class AuthorizedKeysFile : ReactiveObject
     /// <returns>The modified <see cref="AuthorizedKeysFile" /> object.</returns>
     public async ValueTask<AuthorizedKeysFile> PersistChangesInFileAsync(CancellationToken token = default)
     {
+        if (!ChangesMade) return this;
         if (IsFileFromServer) return this;
         await using (var file = new FileStream(_fileContentsOrPath, FileMode.Truncate))
         await using (var streamWriter = new StreamWriter(file))
@@ -154,6 +159,7 @@ public class AuthorizedKeysFile : ReactiveObject
         {
             IsFileFromServer = true;
         }
+        _authorizedKeys = AuthorizedKeys.ToArray();
     }
 
     /// <summary>
