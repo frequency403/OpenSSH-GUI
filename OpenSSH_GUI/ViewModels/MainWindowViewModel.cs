@@ -164,11 +164,10 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
             case null or { NeedsPassword: true, Password.IsValid: false }:
                 Logger.LogError("Keyfile is null");
                 return Task.CompletedTask;
-            case { NeedsPassword: false, Password.IsValid: true } passwordProtectedKeyFile:
+            case { NeedsPassword: false, Password.IsValid: true }:
             {
-                keyFile = passwordProtectedKeyFile;
                 if (keyFile is not null)
-                    content = keyFile.ToOpenSshFormat(passwordProtectedKeyFile.Password.GetPasswordString());
+                    content = keyFile.ToOpenSshFormat(key.Password.GetPasswordString());
                 break;
             }
             default:
@@ -186,15 +185,17 @@ public partial class MainWindowViewModel : ViewModelBase<MainWindowViewModel>
     private Task ShowPublicKeyExportWindow(SshKeyFile key, CancellationToken token = default)
     {
         PrivateKeyFile? keyFile = key;
-        var content = keyFile is not null ? keyFile.ToOpenSshPublicFormat() : string.Empty;
-        return ShowExportWindow(key, content, null, token);
+        return keyFile != null
+            ? ShowExportWindow(key, keyFile.ToOpenSshFormat(), null, token)
+                : _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+                StringsAndTexts.MainWindowViewModelExportKeyErrorMessage);
     }
 
     private async Task ShowExportWindow(SshKeyFile key, string content, string? windowTitle = null,
         CancellationToken token = default)
     {
         windowTitle ??= string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
-            key.HashAlgorithmName, key.FileName);
+            key.KeyType, key.FileName);
         if (string.IsNullOrWhiteSpace(content))
         {
             await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
