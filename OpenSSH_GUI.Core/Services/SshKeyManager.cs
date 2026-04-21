@@ -14,6 +14,7 @@ using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Dialogs.Models;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -28,10 +29,9 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
-public sealed class SshKeyManager : ReactiveObject, IDisposable
+public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 {
     private const string BackupFileExtension = "bak";
-
     private static readonly FileStreamOptions FileStreamOptions = new()
     {
         BufferSize = 0,
@@ -46,28 +46,24 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
     private static string _backupLogFile =
         Path.Combine(BackupDirectory, Path.ChangeExtension(nameof(SshKeyManager), "log"));
 
-    private readonly Lib.Misc.DirectoryCrawler _directoryCrawler;
-    private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly DirectoryCrawler _directoryCrawler;
     private readonly ILogger<SshKeyManager> _logger;
     private readonly IResolver _resolver;
-
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
-
     private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
     private readonly FileSystemWatcher _watcher;
     private ILogger<SshKeyManager>? _backupLogger;
-
     private SerilogLoggerFactory? _loggerFactory;
+
+    [Reactive] private bool _processing;
 
     public SshKeyManager(
         ILogger<SshKeyManager> logger,
-        Lib.Misc.DirectoryCrawler directoryCrawler,
-        IMessageBoxProvider messageBoxProvider,
+        DirectoryCrawler directoryCrawler,
         IResolver resolver)
     {
         _logger = logger;
         _directoryCrawler = directoryCrawler;
-        _messageBoxProvider = messageBoxProvider;
         _resolver = resolver;
 
         if (!OperatingSystem.IsWindows())
@@ -174,7 +170,9 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
     /// </summary>
     public async ValueTask InitialSearchAsync(CancellationToken token = default)
     {
+        Processing = true;
         await SearchForKeysAndUpdateCollectionAsync(token);
+        Processing = false;
     }
 
     /// <summary>
@@ -207,6 +205,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         var keyFilePath = string.Empty;
         try
         {
+            Processing = true;
             keyFilePath = key.AbsoluteFilePath;
             var privateKeyFile = key.PrivateKeyFile;
             ArgumentNullException.ThrowIfNull(privateKeyFile);
@@ -304,6 +303,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
             if (semaphoreAcquired)
                 _semaphoreSlim.Release();
             DisableTempLogger(errorsOccured);
+            Processing = false;
         }
     }
 
@@ -330,6 +330,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         var semaphoreAcquired = false;
         try
         {
+            Processing = true;
             semaphoreAcquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
             foreach (var keyFile in key.KeyFiles)
                 try
@@ -359,6 +360,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
             if (semaphoreAcquired)
                 _semaphoreSlim.Release();
             DisableTempLogger(errorsOccured);
+            Processing = false;
         }
     }
 
@@ -402,6 +404,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         BackedUpFile[] backupFiles = [];
         try
         {
+            Processing  = true;
             semaphoreAcquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
             if (!semaphoreAcquired)
                 throw new InvalidOperationException("Another key operation is in progress");
@@ -458,6 +461,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
             if (semaphoreAcquired)
                 _semaphoreSlim.Release();
             DisableTempLogger(errorsOccurred);
+            Processing = false;
         }
     }
 
@@ -546,6 +550,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         var errorsOccured = false;
         try
         {
+            Processing = true;
             backupFiles = BackupFiles(key.KeyFiles).ToArray();
 
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(2), token);
@@ -613,21 +618,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
                 _semaphoreSlim.Release();
 
             DisableTempLogger(errorsOccured);
-        }
-    }
-
-    /// <summary>
-    ///     Changes the order of the SSH keys in the collection.
-    /// </summary>
-    /// <param name="orderFunc">Function to reorder the keys.</param>
-    public void ChangeOrder(Func<IEnumerable<SshKeyFile>, IEnumerable<SshKeyFile>> orderFunc)
-    {
-        var reordered = orderFunc(SshKeys).ToList();
-        for (var i = 0; i < reordered.Count; i++)
-        {
-            var oldIndex = _sshKeysInternal.IndexOf(reordered[i]);
-            if (oldIndex != i)
-                _sshKeysInternal.Move(oldIndex, i);
+            Processing = false;
         }
     }
 
@@ -689,6 +680,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
             return KeyManagerOperationResult.FromException(new InvalidOperationException("Another key operation is in progress"));
         try
         {
+            Processing = true;
             GeneratedPrivateKey? createdKey;
             try
             {
@@ -725,6 +717,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         finally
         {
             _semaphoreSlim.Release();
+            Processing = false;
         }
     }
 
@@ -738,6 +731,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
             return KeyManagerOperationResult.FromException(new InvalidOperationException("Another key operation is in progress"));
         try
         {
+            Processing = true;
             _sshKeysInternal.Clear();
             await SearchForKeysAndUpdateCollectionAsync(token);
         }
@@ -749,6 +743,7 @@ public sealed class SshKeyManager : ReactiveObject, IDisposable
         finally
         {
             _semaphoreSlim.Release();
+            Processing = false;
         }
         return KeyManagerOperationResult.Success();
     }
