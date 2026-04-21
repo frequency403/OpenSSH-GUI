@@ -9,25 +9,12 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
 /// Represents a known hosts file.
-public sealed partial record KnownHostsFile : ReactiveRecord
+public sealed partial record KnownHostsFile(bool IsFromServer = false) : ReactiveRecord
 {
-    /// <summary>
-    ///     Gets or sets a boolean value indicating whether the `KnownHostsFile` object is created from a server or not.
-    /// </summary>
-    private readonly bool _isFromServer;
-
-    private readonly string _lineEnding;
-
     /// <summary>
     ///     Represents a known hosts file.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHost> _knownHosts = [];
-
-    private KnownHostsFile(bool isFromServer = false, PlatformID? platformId = null)
-    {
-        _isFromServer = isFromServer;
-        _lineEnding = (platformId ?? Environment.OSVersion.Platform).GetLineSeparator();
-    }
 
     public static KnownHostsFile Empty { get; } = new();
 
@@ -62,7 +49,7 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     /// <returns>A <see cref="ValueTask" /> representing the asynchronous operation.</returns>
     public async ValueTask ReadContentAsync(FileStream? stream = null, CancellationToken token = default)
     {
-        if (_isFromServer) return;
+        if (IsFromServer) return;
         if (stream is null)
         {
             await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), SshKeyManager.FileStreamOptions);
@@ -77,27 +64,16 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     }
 
     /// <summary>
-    ///     Synchronizes the known hosts with the given list of new known hosts.
-    /// </summary>
-    /// <param name="newKnownHosts">The new known hosts to synchronize.</param>
-    public void SyncKnownHosts(IEnumerable<KnownHost> newKnownHosts)
-    {
-        KnownHosts = new ObservableCollection<KnownHost>(newKnownHosts);
-    }
-
-    /// <summary>
     ///     Updates the content of the known hosts file asynchronously.
     /// </summary>
     /// <returns>A <see cref="ValueTask" /> representing the update operation.</returns>
     public async ValueTask UpdateFileAsync()
     {
-        // BUG: Only write to file when changes were made
-        if (_isFromServer) return;
+        if(!KnownHosts.Any(e => e.ChangesMade)) return;
+        if (IsFromServer) return;
         await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), FileMode.Truncate);
         await using var streamWriter = new StreamWriter(file);
-        var newContent = KnownHosts
-            .Where(e => !e.DeleteWholeHost)
-            .Aggregate("", (current, host) => current + host.Export());
+        var newContent = Export();
         await streamWriter.WriteAsync(newContent);
         file.Seek(0, SeekOrigin.Begin);
         await SetKnownHostsAsync(file, false);
@@ -110,14 +86,13 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     /// <returns>The updated contents of the known hosts file as a string.</returns>
     public async ValueTask<string> GetUpdatedContentsAsync(PlatformID platformId)
     {
-        if (!_isFromServer) return "";
-        var content = KnownHosts
-            .Where(e => !e.DeleteWholeHost)
-            .Aggregate("", (current, host) => current + host.Export(platformId));
+        if (!IsFromServer) return "";
+        var content = Export(platformId);
 
         using var memoryStream = new MemoryStream();
         Memory<byte> newContent = Encoding.UTF8.GetBytes(content);
         await memoryStream.WriteAsync(newContent);
+        memoryStream.Seek(0, SeekOrigin.Begin);
         await SetKnownHostsAsync(memoryStream, false);
         return content;
     }
@@ -144,32 +119,15 @@ public sealed partial record KnownHostsFile : ReactiveRecord
             KnownHosts.Add(new KnownHost(dictionaryEntry));
         }
     }
-}
 
-public readonly record struct KnownHostHost
-{
-    private readonly string _originalHostEntry;
-
-    public int Port { get; } = 22;
-    public string Host { get; } = string.Empty;
-    
-    public KnownHostHost(string host)
+    private string Export(PlatformID? platformId = null)
     {
-        _originalHostEntry = host;
-        if (host.Split(':') is not { Length: 2 } split)
+        platformId ??= Environment.OSVersion.Platform;
+        var stringBuilder = new StringBuilder();
+        foreach (var knownHost in KnownHosts)
         {
-            Host = host;
+            stringBuilder.Append(knownHost.Export(platformId));
         }
-        else
-        {
-            Port = int.Parse(split[1]);
-            Host = split[0];
-        }
-        Host = Host.Trim('[', ']');
-    }
-
-    public override string ToString()
-    {
-        return _originalHostEntry;
+        return stringBuilder.ToString();
     }
 }

@@ -25,10 +25,6 @@ public partial class EditKnownHostsWindowViewModel(ServerConnectionService serve
     {
         if (!inputParameter) return;
         ArgumentNullException.ThrowIfNull(KnownHostsFileLocal);
-
-        KnownHostsFileLocal.SyncKnownHosts(KnownHostsLocal);
-        if (serverConnectionService.IsConnected)
-            KnownHostsFileRemote?.SyncKnownHosts(KnownHostsRemote);
         await KnownHostsFileLocal.UpdateFileAsync();
         if (!serverConnectionService.IsConnected) return;
         ArgumentNullException.ThrowIfNull(KnownHostsFileRemote);

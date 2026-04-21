@@ -127,6 +127,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     public async ValueTask<bool> WriteKnownHostsToServerAsync(KnownHostsFile knownHostsFile,
         CancellationToken token = default)
     {
+        if (!knownHostsFile.KnownHosts.Any(e => e.ChangesMade)) return false;
         if (!IsConnected) return false;
 
         var path = await ResolveRemoteEnvVariablesAsync(

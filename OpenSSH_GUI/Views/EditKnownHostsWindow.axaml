@@ -35,25 +35,27 @@
     </Window.Styles>
     <Window.DataTemplates>
         <DataTemplate DataType="knownHosts:KnownHost">
-            <Expander HorizontalAlignment="Stretch" Margin="5">
-                <Expander.Header>
-                    <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
-                        <TextBlock Grid.Column="0" Text="{Binding Host}" HorizontalAlignment="Center"
-                                   FontWeight="Bold" />
-                        <ToggleButton Grid.Column="1" IsChecked="False" Classes="whole-host"
-                                      Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
-                            <ToolTip.Tip>
-                                <Label
-                                    Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
-                            </ToolTip.Tip>
-                            <Panel>
-                                <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
-                                <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
-                            </Panel>
-                        </ToggleButton>
-                    </Grid>
-                </Expander.Header>
-                <Grid RowDefinitions="* *" ColumnDefinitions="* * *">
+            <Expander HorizontalAlignment="Stretch" Margin="5" Background="Transparent" Header="{Binding}">
+                <Expander.HeaderTemplate>
+                    <DataTemplate DataType="{x:Type knownHosts:KnownHost}">
+                        <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
+                            <TextBlock Grid.Column="0" Text="{Binding Host}" HorizontalAlignment="Center"
+                                       FontWeight="Bold" />
+                            <ToggleButton Grid.Column="1" IsChecked="False" Classes="whole-host"
+                                          Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
+                                <ToolTip.Tip>
+                                    <Label
+                                        Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
+                                </ToolTip.Tip>
+                                <Panel>
+                                    <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
+                                    <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
+                                </Panel>
+                            </ToggleButton>
+                        </Grid>
+                    </DataTemplate>
+                </Expander.HeaderTemplate>
+                <Grid RowDefinitions="* *" ColumnDefinitions="1* 3* 1*">
                     <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
                             BorderBrush="{DynamicResource BorderSubtleBrush}"
                             BorderThickness="0 0 0 1" Margin="0 5">

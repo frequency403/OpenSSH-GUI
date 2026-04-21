@@ -19,18 +19,6 @@ public partial record KnownHostKey : ReactiveRecord
     /// <summary>
     ///     Represents a known host key in the OpenSSH GUI.
     /// </summary>
-    public KnownHostKey(string entry)
-    {
-        _entryWithoutHost = entry.Trim();
-        var splitted = _entryWithoutHost.Split(' ');
-        TypeDeclarationInFile = splitted[0];
-        KeyType = Enum.Parse<SshKeyType>(
-            TypeDeclarationInFile.StartsWith("ssh-")
-                ? TypeDeclarationInFile.Replace("ssh-", "")
-                : TypeDeclarationInFile.Split('-')[0], true);
-        Fingerprint = splitted[1];
-    }
-
     public KnownHostKey(string[] keyParts)
     {
         _entryWithoutHost = string.Join(" ", keyParts);

@@ -19,28 +19,17 @@ public partial record KnownHost : ReactiveRecord
 
     public KnownHostHost HostUri { get; }
 
+    private KnownHostKey[] _keysCopy;
+
     public KnownHost(KeyValuePair<KnownHostHost, KnownHostKey[]> knownHosts)
     {
         HostUri = knownHosts.Key;
-        Keys.AddRange(knownHosts.Value);
-    }
-    
-    public KnownHost(KnownHostHost uri, KnownHostKey[] keys)
-    {
-        HostUri = uri;
-        Keys.AddRange(keys);
-    }
-    
-    /// <summary>
-    ///     Represents a known host entry in the known_hosts file.
-    /// </summary>
-    public KnownHost(IGrouping<string, string> knownHosts)
-    {
-        HostUri = new KnownHostHost(knownHosts.Key);
-        Keys = new ObservableCollection<KnownHostKey>(knownHosts.Select(e =>
-            new KnownHostKey(e.Replace($"{Host}", "").Trim())));
+        _keysCopy = knownHosts.Value;
+        Keys.AddRange(_keysCopy);
     }
 
+    public bool ChangesMade => !_keysCopy.SequenceEqual(Keys);
+    
     /// <summary>
     ///     Gets or sets the toggled state of the switch.
     /// </summary>
@@ -96,7 +85,7 @@ public partial record KnownHost : ReactiveRecord
         var stringBuilder = new StringBuilder();
         foreach (var knownHostKey in Keys.Where(e => !e.MarkedForDeletion))
         {
-            stringBuilder.Append($"{Host} {knownHostKey}");
+            stringBuilder.Append($"{Host} {knownHostKey}{platformId.Value.GetLineSeparator()}");
         }
         return stringBuilder.ToString();
     }
