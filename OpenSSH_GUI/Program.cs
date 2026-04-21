@@ -19,14 +19,13 @@ using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 namespace OpenSSH_GUI;
 
 // REFACTOR: Change Readme.MD accordingly to new Project functionality;
-// REFACTOR: Implement a "Config" from JSON Format and Provider/Applyer via IConfiguration
 [UsedImplicitly]
 internal sealed class Program
 {
     private const SshConfigFiles ConfigFile = SshConfigFiles.Config;
     private const SshConfigFiles SshdConfig = SshConfigFiles.Sshd_Config;
     public const string AppName = "OpenSSH GUI";
-    public const string VersionEnvVar = "RUNNING_VERSION"; // REFACTOR: Can be used for config versioning
+    public const string VersionEnvVar = "RUNNING_VERSION";
 
     private static string GetHostVersion()
     {

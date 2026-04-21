@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Threading;
 using DryIoc;
-using DryIoc.Microsoft.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
@@ -15,17 +13,16 @@ public class DependencyInjectionExtensionsTests
     public void RegisterViewWithViewModel_ValidNaming_ShouldRegister()
     {
         // Arrange
-        var services = new Container();
+        var services = new Container(rules => rules.WithoutThrowOnRegisteringDisposableTransient());
 
         // Act
         services.RegisterViewWithViewModel<MockWindow, MockWindowViewModel>();
-        var provider = services.BuildServiceProvider();
 
         // Assert
         Dispatcher.UIThread.Invoke(() =>
         {
-            Assert.NotNull(provider.GetKeyedService<MockWindow>("MockWindow"));
-            Assert.NotNull(provider.GetKeyedService<MockWindowViewModel>("MockWindowViewModel"));
+            Assert.NotNull(services.Resolve<MockWindow>("MockWindow"));
+            Assert.NotNull(services.Resolve<MockWindowViewModel>("MockWindowViewModel"));
         });
     }
 
