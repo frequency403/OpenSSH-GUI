@@ -11,12 +11,6 @@ public class FlyoutButton : ContentControl
     public static readonly StyledProperty<FlyoutBase?> FlyoutProperty =
         AvaloniaProperty.Register<FlyoutButton, FlyoutBase?>(nameof(Flyout));
 
-    public FlyoutBase? Flyout
-    {
-        get => GetValue(FlyoutProperty);
-        set => SetValue(FlyoutProperty, value);
-    }
-
     public FlyoutButton()
     {
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Tunnel);
@@ -27,6 +21,12 @@ public class FlyoutButton : ContentControl
             PseudoClasses.Set(":pointerover", false);
             PseudoClasses.Set(":pressed", false);
         });
+    }
+
+    public FlyoutBase? Flyout
+    {
+        get => GetValue(FlyoutProperty);
+        set => SetValue(FlyoutProperty, value);
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)

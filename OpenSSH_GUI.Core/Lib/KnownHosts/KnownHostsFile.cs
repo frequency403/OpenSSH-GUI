@@ -2,6 +2,7 @@
 using System.Text;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
@@ -21,12 +22,13 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     ///     Represents a known hosts file.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHost> _knownHosts = [];
-    
-    private KnownHostsFile(bool isFromServer = false, PlatformID? platformId = null) 
-    { 
+
+    private KnownHostsFile(bool isFromServer = false, PlatformID? platformId = null)
+    {
         _isFromServer = isFromServer;
         _lineEnding = (platformId ?? Environment.OSVersion.Platform).GetLineSeparator();
     }
+
     public static KnownHostsFile Empty { get; } = new();
 
     public static ValueTask<KnownHostsFile> InitializeAsync(FileInfo fileInfo, bool fromServer = false,
@@ -34,7 +36,7 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     {
         return fileInfo is null
             ? throw new ArgumentNullException(nameof(fileInfo))
-            : InitializeAsync(new FileStream(fileInfo.FullName, FileMode.OpenOrCreate), fromServer, true, token);
+            : InitializeAsync(new FileStream(fileInfo.FullName, SshKeyManager.FileStreamOptions), fromServer, true, token);
     }
 
     public static async ValueTask<KnownHostsFile> InitializeAsync(Stream knownHostsContent, bool fromServer = false,
@@ -63,7 +65,7 @@ public sealed partial record KnownHostsFile : ReactiveRecord
         if (_isFromServer) return;
         if (stream is null)
         {
-            await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), FileMode.OpenOrCreate);
+            await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), SshKeyManager.FileStreamOptions);
             using var streamReader = new StreamReader(file, leaveOpen: true);
             await SetKnownHostsAsync(file, false, token);
         }
@@ -95,7 +97,7 @@ public sealed partial record KnownHostsFile : ReactiveRecord
         await using var streamWriter = new StreamWriter(file);
         var newContent = KnownHosts
             .Where(e => !e.DeleteWholeHost)
-            .Aggregate("", (current, host) => current + host.GetAllEntries());
+            .Aggregate("", (current, host) => current + host.Export());
         await streamWriter.WriteAsync(newContent);
         file.Seek(0, SeekOrigin.Begin);
         await SetKnownHostsAsync(file, false);
@@ -111,7 +113,7 @@ public sealed partial record KnownHostsFile : ReactiveRecord
         if (!_isFromServer) return "";
         var content = KnownHosts
             .Where(e => !e.DeleteWholeHost)
-            .Aggregate("", (current, host) => current + host.GetAllEntries());
+            .Aggregate("", (current, host) => current + host.Export(platformId));
 
         using var memoryStream = new MemoryStream();
         Memory<byte> newContent = Encoding.UTF8.GetBytes(content);
@@ -125,10 +127,49 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     {
         KnownHosts.Clear();
         using var streamReader = new StreamReader(contentStream, leaveOpen: !disposeStream);
-        foreach (var knownHost in (await streamReader.ReadToEndAsync(token)).Split(_lineEnding)
-                 .Where(e => !string.IsNullOrEmpty(e))
-                 .GroupBy(e => e.Split(' ')[0])
-                 .Select(e => new KnownHost(e, _lineEnding)))
-            KnownHosts.Add(knownHost);
+        var dicc = new Dictionary<KnownHostHost, KnownHostKey[]>();
+        while (await streamReader.ReadLineAsync(token) is { } line)
+        {
+            if(line.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) is not { Length: >= 2} splitted)
+                continue;
+            foreach (var host in splitted[0].Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+            {
+                var uri = new KnownHostHost(host);
+                var key = new KnownHostKey(splitted[1..]);
+                dicc.Add(uri, dicc.Remove(uri, out var keys) ? keys.Append(key).ToArray() : [key]);
+            }
+        }
+        foreach (var dictionaryEntry in dicc)
+        {
+            KnownHosts.Add(new KnownHost(dictionaryEntry));
+        }
+    }
+}
+
+public readonly record struct KnownHostHost
+{
+    private readonly string _originalHostEntry;
+
+    public int Port { get; } = 22;
+    public string Host { get; } = string.Empty;
+    
+    public KnownHostHost(string host)
+    {
+        _originalHostEntry = host;
+        if (host.Split(':') is not { Length: 2 } split)
+        {
+            Host = host;
+        }
+        else
+        {
+            Port = int.Parse(split[1]);
+            Host = split[0];
+        }
+        Host = Host.Trim('[', ']');
+    }
+
+    public override string ToString()
+    {
+        return _originalHostEntry;
     }
 }

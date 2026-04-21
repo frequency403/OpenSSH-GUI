@@ -55,7 +55,9 @@
             <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}">
                 <UniformGrid Rows="1" ColumnSpacing="5" HorizontalAlignment="Stretch">
                     <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
-                    <Button Command="{Binding OnNextFontSizeCommand}" Background="{DynamicResource InfoBrush}" CommandParameter="{StaticResource BaseFontSize}">
+                    <Button Command="{Binding OnNextFontSizeCommand}" 
+                            Background="{DynamicResource InfoBrush}"
+                            CommandParameter="{StaticResource BaseFontSize}">
                         <avalonia:MaterialIcon Kind="Replay" />
                     </Button>
                 </UniformGrid>

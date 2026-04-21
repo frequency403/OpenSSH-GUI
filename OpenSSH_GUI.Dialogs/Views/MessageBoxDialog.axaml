@@ -11,7 +11,7 @@
         ShowInTaskbar="False"
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="False">
-        <!-- ReSharper disable InconsistentNaming -->
+    <!-- ReSharper disable InconsistentNaming -->
     <Border Padding="24 20 24 16">
         <Grid RowDefinitions="*,16,Auto">
 
@@ -22,7 +22,7 @@
                         VerticalAlignment="Top">
 
                 <!-- Material Icon – visibility and kind set from code-behind -->
-                
+
                 <avalonia:MaterialIcon x:Name="PART_MaterialIcon"
                                        Width="32"
                                        Height="32"

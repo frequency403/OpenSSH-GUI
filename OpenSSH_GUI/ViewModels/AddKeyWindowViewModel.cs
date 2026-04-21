@@ -23,12 +23,12 @@ namespace OpenSSH_GUI.ViewModels;
 public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 {
     private const string KeyPrefix = "id";
-    private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly ILogger<AddKeyWindowViewModel> _logger;
+    private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly SshKeyManager _sshKeyManager;
 
     [ObservableAsProperty(ReadOnly = true)]
-    private int[] _avaliableKeySizes = [];
+    private int[] _availableKeySizes = [];
 
     [ObservableAsProperty(ReadOnly = true)]
     private bool _canChangeKeySize;
@@ -55,19 +55,22 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
         var selectedKeyTypeChanged = this.WhenAnyValue(vm => vm.SelectedKeyType)
             .ObserveOn(AvaloniaScheduler.Instance);
-        
-        _avaliableKeySizesHelper = selectedKeyTypeChanged
+
+        _availableKeySizesHelper = selectedKeyTypeChanged
             .Select(e => e.SupportedKeySizes.OrderDescending().ToArray())
-            .ToProperty(this, vm => vm.AvaliableKeySizes, initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.OrderDescending().ToArray())
+            .ToProperty(this, vm => vm.AvailableKeySizes,
+                SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.OrderDescending().ToArray())
             .DisposeWith(Disposables);
-        
+
         selectedKeyTypeChanged
             .Subscribe(e =>
             {
-                if(DefaultKeyNames.Values.Any(keyName => string.IsNullOrWhiteSpace(KeyName) || string.Equals(keyName, KeyName, StringComparison.OrdinalIgnoreCase)))
-                   if(DefaultKeyNames.TryGetValue(e, out var defaultKeyName))
-                       KeyName = defaultKeyName;
-                
+                if (DefaultKeyNames.Values.Any(keyName =>
+                        string.IsNullOrWhiteSpace(KeyName) ||
+                        string.Equals(keyName, KeyName, StringComparison.OrdinalIgnoreCase)))
+                    if (DefaultKeyNames.TryGetValue(e, out var defaultKeyName))
+                        KeyName = defaultKeyName;
+
                 SelectedKeySize = e switch
                 {
                     SshKeyType.ECDSA => SshKeyGenerateInfo.DefaultEcdsaSshKeyLength,
@@ -77,27 +80,31 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
                 };
             })
             .DisposeWith(Disposables);
-        
-        _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvaliableKeySizes)
+
+        _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvailableKeySizes)
             .Select(e => e.Length > 1)
-            .ToProperty(this, vm => vm.CanChangeKeySize, initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Any())
+            .ToProperty(this, vm => vm.CanChangeKeySize,
+                initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Any())
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.KeyName)
-                .ObserveOn(AvaloniaScheduler.Instance)
-                .Subscribe(name =>
-                {
-                    if(string.IsNullOrWhiteSpace(name) && DefaultKeyNames.TryGetValue(SelectedKeyType, out var value))
-                        KeyName = value;
-                    
-                }).DisposeWith(Disposables);
-        
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Subscribe(name =>
+            {
+                if (string.IsNullOrWhiteSpace(name) && DefaultKeyNames.TryGetValue(SelectedKeyType, out var value))
+                    KeyName = value;
+            }).DisposeWith(Disposables);
+
         KeyNameValidationHelper =
             this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError)
                 .DisposeWith(Disposables);
     }
 
-    public static IDictionary<SshKeyType, string> DefaultKeyNames { get; } = Enum.GetValues<SshKeyType>().Select(type => new KeyValuePair<SshKeyType, string>(type, string.Join("_", KeyPrefix, Enum.GetName(type)!.ToLower()))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+    public static IDictionary<SshKeyType, string> DefaultKeyNames { get; } = Enum.GetValues<SshKeyType>()
+        .Select(type =>
+            new KeyValuePair<SshKeyType, string>(type, string.Join("_", KeyPrefix, Enum.GetName(type)!.ToLower())))
+        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 

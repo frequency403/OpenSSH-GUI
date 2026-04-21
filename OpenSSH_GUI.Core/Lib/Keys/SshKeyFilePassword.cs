@@ -112,9 +112,9 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     /// </summary>
     public string GetPasswordString()
     {
-        if(!IsValid) 
+        if (!IsValid)
             return string.Empty;
-        
+
         Span<char> chars = stackalloc char[_encoding.GetMaxCharCount(_bufferWriter.WrittenCount)];
         var written = _encoding.GetChars(_bufferWriter.WrittenSpan, chars);
         var result = new string(chars[..written]);

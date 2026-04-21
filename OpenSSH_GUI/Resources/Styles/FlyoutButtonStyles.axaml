@@ -8,7 +8,7 @@
     <Style Selector="controls|FlyoutButton.Clickable:pressed">
         <Setter Property="Background" Value="{DynamicResource BorderSubtleBrush}" />
     </Style>
-    
+
     <Style Selector="controls|FlyoutButton">
         <Setter Property="Background" Value="{DynamicResource ForegroundSecondaryBrush}" />
         <Setter Property="Padding" Value="8,4" />

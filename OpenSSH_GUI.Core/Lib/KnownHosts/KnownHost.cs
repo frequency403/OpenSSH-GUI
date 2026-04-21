@@ -1,4 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
+using DynamicData;
+using OpenSSH_GUI.Core.Extensions;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
@@ -9,21 +12,33 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// </summary>
 public partial record KnownHost : ReactiveRecord
 {
-    private readonly string _lineEnding;
-    
     /// <summary>
     ///     Represents a known host in the OpenSSH_GUI.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHostKey> _keys = [];
 
+    public KnownHostHost HostUri { get; }
+
+    public KnownHost(KeyValuePair<KnownHostHost, KnownHostKey[]> knownHosts)
+    {
+        HostUri = knownHosts.Key;
+        Keys.AddRange(knownHosts.Value);
+    }
+    
+    public KnownHost(KnownHostHost uri, KnownHostKey[] keys)
+    {
+        HostUri = uri;
+        Keys.AddRange(keys);
+    }
+    
     /// <summary>
     ///     Represents a known host entry in the known_hosts file.
     /// </summary>
-    public KnownHost(IGrouping<string, string> knownHosts, string lineEnding)
+    public KnownHost(IGrouping<string, string> knownHosts)
     {
-        _lineEnding = lineEnding;
-        Host = knownHosts.Key;
-        Keys = new ObservableCollection<KnownHostKey>(knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim())));
+        HostUri = new KnownHostHost(knownHosts.Key);
+        Keys = new ObservableCollection<KnownHostKey>(knownHosts.Select(e =>
+            new KnownHostKey(e.Replace($"{Host}", "").Trim())));
     }
 
     /// <summary>
@@ -34,12 +49,12 @@ public partial record KnownHost : ReactiveRecord
     ///     - If it was previously off, all known host keys are marked for deletion.
     ///     - If it was previously on, all known host keys are unmarked for deletion.
     /// </remarks>
-    private bool SwitchToggled { get; set; }
+    [Reactive] private bool _switchToggled;
 
     /// <summary>
     ///     Represents a known host in the SSH known hosts file.
     /// </summary>
-    public string Host { get; }
+    public string Host => HostUri.ToString();
 
     /// <summary>
     ///     Represents a known host that can be deleted in its entirety.
@@ -74,14 +89,15 @@ public partial record KnownHost : ReactiveRecord
     ///     Returns a string containing all the entries for the known host.
     ///     If the entire host is marked for deletion, returns the line ending character.
     /// </returns>
-    public string GetAllEntries()
+    public string Export(PlatformID? platformId = null)
     {
-        return DeleteWholeHost
-            ? _lineEnding
-            : Keys
-                .Where(e => !e.MarkedForDeletion)
-                .Aggregate("",
-                    (current, knownHostsKey) =>
-                        current + $"{Host} {knownHostsKey}{_lineEnding}");
+        platformId ??= Environment.OSVersion.Platform;
+        if(DeleteWholeHost) return platformId.Value.GetLineSeparator();
+        var stringBuilder = new StringBuilder();
+        foreach (var knownHostKey in Keys.Where(e => !e.MarkedForDeletion))
+        {
+            stringBuilder.Append($"{Host} {knownHostKey}");
+        }
+        return stringBuilder.ToString();
     }
 }

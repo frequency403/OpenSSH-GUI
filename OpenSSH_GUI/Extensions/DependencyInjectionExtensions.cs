@@ -72,10 +72,7 @@ public static class DependencyInjectionExtensions
     {
         internal IHostBuilder RegisterOpenSshGuiServices()
         {
-            builder.ConfigureServices((_, services) =>
-            {
-                services.AddHostedService<FileSystemAnalyzer>();
-            });
+            builder.ConfigureServices((_, services) => { services.AddHostedService<FileSystemAnalyzer>(); });
             return builder;
         }
     }

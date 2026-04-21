@@ -116,7 +116,8 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditKnownHostsRemote}" Padding="5" IsEnabled="{Binding ServerConnectionService.IsConnected}">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditKnownHostsRemote}" Padding="5"
+                     IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"

@@ -19,15 +19,13 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase
 {
     private readonly ILogger<EditAuthorizedKeysViewModel> _logger;
 
-    [ObservableAsProperty]
-    private bool _addButtonEnabled;
+    [ObservableAsProperty] private bool _addButtonEnabled;
 
     [Reactive] private AuthorizedKeysFile _authorizedKeysFileLocal = AuthorizedKeysFile.Empty;
 
     [Reactive] private AuthorizedKeysFile _authorizedKeysFileRemote = AuthorizedKeysFile.Empty;
 
-    [ObservableAsProperty]
-    private bool _keyAddPossible;
+    [ObservableAsProperty] private bool _keyAddPossible;
 
     [Reactive] private SshKeyFile? _selectedKey;
 
@@ -41,7 +39,8 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase
         ServerConnectionService = serverConnectionService;
         SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
 
-        _addButtonEnabledHelper = this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote, vm => vm.KeyAddPossible)
+        _addButtonEnabledHelper = this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote,
+                vm => vm.KeyAddPossible)
             .DistinctUntilChanged()
             .Select(props =>
                 props is
@@ -77,7 +76,7 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase
             if (!inputParameter) return;
             ArgumentNullException.ThrowIfNull(AuthorizedKeysFileLocal);
             // BUG: Only write to file when changes were made
-                await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
+            await AuthorizedKeysFileLocal.PersistChangesInFileAsync(cancellationToken);
             if (ServerConnectionService.IsConnected)
                 await ServerConnectionService.ServerConnection.WriteAuthorizedKeysChangesToServerAsync(
                     AuthorizedKeysFileRemote, cancellationToken);

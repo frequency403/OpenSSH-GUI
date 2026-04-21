@@ -65,7 +65,8 @@
                 </ToolTip.Tip>
                 <ItemsControl ItemsSource="{Binding AuthorizedKeysFileLocal.AuthorizedKeys}" />
             </TabItem>
-            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditAuthorizedKeysServer}" Margin="10" IsEnabled="{Binding ServerConnectionService.IsConnected}">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditAuthorizedKeysServer}" Margin="10"
+                     IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <ToolTip.Tip>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="{x:Static openSshGui:StringsAndTexts.AuthorizedKeysFileContentFrom}" />

@@ -15,10 +15,12 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
-    <UniformGrid Rows="0" Columns="1" RowSpacing="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
+    <UniformGrid Rows="0" Columns="1" RowSpacing="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                 Margin="10">
         <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}">
             <controls:HeaderedItem.SideHeader>
-                <TextBlock x:Name="KeyFileNameValidation" HorizontalAlignment="Center" VerticalAlignment="Bottom" Foreground="{DynamicResource DangerBrush}" FontSize="12" />
+                <TextBlock x:Name="KeyFileNameValidation" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                           Foreground="{DynamicResource DangerBrush}" FontSize="12" />
             </controls:HeaderedItem.SideHeader>
             <TextBox Name="KeyFileNameTextBox" Text="{CompiledBinding KeyName}" />
         </controls:HeaderedItem>
@@ -31,12 +33,12 @@
             </controls:HeaderedItem>
             <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}">
                 <ComboBox Name="KeySizeComboBox" IsEnabled="{CompiledBinding CanChangeKeySize}"
-                                  HorizontalAlignment="Stretch"
-                                  ItemsSource="{CompiledBinding AvaliableKeySizes}"
-                                  SelectedItem="{CompiledBinding SelectedKeySize}" />
+                          HorizontalAlignment="Stretch"
+                          ItemsSource="{CompiledBinding AvailableKeySizes}"
+                          SelectedItem="{CompiledBinding SelectedKeySize}" />
             </controls:HeaderedItem>
         </UniformGrid>
-        
+
         <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}">
             <TextBox Name="PasswordTextBox" Text="{CompiledBinding Password}" />
         </controls:HeaderedItem>

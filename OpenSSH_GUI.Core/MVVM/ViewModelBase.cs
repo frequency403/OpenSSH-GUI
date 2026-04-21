@@ -13,7 +13,7 @@ namespace OpenSSH_GUI.Core.MVVM;
 /// </summary>
 public abstract class ViewModelBase<TParameters> : ViewModelBase, IInitializableViewModel<TParameters>
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public virtual ValueTask InitializeAsync(
         TParameters? parameters,
         CancellationToken cancellationToken = default)
@@ -23,34 +23,22 @@ public abstract class ViewModelBase<TParameters> : ViewModelBase, IInitializable
         return ValueTask.CompletedTask;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public sealed override ValueTask InitializeAsync(CancellationToken cancellationToken = default)
-    => InitializeAsync(default, cancellationToken);
+    {
+        return InitializeAsync(default, cancellationToken);
+    }
 }
 
 /// <summary>
 ///     Serves as an abstract base class for view models, providing shared properties, commands,
 ///     and behaviors for managing the interaction between the view and the application logic.
 /// </summary>
-public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyncDisposable, IActivatableViewModel, IInitializableViewModel
+public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyncDisposable, IActivatableViewModel,
+    IInitializableViewModel
 {
     protected readonly CompositeDisposable Disposables;
 
-    /// <summary>
-    /// Provides the activator for the view model, enabling activation and deactivation
-    /// of reactive components tied to the lifecycle of the view model. This property
-    /// supports managing subscriptions and other reactive resources.
-    /// </summary>
-    public ViewModelActivator Activator { get; } = new();
-    
-    /// <inheritdoc/>
-    public virtual ValueTask InitializeAsync(CancellationToken cancellationToken = default)
-    {
-        IsInitialized = true;
-        Activator.Activate().DisposeWith(Disposables);
-        return ValueTask.CompletedTask;
-    }
-    
     /// <summary>
     ///     Represents an event handler used to signal close requests for the view model.
     ///     This private field can be invoked internally to notify subscribers of the close event.
@@ -89,6 +77,13 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     /// </remarks>
     protected bool CloseOnBooleanSubmit { get; set; } = true;
 
+    /// <summary>
+    ///     Provides the activator for the view model, enabling activation and deactivation
+    ///     of reactive components tied to the lifecycle of the view model. This property
+    ///     supports managing subscriptions and other reactive resources.
+    /// </summary>
+    public ViewModelActivator Activator { get; } = new();
+
     /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
@@ -102,6 +97,14 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     {
         Disposables.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    /// <inheritdoc />
+    public virtual ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        IsInitialized = true;
+        Activator.Activate().DisposeWith(Disposables);
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -132,15 +135,15 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     }
 
     /// <summary>
-    /// Displays the attached <see cref="FlyoutBase"/> for a specified control.
+    ///     Displays the attached <see cref="FlyoutBase" /> for a specified control.
     /// </summary>
     /// <param name="parameter">
-    /// The control for which the flyout will be displayed. This parameter must be of type <see cref="Control"/>.
+    ///     The control for which the flyout will be displayed. This parameter must be of type <see cref="Control" />.
     /// </param>
     [ReactiveCommand]
     private void OpenFlyout(object? parameter)
     {
-        if(parameter is Control control)
+        if (parameter is Control control)
             FlyoutBase.ShowAttachedFlyout(control);
     }
 }

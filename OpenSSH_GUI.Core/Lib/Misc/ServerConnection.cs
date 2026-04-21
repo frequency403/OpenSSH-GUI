@@ -28,17 +28,14 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     private bool _isConnected;
 
     [ObservableAsProperty(ReadOnly = true)]
-    private string _readContentsCommand = string.Empty;
+    private string _lineSeparator = string.Empty;
 
     [ObservableAsProperty(ReadOnly = true)]
-    private string _lineSeparator = string.Empty;
+    private string _readContentsCommand = string.Empty;
 
     [Reactive(SetModifier = AccessModifier.Private)]
     private PlatformID _serverOs = PlatformID.Other;
 
-    public static ServerConnection Empty { get; } = new();
-    public static ServerConnection WithCredentials(ConnectionCredentials credentials) => new(credentials);
-    
     private ServerConnection(ConnectionCredentials? credentials = null)
     {
         ConnectionCredentials = credentials ?? ConnectionCredentials.Empty;
@@ -66,6 +63,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
             .DisposeWith(_disposables);
     }
 
+    public static ServerConnection Empty { get; } = new();
+
     private ConnectionCredentials ConnectionCredentials
     {
         get;
@@ -82,6 +81,11 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     public void Dispose()
     {
         _disposables.Dispose();
+    }
+
+    public static ServerConnection WithCredentials(ConnectionCredentials credentials)
+    {
+        return new ServerConnection(credentials);
     }
 
     public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
@@ -113,7 +117,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     {
         if (!IsConnected) throw new InvalidOperationException("No connection to get known hosts from");
 
-        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs), token);
+        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
+            token);
         using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         await command.ExecuteAsync(token);
         return await KnownHostsFile.InitializeAsync(command.OutputStream, true, false, token);
@@ -226,15 +231,15 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     }
 
     /// <summary>
-    /// Builds a platform-appropriate shell command to write the given content to a file on the remote host.
+    ///     Builds a platform-appropriate shell command to write the given content to a file on the remote host.
     /// </summary>
-    /// <param name="platformId">The <see cref="PlatformID"/> of the remote host.</param>
+    /// <param name="platformId">The <see cref="PlatformID" /> of the remote host.</param>
     /// <param name="content">The content to write into the file.</param>
     /// <param name="filePath">The full remote path of the target file.</param>
     /// <param name="append">If <c>true</c>, appends to the file instead of overwriting it.</param>
     /// <returns>A shell command string ready to be executed on the remote host.</returns>
     /// <exception cref="PlatformNotSupportedException">
-    /// Thrown when no write command can be constructed for the given <paramref name="platformId"/>.
+    ///     Thrown when no write command can be constructed for the given <paramref name="platformId" />.
     /// </exception>
     private static string BuildRemoteWriteCommand(PlatformID platformId, string content, string filePath,
         bool append = false)
@@ -247,7 +252,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     }
 
     /// <summary>
-    /// Builds a Unix shell write command using <c>printf</c> for reliable, escape-safe output.
+    ///     Builds a Unix shell write command using <c>printf</c> for reliable, escape-safe output.
     /// </summary>
     /// <param name="content">The content to write.</param>
     /// <param name="filePath">The target file path on the remote host.</param>
@@ -260,8 +265,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     }
 
     /// <summary>
-    /// Builds a Windows shell write command using PowerShell's <c>Set-Content</c> or <c>Add-Content</c>
-    /// for reliable Unicode-safe file writing.
+    ///     Builds a Windows shell write command using PowerShell's <c>Set-Content</c> or <c>Add-Content</c>
+    ///     for reliable Unicode-safe file writing.
     /// </summary>
     /// <param name="content">The content to write.</param>
     /// <param name="filePath">The target file path on the remote host.</param>

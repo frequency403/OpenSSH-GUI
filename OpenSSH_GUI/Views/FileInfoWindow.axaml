@@ -117,20 +117,28 @@
                              CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
                     <SplitButton.Resources>
                         <!-- ReSharper disable Xaml.RedundantResource -->
-                        <SolidColorBrush x:Key="SplitButtonBackground" Color="{DynamicResource SplitButtonRemoteBackgroundColor}"/>
-                        <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver" Color="{DynamicResource SplitButtonRemotePointerOverColor}"/>
-                        <SolidColorBrush x:Key="SplitButtonBackgroundPressed" Color="{DynamicResource SplitButtonRemotePressedColor}"/>
-                        <SolidColorBrush x:Key="SplitButtonBackgroundDisabled" Color="{DynamicResource SplitButtonRemoteDisabledColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonBackground"
+                                         Color="{DynamicResource SplitButtonRemoteBackgroundColor}" />
+                        <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver"
+                                         Color="{DynamicResource SplitButtonRemotePointerOverColor}" />
+                        <SolidColorBrush x:Key="SplitButtonBackgroundPressed"
+                                         Color="{DynamicResource SplitButtonRemotePressedColor}" />
+                        <SolidColorBrush x:Key="SplitButtonBackgroundDisabled"
+                                         Color="{DynamicResource SplitButtonRemoteDisabledColor}" />
 
-                        <SolidColorBrush x:Key="SplitButtonDividerBackground" Color="{DynamicResource SplitButtonRemoteDividerColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonDividerBackground"
+                                         Color="{DynamicResource SplitButtonRemoteDividerColor}" />
 
-                        <SolidColorBrush x:Key="SplitButtonForeground" Color="{DynamicResource SplitButtonRemoteForegroundColor}"/>
-                        <SolidColorBrush x:Key="SplitButtonForegroundPointerOver" Color="{DynamicResource SplitButtonRemoteForegroundColor}"/>
-                       
-                        <SolidColorBrush x:Key="SplitButtonForegroundPressed" Color="{DynamicResource SplitButtonRemoteForegroundColor}"/>
+                        <SolidColorBrush x:Key="SplitButtonForeground"
+                                         Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+                        <SolidColorBrush x:Key="SplitButtonForegroundPointerOver"
+                                         Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+
+                        <SolidColorBrush x:Key="SplitButtonForegroundPressed"
+                                         Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
                         <!-- ReSharper enable Xaml.RedundantResource -->
                     </SplitButton.Resources>
-                    
+
                     <SplitButton.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft"
                                     ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">
@@ -142,7 +150,8 @@
 
                                     <Setter Property="ToolTip.Tip">
                                         <Template>
-                                            <TextBlock Text="{Binding Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
+                                            <TextBlock
+                                                Text="{Binding Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
                                         </Template>
                                     </Setter>
                                     <Setter Property="ToolTip.ShowDelay" Value="0" />
@@ -173,7 +182,8 @@
                     </SplitButton.Flyout>
 
                     <ToolTip.Tip>
-                        <TextBlock Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat,
+                        <TextBlock
+                            Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat,
                               Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
                     </ToolTip.Tip>
 

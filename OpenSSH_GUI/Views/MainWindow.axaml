@@ -23,7 +23,7 @@
         </Style>
         <Style Selector="DataGridColumnHeader">
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundPrimaryBrush}" />
             <Setter Property="FontSize" Value="{DynamicResource SystemFontSize}" />
             <Setter Property="Padding" Value="8 6" />
             <Setter Property="MinHeight" Value="40" />
@@ -294,7 +294,7 @@
                     </controls:FlyoutButton.Styles>
                     <Panel>
                         <Panel IsVisible="{Binding !SshKeyManager.Processing}">
-                            <materialIcons:MaterialIcon Kind="{Binding ItemsCountIcon}"/>
+                            <materialIcons:MaterialIcon Kind="{Binding ItemsCountIcon}" />
                             <ToolTip.Tip>
                                 <Label Content="{Binding ItemsCountTooltip}" />
                             </ToolTip.Tip>
@@ -310,8 +310,8 @@
                         </Panel>
                     </Panel>
                 </controls:FlyoutButton>
-                
-                
+
+
                 <!-- Settings -->
 
                 <controls:FlyoutButton Margin="10 5" Classes="Clickable"

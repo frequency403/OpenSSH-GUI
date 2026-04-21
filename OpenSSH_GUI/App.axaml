@@ -29,8 +29,8 @@
     </Application.Resources>
 
     <Application.Styles>
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
-        <StyleInclude Source="Resources/Styles/FlyoutButtonStyles.axaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+        <StyleInclude Source="Resources/Styles/FlyoutButtonStyles.axaml" />
         <Style Selector="Control">
             <Setter Property="ToolTip.ShowDelay" Value="0" />
         </Style>
@@ -38,9 +38,7 @@
             <Setter Property="FontSize" Value="{DynamicResource SystemFontSize}" />
         </Style>
         <Style Selector="avalonia|MaterialIcon">
-            <Setter Property="FontSize" Value="{DynamicResource MaterialIconSize}"/>
-            <!-- <Setter Property="Width" Value="{DynamicResource MaterialIconSize}"/> -->
-            <!-- <Setter Property="Height" Value="{DynamicResource MaterialIconSize}"/> -->
+            <Setter Property="FontSize" Value="{DynamicResource MaterialIconSize}" />
         </Style>
         <FluentTheme DensityStyle="Compact">
             <FluentTheme.Palettes>

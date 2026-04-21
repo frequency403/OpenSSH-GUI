@@ -24,7 +24,8 @@ public abstract class WindowBase<TViewModel, TViewModelInitializer> : WindowBase
 }
 
 public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisposable
-    where TViewModel : ViewModelBase{
+    where TViewModel : ViewModelBase
+{
     private CompositeDisposable Disposables { get; } = new();
     public required ILogger<WindowBase<TViewModel>> Logger { get; set; }
     public required IResolver Resolver { get; set; }

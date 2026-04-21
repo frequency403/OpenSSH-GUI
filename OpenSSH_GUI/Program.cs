@@ -17,6 +17,7 @@ using Serilog.Core;
 using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
+
 // REFACTOR: Change Readme.MD accordingly to new Project functionality;
 // REFACTOR: Implement a "Config" from JSON Format and Provider/Applyer via IConfiguration
 [UsedImplicitly]

@@ -25,14 +25,22 @@ namespace OpenSSH_GUI;
 internal class DoubleToleranceComparer(double epsilon) : IEqualityComparer<double>
 {
     public bool Equals(double x, double y)
-        => Math.Abs(x - y) < epsilon;
+    {
+        return Math.Abs(x - y) < epsilon;
+    }
 
     public int GetHashCode(double obj)
-        => 0;
+    {
+        return 0;
+    }
 }
 
 [UsedImplicitly]
-public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator, IHostApplicationLifetime hostApplicationLifetime) : Application
+public class App(
+    ILogger<App> logger,
+    IResolver resolver,
+    IRegistrator registrator,
+    IHostApplicationLifetime hostApplicationLifetime) : Application
 {
     private const string RessourceUri = "avares://OpenSSH_GUI/Assets/openssh-gui{0}.svg";
     private const string Underline = "_";
@@ -40,7 +48,8 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
     private const string BaseFontSize = "BaseFontSize";
     private const string MaterialIconSize = "MaterialIconSize";
     private static readonly CompositeDisposable Disposables = new();
-    private static readonly Dictionary<float, float> IconSizes = new()
+
+    private static readonly Dictionary<int, int> IconSizes = new()
     {
         { 16, 16 },
         { 32, 32 },
@@ -54,7 +63,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        
+
 #if DEBUG
         this.AttachDeveloperTools();
 #endif
@@ -77,7 +86,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                         var memoryStream = new MemoryStream();
                         using var svg = new SKSvg();
                         svg.Load(svgStream);
-                        var bitmap = new SKBitmap((int)width, (int)height, true);
+                        var bitmap = new SKBitmap(width, height, true);
                         using (var canvas = new SKCanvas(bitmap))
                         {
                             if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width),
@@ -130,14 +139,15 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
                         .DistinctUntilChanged(new DoubleToleranceComparer(0.1))
                         .Subscribe(FontSizeChanged)
                         .DisposeWith(Disposables);
-                    if(Current.TryFindResource(BaseFontSize, out var fontSize) && fontSize is double fontSizeValueDouble)
+                    if (Current.TryFindResource(BaseFontSize, out var fontSize) &&
+                        fontSize is double fontSizeValueDouble)
                     {
                         var fontSizeValue = fontSizeValueDouble * desktop.MainWindow.RenderScaling;
                         Current.Resources[SystemFontSize] = fontSizeValue;
                         logger.LogInformation("{SystemFontSize} set to {fontSize}", SystemFontSize, fontSizeValue);
                     }
                 }
-                
+
                 logger.LogInformation("MainWindow created");
                 desktop.MainWindow.Opened += OnMainWindowOpened;
             }
@@ -150,7 +160,6 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         {
             logger.LogError(e, "Unhandled error during application initialization");
         }
-        
     }
 
     private void FontSizeChanged(double fontSize)
@@ -162,7 +171,7 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
             logger.LogInformation("{MaterialIconSize} set to {fontSize}", MaterialIconSize, materialIconSize);
         }
     }
-    
+
     /// <summary>
     ///     Triggers the initial SSH key search after the main window has been presented,
     ///     ensuring the UI is fully ready before background work begins.

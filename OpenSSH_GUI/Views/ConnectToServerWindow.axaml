@@ -48,7 +48,8 @@
         </StackPanel>
         <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" RowDefinitions="* *"
               IsVisible="{Binding EnablePreConfiguredHosts}" Margin="10 20">
-            <Label Target="SelectConnectionFromConfig" Grid.Row="0" Content="{x:Static openSshGui:StringsAndTexts.ConnectToServerPreconfiguredConnections}"
+            <Label Target="SelectConnectionFromConfig" Grid.Row="0"
+                   Content="{x:Static openSshGui:StringsAndTexts.ConnectToServerPreconfiguredConnections}"
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <ComboBox x:Name="SelectConnectionFromConfig" Grid.Row="1"
                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
@@ -65,12 +66,14 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </Grid>
-        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding HostName}" PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerHostname}" Margin="5 10"
+        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding HostName}"
+                 PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerHostname}" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
 
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerUsername}" Margin="5 10"
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}"
+                 PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerUsername}" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
@@ -79,7 +82,8 @@
                     VerticalAlignment="Top">
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
-                     Text="{Binding Password}" PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerPassword}" PasswordChar="*"
+                     Text="{Binding Password}"
+                     PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerPassword}" PasswordChar="*"
                      RevealPassword="False"
                      IsEnabled="{Binding !CanConnectToServer}"
                      IsVisible="{Binding !AuthWithPublicKey}" />

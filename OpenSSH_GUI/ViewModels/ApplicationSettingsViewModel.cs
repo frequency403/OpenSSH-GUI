@@ -19,7 +19,8 @@ using Serilog.Events;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class ApplicationSettingsViewModel : ViewModelBase{
+public partial class ApplicationSettingsViewModel : ViewModelBase
+{
     private readonly Application _application;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
@@ -27,15 +28,15 @@ public partial class ApplicationSettingsViewModel : ViewModelBase{
 
     [Reactive] private bool _canDeleteOldLogFiles;
 
+    [ObservableAsProperty] private string _cleanupFilesButtonText = string.Empty;
+
     [Reactive] private LogEventLevel _currentLogLevel;
 
     [Reactive] private ThemeVariant _currentThemeVariant;
 
     [Reactive] private int _daysToDeleteSelected;
-    
-    [Reactive] private double _fontSize = 12;
 
-    [ObservableAsProperty] private string _cleanupFilesButtonText = string.Empty;
+    [Reactive] private double _fontSize = 12;
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMessageBoxProvider messageBoxProvider,
@@ -89,7 +90,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase{
             .DistinctUntilChanged()
             .Subscribe(OnNextTheme)
             .DisposeWith(Disposables);
-        
+
         this.WhenAnyValue(vm => vm.FontSize)
             .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
@@ -97,17 +98,17 @@ public partial class ApplicationSettingsViewModel : ViewModelBase{
             .DisposeWith(Disposables);
     }
 
-    [ReactiveCommand]
-    private void OnNextFontSize(double obj)
-    {
-        _application.Resources[App.SystemFontSize] = obj;
-    }
-
     public static LogEventLevel[] AvailableLogLevels { get; } = Enum.GetValues<LogEventLevel>();
     public static ThemeVariant[] ThemeVariants { get; } = Enum.GetValues<ThemeVariant>();
     public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
 
     public ObservableCollection<string> LogFiles { get; } = [];
+
+    [ReactiveCommand]
+    private void OnNextFontSize(double obj)
+    {
+        _application.Resources[App.SystemFontSize] = obj;
+    }
 
 
     [ReactiveCommand]
@@ -197,8 +198,9 @@ public partial class ApplicationSettingsViewModel : ViewModelBase{
         foreach (var logFile in Directory.EnumerateFiles(logConfiguration.LogFilePath, "*.log",
                      SearchOption.TopDirectoryOnly))
         {
-            var extractedDate =
-                Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty)[..8];
+            var fileName = Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty);
+            if(fileName.Length < 8) continue;
+            var extractedDate = fileName[..8];
             if (DateOnly.TryParseExact(extractedDate, "yyyyMMdd", out var dateTime) &&
                 DateTime.Now.Subtract(dateTime.ToDateTime(TimeOnly.MinValue)) > TimeSpan.FromDays(obj))
                 LogFiles.Add(logFile);

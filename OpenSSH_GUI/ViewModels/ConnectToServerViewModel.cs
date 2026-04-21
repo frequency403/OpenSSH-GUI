@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia;
@@ -92,7 +93,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
                 {
                     logger.LogError(e, "Error testing connection");
                 }
-                return System.Reactive.Unit.Default;
+
+                return Unit.Default;
             })
             .Subscribe()
             .DisposeWith(Disposables);

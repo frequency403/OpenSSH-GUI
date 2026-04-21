@@ -27,7 +27,7 @@ public partial class DirectoryCrawler(
     ///     the SSH configuration and the base SSH directory on disk.
     /// </summary>
     /// <param name="cancellationToken">Token to cancel the enumeration.</param>
-    /// <returns>An async stream of discovered <see cref="SshKeyFileSource"/> instances.</returns>
+    /// <returns>An async stream of discovered <see cref="SshKeyFileSource" /> instances.</returns>
     public async IAsyncEnumerable<SshKeyFileSource> GetPossibleKeyFilesOnDiskAsyncEnumerable(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -36,7 +36,6 @@ public partial class DirectoryCrawler(
         try
         {
             if (configuration.GetSection("SshConfig").Get<SshConfiguration>() is { } sshConfig)
-            {
                 foreach (var hostSetting in sshConfig.Hosts.Concat(sshConfig.Blocks).Append(sshConfig.Global))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -62,8 +61,7 @@ public partial class DirectoryCrawler(
                         yield return source;
                     }
                 }
-            }
-            
+
             foreach (var keyFileSource in EnumerateDiskSources())
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -83,7 +81,7 @@ public partial class DirectoryCrawler(
     ///     Enumerates SSH key file sources from the base SSH directory,
     ///     excluding already tracked and config-reserved files.
     /// </summary>
-    /// <returns>A list of <see cref="SshKeyFileSource"/> found on disk.</returns>
+    /// <returns>A list of <see cref="SshKeyFileSource" /> found on disk.</returns>
     private IEnumerable<SshKeyFileSource> EnumerateDiskSources()
     {
         return Directory
@@ -98,7 +96,8 @@ public partial class DirectoryCrawler(
             .Where(e => !_keyFileSources.Any(k =>
                 k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
             .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
-                        e.Extension.Equals(SshKeyFormatExtension.PuttyKeyFileExtension, StringComparison.OrdinalIgnoreCase))
+                        e.Extension.Equals(SshKeyFormatExtension.PuttyKeyFileExtension,
+                            StringComparison.OrdinalIgnoreCase))
             .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase)
             .Select(e => SshKeyFileSource.FromDisk(e.FullName));
     }

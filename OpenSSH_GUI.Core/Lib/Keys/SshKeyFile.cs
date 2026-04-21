@@ -38,8 +38,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     /// <summary>
     ///     The basic key file information extracted by <c>ssh-keygen</c> or the file itself in case of a PuTTy key.
     /// </summary>
-    [Reactive] 
-    private BasicSshKeyFileInformation _basicSshKeyFileInformation;
+    [Reactive] private BasicSshKeyFileInformation _basicSshKeyFileInformation;
 
     /// <summary>
     ///     Holds the comment embedded in the SSH key, derived from either the loaded
@@ -146,21 +145,23 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     {
         _logger = logger;
 
-        var privateKeyFileAndBasicFileInfoObservable = this.WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
+        var privateKeyFileAndBasicFileInfoObservable = this
+            .WhenAnyValue(x => x.PrivateKeyFile, x => x.BasicSshKeyFileInformation)
             .ObserveOn(AvaloniaScheduler.Instance);
-        
+
         var privateKeyFileAndFileInfoObservable = this.WhenAnyValue(vm => vm.PrivateKeyFile, vm => vm.KeyFileInfo)
             .ObserveOn(AvaloniaScheduler.Instance);
-        
+
         _needsPasswordHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => tuple.Item1 == null)
             .ToProperty(this, x => x.NeedsPassword).DisposeWith(_disposables);
-        
+
         _fingerprintHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => tuple.Item2.FingerPrint)
             .ToProperty(this, x => x.Fingerprint).DisposeWith(_disposables);
-        
-        _commentHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => tuple.Item1?.Key.Comment ?? tuple.Item2.Comment)
+
+        _commentHelper = privateKeyFileAndBasicFileInfoObservable
+            .Select(tuple => tuple.Item1?.Key.Comment ?? tuple.Item2.Comment)
             .ToProperty(this, x => x.Comment).DisposeWith(_disposables);
-        
+
         _keyTypeHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple =>
             tuple.Item1?.Key switch
             {
@@ -169,33 +170,36 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                 RsaKey => SshKeyType.RSA,
                 _ => tuple.Item2.KeyType
             }).ToProperty(this, x => x.KeyType).DisposeWith(_disposables);
-        
-        _hashAlgorithmNameHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple => 
+
+        _hashAlgorithmNameHelper = privateKeyFileAndBasicFileInfoObservable.Select(tuple =>
             Enum.TryParse<SshKeyHashAlgorithmName>(
                 tuple.Item1?.HostKeyAlgorithms.FirstOrDefault()?.Name ?? string.Empty,
                 out var enumValue)
                 ? enumValue
                 : tuple.Item2.HashAlgorithmName
-            ).ToProperty(this, x => x.HashAlgorithmName).DisposeWith(_disposables);
+        ).ToProperty(this, x => x.HashAlgorithmName).DisposeWith(_disposables);
 
         _absoluteFilePathHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.FullFileName)
             .ToProperty(this, obj => obj.AbsoluteFilePath);
-        
-        _isInitializedHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item1 is not null && tuple.Item2 is { Exists: true })
+
+        _isInitializedHelper = privateKeyFileAndFileInfoObservable
+            .Select(tuple => tuple.Item1 is not null && tuple.Item2 is { Exists: true })
             .ToProperty(this, x => x.IsInitialized).DisposeWith(_disposables);
-        
-        _isPuttyKeyHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.CurrentFormat is not SshKeyFormat.OpenSSH)
+
+        _isPuttyKeyHelper = privateKeyFileAndFileInfoObservable
+            .Select(tuple => tuple.Item2?.CurrentFormat is not SshKeyFormat.OpenSSH)
             .ToProperty(this, x => x.IsPuttyKey).DisposeWith(_disposables);
-        
-        _keyFilesHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2 is not null ? tuple.Item2.Files : [])
+
+        _keyFilesHelper = privateKeyFileAndFileInfoObservable
+            .Select(tuple => tuple.Item2 is not null ? tuple.Item2.Files : [])
             .ToProperty(this, x => x.KeyFiles).DisposeWith(_disposables);
-        
+
         _fileNameHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.FileName)
             .ToProperty(this, x => x.FileName).DisposeWith(_disposables);
-        
+
         _formatHelper = privateKeyFileAndFileInfoObservable.Select(tuple => tuple.Item2?.CurrentFormat)
             .ToProperty(this, x => x.Format).DisposeWith(_disposables);
-        
+
         _fileChangesAllowedHelper = this.WhenAnyValue(
                 vm => vm.NeedsPassword,
                 vm => vm.Password,
@@ -205,7 +209,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
                     (!needsPassword || password.IsValid))
             .ObserveOn(AvaloniaScheduler.Instance)
             .ToProperty(this, x => x.FileChangesAllowed).DisposeWith(_disposables);
-        
+
         this.WhenAnyValue(vm => vm.KeyFileInfo)
             .ObserveOn(AvaloniaScheduler.Instance)
             .Subscribe(keyFileInfo =>

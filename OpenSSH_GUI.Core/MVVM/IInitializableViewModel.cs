@@ -10,7 +10,7 @@ public interface IInitializableViewModel
     public ValueTask InitializeAsync(CancellationToken cancellationToken = default);
 }
 
-public interface IInitializableViewModel<in TParam> 
+public interface IInitializableViewModel<in TParam>
 {
     /// Asynchronously initializes the ViewModel with the specified parameters and optional cancellation token.
     /// Sets the state of the ViewModel as initialized upon completion.

@@ -27,7 +27,8 @@ namespace OpenSSH_GUI.Core.Services;
 public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 {
     private const string BackupFileExtension = "bak";
-    private static readonly FileStreamOptions FileStreamOptions = new()
+
+    internal static readonly FileStreamOptions FileStreamOptions = new()
     {
         BufferSize = 0,
         Access = FileAccess.ReadWrite,
@@ -171,24 +172,26 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     }
 
     /// <summary>
-    /// Changes the password of an SSH key file, handling both OpenSSH and PuTTY formats transparently.
-    /// If the key is in PuTTY format, it will be temporarily converted to OpenSSH, the password changed,
-    /// and then converted back to the original format.
+    ///     Changes the password of an SSH key file, handling both OpenSSH and PuTTY formats transparently.
+    ///     If the key is in PuTTY format, it will be temporarily converted to OpenSSH, the password changed,
+    ///     and then converted back to the original format.
     /// </summary>
     /// <param name="key">The SSH key file whose password should be changed.</param>
-    /// <param name="newPassword">The new password to set, encoded using <paramref name="encoding"/>.</param>
+    /// <param name="newPassword">The new password to set, encoded using <paramref name="encoding" />.</param>
     /// <param name="encoding">
-    /// The encoding used to interpret <paramref name="newPassword"/>. Defaults to <see cref="Encoding.UTF8"/> if <c>null</c>.
+    ///     The encoding used to interpret <paramref name="newPassword" />. Defaults to <see cref="Encoding.UTF8" /> if
+    ///     <c>null</c>.
     /// </param>
     /// <param name="token">A cancellation token to observe while waiting for the operation to complete.</param>
-    /// <exception cref="ArgumentNullException">Thrown if the private key file of <paramref name="key"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentNullException">Thrown if the private key file of <paramref name="key" /> is <c>null</c>.</exception>
     /// <exception cref="ArgumentException">Thrown if the resolved key file path is null or whitespace.</exception>
     /// <exception cref="TimeoutException">Thrown if the internal semaphore could not be acquired within 5 seconds.</exception>
     /// <exception cref="Exception">
-    /// Thrown if <c>ssh-keygen</c> exits with a non-zero code, or if intermediate key file operations fail.
-    /// On failure, all modified files are restored from backup.
+    ///     Thrown if <c>ssh-keygen</c> exits with a non-zero code, or if intermediate key file operations fail.
+    ///     On failure, all modified files are restored from backup.
     /// </exception>
-    public async ValueTask<KeyManagerOperationResult> ChangePasswordOfKeyAsync(SshKeyFile key, ReadOnlyMemory<byte> newPassword,
+    public async ValueTask<KeyManagerOperationResult> ChangePasswordOfKeyAsync(SshKeyFile key,
+        ReadOnlyMemory<byte> newPassword,
         Encoding? encoding = null, CancellationToken token = default)
     {
         EnableTempLogger();
@@ -221,9 +224,10 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                         key.Password.ToSshKeyEncryption(), privateKeyFile, keyFilePath, true) is { } result)
                 {
                     result.ThrowIfFailure();
-                    if(result.IsSuccess)
+                    if (result.IsSuccess)
                         additionalDeleteFiles = result.ResultValue.ToArray();
                 }
+
                 keyFilePath = additionalDeleteFiles.First(e => string.IsNullOrWhiteSpace(Path.GetExtension(e)));
                 Log(LogLevel.Debug, "New file path: {newFilePath}", keyFilePath);
             }
@@ -270,13 +274,15 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 Log(LogLevel.Debug,
                     "Changes to the password were made in OpenSSH Format - need to change format to Putty again");
                 if (await WriteToFileInSpecificFormat(format, keyFile.Password.ToSshKeyEncryption(),
-                        keyFile.PrivateKeyFile ?? throw new Exception("Private key file not found"), keyFilePath, true) is
+                        keyFile.PrivateKeyFile ?? throw new Exception("Private key file not found"), keyFilePath,
+                        true) is
                     { } result)
                 {
                     result.ThrowIfFailure();
-                    if(result.IsSuccess)
+                    if (result.IsSuccess)
                         keyFilePath = result.ResultValue.First();
                 }
+
                 Log(LogLevel.Debug, "New file path: {newFilePath}", keyFilePath);
                 foreach (var deleteFile in additionalDeleteFiles) File.Delete(deleteFile);
             }
@@ -303,18 +309,25 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     }
 
     /// <summary>
-    /// Attempts to delete all files associated with the given SSH key.
-    /// Unlike <see cref="ChangePasswordOfKeyAsync"/>, this method does not throw on failure —
-    /// instead, all encountered exceptions are aggregated and returned alongside a success flag.
+    ///     Attempts to delete all files associated with the given SSH key.
+    ///     Unlike <see cref="ChangePasswordOfKeyAsync" />, this method does not throw on failure —
+    ///     instead, all encountered exceptions are aggregated and returned alongside a success flag.
     /// </summary>
     /// <param name="key">The SSH key file to delete, including all associated key files.</param>
     /// <param name="token">A cancellation token to observe while waiting for the semaphore.</param>
     /// <returns>
-    /// A tuple containing:
-    /// <list type="bullet">
-    ///   <item><description><c>success</c> — <c>true</c> if all files were deleted without error, <c>false</c> otherwise.</description></item>
-    ///   <item><description><c>exception</c> — the exception that occurred, or an <see cref="AggregateException"/> if multiple errors were encountered. <c>null</c> on full success.</description></item>
-    /// </list>
+    ///     A tuple containing:
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <description><c>success</c> — <c>true</c> if all files were deleted without error, <c>false</c> otherwise.</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>
+    ///                 <c>exception</c> — the exception that occurred, or an <see cref="AggregateException" /> if
+    ///                 multiple errors were encountered. <c>null</c> on full success.
+    ///             </description>
+    ///         </item>
+    ///     </list>
     /// </returns>
     public async ValueTask<KeyManagerOperationResult> TryDeleteKeyAsync(SshKeyFile key,
         CancellationToken token = default)
@@ -360,38 +373,40 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     }
 
     /// <summary>
-    /// Renames all files associated with the given <see cref="SshKeyFile"/> to a new base file name,
-    /// preserving each file's original extension. If any target file already exists, the user is prompted
-    /// to confirm the overwrite. On failure, all files are restored from backup.
+    ///     Renames all files associated with the given <see cref="SshKeyFile" /> to a new base file name,
+    ///     preserving each file's original extension. If any target file already exists, the user is prompted
+    ///     to confirm the overwrite. On failure, all files are restored from backup.
     /// </summary>
     /// <param name="key">
-    /// The <see cref="SshKeyFile"/> whose associated files are to be renamed.
-    /// After a successful rename, the key is reloaded from the new primary file.
+    ///     The <see cref="SshKeyFile" /> whose associated files are to be renamed.
+    ///     After a successful rename, the key is reloaded from the new primary file.
     /// </param>
     /// <param name="newFileName">
-    /// The new base file name (without extension) to assign to all files of the key.
-    /// Each file retains its original extension.
+    ///     The new base file name (without extension) to assign to all files of the key.
+    ///     Each file retains its original extension.
     /// </param>
     /// <param name="overwrite">A flag to indicate forceful overwrite of any existent files</param>
     /// <param name="token">
-    /// A <see cref="CancellationToken"/> to observe while waiting for the semaphore
-    /// and during file move operations.
+    ///     A <see cref="CancellationToken" /> to observe while waiting for the semaphore
+    ///     and during file move operations.
     /// </param>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when another key operation is already in progress and the semaphore
-    /// could not be acquired within the timeout.
+    ///     Thrown when another key operation is already in progress and the semaphore
+    ///     could not be acquired within the timeout.
     /// </exception>
     /// <exception cref="OperationCanceledException">
-    /// Thrown when the operation is cancelled via <paramref name="token"/>
-    /// or when the user declines the overwrite confirmation dialog.
+    ///     Thrown when the operation is cancelled via <paramref name="token" />
+    ///     or when the user declines the overwrite confirmation dialog.
     /// </exception>
     /// <remarks>
-    /// File moves are performed via <see cref="FileInfo.MoveTo(string, bool)"/> wrapped in <see cref="Task.Run(Action, CancellationToken)"/>,
-    /// since no native async move API exists in .NET. On same-volume moves, this is an atomic
-    /// metadata operation. Backups are created before any file is moved and deleted only on full success;
-    /// on any failure the backup is restored.
+    ///     File moves are performed via <see cref="FileInfo.MoveTo(string, bool)" /> wrapped in
+    ///     <see cref="Task.Run(Action, CancellationToken)" />,
+    ///     since no native async move API exists in .NET. On same-volume moves, this is an atomic
+    ///     metadata operation. Backups are created before any file is moved and deleted only on full success;
+    ///     on any failure the backup is restored.
     /// </remarks>
-    public async ValueTask<KeyManagerOperationResult> RenameKeyAsync(SshKeyFile key, string newFileName, bool overwrite = false, CancellationToken token = default)
+    public async ValueTask<KeyManagerOperationResult> RenameKeyAsync(SshKeyFile key, string newFileName,
+        bool overwrite = false, CancellationToken token = default)
     {
         var semaphoreAcquired = false;
         EnableTempLogger();
@@ -399,7 +414,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         BackedUpFile[] backupFiles = [];
         try
         {
-            Processing  = true;
+            Processing = true;
             semaphoreAcquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
             if (!semaphoreAcquired)
                 throw new InvalidOperationException("Another key operation is in progress");
@@ -420,10 +435,10 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 Log(LogLevel.Debug, "Destination files already exist");
                 return KeyManagerOperationResult.Conflict(new Exception("Destination files already exist"));
             }
-            
+
             foreach (var (source, target) in filePairs)
             {
-                await Task.Run(() => source.MoveTo(target, overwrite: true), token);
+                await Task.Run(() => source.MoveTo(target, true), token);
                 Log(LogLevel.Debug, "Successfully renamed file {file} to {newFileName}", source.FullName, source.Name);
             }
 
@@ -460,7 +475,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    private async ValueTask<KeyManagerOperationResult> WriteToFile(string filePath, string content, bool overwrite = false, Encoding? encoding = null)
+    private async ValueTask<KeyManagerOperationResult> WriteToFile(string filePath, string content,
+        bool overwrite = false, Encoding? encoding = null)
     {
         if (encoding is null)
         {
@@ -471,14 +487,14 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         {
             Log(LogLevel.Debug, "Using encoding: {encoding}", encoding.EncodingName);
         }
-        
+
         var fileInfo = new FileInfo(filePath);
-        if(fileInfo.Exists && !overwrite)
+        if (fileInfo.Exists && !overwrite)
         {
             Log(LogLevel.Warning, "File {filePath} already exists. Skipping write operation.", filePath);
             return KeyManagerOperationResult.Conflict(new Exception("File already exists"));
         }
-        
+
         await using var fileStream = fileInfo.Open(FileStreamOptions);
         Log(LogLevel.Debug, "Opened file {filePath}", filePath);
 
@@ -535,7 +551,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         {
             return KeyManagerOperationResult.Failure(e);
         }
-        
+
 
         EnableTempLogger();
         var filePath = newFormat.ChangeExtension(Path.GetFullPath(key.AbsoluteFilePath), false);
@@ -558,12 +574,13 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                     filePath, true) is { } result)
             {
                 result.ThrowIfFailure();
-                if(result.IsSuccess)
+                if (result.IsSuccess)
                     writtenFiles.AddRange(result.ResultValue);
             }
-            
+
             key.Load(SshKeyFileSource.FromDisk(filePath));
-            Log(LogLevel.Debug, "Successfully changed format of key {key} to {format}", key.AbsoluteFilePath, newFormat);
+            Log(LogLevel.Debug, "Successfully changed format of key {key} to {format}", key.AbsoluteFilePath,
+                newFormat);
             DeleteBackupFiles(backupFiles);
             return KeyManagerOperationResult.Success();
         }
@@ -604,7 +621,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 };
                 Log(LogLevel.Warning, exception, "Could not restore backup files");
             }
-            
+
             return KeyManagerOperationResult.FromException(exc);
         }
         finally
@@ -617,7 +634,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    private async ValueTask<KeyManagerOperationResult<IEnumerable<string>>> WriteToFileInSpecificFormat(SshKeyFormat format,
+    private async ValueTask<KeyManagerOperationResult<IEnumerable<string>>> WriteToFileInSpecificFormat(
+        SshKeyFormat format,
         ISshKeyEncryption encryption,
         IPrivateKeySource privateKeySource, string filePath, bool overwrite = false)
     {
@@ -634,29 +652,36 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             default:
             {
                 var pubKeyFormat = format.ChangeExtension(filePath);
-                if(await WriteToFile(pubKeyFormat, privateKeySource.ToOpenSshPublicFormat(), overwrite) is {IsSuccess: false} error)
+                if (await WriteToFile(pubKeyFormat, privateKeySource.ToOpenSshPublicFormat(), overwrite) is
+                    { IsSuccess: false } error)
                 {
                     Log(LogLevel.Error, "Failed to write public key file {filePath}", pubKeyFormat);
                     return error.WithValue<IEnumerable<string>>([]);
                 }
+
                 writtenFiles.Add(pubKeyFormat);
                 break;
             }
         }
 
         var privateFilePath = format.ChangeExtension(filePath, false);
-        if(await WriteToFile(privateFilePath, privateKeyFileContent, overwrite) is {IsSuccess: false} error1)
+        if (await WriteToFile(privateFilePath, privateKeyFileContent, overwrite) is { IsSuccess: false } error1)
         {
             Log(LogLevel.Error, "Failed to write private key file {filePath}", privateFilePath);
             return error1.WithValue<IEnumerable<string>>([]);
         }
+
         writtenFiles.Add(privateFilePath);
         return KeyManagerOperationResult<IEnumerable<string>>.Success(writtenFiles);
     }
 
-    private ValueTask<KeyManagerOperationResult<IEnumerable<string>>> WriteToFileInSpecificFormat(SshKeyGenerateInfo generateInfo,
-        GeneratedPrivateKey createdKey, string filePath, bool overwrite = false) =>
-        WriteToFileInSpecificFormat(generateInfo.KeyFormat, generateInfo.Encryption, createdKey, filePath, overwrite);
+    private ValueTask<KeyManagerOperationResult<IEnumerable<string>>> WriteToFileInSpecificFormat(
+        SshKeyGenerateInfo generateInfo,
+        GeneratedPrivateKey createdKey, string filePath, bool overwrite = false)
+    {
+        return WriteToFileInSpecificFormat(generateInfo.KeyFormat, generateInfo.Encryption, createdKey, filePath,
+            overwrite);
+    }
 
     /// <summary>
     ///     Generates a new SSH key.
@@ -665,14 +690,16 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     /// <param name="generateParamsInfo">Parameters for key generation.</param>
     /// <param name="overwrite">Whether to overwrite existing file if it exists.</param>
     /// <returns>A value task representing the asynchronous operation.</returns>
-    public async ValueTask<KeyManagerOperationResult> GenerateNewKey(string fullFilePath, SshKeyGenerateInfo generateParamsInfo, bool overwrite = false)
+    public async ValueTask<KeyManagerOperationResult> GenerateNewKey(string fullFilePath,
+        SshKeyGenerateInfo generateParamsInfo, bool overwrite = false)
     {
-        if(File.Exists(fullFilePath) && !overwrite)
+        if (File.Exists(fullFilePath) && !overwrite)
             return KeyManagerOperationResult.Failure(new InvalidOperationException("File already exists"));
         if (GenerateKeyFile() is not { } keyFile)
             return KeyManagerOperationResult.FromException(new InvalidOperationException("Key file not generated"));
         if (!await _semaphoreSlim.WaitAsync(100))
-            return KeyManagerOperationResult.FromException(new InvalidOperationException("Another key operation is in progress"));
+            return KeyManagerOperationResult.FromException(
+                new InvalidOperationException("Another key operation is in progress"));
         try
         {
             Processing = true;
@@ -692,7 +719,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 
             var filePath = generateParamsInfo.KeyFormat.ChangeExtension(fullFilePath, false);
 
-            if(await WriteToFileInSpecificFormat(generateParamsInfo, createdKey, filePath, overwrite) is {IsSuccess: false} error)
+            if (await WriteToFileInSpecificFormat(generateParamsInfo, createdKey, filePath, overwrite) is
+                { IsSuccess: false } error)
                 return error;
 
             var keyFileSource = SshKeyFileSource.FromDisk(filePath);
@@ -723,7 +751,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     public async ValueTask<KeyManagerOperationResult> RerunSearchAsync(CancellationToken token = default)
     {
         if (!await _semaphoreSlim.WaitAsync(100, token))
-            return KeyManagerOperationResult.FromException(new InvalidOperationException("Another key operation is in progress"));
+            return KeyManagerOperationResult.FromException(
+                new InvalidOperationException("Another key operation is in progress"));
         try
         {
             Processing = true;
@@ -740,6 +769,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             _semaphoreSlim.Release();
             Processing = false;
         }
+
         return KeyManagerOperationResult.Success();
     }
 
@@ -844,7 +874,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     {
         try
         {
-            if (_resolver.Resolve<SshKeyFile>() is { } keyFile) 
+            if (_resolver.Resolve<SshKeyFile>() is { } keyFile)
                 return keyFile;
         }
         catch (Exception e)
@@ -875,16 +905,18 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         }
     }
 
-    private async ValueTask<KeyManagerOperationResult> SearchForKeysAndUpdateCollectionAsync(CancellationToken token = default)
+    private async ValueTask<KeyManagerOperationResult> SearchForKeysAndUpdateCollectionAsync(
+        CancellationToken token = default)
     {
-        if (_directoryCrawler.IsSearching) return KeyManagerOperationResult.Conflict(new InvalidOperationException("Key search already in progress"));
+        if (_directoryCrawler.IsSearching)
+            return KeyManagerOperationResult.Conflict(new InvalidOperationException("Key search already in progress"));
         var semaphoreAquired = false;
         var errorsOccured = false;
         EnableTempLogger();
         try
         {
             semaphoreAquired = await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(5), token);
-            await foreach(var sshKey in _directoryCrawler.GetPossibleKeyFilesOnDiskAsyncEnumerable(token))
+            await foreach (var sshKey in _directoryCrawler.GetPossibleKeyFilesOnDiskAsyncEnumerable(token))
                 AddKey(sshKey);
             return KeyManagerOperationResult.Success();
         }
