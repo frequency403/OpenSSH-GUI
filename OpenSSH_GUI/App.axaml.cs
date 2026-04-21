@@ -1,3 +1,6 @@
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -20,11 +23,31 @@ using Svg.Skia;
 
 namespace OpenSSH_GUI;
 
+class DoubleToleranceComparer : IEqualityComparer<double>
+{
+    private readonly double _epsilon;
+
+    public DoubleToleranceComparer(double epsilon)
+    {
+        _epsilon = epsilon;
+    }
+
+    public bool Equals(double x, double y)
+        => Math.Abs(x - y) < _epsilon;
+
+    public int GetHashCode(double obj)
+        => 0;
+}
+
 [UsedImplicitly]
 public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrator, IHostApplicationLifetime hostApplicationLifetime) : Application
 {
     private const string RessourceUri = "avares://OpenSSH_GUI/Assets/openssh-gui{0}.svg";
     private const string Underline = "_";
+    internal const string SystemFontSize = "SystemFontSize";
+    private const string BaseFontSize = "BaseFontSize";
+    private const string MaterialIconSize = "MaterialIconSize";
+    private static readonly CompositeDisposable Disposables = new();
     private static readonly Dictionary<float, float> IconSizes = new()
     {
         { 16, 16 },
@@ -104,7 +127,25 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
             {
                 if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
                 desktop.MainWindow = await resolver.ResolveViewAsync<MainWindow, MainWindowViewModel>();
-                Current?.Resources["SystemFontSize"] = double.Parse(Current?.Resources["BaseFontSize"]?.ToString() ?? string.Empty) * desktop.MainWindow.RenderScaling;
+
+                if (Current is not null)
+                {
+                    Current.Resources
+                        .GetResourceObservable(SystemFontSize)
+                        .Select(fs => fs as double?)
+                        .Where(fs => fs.HasValue)
+                        .Select(fs => fs.Value)
+                        .DistinctUntilChanged(new DoubleToleranceComparer(0.1))
+                        .Subscribe(FontSizeChanged)
+                        .DisposeWith(Disposables);
+                    if(Current.TryFindResource(BaseFontSize, out var fontSize) && fontSize is double fontSizeValueDouble)
+                    {
+                        var fontSizeValue = fontSizeValueDouble * desktop.MainWindow.RenderScaling;
+                        Current.Resources[SystemFontSize] = fontSizeValue;
+                        logger.LogInformation("{SystemFontSize} set to {fontSize}", SystemFontSize, fontSizeValue);
+                    }
+                }
+                
                 logger.LogInformation("MainWindow created");
                 desktop.MainWindow.Opened += OnMainWindowOpened;
             }
@@ -120,6 +161,15 @@ public class App(ILogger<App> logger, IResolver resolver, IRegistrator registrat
         
     }
 
+    private void FontSizeChanged(double fontSize)
+    {
+        if (Current is not null)
+        {
+            Current.Resources[MaterialIconSize] = fontSize + 6;
+            logger.LogInformation("{MaterialIconSize} set to {fontSize}", MaterialIconSize, fontSize + 6);
+        }
+    }
+    
     /// <summary>
     ///     Triggers the initial SSH key search after the main window has been presented,
     ///     ensuring the UI is fully ready before background work begins.

@@ -47,7 +47,7 @@
                 </Button>
             </StackPanel>
         </controls:HeaderedItem>
-        <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
+        <UniformGrid Columns="2" Rows="1">
             <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}">
                 <Button Command="{Binding ClearWholeCacheCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="5">
@@ -57,19 +57,12 @@
                 </Button>
             </controls:HeaderedItem>
             <controls:HeaderedItem Header="Font Size">
-                <UniformGrid Columns="1" Rows="2">
-                    <StackPanel>
-                        <TextBlock Text="{Binding #Slider.Value}" HorizontalAlignment="Center" />
-                        <Slider x:Name="Slider" Minimum="8" Maximum="48" IsSnapToTickEnabled="True" TickFrequency="2" Value="{Binding FontSize}" />
-                    </StackPanel>
-                    <Button Command="{Binding OnNextFontSizeCommand}" CommandParameter="{StaticResource BaseFontSize}">
-                        <StackPanel Orientation="Horizontal" Spacing="2">
-                            <avalonia:MaterialIcon Kind="Reload" />
-                            <TextBlock Text="Reset to default"/>
-                        </StackPanel>
+                <UniformGrid Rows="1" ColumnSpacing="5" HorizontalAlignment="Stretch">
+                    <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
+                    <Button Command="{Binding OnNextFontSizeCommand}" Background="{DynamicResource InfoBrush}" CommandParameter="{StaticResource BaseFontSize}">
+                        <avalonia:MaterialIcon Kind="Replay" />
                     </Button>
                 </UniformGrid>
-
             </controls:HeaderedItem>
         </UniformGrid>
 

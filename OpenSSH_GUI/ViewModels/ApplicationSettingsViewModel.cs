@@ -93,7 +93,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase<ApplicationSet
     [ReactiveCommand]
     private void OnNextFontSize(double obj)
     {
-        _application.Resources["SystemFontSize"] = obj;
+        _application.Resources[App.SystemFontSize] = obj;
     }
 
     public static LogEventLevel[] AvailableLogLevels { get; } = Enum.GetValues<LogEventLevel>();
