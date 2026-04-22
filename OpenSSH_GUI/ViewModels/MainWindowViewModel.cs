@@ -86,7 +86,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _itemsCountIconHelper = sshKeysCountChanged
             .Select(GetMaterialNumericIcon)
-            .Do(icon => logger.LogDebug($"Updated items count icon to {icon}"))
             .ToProperty(this, vm => vm.ItemsCountIcon)
             .DisposeWith(Disposables);
 

@@ -45,7 +45,7 @@ public class App(
     private const string RessourceUri = "avares://OpenSSH_GUI/Assets/openssh-gui{0}.svg";
     private const string Underline = "_";
     internal const string SystemFontSize = "SystemFontSize";
-    private const string BaseFontSize = "BaseFontSize";
+    internal const string BaseFontSize = "BaseFontSize";
     private const string MaterialIconSize = "MaterialIconSize";
     private static readonly CompositeDisposable Disposables = new();
 
@@ -144,7 +144,6 @@ public class App(
                     {
                         var fontSizeValue = fontSizeValueDouble * desktop.MainWindow.RenderScaling;
                         Current.Resources[SystemFontSize] = fontSizeValue;
-                        logger.LogInformation("{SystemFontSize} set to {fontSize}", SystemFontSize, fontSizeValue);
                     }
                 }
 
@@ -168,7 +167,6 @@ public class App(
         {
             var materialIconSize = fontSize + 4;
             Current.Resources[MaterialIconSize] = materialIconSize;
-            logger.LogInformation("{MaterialIconSize} set to {fontSize}", MaterialIconSize, materialIconSize);
         }
     }
 

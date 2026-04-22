@@ -9,14 +9,19 @@
                     <ContentPresenter Grid.Column="0"
                                       Grid.ColumnSpan="{TemplateBinding SideHeader, Converter={x:Static c:Converter.NullToColumnSpanConverter}}"
                                       Content="{TemplateBinding Header}"
-                                      HorizontalAlignment="Left" />
+                                      VerticalAlignment="{TemplateBinding HeaderVerticalAlignment}"
+                                      HorizontalAlignment="{TemplateBinding HeaderHorizontalAlignment}" />
                     <ContentPresenter Grid.Column="1"
                                       Content="{TemplateBinding SideHeader}"
-                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="{TemplateBinding SideHeaderVerticalAlignment}"
+                                      HorizontalAlignment="{TemplateBinding SideHeaderHorizontalAlignment}"
                                       IsVisible="{TemplateBinding SideHeader, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 </Grid>
                 <Separator />
-                <ContentPresenter Content="{TemplateBinding Content}" />
+                <ContentPresenter
+                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    Content="{TemplateBinding Content}" />
             </StackPanel>
         </ControlTemplate>
     </ContentControl.Template>

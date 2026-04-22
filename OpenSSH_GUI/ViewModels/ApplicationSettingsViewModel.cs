@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia;
+using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Configuration;
@@ -24,6 +25,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     private readonly Application _application;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
+    private readonly ILauncher _launcher;
     private readonly IMessageBoxProvider _messageBoxProvider;
 
     [Reactive] private bool _canDeleteOldLogFiles;
@@ -36,19 +38,27 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 
     [Reactive] private int _daysToDeleteSelected;
 
-    [Reactive] private double _fontSize = 12;
+    [Reactive] private double _fontSize;
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
+        ILauncher launcher,
         IMessageBoxProvider messageBoxProvider,
         Application application,
         LoggingLevelSwitch levelSwitch)
     {
         _logger = logger;
+        _launcher = launcher;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         _currentLogLevel = levelSwitch.MinimumLevel;
         _application = application;
         _daysToDeleteSelected = DaysToDelete[0];
+        if (!double.TryParse(_application.Resources[App.SystemFontSize]?.ToString(), out _fontSize)) 
+            if(!double.TryParse(_application.Resources[App.BaseFontSize]?.ToString(), out _fontSize))
+            {
+                _logger.LogWarning("Could not set font size by resources");
+                _fontSize = 14;
+            }
 
         if (Enum.TryParse<ThemeVariant>(application.ActualThemeVariant.Key.ToString(), true, out var themeVariant))
             _currentThemeVariant = themeVariant;
@@ -176,6 +186,11 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         LogFiles.Clear();
     }
 
+    [ReactiveCommand]
+    private Task<bool> OpenCacheFolder(CancellationToken token = default) => _launcher.LaunchDirectoryInfoAsync(
+        new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            AppDomain.CurrentDomain.FriendlyName)));
+
     private void OnNextTheme(ThemeVariant variant)
     {
         var themeVariant = variant switch
@@ -192,7 +207,6 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 
     private void OnNextDaysToDelete(int obj)
     {
-        _logger.LogDebug("Days to delete selected: {Days}", obj);
         var logConfiguration = LoggerConfiguration.Default;
         LogFiles.Clear();
         foreach (var logFile in Directory.EnumerateFiles(logConfiguration.LogFilePath, "*.log",
