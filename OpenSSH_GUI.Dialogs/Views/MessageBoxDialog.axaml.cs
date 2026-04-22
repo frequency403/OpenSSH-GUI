@@ -98,10 +98,15 @@ public partial class MessageBoxDialog : Window
     {
         Close(MessageBoxResult.Cancel);
     }
-
+    private bool _isInternalClose;
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
-        // TODO: ._.
+        if (_isInternalClose)
+            return;
+
+        e.Cancel = true;
+
+        _isInternalClose = true;
         Close(MessageBoxResult.Cancel);
     }
 }

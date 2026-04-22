@@ -197,6 +197,8 @@ public partial class ValidatedInputDialog : Window
 
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        e.Cancel = true;
+        Closing -= Window_OnClosing;
         Close(new ValidatedInputResult(null));
     }
 }
