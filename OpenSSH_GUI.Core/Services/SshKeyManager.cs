@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
+using Avalonia.Threading;
 using DryIoc;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -72,9 +73,9 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         };
         _watcher.Filters.Add("*.pub");
         _watcher.Filters.Add("*.ppk");
-        _watcher.Created += async (_, eventArgs) => await WatcherOnCreated(eventArgs);
-        _watcher.Deleted += WatcherOnDeleted;
-        _watcher.Renamed += async (_, eventArgs) => await WatcherOnRenamed(eventArgs);
+        _watcher.Created += async (_, eventArgs) => await Dispatcher.UIThread.InvokeAsync(() => WatcherOnCreated(eventArgs));
+        _watcher.Deleted += (sender, eventArgs) => Dispatcher.UIThread.Invoke(() => WatcherOnDeleted(sender, eventArgs));
+        _watcher.Renamed += async (_, eventArgs) => await Dispatcher.UIThread.InvokeAsync(() => WatcherOnRenamed(eventArgs));
         SshKeys = new ReadOnlyObservableCollection<SshKeyFile>(_sshKeysInternal);
     }
 
