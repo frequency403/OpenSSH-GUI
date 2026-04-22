@@ -154,21 +154,52 @@ public sealed partial record SshKeyFileInformation : ReactiveRecord, IDisposable
     public SshKeyFileInformation(SshKeyFileSource keyFileSource)
     {
         KeyFileSource = keyFileSource;
-        var keyFileSourceChanged = this.WhenAnyValue(vm => vm.KeyFileSource)
-            .ObserveOn(AvaloniaScheduler.Instance);
-        var fileInfoChanged = this.WhenAnyValue(vm => vm.FileInfo)
-            .ObserveOn(AvaloniaScheduler.Instance);
-        var currentFormatChanged = this.WhenAnyValue(vm => vm.CurrentFormat)
-            .ObserveOn(AvaloniaScheduler.Instance);
+        var initialFileInfo = !string.IsNullOrWhiteSpace(keyFileSource.AbsolutePath)
+            ? new FileInfo(keyFileSource.AbsolutePath)
+            : new FileInfo(Assembly.GetExecutingAssembly().Location);
+
+        var initialFormat = initialFileInfo.Extension == SshKeyFormatExtension.PuttyKeyFileExtension
+            ? SshKeyFormat.PuTTYv3
+            : SshKeyFormat.OpenSSH;
+
+        var initialIsOpenSsh = initialFormat == SshKeyFormat.OpenSSH;
+
+        var initialPublicKeyFileName = initialIsOpenSsh
+            ? Path.ChangeExtension(
+                initialFileInfo.FullName,
+                SshKeyFormatExtension.OpenSshPublicKeyFileExtension)
+            : null;
+
+        var initialAvailableFormats = AvailableFormats
+            .Where(f => f != initialFormat)
+            .ToArray();
+
+        var initialDefaultFormat = initialAvailableFormats.Contains(SshKeyFormat.OpenSSH)
+            ? SshKeyFormat.OpenSSH
+            : initialAvailableFormats.FirstOrDefault();
+
+        var initialFiles = new[] { initialFileInfo.FullName, initialPublicKeyFileName }
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => new FileInfo(p!))
+            .ToArray();
+
+        var keyFileSourceChanged = this.WhenAnyValue(x => x.KeyFileSource);
+        var fileInfoChanged = this.WhenAnyValue(x => x.FileInfo);
+        var currentFormatChanged = this.WhenAnyValue(x => x.CurrentFormat);
 
         _canChangeFileNameHelper = keyFileSourceChanged
-            .Select(fileSource => !fileSource.ProvidedByConfig)
-            .ToProperty(this, vm => vm.CanChangeFileName, initialValue: false)
+            .Select(src => src is { ProvidedByConfig: false })
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.CanChangeFileName,
+                initialValue: keyFileSource is { ProvidedByConfig: false })
             .DisposeWith(_disposables);
 
         _fileInfoHelper = keyFileSourceChanged
-            .Select(fileSource => new FileInfo(fileSource.AbsolutePath))
-            .ToProperty(this, vm => vm.FileInfo, new FileInfo(Assembly.GetExecutingAssembly().Location))
+            .Select(src => !string.IsNullOrWhiteSpace(src.AbsolutePath)
+                ? new FileInfo(src.AbsolutePath)
+                : new FileInfo(Assembly.GetExecutingAssembly().Location))
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.FileInfo, initialValue: initialFileInfo)
             .DisposeWith(_disposables);
 
         _currentFormatHelper = fileInfoChanged
@@ -176,59 +207,84 @@ public sealed partial record SshKeyFileInformation : ReactiveRecord, IDisposable
             {
                 SshKeyFormatExtension.PuttyKeyFileExtension => SshKeyFormat.PuTTYv3,
                 _ => SshKeyFormat.OpenSSH
-            }).ToProperty(this, vm => vm.CurrentFormat)
+            })
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.CurrentFormat, initialValue: initialFormat)
             .DisposeWith(_disposables);
 
         _fileNameHelper = fileInfoChanged
-            .Select(e => e.Name)
-            .ToProperty(this, vm => vm.FileName, string.Empty)
+            .Select(info => info.Name)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.FileName, initialValue: initialFileInfo.Name)
             .DisposeWith(_disposables);
 
         _fullFileNameHelper = fileInfoChanged
-            .Select(e => e.FullName)
-            .ToProperty(this, vm => vm.FullFileName, string.Empty)
+            .Select(info => info.FullName)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.FullFileName, initialValue: initialFileInfo.FullName)
             .DisposeWith(_disposables);
 
         _existsHelper = fileInfoChanged
-            .Select(e => e.Exists)
-            .ToProperty(this, vm => vm.Exists, initialValue: false)
+            .Select(info => info.Exists)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.Exists, initialValue: initialFileInfo.Exists)
             .DisposeWith(_disposables);
 
         _directoryNameHelper = fileInfoChanged
-            .Select(e => e.DirectoryName)
-            .ToProperty(this, vm => vm.DirectoryName, initialValue: null)
+            .Select(info => info.DirectoryName)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.DirectoryName, initialValue: initialFileInfo.DirectoryName)
             .DisposeWith(_disposables);
 
         _isOpenSshKeyHelper = currentFormatChanged
-            .Select(e => e is SshKeyFormat.OpenSSH)
-            .ToProperty(this, vm => vm.IsOpenSshKey, initialValue: false)
+            .Select(fmt => fmt == SshKeyFormat.OpenSSH)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.IsOpenSshKey, initialValue: initialIsOpenSsh)
             .DisposeWith(_disposables);
 
-        _publicKeyFileNameHelper = this.WhenAnyValue(vm => vm.IsOpenSshKey)
-            .Select(e =>
-                e ? Path.ChangeExtension(FileInfo.FullName, SshKeyFormatExtension.OpenSshPublicKeyFileExtension) : null)
-            .ToProperty(this, vm => vm.PublicKeyFileName, initialValue: null)
+        _publicKeyFileNameHelper = this
+            .WhenAnyValue(x => x.IsOpenSshKey, x => x.FileInfo)
+            .Select(tuple =>
+            {
+                var (isOpenSsh, info) = tuple;
+                if (!isOpenSsh) return null;
+                var path = info?.FullName;
+                return !string.IsNullOrWhiteSpace(path)
+                    ? Path.ChangeExtension(path, SshKeyFormatExtension.OpenSshPublicKeyFileExtension)
+                    : null;
+            })
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.PublicKeyFileName, initialValue: initialPublicKeyFileName)
             .DisposeWith(_disposables);
 
         _availableFormatsForConversionHelper = currentFormatChanged
             .Select(e => AvailableFormats.Where(f => f != e).ToArray())
-            .ToProperty(this, vm => vm.AvailableFormatsForConversion, [])
-            .DisposeWith(_disposables);
-
-        _defaultConversionFormatHelper = this.WhenAnyValue(vm => vm.AvailableFormatsForConversion)
-            .Select(e =>
-                e.Contains(SshKeyFormat.OpenSSH)
-                    ? SshKeyFormat.OpenSSH
-                    : e.OrderByDescending(f => f == SshKeyFormat.OpenSSH).FirstOrDefault(SshKeyFormat.OpenSSH))
-            .ToProperty(this, vm => vm.DefaultConversionFormat, SshKeyFormat.OpenSSH)
-            .DisposeWith(_disposables);
-
-
-        _filesHelper = this.WhenAnyValue(vm => vm.FullFileName, vm => vm.PublicKeyFileName)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(tuple => new[] { tuple.Item1, tuple.Item2 }.Where(e => !string.IsNullOrEmpty(e))
-                .Select(e => new FileInfo(e!)).ToArray())
-            .ToProperty(this, vm => vm.Files, [])
+            .ToProperty(this, x => x.AvailableFormatsForConversion,
+                initialValue: initialAvailableFormats)
+            .DisposeWith(_disposables);
+
+        _defaultConversionFormatHelper = this
+            .WhenAnyValue(x => x.AvailableFormatsForConversion)
+            .Select(list =>
+            {
+                if (list.Length == 0 || list.Contains(SshKeyFormat.OpenSSH))
+                    return SshKeyFormat.OpenSSH;
+                return list[0];
+            })
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.DefaultConversionFormat,
+                initialValue: initialDefaultFormat)
+            .DisposeWith(_disposables);
+
+        _filesHelper = this
+            .WhenAnyValue(x => x.FullFileName, x => x.PublicKeyFileName)
+            .Select(tuple => new[] { tuple.Item1, tuple.Item2 }
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+                .Select(p => new FileInfo(p!))
+                .ToArray())
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .ToProperty(this, x => x.Files, initialValue: initialFiles)
             .DisposeWith(_disposables);
     }
 

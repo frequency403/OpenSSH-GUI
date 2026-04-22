@@ -162,6 +162,7 @@ public partial class ValidatedInputDialog : Window
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
+        _isInternalClose = true;
         Close(new ValidatedInputResult(null));
     }
 
@@ -180,6 +181,7 @@ public partial class ValidatedInputDialog : Window
             return;
         }
 
+        _isInternalClose = true;
         Close(new ValidatedInputResult(text));
     }
 
@@ -195,9 +197,15 @@ public partial class ValidatedInputDialog : Window
         PART_Error.Text = string.Empty;
     }
 
+    private bool _isInternalClose;
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        if (_isInternalClose)
+            return;
+
         e.Cancel = true;
+
+        _isInternalClose = true;
         Closing -= Window_OnClosing;
         Close(new ValidatedInputResult(null));
     }

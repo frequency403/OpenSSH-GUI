@@ -186,6 +186,7 @@ public partial class SecureInputDialog : Window
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
         ZeroSegments();
+        _isInternalClose = true;
         Close(null);
     }
 
@@ -208,7 +209,7 @@ public partial class SecureInputDialog : Window
 
         var buffer = ConsolidateBuffer();
         ZeroSegments();
-
+        _isInternalClose = true;
         Close(new SecureInputResult(buffer));
     }
 
@@ -272,9 +273,14 @@ public partial class SecureInputDialog : Window
         PART_Error.Text = string.Empty;
     }
 
+    private bool _isInternalClose;
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        if (_isInternalClose)
+            return;
+
         e.Cancel = true;
+        _isInternalClose = true;
         Closing -= Window_OnClosing;
         Close(null);
     }

@@ -81,21 +81,25 @@ public partial class MessageBoxDialog : Window
 
     private void OnYesClick(object? sender, RoutedEventArgs e)
     {
+        _isInternalClose = true;
         Close(MessageBoxResult.Yes);
     }
 
     private void OnNoClick(object? sender, RoutedEventArgs e)
     {
+        _isInternalClose = true;
         Close(MessageBoxResult.No);
     }
 
     private void OnOkClick(object? sender, RoutedEventArgs e)
     {
+        _isInternalClose = true;
         Close(MessageBoxResult.Ok);
     }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
+        _isInternalClose = true;
         Close(MessageBoxResult.Cancel);
     }
     private bool _isInternalClose;
