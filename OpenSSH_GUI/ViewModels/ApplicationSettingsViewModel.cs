@@ -29,9 +29,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     private readonly IMessageBoxProvider _messageBoxProvider;
 
     [Reactive] private bool _canDeleteOldLogFiles;
-
-    [ObservableAsProperty] private string _cleanupFilesButtonText = string.Empty;
-
+    
     [Reactive] private LogEventLevel _currentLogLevel;
 
     [Reactive] private ThemeVariant _currentThemeVariant;
@@ -87,12 +85,6 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
             .Subscribe(count => { CanDeleteOldLogFiles = count > 0; })
-            .DisposeWith(Disposables);
-
-        _cleanupFilesButtonTextHelper = this.WhenAnyValue(vm => vm.LogFiles.Count)
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(count => string.Format(StringsAndTexts.ApplicationSettingsCleanupFiles, count))
-            .ToProperty(this, vm => vm.CleanupFilesButtonText)
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.CurrentThemeVariant)

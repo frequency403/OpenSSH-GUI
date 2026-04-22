@@ -30,48 +30,59 @@
             </controls:HeaderedItem>
         </UniformGrid>
         <controls:HeaderedItem
-            Header="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}">
+            Header="Cache Options">
             <controls:HeaderedItem.SideHeader>
                 <Button Grid.Column="1" HorizontalAlignment="Right" Background="{DynamicResource NavigationActiveBrush}" Command="{Binding OpenCacheFolderCommand}">
                     <avalonia:MaterialIcon Kind="FolderOpenOutline"/>
                 </Button>
             </controls:HeaderedItem.SideHeader>
-            <StackPanel Orientation="Horizontal" Margin="10" Spacing="5">
-                <ComboBox HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                          SelectedItem="{Binding DaysToDeleteSelected}"
-                          ItemsSource="{Binding DaysToDelete}" />
-                <Label HorizontalAlignment="Right" VerticalAlignment="Stretch"
-                       Content="{x:Static resources:StringsAndTexts.Days}" />
-                <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
-                        Background="{DynamicResource CodeForegroundBrush}"
-                        Command="{Binding DeleteOldLogFilesCommand}">
-                    <TextBlock Text="{Binding CleanupFilesButtonText}" />
-                </Button>
-            </StackPanel>
-        </controls:HeaderedItem>
-        <UniformGrid Columns="2" Rows="1">
-            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}">
-                <Button Background="{DynamicResource RevokedBrush}" Command="{Binding ClearWholeCacheCommand}">
+            <UniformGrid Rows="1" Columns="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <StackPanel HorizontalAlignment="Center" Spacing="1">
+                    <StackPanel Spacing="5" HorizontalAlignment="Center">
+                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}"/>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="5">
+                            <ComboBox VerticalAlignment="Center" SelectedItem="{Binding DaysToDeleteSelected}"
+                                      ItemsSource="{Binding DaysToDelete}" />
+                            <TextBlock VerticalAlignment="Center" Text="{x:Static resources:StringsAndTexts.Days}" />
+                            <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
+                                    Background="{DynamicResource CodeForegroundBrush}" HorizontalAlignment="Center"
+                                    Command="{Binding DeleteOldLogFilesCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <avalonia:MaterialIcon Kind="DeleteOutline" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding LogFiles.Count, StringFormat=({0})}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+                <Button HorizontalAlignment="Right" Background="{DynamicResource RevokedBrush}" Command="{Binding ClearWholeCacheCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="5">
                         <avalonia:MaterialIcon Kind="ReportProblem" />
-                        <Label Content="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Center" Text="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}"/>
+                            <Separator HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                            <TextBlock HorizontalAlignment="Center" Text="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}"/>
+                        </StackPanel>
                     </StackPanel>
                 </Button>
-            </controls:HeaderedItem>
-            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}" 
-                                   HeaderHorizontalAlignment="Left"
-                                   HeaderVerticalAlignment="Center"
-                                   SideHeaderHorizontalAlignment="Right"
-                                   HorizontalContentAlignment="Stretch">
-                <controls:HeaderedItem.SideHeader>
-                    <Button Command="{Binding OnNextFontSizeCommand}" 
-                            Background="{DynamicResource InfoBrush}"
-                            CommandParameter="{StaticResource BaseFontSize}">
-                        <avalonia:MaterialIcon Kind="Replay" />
-                    </Button>
-                </controls:HeaderedItem.SideHeader>
-                <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
-            </controls:HeaderedItem>
-        </UniformGrid>
+            </UniformGrid>
+            
+            
+        </controls:HeaderedItem>
+        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}" 
+                               HeaderHorizontalAlignment="Left"
+                               HeaderVerticalAlignment="Center"
+                               SideHeaderHorizontalAlignment="Right"
+                               HorizontalContentAlignment="Stretch">
+            <controls:HeaderedItem.SideHeader>
+                <Button Command="{Binding OnNextFontSizeCommand}" 
+                        Background="{DynamicResource InfoBrush}"
+                        CommandParameter="{StaticResource BaseFontSize}">
+                    <avalonia:MaterialIcon Kind="Replay" />
+                </Button>
+            </controls:HeaderedItem.SideHeader>
+            <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
+        </controls:HeaderedItem>
     </UniformGrid>
 </Window>
