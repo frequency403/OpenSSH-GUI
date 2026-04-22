@@ -273,42 +273,13 @@
                 <controls:FlyoutButton Margin="10 5"
                                        Padding="5" HorizontalAlignment="Stretch"
                                        VerticalAlignment="Stretch" CornerRadius="5">
-                    <controls:FlyoutButton.Styles>
-                        <Style Selector="materialIcons|MaterialIcon.spin">
-                            <Setter Property="RenderTransform">
-                                <Setter.Value>
-                                    <RotateTransform Angle="0" />
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Animations>
-                                <Animation Duration="0:0:1.2" IterationCount="INFINITE">
-                                    <KeyFrame Cue="0%">
-                                        <Setter Property="RotateTransform.Angle" Value="0" />
-                                    </KeyFrame>
-                                    <KeyFrame Cue="100%">
-                                        <Setter Property="RotateTransform.Angle" Value="360" />
-                                    </KeyFrame>
-                                </Animation>
-                            </Style.Animations>
-                        </Style>
-                    </controls:FlyoutButton.Styles>
-                    <Panel>
-                        <Panel IsVisible="{Binding !SshKeyManager.Processing}">
-                            <materialIcons:MaterialIcon Kind="{Binding ItemsCountIcon}" />
-                            <ToolTip.Tip>
-                                <Label Content="{Binding ItemsCountTooltip}" />
-                            </ToolTip.Tip>
+                    <ToolTip.Tip>
+                        <Panel>
+                            <Label IsVisible="{Binding !SshKeyManager.Processing}" Content="{Binding ItemsCountTooltip}" />
+                            <TextBlock IsVisible="{Binding SshKeyManager.Processing}" Text="{x:Static openSshGui:StringsAndTexts.MainWindowReloadingKeys}" />
                         </Panel>
-                        <Panel IsVisible="{Binding SshKeyManager.Processing}">
-                            <materialIcons:MaterialIcon Classes="spin"
-                                                        Kind="Reload"
-                                                        RenderTransformOrigin="50%,50%">
-                                <ToolTip.Tip>
-                                    <TextBlock Text="{x:Static openSshGui:StringsAndTexts.MainWindowReloadingKeys}" />
-                                </ToolTip.Tip>
-                            </materialIcons:MaterialIcon>
-                        </Panel>
-                    </Panel>
+                    </ToolTip.Tip>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold"/>
                 </controls:FlyoutButton>
 
 

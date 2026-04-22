@@ -41,9 +41,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IResolver _serviceProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
-    private MaterialIconKind _itemsCountIcon = MaterialIconKind.Infinity;
-
-    [ObservableAsProperty(ReadOnly = true)]
     private string _itemsCountTooltip = string.Empty;
 
     [Reactive(SetModifier = AccessModifier.Private)]
@@ -83,11 +80,6 @@ public partial class MainWindowViewModel : ViewModelBase
             .Select(_ => SshKeyManager.SshKeys.Count)
             .StartWith(SshKeyManager.SshKeys.Count)
             .ObserveOn(AvaloniaScheduler.Instance);
-
-        _itemsCountIconHelper = sshKeysCountChanged
-            .Select(GetMaterialNumericIcon)
-            .ToProperty(this, vm => vm.ItemsCountIcon)
-            .DisposeWith(Disposables);
 
         _itemsCountTooltipHelper = sshKeysCountChanged
             .Select(count => string.Format(StringsAndTexts.MainWindowFoundKeyPairsCountLabel, count))
@@ -338,24 +330,5 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         await _dialogHost.ShowDialog<TWindow, TViewModel>(
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));
-    }
-
-    private static MaterialIconKind GetMaterialNumericIcon(int count)
-    {
-        return count switch
-        {
-            0 => MaterialIconKind.NumericZero,
-            1 => MaterialIconKind.NumericOne,
-            2 => MaterialIconKind.NumericTwo,
-            3 => MaterialIconKind.NumericThree,
-            4 => MaterialIconKind.NumericFour,
-            5 => MaterialIconKind.NumericFive,
-            6 => MaterialIconKind.NumericSix,
-            7 => MaterialIconKind.NumericSeven,
-            8 => MaterialIconKind.NumericEight,
-            9 => MaterialIconKind.NumericNine,
-            10 => MaterialIconKind.Numeric10,
-            _ => MaterialIconKind.Infinity
-        };
     }
 }
