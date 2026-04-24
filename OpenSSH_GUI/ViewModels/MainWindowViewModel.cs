@@ -2,6 +2,7 @@
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
+using Avalonia.Animation.Easings;
 using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
 using Material.Icons;
@@ -48,6 +49,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableAsProperty(ReadOnly = true)]
     private string _windowTitle = string.Empty;
 
+    [ObservableAsProperty(ReadOnly = true)]
+    private bool _isProvidePasswordExecuting;
+
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,
         SshKeyManager sshKeyManager,
@@ -83,6 +87,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _itemsCountTooltipHelper = sshKeysCountChanged
             .Select(count => string.Format(StringsAndTexts.MainWindowFoundKeyPairsCountLabel, count))
             .ToProperty(this, vm => vm.ItemsCountTooltip)
+            .DisposeWith(Disposables);
+        _isProvidePasswordExecutingHelper = ProvidePasswordCommand.IsExecuting
+            .ToProperty(this, vm => vm.IsProvidePasswordExecuting)
             .DisposeWith(Disposables);
     }
 
