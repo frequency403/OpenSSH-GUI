@@ -7,12 +7,14 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using DryIoc;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Resources;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
@@ -38,8 +40,8 @@ internal class DoubleToleranceComparer(double epsilon) : IEqualityComparer<doubl
 [UsedImplicitly]
 public class App(
     ILogger<App> logger,
-    IResolver resolver,
-    IRegistrator registrator,
+    IServiceProvider serviceProvider,
+    AppIconStore iconStore,
     IHostApplicationLifetime hostApplicationLifetime) : Application
 {
     private const string RessourceUri = "avares://OpenSSH_GUI/Assets/openssh-gui{0}.svg";
@@ -74,7 +76,7 @@ public class App(
         try
         {
             base.OnFrameworkInitializationCompleted();
-            SshNetLoggingConfiguration.InitializeLogging(resolver.Resolve<ILoggerFactory>());
+            SshNetLoggingConfiguration.InitializeLogging(serviceProvider.GetRequiredService<ILoggerFactory>());
             try
             {
                 foreach (var variant in new[] { ThemeVariant.Light, ThemeVariant.Dark })
@@ -108,14 +110,14 @@ public class App(
                         }
 
                         var bm = new Bitmap(memoryStream);
-                        var serviceKey = string.Join(Underline, nameof(Bitmap), width).ToLower();
-                        registrator.RegisterInstance(bm, serviceKey: serviceKey,
-                            ifAlreadyRegistered: IfAlreadyRegistered.Replace);
+                        var bitmapKey = string.Join(Underline, nameof(Bitmap), width).ToLower();
+                        iconStore.AddBitmap(bitmapKey, bm);
                     }
 
-                    registrator.RegisterInstance(
-                        new WindowIcon(resolver.Resolve<Bitmap>(string.Join(Underline, nameof(Bitmap), 32).ToLower())),
-                        serviceKey: string.Join(Underline, nameof(WindowIcon), 32, variant).ToLower());
+                    var iconKey = string.Join(Underline, nameof(WindowIcon), 32, variant).ToLower();
+                    var bitmapRef = iconStore.GetBitmap(string.Join(Underline, nameof(Bitmap), 32).ToLower());
+                    if (bitmapRef is not null)
+                        iconStore.AddWindowIcon(iconKey, new WindowIcon(bitmapRef));
                 }
             }
             catch (Exception e)
@@ -127,7 +129,7 @@ public class App(
             try
             {
                 if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
-                desktop.MainWindow = await resolver.ResolveViewAsync<MainWindow, MainWindowViewModel>();
+                desktop.MainWindow = await serviceProvider.ResolveViewAsync<MainWindow, MainWindowViewModel>();
 
                 if (Current is not null)
                 {
@@ -183,7 +185,7 @@ public class App(
 
             try
             {
-                await resolver.Resolve<SshKeyManager>().InitialSearchAsync(hostApplicationLifetime.ApplicationStopping);
+                await serviceProvider.GetRequiredService<SshKeyManager>().InitialSearchAsync(hostApplicationLifetime.ApplicationStopping);
                 logger.LogInformation("Initial key search completed");
             }
             catch (Exception ex)

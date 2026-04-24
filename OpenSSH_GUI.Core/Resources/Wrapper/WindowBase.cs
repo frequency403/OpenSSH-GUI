@@ -2,7 +2,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia.Controls;
-using DryIoc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.MVVM;
@@ -28,7 +28,8 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
 {
     private CompositeDisposable Disposables { get; } = new();
     public required ILogger<WindowBase<TViewModel>> Logger { get; set; }
-    public required IResolver Resolver { get; set; }
+    public required IServiceProvider Services { get; set; }
+    public required AppIconStore AppIconStore { get; set; }
 
     public void Dispose()
     {
@@ -46,7 +47,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
             .DisposeWith(Disposables);
         try
         {
-            ViewModel = Resolver.Resolve<TViewModel>(typeof(TViewModel).Name);
+            ViewModel = Services.GetRequiredKeyedService<TViewModel>(typeof(TViewModel).Name);
         }
         catch (Exception e)
         {
@@ -64,7 +65,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
         try
         {
             if (Enum.TryParse<ThemeVariant>(ActualThemeVariant.Key.ToString(), true, out var themeVariant))
-                Icon = Resolver.Resolve<WindowIcon>(string.Join("_", nameof(WindowIcon), 32, themeVariant).ToLower());
+                Icon = AppIconStore.GetWindowIcon(string.Join("_", nameof(WindowIcon), 32, themeVariant).ToLower());
             else
                 Logger.LogWarning("Could not resolve theme variant {themeVariant}", ActualThemeVariant);
         }

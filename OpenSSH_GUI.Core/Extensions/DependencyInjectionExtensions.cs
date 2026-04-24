@@ -1,5 +1,5 @@
 ﻿using Avalonia.Controls;
-using DryIoc;
+using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 
@@ -17,53 +17,52 @@ public static class DependencyInjectionExtensions
         var option2 = t2Name.StartsWith(t1Name) && t2Name.EndsWith("ViewModel");
         return option1 || option2;
     }
-
-    extension(IResolver resolver)
+    
+    extension(IServiceProvider serviceProvider)
+{
+    public async ValueTask<TView> ResolveViewAsync<TView, TViewModel, TViewModelInitializerParameter>(
+        TViewModelInitializerParameter initializerParameters,
+        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
+        CancellationToken token = default)
+        where TView : WindowBase<TViewModel, TViewModelInitializerParameter>
+        where TViewModel : ViewModelBase<TViewModelInitializerParameter>
     {
-        public async ValueTask<TView> ResolveViewAsync<TView, TViewModel, TViewModelInitializerParameter>(
-            TViewModelInitializerParameter initializerParameters,
-            WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
-            CancellationToken token = default)
-            where TView : WindowBase<TViewModel, TViewModelInitializerParameter>
-            where TViewModel : ViewModelBase<TViewModelInitializerParameter>
-        {
-            var viewName = typeof(TView).Name;
-            var resolvedView = resolver.Resolve<TView>(viewName);
-            await resolvedView.InitializeAsync(initializerParameters, windowStartupLocation, token);
-            ArgumentNullException.ThrowIfNull(resolvedView.ViewModel);
-            return !resolvedView.ViewModel.IsInitialized
-                ? throw new InvalidOperationException("ViewModel not properly initialized")
-                : resolvedView;
-        }
-
-        public async ValueTask<TView> ResolveViewAsync<TView, TViewModel>(
-            WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
-            CancellationToken token = default)
-            where TView : WindowBase<TViewModel>
-            where TViewModel : ViewModelBase
-        {
-            var viewName = typeof(TView).Name;
-            var resolvedView = resolver.Resolve<TView>(viewName);
-            await resolvedView.InitializeAsync(windowStartupLocation, token);
-            ArgumentNullException.ThrowIfNull(resolvedView.ViewModel);
-            return !resolvedView.ViewModel.IsInitialized
-                ? throw new InvalidOperationException("ViewModel not properly initialized")
-                : resolvedView;
-        }
+        var resolvedView = serviceProvider.GetRequiredKeyedService<TView>(typeof(TView).Name);
+        await resolvedView.InitializeAsync(initializerParameters, windowStartupLocation, token);
+        ArgumentNullException.ThrowIfNull(resolvedView.ViewModel);
+        return !resolvedView.ViewModel.IsInitialized
+            ? throw new InvalidOperationException("ViewModel not properly initialized")
+            : resolvedView;
     }
 
-    extension(IContainer container)
+    public async ValueTask<TView> ResolveViewAsync<TView, TViewModel>(
+        WindowStartupLocation windowStartupLocation = WindowStartupLocation.CenterScreen,
+        CancellationToken token = default)
+        where TView : WindowBase<TViewModel>
+        where TViewModel : ViewModelBase
     {
-        public void RegisterViewWithViewModel<TView, TViewModel>()
-            where TViewModel : ViewModelBase where TView : Window
-        {
-            if (!ValidateNamingConvention<TView, TViewModel>())
-                throw new InvalidOperationException(
-                    $"Viewmodels must follow the following convention: $NameOfView + $ViewModel -> in that case your Viewmodel must be renamed to \"{typeof(TView).Name + "ViewModel"}\"");
-
-            container.Register<TView>(serviceKey: typeof(TView).Name, reuse: Reuse.Transient,
-                made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
-            container.Register<TViewModel>(serviceKey: typeof(TViewModel).Name, reuse: Reuse.Transient);
-        }
+        var resolvedView = serviceProvider.GetRequiredKeyedService<TView>(typeof(TView).Name);
+        await resolvedView.InitializeAsync(windowStartupLocation, token);
+        ArgumentNullException.ThrowIfNull(resolvedView.ViewModel);
+        return !resolvedView.ViewModel.IsInitialized
+            ? throw new InvalidOperationException("ViewModel not properly initialized")
+            : resolvedView;
     }
+}
+
+extension(IServiceCollection services)
+{
+    
+    public void RegisterViewWithViewModel<TView, TViewModel>()
+        where TViewModel : ViewModelBase
+        where TView : Window
+    {
+        if (!ValidateNamingConvention<TView, TViewModel>())
+            throw new InvalidOperationException(
+                $"Viewmodels must follow the following convention: $NameOfView + $ViewModel -> in that case your Viewmodel must be renamed to \"{typeof(TView).Name + "ViewModel"}\"");
+
+        services.AddKeyedTransient<TView>(typeof(TView).Name);
+        services.AddKeyedTransient<TViewModel>(typeof(TViewModel).Name);
+    }
+}
 }

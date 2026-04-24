@@ -3,8 +3,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using Avalonia.Threading;
-using DryIoc;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.Keys;
@@ -45,7 +45,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 
     private readonly DirectoryCrawler _directoryCrawler;
     private readonly ILogger<SshKeyManager> _logger;
-    private readonly IResolver _resolver;
+    private readonly IServiceProvider _resolver;
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
     private readonly FileSystemWatcher _watcher;
@@ -57,7 +57,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     public SshKeyManager(
         ILogger<SshKeyManager> logger,
         DirectoryCrawler directoryCrawler,
-        IResolver resolver)
+        IServiceProvider resolver)
     {
         _logger = logger;
         _directoryCrawler = directoryCrawler;
@@ -875,7 +875,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     {
         try
         {
-            if (_resolver.Resolve<SshKeyFile>() is { } keyFile)
+            if (_resolver.GetService<SshKeyFile>() is { } keyFile)
                 return keyFile;
         }
         catch (Exception e)

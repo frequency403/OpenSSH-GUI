@@ -3,7 +3,6 @@ using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
 using Avalonia.Platform.Storage;
-using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
 using Microsoft.Extensions.Configuration;
@@ -38,7 +37,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILauncher _launcher;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
-    private readonly IResolver _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
     private string _itemsCountTooltip = string.Empty;
@@ -53,7 +52,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ILogger<MainWindowViewModel> logger,
         SshKeyManager sshKeyManager,
         ServerConnectionService serverConnectionService,
-        IResolver serviceProvider,
+        IServiceProvider serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
         ILauncher launcher,

@@ -1,7 +1,9 @@
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
-using DryIoc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
@@ -9,6 +11,7 @@ using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Resources;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
 using OpenSSH_GUI.Dialogs.Interfaces;
@@ -24,55 +27,62 @@ namespace OpenSSH_GUI.Extensions;
 
 public static class DependencyInjectionExtensions
 {
-    extension(IContainer container)
-    {
-        internal void ConfigureServicesInternal()
-        {
-            container.RegisterMany<App>();
-            container.Register<ExceptionHandler>();
-            container.RegisterInstance(
-                new LoggingLevelSwitch(
-#if DEBUG
-                    LogEventLevel.Verbose
-#endif
-                ));
-
-            container.Register<ServerConnectionService>();
-            container.Register<DirectoryCrawler>();
-            container.Register<SshKeyManager>();
-            container.Register<MainWindow>(serviceKey: nameof(MainWindow),
-                made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
-            container.Register<MainWindowViewModel>(serviceKey: nameof(MainWindowViewModel));
-
-            container.RegisterDelegate<IDialogHost>(resolver =>
-                resolver.Resolve<MainWindow>(nameof(MainWindow)));
-            container.RegisterDelegate<Window>(resolver =>
-                resolver.Resolve<MainWindow>(nameof(MainWindow)));
-            container.RegisterDelegate<IClipboard>(resolver =>
-                resolver.Resolve<MainWindow>(nameof(MainWindow))!.Clipboard!);
-            container.RegisterDelegate<IStorageProvider>(resolver =>
-                resolver.Resolve<MainWindow>(nameof(MainWindow)).StorageProvider);
-            container.RegisterDelegate<ILauncher>(resolver =>
-                resolver.Resolve<MainWindow>(nameof(MainWindow)).Launcher);
-
-            container.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
-            container.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
-            container.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
-            container.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
-            container.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
-            container.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
-            container.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
-
-            container.Register<IMessageBoxProvider, MessageBoxProvider>(Reuse.Transient);
-            container.Register<SshKeyFile>(Reuse.Transient);
-        }
-    }
-
     extension(IHostBuilder builder)
     {
         internal IHostBuilder RegisterOpenSshGuiServices()
         {
-            builder.ConfigureServices((_, services) => { services.AddHostedService<FileSystemAnalyzer>(); });
+            builder.ConfigureServices((_, services) =>
+            {
+                services.AddSingleton<App>();
+                services.AddSingleton<Application>(sp => sp.GetRequiredService<App>());
+                services.AddSingleton<AppIconStore>();
+                services.AddSingleton<ExceptionHandler>();
+                services.AddSingleton<LoggingLevelSwitch>(_ =>
+                    new LoggingLevelSwitch(
+#if DEBUG
+                        LogEventLevel.Verbose
+#endif
+                    ));
+
+                services.AddSingleton<ServerConnectionService>();
+                services.AddSingleton<DirectoryCrawler>();
+                services.AddSingleton<SshKeyManager>();
+                
+                // MainWindow gets a special treatment, because it has to be created with the resolver
+                services.AddKeyedSingleton<MainWindow>(nameof(MainWindow), (sp, _) =>
+                {
+                    var view = ActivatorUtilities.CreateInstance<MainWindow>(sp);
+                    foreach (var requiredProperty in view.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(property => property.CanWrite
+                                 && property.GetCustomAttribute<RequiredMemberAttribute>() is not null))
+                    {
+                        if(sp.GetService(requiredProperty.PropertyType) is { } service)
+                        {
+                            requiredProperty.SetValue(view, service);
+                        }
+                    }
+                    return view;
+                });
+                services.AddKeyedSingleton<MainWindowViewModel>(nameof(MainWindowViewModel));
+                
+                services.AddSingleton<Window>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                services.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                services.AddSingleton<IClipboard>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Clipboard!);
+                services.AddSingleton<IStorageProvider>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).StorageProvider);
+                services.AddSingleton<ILauncher>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Launcher);
+                
+                services.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
+                services.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
+                services.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
+                services.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
+                services.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
+                services.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
+                services.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
+                
+                
+                services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
+                services.AddTransient<SshKeyFile>();
+                services.AddHostedService<FileSystemAnalyzer>();
+            });
             return builder;
         }
     }

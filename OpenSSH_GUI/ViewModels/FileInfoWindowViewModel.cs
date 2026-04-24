@@ -1,9 +1,9 @@
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia.Input.Platform;
-using DryIoc;
 using JetBrains.Annotations;
 using Material.Icons;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.MVVM;
@@ -26,7 +26,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     private readonly SshKeyManager _keyManager;
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
-    private readonly IResolver _resolver;
+    private readonly IServiceProvider _serviceProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
     private string _associatedFilesHeader = string.Empty;
@@ -41,14 +41,14 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     private string _windowTitle = "Key info";
 
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
-        IResolver resolver, IClipboard clipboard, SshKeyManager keyManager)
+        IServiceProvider serviceProvider, IClipboard clipboard, SshKeyManager keyManager)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
-        _resolver = resolver;
+        _serviceProvider = serviceProvider;
         _clipboard = clipboard;
         _keyManager = keyManager;
-        _keyFile = _resolver.Resolve<SshKeyFile>();
+        _keyFile = _serviceProvider.GetRequiredService<SshKeyFile>();
         var keyFileChanged = this.WhenAnyValue(vm => vm.KeyFile)
             .ObserveOn(AvaloniaScheduler.Instance);
 
@@ -75,7 +75,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
         KeyFile = (source is not null
                       ? _keyManager.SshKeys.SingleOrDefault(x => x.KeyFileInfo?.KeyFileSource == source)
                       : null)
-                  ?? _resolver.Resolve<SshKeyFile>();
+                  ?? _serviceProvider.GetRequiredService<SshKeyFile>();
     }
 
     public override ValueTask InitializeAsync(SshKeyFileSource? parameters,

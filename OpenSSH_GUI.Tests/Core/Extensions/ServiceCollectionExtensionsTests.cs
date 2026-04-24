@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Threading;
-using DryIoc;
+using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
@@ -13,16 +13,18 @@ public class DependencyInjectionExtensionsTests
     public void RegisterViewWithViewModel_ValidNaming_ShouldRegister()
     {
         // Arrange
-        var services = new Container(rules => rules.WithoutThrowOnRegisteringDisposableTransient());
+        var serviceCollection = new ServiceCollection();
 
         // Act
-        services.RegisterViewWithViewModel<MockWindow, MockWindowViewModel>();
+        serviceCollection.RegisterViewWithViewModel<MockWindow, MockWindowViewModel>();
+        
+        var services = serviceCollection.BuildServiceProvider();
 
         // Assert
         Dispatcher.UIThread.Invoke(() =>
         {
-            Assert.NotNull(services.Resolve<MockWindow>("MockWindow"));
-            Assert.NotNull(services.Resolve<MockWindowViewModel>("MockWindowViewModel"));
+            Assert.NotNull(services.GetKeyedService<MockWindow>(nameof(MockWindow)));
+            Assert.NotNull(services.GetKeyedService<MockWindowViewModel>(nameof(MockWindowViewModel)));
         });
     }
 
@@ -30,7 +32,7 @@ public class DependencyInjectionExtensionsTests
     public void RegisterViewWithViewModel_InvalidNaming_ShouldThrow()
     {
         // Arrange
-        var services = new Container();
+        var services = new ServiceCollection();
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(services.RegisterViewWithViewModel<MockWindow, InvalidVm>);
