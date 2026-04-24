@@ -48,28 +48,13 @@ public static class DependencyInjectionExtensions
                 services.AddSingleton<DirectoryCrawler>();
                 services.AddSingleton<SshKeyManager>();
                 
-                // MainWindow gets a special treatment, because it has to be created with the resolver
-                services.AddKeyedSingleton<MainWindow>(nameof(MainWindow), (sp, _) =>
-                {
-                    var view = ActivatorUtilities.CreateInstance<MainWindow>(sp);
-                    foreach (var requiredProperty in view.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(property => property.CanWrite
-                                 && property.GetCustomAttribute<RequiredMemberAttribute>() is not null))
-                    {
-                        if(sp.GetService(requiredProperty.PropertyType) is { } service)
-                        {
-                            requiredProperty.SetValue(view, service);
-                        }
-                    }
-                    return view;
-                });
-                services.AddKeyedSingleton<MainWindowViewModel>(nameof(MainWindowViewModel));
-                
                 services.AddSingleton<Window>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 services.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 services.AddSingleton<IClipboard>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Clipboard!);
                 services.AddSingleton<IStorageProvider>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).StorageProvider);
                 services.AddSingleton<ILauncher>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Launcher);
                 
+                services.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(ServiceLifetime.Singleton);
                 services.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
                 services.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
                 services.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
