@@ -17,17 +17,11 @@ public static class Converter
     public static FuncValueConverter<PlatformID, string?> PlatformIdToStringConverter { get; } = new(ConvertPlatformId);
     public static FuncValueConverter<object?, int> NullToColumnSpanConverter { get; } = new(o => o is null ? 2 : 1);
 
-    private static string? EnumToString<TEnum>(TEnum value) where TEnum : struct, Enum
-    {
-        return Enum.GetName(value);
-    }
+    private static string? EnumToString<TEnum>(TEnum value) where TEnum : struct, Enum => Enum.GetName(value);
 
-    private static string? ConvertPlatformId(PlatformID arg)
-    {
-        return EnumToString(arg) is { } platformId
-            ? platformId.StartsWith(WindowsShort, StringComparison.CurrentCultureIgnoreCase)
-                ? Windows
-                : platformId
-            : null;
-    }
+    private static string? ConvertPlatformId(PlatformID arg) => EnumToString(arg) is { } platformId
+        ? platformId.StartsWith(WindowsShort, StringComparison.CurrentCultureIgnoreCase)
+            ? Windows
+            : platformId
+        : null;
 }

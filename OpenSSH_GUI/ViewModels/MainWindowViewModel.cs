@@ -90,42 +90,27 @@ public partial class MainWindowViewModel : ViewModelBase
     public SshKeyManager SshKeyManager { get; }
 
     [ReactiveCommand]
-    private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>(cancellationToken);
-    }
+    private Task OpenApplicationSettingsWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<ApplicationSettingsWindow, ApplicationSettingsViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenFileInfoWindowAsync(SshKeyFileSource source, CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource>(
+    private Task OpenFileInfoWindowAsync(SshKeyFileSource source, CancellationToken cancellationToken = default) =>
+        OpenWindow<FileInfoWindow, FileInfoWindowViewModel, SshKeyFileSource>(
             source,
             cancellationToken);
-    }
 
     [ReactiveCommand]
-    private Task OpenCreateKeyWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<AddKeyWindow, AddKeyWindowViewModel>(cancellationToken);
-    }
+    private Task OpenCreateKeyWindowAsync(CancellationToken cancellationToken = default) => OpenWindow<AddKeyWindow, AddKeyWindowViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenEditAuthorizedKeysWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(cancellationToken);
-    }
+    private Task OpenEditAuthorizedKeysWindowAsync(CancellationToken cancellationToken = default) =>
+        OpenWindow<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenEditKnownHostsWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(cancellationToken);
-    }
+    private Task OpenEditKnownHostsWindowAsync(CancellationToken cancellationToken = default) => OpenWindow<EditKnownHostsWindow, EditKnownHostsWindowViewModel>(cancellationToken);
 
     [ReactiveCommand]
-    private Task OpenConnectToServerWindowAsync(CancellationToken cancellationToken = default)
-    {
-        return OpenWindow<ConnectToServerWindow, ConnectToServerViewModel>(cancellationToken);
-    }
+    private Task OpenConnectToServerWindowAsync(CancellationToken cancellationToken = default) => OpenWindow<ConnectToServerWindow, ConnectToServerViewModel>(cancellationToken);
 
     [ReactiveCommand]
     private void ResetKey(SshKeyFile keyFile)
@@ -187,18 +172,21 @@ public partial class MainWindowViewModel : ViewModelBase
         PrivateKeyFile? keyFile = key;
         return keyFile != null
             ? ShowExportWindow(key, keyFile.ToOpenSshFormat(), null, token)
-            : _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+            : _messageBoxProvider.ShowMessageBoxAsync(
+                StringsAndTexts.Error,
                 StringsAndTexts.MainWindowViewModelExportKeyErrorMessage);
     }
 
     private async Task ShowExportWindow(SshKeyFile key, string content, string? windowTitle = null,
         CancellationToken token = default)
     {
-        windowTitle ??= string.Format(StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
+        windowTitle ??= string.Format(
+            StringsAndTexts.MainWindowViewModelDynamicExportWindowTitle,
             key.KeyType, key.FileName);
         if (string.IsNullOrWhiteSpace(content))
         {
-            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+            await _messageBoxProvider.ShowMessageBoxAsync(
+                StringsAndTexts.Error,
                 StringsAndTexts.MainWindowViewModelExportKeyErrorMessage);
             return;
         }
@@ -216,7 +204,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task ShowNotImplementedMessageBoxAsync(CancellationToken cancellationToken = default)
     {
-        await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.NotImplementedBoxTitle,
+        await _messageBoxProvider.ShowMessageBoxAsync(
+            StringsAndTexts.NotImplementedBoxTitle,
             StringsAndTexts.NotImplementedBoxText, MessageBoxButtons.Ok, MaterialIconKind.InformationOutline);
     }
 
@@ -265,7 +254,8 @@ public partial class MainWindowViewModel : ViewModelBase
             messageBoxIcon = MaterialIconKind.ErrorOutline;
         }
 
-        await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.MainWindowDisconnectBoxTitle, messageBoxText,
+        await _messageBoxProvider.ShowMessageBoxAsync(
+            StringsAndTexts.MainWindowDisconnectBoxTitle, messageBoxText,
             MessageBoxButtons.Ok, messageBoxIcon);
     }
 
@@ -287,13 +277,15 @@ public partial class MainWindowViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task ProvidePasswordAsync(SshKeyFile key, CancellationToken cancellationToken = default)
     {
-        if (!await _messageBoxProvider.ShowRetryMessageBoxAsync(async () =>
+        if (!await _messageBoxProvider.ShowRetryMessageBoxAsync(
+                async () =>
                 {
                     using var secureInputResult = await _messageBoxProvider.ShowSecureInputAsync(
                         new SecureInputParams
                         {
                             Title = StringsAndTexts.MainWindowViewModelProvidePasswordPromptHeading,
-                            Prompt = string.Join(Environment.NewLine,
+                            Prompt = string.Join(
+                                Environment.NewLine,
                                 StringsAndTexts.MainWindowViewModelProvidePasswordPromptBodyHeading,
                                 Path.GetFileName(key.AbsoluteFilePath))
                         });
@@ -309,8 +301,10 @@ public partial class MainWindowViewModel : ViewModelBase
                 }, StringsAndTexts.MainWindowViewModelProvidePasswordErrorHeading,
                 StringsAndTexts.MainWindowViewModelProvidePasswordErrorContent,
                 retries: 3, showTryCountInTitle: true, icon: MaterialIconKind.WarningOutline))
-            await _messageBoxProvider.ShowErrorMessageBoxAsync(customMessage: string.Join(" ", "Key", key.FileName,
-                "could not be opened correctly"));
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(
+                customMessage: string.Join(
+                    " ", "Key", key.FileName,
+                    "could not be opened correctly"));
     }
 
     private async Task OpenWindow<TWindow, TViewModel, TInitializer>(TInitializer param,

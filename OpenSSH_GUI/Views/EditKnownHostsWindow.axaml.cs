@@ -7,8 +7,5 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class EditKnownHostsWindow : WindowBase<EditKnownHostsWindowViewModel>
 {
-    public EditKnownHostsWindow()
-    {
-        InitializeComponent();
-    }
+    public EditKnownHostsWindow() { InitializeComponent(); }
 }

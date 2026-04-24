@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using OpenSSH_GUI.Core.MVVM;
 
 namespace OpenSSH_GUI.Core.Interfaces.Hosts;
 

@@ -18,16 +18,14 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         string title,
         string message,
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
-        MaterialIconKind icon = MaterialIconKind.ErrorOutline)
-    {
-        return ShowMessageBoxAsync(new MessageBoxParams
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline) => ShowMessageBoxAsync(
+        new MessageBoxParams
         {
             Title = title,
             Message = message,
             Buttons = buttons,
             Icon = icon
         });
-    }
 
     /// <inheritdoc />
     public Task<MessageBoxResult> ShowMessageBoxAsync(MessageBoxParams @params)
@@ -38,19 +36,20 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
 
     public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null)
     {
-        return ShowMessageBoxAsync(new MessageBoxParams
-        {
-            Title = e?.GetType().Name ?? "Error",
-            Message = e switch
+        return ShowMessageBoxAsync(
+            new MessageBoxParams
             {
-                not null when !string.IsNullOrWhiteSpace(customMessage) => string.Join(" ", customMessage, e.Message),
-                null when !string.IsNullOrWhiteSpace(customMessage) => customMessage,
-                not null => e.ToString(),
-                _ => string.Empty
-            },
-            Buttons = MessageBoxButtons.Ok,
-            Icon = MaterialIconKind.ErrorOutline
-        });
+                Title = e?.GetType().Name ?? "Error",
+                Message = e switch
+                {
+                    not null when !string.IsNullOrWhiteSpace(customMessage) => string.Join(" ", customMessage, e.Message),
+                    null when !string.IsNullOrWhiteSpace(customMessage) => customMessage,
+                    not null => e.ToString(),
+                    _ => string.Empty
+                },
+                Buttons = MessageBoxButtons.Ok,
+                Icon = MaterialIconKind.ErrorOutline
+            });
     }
 
     public async Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message,
@@ -77,16 +76,14 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         string title,
         string prompt,
         int minLength = 1,
-        int maxLength = 0)
-    {
-        return ShowSecureInputAsync(new SecureInputParams
+        int maxLength = 0) => ShowSecureInputAsync(
+        new SecureInputParams
         {
             Title = title,
             Prompt = prompt,
             MinLength = minLength,
             MaxLength = maxLength
         });
-    }
 
     /// <inheritdoc />
     public Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params)
@@ -101,9 +98,8 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
         string prompt,
         Func<string, string?> validator,
         string initialValue = "",
-        string watermark = "Enter value…")
-    {
-        return ShowValidatedInputAsync(new ValidatedInputParams
+        string watermark = "Enter value…") => ShowValidatedInputAsync(
+        new ValidatedInputParams
         {
             Title = title,
             Prompt = prompt,
@@ -111,7 +107,6 @@ public class MessageBoxProvider(Window owner) : IMessageBoxProvider
             InitialValue = initialValue,
             Watermark = watermark
         });
-    }
 
     /// <inheritdoc />
     public Task<ValidatedInputResult?> ShowValidatedInputAsync(ValidatedInputParams @params)

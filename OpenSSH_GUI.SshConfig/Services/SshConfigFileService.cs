@@ -22,10 +22,11 @@ public static class SshConfigFileService
             return new SshConfiguration();
 
         var content = File.ReadAllText(filePath);
-        var document = SshConfigParser.Parse(content, new SshConfigParserOptions
-        {
-            IncludeBasePath = Path.GetDirectoryName(filePath)
-        });
+        var document = SshConfigParser.Parse(
+            content, new SshConfigParserOptions
+            {
+                IncludeBasePath = Path.GetDirectoryName(filePath)
+            });
 
         return MapDocumentToConfiguration(document);
     }

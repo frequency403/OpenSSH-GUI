@@ -12,24 +12,13 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// </summary>
 public partial record KnownHost : ReactiveRecord
 {
+    private readonly KnownHostKey[] _keysCopy;
+
     /// <summary>
     ///     Represents a known host in the OpenSSH_GUI.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHostKey> _keys = [];
 
-    public KnownHostHost HostUri { get; }
-
-    private KnownHostKey[] _keysCopy;
-
-    public KnownHost(KeyValuePair<KnownHostHost, KnownHostKey[]> knownHosts)
-    {
-        HostUri = knownHosts.Key;
-        _keysCopy = knownHosts.Value;
-        Keys.AddRange(_keysCopy);
-    }
-
-    public bool ChangesMade => !_keysCopy.SequenceEqual(Keys);
-    
     /// <summary>
     ///     Gets or sets the toggled state of the switch.
     /// </summary>
@@ -39,6 +28,17 @@ public partial record KnownHost : ReactiveRecord
     ///     - If it was previously on, all known host keys are unmarked for deletion.
     /// </remarks>
     [Reactive] private bool _switchToggled;
+
+    public KnownHost(KeyValuePair<KnownHostHost, KnownHostKey[]> knownHosts)
+    {
+        HostUri = knownHosts.Key;
+        _keysCopy = knownHosts.Value;
+        Keys.AddRange(_keysCopy);
+    }
+
+    public KnownHostHost HostUri { get; }
+
+    public bool ChangesMade => !_keysCopy.SequenceEqual(Keys);
 
     /// <summary>
     ///     Represents a known host in the SSH known hosts file.
@@ -81,7 +81,7 @@ public partial record KnownHost : ReactiveRecord
     public string Export(PlatformID? platformId = null)
     {
         platformId ??= Environment.OSVersion.Platform;
-        if(DeleteWholeHost) return platformId.Value.GetLineSeparator();
+        if (DeleteWholeHost) return platformId.Value.GetLineSeparator();
         var stringBuilder = new StringBuilder();
         foreach (var knownHostKey in Keys.Where(e => !e.MarkedForDeletion))
         {

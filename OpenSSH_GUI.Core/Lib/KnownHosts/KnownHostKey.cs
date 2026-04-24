@@ -25,7 +25,7 @@ public partial record KnownHostKey : ReactiveRecord
         TypeDeclarationInFile = keyParts[0];
         KeyType = Enum.Parse<SshKeyType>(
             TypeDeclarationInFile.StartsWith("ssh-")
-                ? TypeDeclarationInFile.Replace("ssh-", "")
+                ? TypeDeclarationInFile.Replace("ssh-", string.Empty)
                 : TypeDeclarationInFile.Split('-')[0], true);
         Fingerprint = keyParts[1];
     }
@@ -45,8 +45,5 @@ public partial record KnownHostKey : ReactiveRecord
     /// </summary>
     public string Fingerprint { get; }
 
-    public override string ToString()
-    {
-        return _entryWithoutHost;
-    }
+    public override string ToString() => _entryWithoutHost;
 }

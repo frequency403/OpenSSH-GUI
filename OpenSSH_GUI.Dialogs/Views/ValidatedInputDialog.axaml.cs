@@ -25,6 +25,8 @@ public partial class ValidatedInputDialog : Window
 {
     private readonly Func<string, string?> _validator;
 
+    private bool _isInternalClose;
+
     /// <summary>
     ///     Initialises a new <see cref="ValidatedInputDialog" />.
     /// </summary>
@@ -108,10 +110,7 @@ public partial class ValidatedInputDialog : Window
     //  Validation
     // -------------------------------------------------------------------------
 
-    private void OnInputTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        Validate();
-    }
+    private void OnInputTextChanged(object? sender, TextChangedEventArgs e) { Validate(); }
 
     /// <summary>
     ///     Runs the external validator against the current input and updates the
@@ -155,10 +154,7 @@ public partial class ValidatedInputDialog : Window
         }
     }
 
-    private void OnOkClick(object? sender, RoutedEventArgs e)
-    {
-        TryConfirm();
-    }
+    private void OnOkClick(object? sender, RoutedEventArgs e) { TryConfirm(); }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
@@ -196,8 +192,6 @@ public partial class ValidatedInputDialog : Window
         PART_Error.IsVisible = false;
         PART_Error.Text = string.Empty;
     }
-
-    private bool _isInternalClose;
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
         if (_isInternalClose)

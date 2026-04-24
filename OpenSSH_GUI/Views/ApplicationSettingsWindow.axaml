@@ -32,15 +32,18 @@
         <controls:HeaderedItem
             Header="Cache Options">
             <controls:HeaderedItem.SideHeader>
-                <Button Grid.Column="1" HorizontalAlignment="Right" Background="{DynamicResource NavigationActiveBrush}" Command="{Binding OpenCacheFolderCommand}">
-                    <avalonia:MaterialIcon Kind="FolderOpenOutline"/>
+                <Button Grid.Column="1" HorizontalAlignment="Right"
+                        Background="{DynamicResource NavigationActiveBrush}" Command="{Binding OpenCacheFolderCommand}">
+                    <avalonia:MaterialIcon Kind="FolderOpenOutline" />
                 </Button>
             </controls:HeaderedItem.SideHeader>
             <UniformGrid Rows="1" Columns="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <StackPanel HorizontalAlignment="Center" Spacing="1">
                     <StackPanel Spacing="5" HorizontalAlignment="Center">
-                        <TextBlock Text="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}"/>
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="5">
+                        <TextBlock
+                            Text="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal"
+                                    Spacing="5">
                             <ComboBox VerticalAlignment="Center" SelectedItem="{Binding DaysToDeleteSelected}"
                                       ItemsSource="{Binding DaysToDelete}" />
                             <TextBlock VerticalAlignment="Center" Text="{x:Static resources:StringsAndTexts.Days}" />
@@ -56,27 +59,30 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-                <Button HorizontalAlignment="Right" Background="{DynamicResource RevokedBrush}" Command="{Binding ClearWholeCacheCommand}">
+                <Button HorizontalAlignment="Right" Background="{DynamicResource RevokedBrush}"
+                        Command="{Binding ClearWholeCacheCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="5">
                         <avalonia:MaterialIcon Kind="ReportProblem" />
                         <StackPanel>
-                            <TextBlock HorizontalAlignment="Center" Text="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}"/>
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}" />
                             <Separator HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                            <TextBlock HorizontalAlignment="Center" Text="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}"/>
+                            <TextBlock HorizontalAlignment="Center"
+                                       Text="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
                         </StackPanel>
                     </StackPanel>
                 </Button>
             </UniformGrid>
-            
-            
+
+
         </controls:HeaderedItem>
-        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}" 
+        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}"
                                HeaderHorizontalAlignment="Left"
                                HeaderVerticalAlignment="Center"
                                SideHeaderHorizontalAlignment="Right"
                                HorizontalContentAlignment="Stretch">
             <controls:HeaderedItem.SideHeader>
-                <Button Command="{Binding OnNextFontSizeCommand}" 
+                <Button Command="{Binding OnNextFontSizeCommand}"
                         Background="{DynamicResource InfoBrush}"
                         CommandParameter="{StaticResource BaseFontSize}">
                     <avalonia:MaterialIcon Kind="Replay" />

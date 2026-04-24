@@ -26,16 +26,13 @@ internal sealed class Program
     public const string AppName = "OpenSSH GUI";
     public const string VersionEnvVar = "RUNNING_VERSION";
 
-    private static string GetHostVersion()
-    {
-        return Assembly.GetEntryAssembly()
-                   ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                   ?.InformationalVersion
-               ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
-               ?? "0.0.0";
-    }
+    private static string GetHostVersion() => Assembly.GetEntryAssembly()
+                                                  ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                                  ?.InformationalVersion
+                                              ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
+                                              ?? "0.0.0";
 
-    private static void CreateLogger(IServiceProvider serviceProvider, Serilog.LoggerConfiguration loggerConfiguration)
+    private static void ConfigureOpenSshGuiLogger(HostBuilderContext _, IServiceProvider serviceProvider, Serilog.LoggerConfiguration loggerConfiguration)
     {
         var logConfiguration = LoggerConfiguration.Default;
         if (!Directory.Exists(logConfiguration.LogFilePath))
@@ -61,7 +58,7 @@ internal sealed class Program
         using var mainCancellationTokenSource = new CancellationTokenSource();
         var host = Host.CreateDefaultBuilder(args)
             .RegisterOpenSshGuiServices()
-            .ConfigureLogging((_, builder) => builder.Services.AddSerilog(CreateLogger))
+            .UseSerilog(ConfigureOpenSshGuiLogger)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
 
@@ -71,9 +68,10 @@ internal sealed class Program
             .WithInterFont()
             .UseReactiveUI(configure =>
             {
-                configure.WithPlatformServices();
-                configure.WithAvalonia();
-                configure.WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
+                configure
+                    .WithPlatformServices()
+                    .WithAvalonia()
+                    .WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
             });
 
         await host.StartAsync(mainCancellationTokenSource.Token);
@@ -87,13 +85,11 @@ internal sealed class Program
     {
         configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true, LoggingAction);
         configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true, LoggingAction);
-        configurationBuilder.AddInMemoryCollection([
+        configurationBuilder.AddInMemoryCollection(
+        [
             new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
         ]);
     }
 
-    private static void LoggingAction(string arg1, Exception arg2)
-    {
-        Log.Logger.Error(arg2, "Failed to load SSH config file: {Path}", arg1);
-    }
+    private static void LoggingAction(string arg1, Exception arg2) { Log.Logger.Error(arg2, "Failed to load SSH config file: {Path}", arg1); }
 }

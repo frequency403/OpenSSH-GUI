@@ -99,14 +99,16 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         if (!Directory.Exists(BackupDirectory))
             Directory.CreateDirectory(BackupDirectory);
 
-        _backupLogFile = Path.Combine(BackupDirectory,
+        _backupLogFile = Path.Combine(
+            BackupDirectory,
             Path.ChangeExtension(
                 "operation_log",
                 "log"));
-        _loggerFactory = new SerilogLoggerFactory(new LoggerConfiguration()
-            .WriteTo.File(_backupLogFile)
-            .MinimumLevel.Verbose()
-            .CreateLogger(), true);
+        _loggerFactory = new SerilogLoggerFactory(
+            new LoggerConfiguration()
+                .WriteTo.File(_backupLogFile)
+                .MinimumLevel.Verbose()
+                .CreateLogger(), true);
         _backupLogger = _loggerFactory.CreateLogger<SshKeyManager>();
     }
 
@@ -144,7 +146,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     {
         foreach (var file in files)
         {
-            Log(LogLevel.Debug, "Restoring backup file {file} to {destination}", file.BackupFile.FullName,
+            Log(
+                LogLevel.Debug, "Restoring backup file {file} to {destination}", file.BackupFile.FullName,
                 file.InitialFile.FullName);
             file.Restore();
             Log(LogLevel.Debug, "Successfully restored backup file {file}", file.BackupFile.FullName);
@@ -221,7 +224,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             if (key.Format is { } and not SshKeyFormat.OpenSSH)
             {
                 Log(LogLevel.Debug, "Detected PuTTY key {key} - need to change format first", keyFilePath);
-                if (await WriteToFileInSpecificFormat(SshKeyFormat.OpenSSH,
+                if (await WriteToFileInSpecificFormat(
+                        SshKeyFormat.OpenSSH,
                         key.Password.ToSshKeyEncryption(), privateKeyFile, keyFilePath, true) is { } result)
                 {
                     result.ThrowIfFailure();
@@ -251,7 +255,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 if (process.ExitCode != 0)
                 {
                     var message = await process.StandardError.ReadToEndAsync(token);
-                    Log(LogLevel.Error, "ssh-keygen exited with code {exitCode} and message: {message}",
+                    Log(
+                        LogLevel.Error, "ssh-keygen exited with code {exitCode} and message: {message}",
                         process.ExitCode,
                         message);
                     throw new Exception($"ssh-keygen exited with code {process.ExitCode}");
@@ -272,9 +277,11 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 }
 
                 keyFile.Load(SshKeyFileSource.FromDisk(keyFilePath), newPassword.Span);
-                Log(LogLevel.Debug,
+                Log(
+                    LogLevel.Debug,
                     "Changes to the password were made in OpenSSH Format - need to change format to Putty again");
-                if (await WriteToFileInSpecificFormat(format, keyFile.Password.ToSshKeyEncryption(),
+                if (await WriteToFileInSpecificFormat(
+                        format, keyFile.Password.ToSshKeyEncryption(),
                         keyFile.PrivateKeyFile ?? throw new Exception("Private key file not found"), keyFilePath,
                         true) is
                     { } result)
@@ -444,7 +451,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             }
 
             if (filePairs.Select(p => p.Source).FirstOrDefault(file =>
-                    string.Equals(file.Extension, key.Format?.GetExtension(false),
+                    string.Equals(
+                        file.Extension, key.Format?.GetExtension(false),
                         StringComparison.OrdinalIgnoreCase) &&
                     file.Exists) is { } keyFileToLoad)
             {
@@ -569,7 +577,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             if (!semaphoreAquired)
                 throw new InvalidOperationException("Another key operation is in progress");
 
-            if (await WriteToFileInSpecificFormat(newFormat,
+            if (await WriteToFileInSpecificFormat(
+                    newFormat,
                     key.Password.ToSshKeyEncryption(),
                     privateKeyFile,
                     filePath, true) is { } result)
@@ -580,7 +589,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             }
 
             key.Load(SshKeyFileSource.FromDisk(filePath));
-            Log(LogLevel.Debug, "Successfully changed format of key {key} to {format}", key.AbsoluteFilePath,
+            Log(
+                LogLevel.Debug, "Successfully changed format of key {key} to {format}", key.AbsoluteFilePath,
                 newFormat);
             DeleteBackupFiles(backupFiles);
             return KeyManagerOperationResult.Success();
@@ -678,11 +688,9 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 
     private ValueTask<KeyManagerOperationResult<IEnumerable<string>>> WriteToFileInSpecificFormat(
         SshKeyGenerateInfo generateInfo,
-        GeneratedPrivateKey createdKey, string filePath, bool overwrite = false)
-    {
-        return WriteToFileInSpecificFormat(generateInfo.KeyFormat, generateInfo.Encryption, createdKey, filePath,
-            overwrite);
-    }
+        GeneratedPrivateKey createdKey, string filePath, bool overwrite = false) => WriteToFileInSpecificFormat(
+        generateInfo.KeyFormat, generateInfo.Encryption, createdKey, filePath,
+        overwrite);
 
     /// <summary>
     ///     Generates a new SSH key.
@@ -787,9 +795,10 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                     string.Equals(absolutePath, Path.ChangeExtension(e.OldFullPath, null))) is { } keyFile)
             {
                 Log(LogLevel.Debug, "Reloading keyfile because it was renamed externally");
-                keyFile.Load(keyFile.KeyFileInfo?.KeyFileSource.ProvidedByConfig ?? false
-                    ? SshKeyFileSource.FromConfig(Path.ChangeExtension(e.FullPath, null))
-                    : SshKeyFileSource.FromDisk(Path.ChangeExtension(e.OldFullPath, null)));
+                keyFile.Load(
+                    keyFile.KeyFileInfo?.KeyFileSource.ProvidedByConfig ?? false
+                        ? SshKeyFileSource.FromConfig(Path.ChangeExtension(e.FullPath, null))
+                        : SshKeyFileSource.FromDisk(Path.ChangeExtension(e.OldFullPath, null)));
             }
         }
         catch (Exception exception)
@@ -816,7 +825,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 Path.GetFullPath(eventArgs.FullPath), null);
 
             var key = SshKeys.SingleOrDefault(k =>
-                string.Equals(k.AbsoluteFilePath, normalizedPath,
+                string.Equals(
+                    k.AbsoluteFilePath, normalizedPath,
                     StringComparison.OrdinalIgnoreCase));
 
             if (key is null)
@@ -853,7 +863,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
                 : Path.ChangeExtension(e.FullPath, null);
 
             if (SshKeys.Any(key =>
-                    string.Equals(key.AbsoluteFilePath, keyFilePath,
+                    string.Equals(
+                        key.AbsoluteFilePath, keyFilePath,
                         StringComparison.OrdinalIgnoreCase)))
                 return;
 
@@ -889,7 +900,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     private void AddKey(SshKeyFileSource keyFileSource)
     {
         if (_sshKeysInternal.Any(k =>
-                string.Equals(k.AbsoluteFilePath, keyFileSource.AbsolutePath,
+                string.Equals(
+                    k.AbsoluteFilePath, keyFileSource.AbsolutePath,
                     StringComparison.OrdinalIgnoreCase)))
             return;
         try

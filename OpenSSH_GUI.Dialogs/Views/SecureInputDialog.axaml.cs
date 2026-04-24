@@ -51,6 +51,8 @@ public partial class SecureInputDialog : Window
     // character correctly even for multi-byte code points.
     private readonly List<byte[]> _segments = new();
 
+    private bool _isInternalClose;
+
     /// <summary>
     ///     Initialises a new <see cref="SecureInputDialog" />.
     /// </summary>
@@ -122,10 +124,7 @@ public partial class SecureInputDialog : Window
     /// <summary>
     ///     Moves keyboard focus to the password field once the window is shown.
     /// </summary>
-    private void OnOpened(object? sender, EventArgs e)
-    {
-        PART_Input.Focus();
-    }
+    private void OnOpened(object? sender, EventArgs e) { PART_Input.Focus(); }
 
     // -------------------------------------------------------------------------
     //  Secure input interception
@@ -178,10 +177,7 @@ public partial class SecureInputDialog : Window
     //  Button handlers
     // -------------------------------------------------------------------------
 
-    private void OnOkClick(object? sender, RoutedEventArgs e)
-    {
-        TryConfirm();
-    }
+    private void OnOkClick(object? sender, RoutedEventArgs e) { TryConfirm(); }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
@@ -272,8 +268,6 @@ public partial class SecureInputDialog : Window
         PART_Error.IsVisible = false;
         PART_Error.Text = string.Empty;
     }
-
-    private bool _isInternalClose;
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
         if (_isInternalClose)

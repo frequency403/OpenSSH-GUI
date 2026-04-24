@@ -26,9 +26,7 @@ public sealed record SshHostSettings(
     ///     Initializes a new instance of the <see cref="SshHostSettings" /> class.
     ///     Required for the configuration binder.
     /// </summary>
-    public SshHostSettings() : this([])
-    {
-    }
+    public SshHostSettings() : this([]) { }
 
     /// <summary>
     ///     Gets an empty <see cref="SshHostSettings" /> instance.

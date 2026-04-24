@@ -19,7 +19,7 @@ public record AuthorizedKey
         KeyTypeDeclarationInFile = split[0];
         KeyType = Enum.Parse<SshKeyType>(
             KeyTypeDeclarationInFile.StartsWith("ssh-")
-                ? KeyTypeDeclarationInFile.Replace("ssh-", "")
+                ? KeyTypeDeclarationInFile.Replace("ssh-", string.Empty)
                 : KeyTypeDeclarationInFile.Split('-')[0], true);
         Fingerprint = split[1];
         Comment = split[2];
@@ -63,8 +63,5 @@ public record AuthorizedKey
     /// <returns>The full key entry string.</returns>
     public override string ToString() => $"{KeyTypeDeclarationInFile} {Fingerprint} {Comment}";
 
-    internal static AuthorizedKey Parse(string keyEntry)
-    {
-        return new AuthorizedKey(keyEntry);
-    }
+    internal static AuthorizedKey Parse(string keyEntry) => new(keyEntry);
 }

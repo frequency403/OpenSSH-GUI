@@ -51,10 +51,7 @@ public static partial class StringExtensions
         /// // pping.
         /// </code>
         /// </example>
-        public string Wrap(int maxLength, char? wrapper = null)
-        {
-            return input.Wrap(maxLength, wrapper is null ? null : wrapper.ToString());
-        }
+        public string Wrap(int maxLength, char? wrapper = null) => input.Wrap(maxLength, wrapper is null ? null : wrapper.ToString());
 
         /// <summary>
         ///     Wraps the input string to the specified maximum length, optionally enclosing each chunk in a specified string.
@@ -72,11 +69,9 @@ public static partial class StringExtensions
         /// // This is a | long stri | ng that n | eeds wra | pping.
         /// </code>
         /// </example>
-        public string Wrap(int maxLength, string? wrapper = null)
-        {
-            return string.Join(wrapper ?? Environment.NewLine,
-                EcapeRegex().Replace(input, "").SplitToChunks(maxLength));
-        }
+        public string Wrap(int maxLength, string? wrapper = null) => string.Join(
+            wrapper ?? Environment.NewLine,
+            EcapeRegex().Replace(input, string.Empty).SplitToChunks(maxLength));
 
         /// <summary>
         ///     Splits the input string into chunks of the specified size.
@@ -120,10 +115,7 @@ public static partial class StringExtensions
         /// // pascal_case_string
         /// </code>
         /// </example>
-        public string ToSnakeCase()
-        {
-            return Regex.Replace(input, "(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", "_$1").ToLower();
-        }
+        public string ToSnakeCase() => Regex.Replace(input, "(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", "_$1").ToLower();
 
         /// <summary>
         ///     Converts the given string to camelCase.
@@ -159,10 +151,7 @@ public static partial class StringExtensions
         /// // pascal-case-string
         /// </code>
         /// </example>
-        public string ToKebabCase()
-        {
-            return Regex.Replace(input, "(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", "-$1").ToLower();
-        }
+        public string ToKebabCase() => Regex.Replace(input, "(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", "-$1").ToLower();
 
         /// <summary>
         ///     Converts the given string to PascalCase.
@@ -178,10 +167,7 @@ public static partial class StringExtensions
         /// // SnakeCaseString
         /// </code>
         /// </example>
-        public string ToPascalCase()
-        {
-            return Regex.Replace(input, @"(^\w)|(\s\w)", m => m.Value.ToUpper()).Replace(" ", "");
-        }
+        public string ToPascalCase() { return Regex.Replace(input, @"(^\w)|(\s\w)", m => m.Value.ToUpper()).Replace(" ", string.Empty); }
 
         /// <summary>
         ///     Converts the given string to Title Case.
@@ -197,10 +183,7 @@ public static partial class StringExtensions
         /// // This Is A Title Case String
         /// </code>
         /// </example>
-        public string ToTitleCase()
-        {
-            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
-        }
+        public string ToTitleCase() => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
 
         /// <summary>
         ///     Converts the given string to Sentence case.
@@ -239,7 +222,8 @@ public static partial class StringExtensions
         public string ToStudlyCaps()
         {
             var random = new Random();
-            return input.Aggregate("",
+            return input.Aggregate(
+                string.Empty,
                 (current, t) => current + (random.Next(2) == 0 ? char.ToUpper(t) : char.ToLower(t)));
         }
 
@@ -257,9 +241,6 @@ public static partial class StringExtensions
         /// // 133t Sp34k 15 c00l!
         /// </code>
         /// </example>
-        public string ToLeetSpeak()
-        {
-            return input.Replace('e', '3').Replace('a', '4').Replace('o', '0').Replace('i', '1').Replace('s', '5');
-        }
+        public string ToLeetSpeak() => input.Replace('e', '3').Replace('a', '4').Replace('o', '0').Replace('i', '1').Replace('s', '5');
     }
 }

@@ -7,8 +7,5 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class ApplicationSettingsWindow : WindowBase<ApplicationSettingsViewModel>
 {
-    public ApplicationSettingsWindow()
-    {
-        InitializeComponent();
-    }
+    public ApplicationSettingsWindow() { InitializeComponent(); }
 }

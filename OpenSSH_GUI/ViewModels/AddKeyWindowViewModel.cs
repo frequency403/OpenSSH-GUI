@@ -39,7 +39,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
     [Reactive] private string _keyName = string.Empty;
 
-    [Reactive] private string _password = "";
+    [Reactive] private string _password = string.Empty;
 
     [Reactive] private int _selectedKeySize;
 
@@ -58,7 +58,8 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
         _availableKeySizesHelper = selectedKeyTypeChanged
             .Select(e => e.SupportedKeySizes.OrderDescending().ToArray())
-            .ToProperty(this, vm => vm.AvailableKeySizes,
+            .ToProperty(
+                this, vm => vm.AvailableKeySizes,
                 SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.OrderDescending().ToArray())
             .DisposeWith(Disposables);
 
@@ -83,7 +84,8 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
         _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvailableKeySizes)
             .Select(e => e.Length > 1)
-            .ToProperty(this, vm => vm.CanChangeKeySize,
+            .ToProperty(
+                this, vm => vm.CanChangeKeySize,
                 initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Any())
             .DisposeWith(Disposables);
 

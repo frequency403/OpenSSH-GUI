@@ -14,8 +14,5 @@ public static class CallerEnricherExtensions
     /// </summary>
     /// <param name="enrichmentConfiguration">The Serilog enrichment configuration.</param>
     /// <returns>The updated <see cref="LoggerConfiguration" />.</returns>
-    public static LoggerConfiguration WithCaller(this LoggerEnrichmentConfiguration enrichmentConfiguration)
-    {
-        return enrichmentConfiguration.With<CallerEnricher>();
-    }
+    public static LoggerConfiguration WithCaller(this LoggerEnrichmentConfiguration enrichmentConfiguration) => enrichmentConfiguration.With<CallerEnricher>();
 }

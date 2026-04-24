@@ -24,10 +24,7 @@ public abstract class ViewModelBase<TParameters> : ViewModelBase, IInitializable
     }
 
     /// <inheritdoc />
-    public sealed override ValueTask InitializeAsync(CancellationToken cancellationToken = default)
-    {
-        return InitializeAsync(default, cancellationToken);
-    }
+    public sealed override ValueTask InitializeAsync(CancellationToken cancellationToken = default) => InitializeAsync(default, cancellationToken);
 }
 
 /// <summary>
@@ -115,10 +112,7 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     ///     the ViewModel intends to close. It is primarily used in scenarios
     ///     where the ViewModel is responsible for managing its own lifecycle transitions.
     /// </remarks>
-    protected void RequestClose()
-    {
-        Close.Invoke(this, EventArgs.Empty);
-    }
+    protected void RequestClose() { Close.Invoke(this, EventArgs.Empty); }
 
     /// <summary>
     ///     Handles the submission of a boolean input asynchronously.
@@ -129,10 +123,7 @@ public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyn
     /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     [ReactiveCommand]
-    protected virtual Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
-    {
-        return Task.CompletedTask;
-    }
+    protected virtual Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     /// <summary>
     ///     Displays the attached <see cref="FlyoutBase" /> for a specified control.

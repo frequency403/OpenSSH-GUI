@@ -16,11 +16,12 @@ public class FlyoutButton : ContentControl
         AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Tunnel);
         AddHandler(PointerReleasedEvent, OnPointerReleased, RoutingStrategies.Tunnel);
         AddHandler(PointerEnteredEvent, (_, _) => PseudoClasses.Set(":pointerover", true));
-        AddHandler(PointerExitedEvent, (_, _) =>
-        {
-            PseudoClasses.Set(":pointerover", false);
-            PseudoClasses.Set(":pressed", false);
-        });
+        AddHandler(
+            PointerExitedEvent, (_, _) =>
+            {
+                PseudoClasses.Set(":pointerover", false);
+                PseudoClasses.Set(":pressed", false);
+            });
     }
 
     public FlyoutBase? Flyout
@@ -40,8 +41,5 @@ public class FlyoutButton : ContentControl
         }
     }
 
-    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        PseudoClasses.Set(":pressed", false);
-    }
+    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e) { PseudoClasses.Set(":pressed", false); }
 }

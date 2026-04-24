@@ -9,7 +9,6 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
@@ -26,15 +25,9 @@ namespace OpenSSH_GUI;
 
 internal class DoubleToleranceComparer(double epsilon) : IEqualityComparer<double>
 {
-    public bool Equals(double x, double y)
-    {
-        return Math.Abs(x - y) < epsilon;
-    }
+    public bool Equals(double x, double y) => Math.Abs(x - y) < epsilon;
 
-    public int GetHashCode(double obj)
-    {
-        return 0;
-    }
+    public int GetHashCode(double obj) => 0;
 }
 
 [UsedImplicitly]
@@ -83,15 +76,17 @@ public class App(
                 {
                     foreach (var (width, height) in IconSizes)
                     {
-                        await using var svgStream = AssetLoader.Open(new Uri(
-                            string.Format(RessourceUri, variant is ThemeVariant.Light ? "-light" : string.Empty)));
+                        await using var svgStream = AssetLoader.Open(
+                            new Uri(
+                                string.Format(RessourceUri, variant is ThemeVariant.Light ? "-light" : string.Empty)));
                         var memoryStream = new MemoryStream();
                         using var svg = new SKSvg();
                         svg.Load(svgStream);
                         var bitmap = new SKBitmap(width, height, true);
                         using (var canvas = new SKCanvas(bitmap))
                         {
-                            if (Math.Min(width / (svg.Picture?.CullRect.Width ?? width),
+                            if (Math.Min(
+                                    width / (svg.Picture?.CullRect.Width ?? width),
                                     height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
                                 canvas.Scale(scale);
                             canvas.Clear(SKColors.Transparent);
@@ -163,13 +158,11 @@ public class App(
         }
     }
 
-    private void FontSizeChanged(double fontSize)
+    private static void FontSizeChanged(double fontSize)
     {
-        if (Current is not null)
-        {
-            var materialIconSize = fontSize + 4;
-            Current.Resources[MaterialIconSize] = materialIconSize;
-        }
+        if (Current is null) return;
+        var materialIconSize = fontSize + 4;
+        Current.Resources[MaterialIconSize] = materialIconSize;
     }
 
     /// <summary>

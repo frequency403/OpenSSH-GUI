@@ -1,5 +1,3 @@
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
@@ -47,13 +45,13 @@ public static class DependencyInjectionExtensions
                 services.AddSingleton<ServerConnectionService>();
                 services.AddSingleton<DirectoryCrawler>();
                 services.AddSingleton<SshKeyManager>();
-                
+
                 services.AddSingleton<Window>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 services.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
                 services.AddSingleton<IClipboard>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Clipboard!);
                 services.AddSingleton<IStorageProvider>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).StorageProvider);
                 services.AddSingleton<ILauncher>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Launcher);
-                
+
                 services.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(ServiceLifetime.Singleton);
                 services.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
                 services.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
@@ -62,8 +60,8 @@ public static class DependencyInjectionExtensions
                 services.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
                 services.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
                 services.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
-                
-                
+
+
                 services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
                 services.AddTransient<SshKeyFile>();
                 services.AddHostedService<FileSystemAnalyzer>();

@@ -9,10 +9,7 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigurationBindingTests
 {
-    private static IFileProvider GetEmbeddedFileProvider()
-    {
-        return new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
-    }
+    private static IFileProvider GetEmbeddedFileProvider() => new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
 
     [Fact]
     public void AddSshConfig_ShouldBeBindableToObjects()

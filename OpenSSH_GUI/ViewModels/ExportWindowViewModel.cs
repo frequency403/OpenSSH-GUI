@@ -10,9 +10,9 @@ namespace OpenSSH_GUI.ViewModels;
 public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard)
     : ViewModelBase<(string WindowTitle, string Export)>
 {
-    [Reactive] private string _export = "";
+    [Reactive] private string _export = string.Empty;
 
-    [Reactive] private string _windowTitle = "";
+    [Reactive] private string _windowTitle = string.Empty;
 
     public override ValueTask InitializeAsync((string WindowTitle, string Export) parameters,
         CancellationToken cancellationToken = default)

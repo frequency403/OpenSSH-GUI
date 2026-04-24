@@ -6,10 +6,7 @@ namespace OpenSSH_GUI.Tests.Core.Extensions;
 
 public class SshKeyTypeExtensionTests
 {
-    [Theory]
-    [InlineData(SshKeyType.RSA)]
-    [InlineData(SshKeyType.ECDSA)]
-    [InlineData(SshKeyType.ED25519)]
+    [Theory, InlineData(SshKeyType.RSA), InlineData(SshKeyType.ECDSA), InlineData(SshKeyType.ED25519)]
     public static void SshKeyType_Tests(SshKeyType sshKeyType)
     {
         var bitValues = sshKeyType.SupportedKeySizes;

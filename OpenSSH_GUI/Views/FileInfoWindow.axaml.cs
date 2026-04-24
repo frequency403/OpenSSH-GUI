@@ -8,8 +8,5 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class FileInfoWindow : WindowBase<FileInfoWindowViewModel, SshKeyFileSource>
 {
-    public FileInfoWindow()
-    {
-        InitializeComponent();
-    }
+    public FileInfoWindow() { InitializeComponent(); }
 }

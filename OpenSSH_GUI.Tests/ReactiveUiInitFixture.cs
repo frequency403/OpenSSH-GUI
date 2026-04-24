@@ -45,8 +45,5 @@ public sealed class ReactiveUiInitFixture : IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
-    {
-        _cts.Cancel();
-    }
+    public void Dispose() { _cts.Cancel(); }
 }

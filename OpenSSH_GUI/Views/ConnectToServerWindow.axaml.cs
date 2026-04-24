@@ -7,8 +7,5 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class ConnectToServerWindow : WindowBase<ConnectToServerViewModel>
 {
-    public ConnectToServerWindow()
-    {
-        InitializeComponent();
-    }
+    public ConnectToServerWindow() { InitializeComponent(); }
 }

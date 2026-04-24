@@ -45,9 +45,6 @@ public static class SshKeyFormatExtension
         /// <param name="path">The path to the file.</param>
         /// <param name="usePublicFormat">Indicates whether the key is public. Default is true.</param>
         /// <returns>The modified file path with the updated extension.</returns>
-        public string ChangeExtension(string path, bool usePublicFormat = true)
-        {
-            return Path.ChangeExtension(path, format.GetExtension(usePublicFormat));
-        }
+        public string ChangeExtension(string path, bool usePublicFormat = true) => Path.ChangeExtension(path, format.GetExtension(usePublicFormat));
     }
 }

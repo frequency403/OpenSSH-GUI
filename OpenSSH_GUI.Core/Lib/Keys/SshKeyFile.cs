@@ -260,18 +260,12 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     ///     Releases the unmanaged resources used by the <see cref="SshKeyFile" /> instance
     ///     and optionally releases the managed resources.
     /// </summary>
-    public void Dispose()
-    {
-        _disposables.Dispose();
-    }
+    public void Dispose() { _disposables.Dispose(); }
 
     /// <summary>
     ///     Implicit conversion to the underlying <see cref="Renci.SshNet.PrivateKeyFile" />.
     /// </summary>
-    public static implicit operator PrivateKeyFile?(SshKeyFile sshKeyFile)
-    {
-        return sshKeyFile.PrivateKeyFile;
-    }
+    public static implicit operator PrivateKeyFile?(SshKeyFile sshKeyFile) => sshKeyFile.PrivateKeyFile;
 
     /// <summary>
     ///     Resets the state of the current SSH key file instance, clearing any previously set password,
@@ -315,7 +309,8 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
         }
         catch (SshPassPhraseNullOrEmptyException passPhraseNullOrEmptyException)
         {
-            _logger.LogInformation(passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}",
+            _logger.LogInformation(
+                passPhraseNullOrEmptyException, "Missing Password for keyfile {filePath}",
                 source.AbsolutePath);
             if (KeyFileInfo is not null)
                 BasicSshKeyFileInformation = BasicSshKeyFileInformation.FromKeyFileInfo(KeyFileInfo);

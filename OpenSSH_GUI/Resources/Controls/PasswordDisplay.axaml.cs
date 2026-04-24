@@ -43,10 +43,7 @@ public partial class PasswordDisplay : UserControl
     private TextBox _textBox = new();
     private ToggleButton _toggle = new();
 
-    public PasswordDisplay()
-    {
-        InitializeComponent();
-    }
+    public PasswordDisplay() { InitializeComponent(); }
 
     public SshKeyFilePassword? SecurePassword
     {

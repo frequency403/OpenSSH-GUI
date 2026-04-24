@@ -14,10 +14,7 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigParserTests
 {
-    private IFileProvider GetEmbeddedFileProvider()
-    {
-        return new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
-    }
+    private IFileProvider GetEmbeddedFileProvider() => new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
 
     private string GetEmbeddedResource(string fileName)
     {
@@ -102,7 +99,7 @@ public class SshConfigParserTests
     [Fact]
     public void Parse_EmptyContent_ShouldReturnEmptyDocument()
     {
-        var doc = SshConfigParser.Parse("");
+        var doc = SshConfigParser.Parse(string.Empty);
         doc.GlobalItems.ShouldAllBe(i => i is SshBlankLine);
         doc.Blocks.ShouldBeEmpty();
     }

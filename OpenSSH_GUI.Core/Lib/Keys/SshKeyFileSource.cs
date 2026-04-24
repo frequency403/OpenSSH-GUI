@@ -5,18 +5,11 @@ public record SshKeyFileSource
     public string AbsolutePath { get; init; } = string.Empty;
     public bool ProvidedByConfig { get; init; }
 
-    public static SshKeyFileSource FromDisk(string absolutePath)
-    {
-        return new SshKeyFileSource { AbsolutePath = absolutePath };
-    }
+    public static SshKeyFileSource FromDisk(string absolutePath) => new()
+        { AbsolutePath = absolutePath };
 
-    public static SshKeyFileSource FromConfig(string absolutePath)
-    {
-        return new SshKeyFileSource { AbsolutePath = absolutePath, ProvidedByConfig = true };
-    }
+    public static SshKeyFileSource FromConfig(string absolutePath) => new()
+        { AbsolutePath = absolutePath, ProvidedByConfig = true };
 
-    public override string ToString()
-    {
-        return $"{AbsolutePath} | Referenced by Config: {ProvidedByConfig}";
-    }
+    public override string ToString() => $"{AbsolutePath} | Referenced by Config: {ProvidedByConfig}";
 }

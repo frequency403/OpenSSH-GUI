@@ -36,15 +36,10 @@ public abstract record SshLineItem
 public sealed record SshBlankLine : SshLineItem
 {
     /// <param name="lineNumber">1-based source line number.</param>
-    public SshBlankLine(int lineNumber) : base(lineNumber, string.Empty)
-    {
-    }
+    public SshBlankLine(int lineNumber) : base(lineNumber, string.Empty) { }
 
     /// <summary>Creates a blank line not associated with any source position.</summary>
-    public static SshBlankLine Create()
-    {
-        return new SshBlankLine(0);
-    }
+    public static SshBlankLine Create() => new(0);
 }
 
 /// <summary>
@@ -56,10 +51,7 @@ public sealed record SshCommentLine : SshLineItem
     /// <param name="lineNumber">1-based source line number.</param>
     /// <param name="rawText">Original line text.</param>
     public SshCommentLine(string comment, int lineNumber, string rawText)
-        : base(lineNumber, rawText)
-    {
-        Comment = comment;
-    }
+        : base(lineNumber, rawText) => Comment = comment;
 
     /// <summary>
     ///     Gets the full comment text, including the leading <c>#</c> character
@@ -144,8 +136,5 @@ public sealed record SshConfigEntry : SshLineItem
     /// </summary>
     /// <param name="key">Configuration keyword (case-insensitive).</param>
     /// <param name="values">One or more value tokens.</param>
-    public static SshConfigEntry Create(string key, params string[] values)
-    {
-        return new SshConfigEntry(SshKnownKeys.Normalize(key), [..values], null, 0, string.Empty);
-    }
+    public static SshConfigEntry Create(string key, params string[] values) => new(SshKnownKeys.Normalize(key), [..values], null, 0, string.Empty);
 }

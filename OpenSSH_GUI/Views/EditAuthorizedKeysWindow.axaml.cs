@@ -7,8 +7,5 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class EditAuthorizedKeysWindow : WindowBase<EditAuthorizedKeysViewModel>
 {
-    public EditAuthorizedKeysWindow()
-    {
-        InitializeComponent();
-    }
+    public EditAuthorizedKeysWindow() { InitializeComponent(); }
 }

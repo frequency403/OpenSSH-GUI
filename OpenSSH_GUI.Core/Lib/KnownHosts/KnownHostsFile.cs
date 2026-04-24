@@ -19,12 +19,9 @@ public sealed partial record KnownHostsFile(bool IsFromServer = false) : Reactiv
     public static KnownHostsFile Empty { get; } = new();
 
     public static ValueTask<KnownHostsFile> InitializeAsync(FileInfo fileInfo, bool fromServer = false,
-        CancellationToken token = default)
-    {
-        return fileInfo is null
-            ? throw new ArgumentNullException(nameof(fileInfo))
-            : InitializeAsync(new FileStream(fileInfo.FullName, SshKeyManager.FileStreamOptions), fromServer, true, token);
-    }
+        CancellationToken token = default) => fileInfo is null
+        ? throw new ArgumentNullException(nameof(fileInfo))
+        : InitializeAsync(new FileStream(fileInfo.FullName, SshKeyManager.FileStreamOptions), fromServer, true, token);
 
     public static async ValueTask<KnownHostsFile> InitializeAsync(Stream knownHostsContent, bool fromServer = false,
         bool disposeStream = true, CancellationToken token = default)
@@ -69,7 +66,7 @@ public sealed partial record KnownHostsFile(bool IsFromServer = false) : Reactiv
     /// <returns>A <see cref="ValueTask" /> representing the update operation.</returns>
     public async ValueTask UpdateFileAsync()
     {
-        if(!KnownHosts.Any(e => e.ChangesMade)) return;
+        if (!KnownHosts.Any(e => e.ChangesMade)) return;
         if (IsFromServer) return;
         await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), FileMode.Truncate);
         await using var streamWriter = new StreamWriter(file);
@@ -86,7 +83,7 @@ public sealed partial record KnownHostsFile(bool IsFromServer = false) : Reactiv
     /// <returns>The updated contents of the known hosts file as a string.</returns>
     public async ValueTask<string> GetUpdatedContentsAsync(PlatformID platformId)
     {
-        if (!IsFromServer) return "";
+        if (!IsFromServer) return string.Empty;
         var content = Export(platformId);
 
         using var memoryStream = new MemoryStream();
@@ -105,7 +102,7 @@ public sealed partial record KnownHostsFile(bool IsFromServer = false) : Reactiv
         var dicc = new Dictionary<KnownHostHost, KnownHostKey[]>();
         while (await streamReader.ReadLineAsync(token) is { } line)
         {
-            if(line.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) is not { Length: >= 2} splitted)
+            if (line.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) is not { Length: >= 2 } splitted)
                 continue;
             foreach (var host in splitted[0].Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {

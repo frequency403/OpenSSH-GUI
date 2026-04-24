@@ -31,10 +31,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
     public required IServiceProvider Services { get; set; }
     public required AppIconStore AppIconStore { get; set; }
 
-    public void Dispose()
-    {
-        Disposables.Dispose();
-    }
+    public void Dispose() { Disposables.Dispose(); }
 
     protected void WindowInitialize(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen)
     {

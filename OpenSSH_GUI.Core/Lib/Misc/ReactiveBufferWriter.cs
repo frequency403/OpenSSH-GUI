@@ -19,10 +19,7 @@ public sealed class ReactiveBufferWriter<T> : IReactiveObject, IBufferWriter<T>
     ///     Initializes a new instance with an optional initial capacity.
     /// </summary>
     /// <param name="initialCapacity">Initial buffer capacity. Defaults to 256.</param>
-    public ReactiveBufferWriter(int initialCapacity = 256)
-    {
-        _inner = new ArrayBufferWriter<T>(initialCapacity);
-    }
+    public ReactiveBufferWriter(int initialCapacity = 256) => _inner = new ArrayBufferWriter<T>(initialCapacity);
 
     /// <summary>Gets the portion of the buffer that has been written to.</summary>
     public ReadOnlyMemory<T> WrittenMemory
@@ -93,15 +90,9 @@ public sealed class ReactiveBufferWriter<T> : IReactiveObject, IBufferWriter<T>
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
-    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
-    {
-        PropertyChanging?.Invoke(this, args);
-    }
+    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) { PropertyChanging?.Invoke(this, args); }
 
-    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
-    {
-        PropertyChanged?.Invoke(this, args);
-    }
+    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) { PropertyChanged?.Invoke(this, args); }
 
     /// <summary>Resets the writer and notifies subscribers.</summary>
     public void Clear()

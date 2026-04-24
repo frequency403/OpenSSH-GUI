@@ -40,6 +40,7 @@ public readonly record struct BasicSshKeyFileInformation()
     public SshKeyFormat Format { get; private init; } = SshKeyFormat.OpenSSH;
 
     private bool IsEmpty => FingerPrint.Length == 0;
+
     private static BasicSshKeyFileInformation Empty { get; } = new();
 
     /// <summary>
@@ -107,10 +108,10 @@ public readonly record struct BasicSshKeyFileInformation()
     private static BasicSshKeyFileInformation ParseOpensshPrivateKey(string pem)
     {
         var base64 = pem
-            .Replace(OpensshPrivateHeader, "")
-            .Replace(OpensshPrivateFooter, "")
-            .Replace("\r", "")
-            .Replace("\n", "")
+            .Replace(OpensshPrivateHeader, string.Empty)
+            .Replace(OpensshPrivateFooter, string.Empty)
+            .Replace("\r", string.Empty)
+            .Replace("\n", string.Empty)
             .Trim();
 
         ReadOnlyMemory<byte> blob = Convert.FromBase64String(base64);
@@ -151,7 +152,7 @@ public readonly record struct BasicSshKeyFileInformation()
     {
         var firstLine = content.Split('\n', 2)[0].Trim();
 
-        var format = int.TryParse(firstLine.Replace(PuttyFileStart, "")[0].ToString(), out var version)
+        var format = int.TryParse(firstLine.Replace(PuttyFileStart, string.Empty)[0].ToString(), out var version)
             ? version is 3 ? SshKeyFormat.PuTTYv3 : SshKeyFormat.PuTTYv2
             : SshKeyFormat.PuTTYv2;
 
@@ -321,10 +322,7 @@ public readonly record struct BasicSshKeyFileInformation()
     }
 
     /// <summary>Splits a PPK header line of the form "Key: Value" and returns the trimmed value.</summary>
-    private static string SplitPpkField(string line)
-    {
-        return line.Split(": ", 2) is { Length: 2 } parts ? parts[1].Trim() : string.Empty;
-    }
+    private static string SplitPpkField(string line) => line.Split(": ", 2) is { Length: 2 } parts ? parts[1].Trim() : string.Empty;
 
     /// <summary>
     ///     Wraps a parse call and returns <see cref="Empty" /> on any exception,
@@ -342,24 +340,19 @@ public readonly record struct BasicSshKeyFileInformation()
         }
     }
 
-    public string ToString(SshKeyHashAlgorithmName hashAlgorithmName, string outputFormat = OutputFormat)
-    {
-        return IsEmpty
-            ? hashAlgorithmName == HashAlgorithmName
-                ? string.Format(outputFormat, BitLength, HashAlgorithmName, FingerPrint, Comment, KeyType)
-                : string.Format(outputFormat, BitLength, hashAlgorithmName, ComputeFingerprint([], hashAlgorithmName),
-                    Comment, KeyType)
-            : string.Empty;
-    }
+    public string ToString(SshKeyHashAlgorithmName hashAlgorithmName, string outputFormat = OutputFormat) => IsEmpty
+        ? hashAlgorithmName == HashAlgorithmName
+            ? string.Format(outputFormat, BitLength, HashAlgorithmName, FingerPrint, Comment, KeyType)
+            : string.Format(
+                outputFormat, BitLength, hashAlgorithmName, ComputeFingerprint([], hashAlgorithmName),
+                Comment, KeyType)
+        : string.Empty;
 
     /// <summary>
     ///     Returns a human-readable string matching the output format of <c>ssh-keygen -lf</c>:
     ///     <c>{bits} SHA256:{fingerprint} {comment} ({keyType})</c>
     /// </summary>
-    public override string ToString()
-    {
-        return ToString(HashAlgorithmName);
-    }
+    public override string ToString() => ToString(HashAlgorithmName);
 }
 
 /// <summary>
@@ -372,9 +365,9 @@ file sealed class BlobReader(ReadOnlyMemory<byte> data, int offset)
     public uint ReadUInt32()
     {
         var value = (uint)(
-            (data.Span[_position] << 24) |
-            (data.Span[_position + 1] << 16) |
-            (data.Span[_position + 2] << 8) |
+            data.Span[_position] << 24 |
+            data.Span[_position + 1] << 16 |
+            data.Span[_position + 2] << 8 |
             data.Span[_position + 3]);
         _position += 4;
         return value;
@@ -388,8 +381,5 @@ file sealed class BlobReader(ReadOnlyMemory<byte> data, int offset)
         return result;
     }
 
-    public string ReadString(Encoding? encoding = null)
-    {
-        return (encoding ?? Encoding.ASCII).GetString(ReadBlob().Span);
-    }
+    public string ReadString(Encoding? encoding = null) => (encoding ?? Encoding.ASCII).GetString(ReadBlob().Span);
 }

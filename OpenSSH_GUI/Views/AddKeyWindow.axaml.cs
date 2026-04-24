@@ -14,7 +14,8 @@ public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
         InitializeComponent();
         this.WhenActivated(_ =>
         {
-            this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(ViewModel, model => model.KeyName,
+            this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(
+                ViewModel, model => model.KeyName,
                 window => window.KeyFileNameValidation.Text!);
         });
     }

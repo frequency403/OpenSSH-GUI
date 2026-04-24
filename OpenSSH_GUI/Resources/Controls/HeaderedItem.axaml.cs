@@ -29,11 +29,8 @@ public partial class HeaderedItem : ContentControl
     public static readonly StyledProperty<VerticalAlignment> SideHeaderVerticalAlignmentProperty =
         AvaloniaProperty.Register<HeaderedItem, VerticalAlignment>(
             nameof(SideHeaderVerticalAlignment), VerticalAlignment.Center);
-    
-    public HeaderedItem()
-    {
-        InitializeComponent();
-    }
+
+    public HeaderedItem() { InitializeComponent(); }
 
     public object? Header
     {

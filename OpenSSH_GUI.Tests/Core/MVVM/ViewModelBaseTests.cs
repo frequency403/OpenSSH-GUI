@@ -62,9 +62,6 @@ public class ViewModelBaseTests
             return Task.CompletedTask;
         }
 
-        public void TriggerClose()
-        {
-            RequestClose();
-        }
+        public void TriggerClose() { RequestClose(); }
     }
 }

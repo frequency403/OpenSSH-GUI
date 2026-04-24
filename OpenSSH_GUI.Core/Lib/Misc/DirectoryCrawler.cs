@@ -85,18 +85,20 @@ public partial class DirectoryCrawler(
     private IEnumerable<SshKeyFileSource> EnumerateDiskSources()
     {
         return Directory
-            .EnumerateFiles(SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions
-            {
-                IgnoreInaccessible = true,
-                RecurseSubdirectories = false
-            })
+            .EnumerateFiles(
+                SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions
+                {
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = false
+                })
             .Select(e => new FileInfo(e))
             .Where(e => !ImportantFileNames.Any(ifn =>
                 ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
             .Where(e => !_keyFileSources.Any(k =>
                 k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
             .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
-                        e.Extension.Equals(SshKeyFormatExtension.PuttyKeyFileExtension,
+                        e.Extension.Equals(
+                            SshKeyFormatExtension.PuttyKeyFileExtension,
                             StringComparison.OrdinalIgnoreCase))
             .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase)
             .Select(e => SshKeyFileSource.FromDisk(e.FullName));

@@ -17,6 +17,7 @@ public partial class EditKnownHostsWindowViewModel(ServerConnectionService serve
     [Reactive] private ObservableCollection<KnownHost> _knownHostsRemote = [];
 
     public ServerConnectionService ServerConnectionService => serverConnectionService;
+
     private KnownHostsFile? KnownHostsFileLocal { get; set; }
     private KnownHostsFile? KnownHostsFileRemote { get; set; }
 
@@ -28,14 +29,16 @@ public partial class EditKnownHostsWindowViewModel(ServerConnectionService serve
         await KnownHostsFileLocal.UpdateFileAsync();
         if (!serverConnectionService.IsConnected) return;
         ArgumentNullException.ThrowIfNull(KnownHostsFileRemote);
-        await serverConnectionService.ServerConnection.WriteKnownHostsToServerAsync(KnownHostsFileRemote,
+        await serverConnectionService.ServerConnection.WriteKnownHostsToServerAsync(
+            KnownHostsFileRemote,
             cancellationToken);
     }
 
     public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         KnownHostsFileLocal =
-            await KnownHostsFile.InitializeAsync(new FileInfo(SshConfigFiles.Known_Hosts.GetPathOfFile()),
+            await KnownHostsFile.InitializeAsync(
+                new FileInfo(SshConfigFiles.Known_Hosts.GetPathOfFile()),
                 token: cancellationToken);
         if (serverConnectionService.IsConnected)
             KnownHostsFileRemote =

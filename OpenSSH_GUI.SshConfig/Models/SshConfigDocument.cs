@@ -47,12 +47,10 @@ public sealed record SshConfigDocument
     public static SshConfigDocument Empty { get; } = new([], []);
 
     /// <summary>Returns all <see cref="SshHostBlock" /> instances in document order.</summary>
-    public IEnumerable<SshHostBlock> HostBlocks =>
-        Blocks.OfType<SshHostBlock>();
+    public IEnumerable<SshHostBlock> HostBlocks => Blocks.OfType<SshHostBlock>();
 
     /// <summary>Returns all <see cref="SshMatchBlock" /> instances in document order.</summary>
-    public IEnumerable<SshMatchBlock> MatchBlocks =>
-        Blocks.OfType<SshMatchBlock>();
+    public IEnumerable<SshMatchBlock> MatchBlocks => Blocks.OfType<SshMatchBlock>();
 
     /// <summary>
     ///     Returns all <see cref="SshConfigEntry" /> items at global scope,
@@ -72,8 +70,5 @@ public sealed record SshConfigDocument
     ///     <see cref="SshWildcardMatcher" />.
     /// </summary>
     /// <param name="hostname">The target hostname to test.</param>
-    public IEnumerable<SshHostBlock> GetMatchingHostBlocks(string hostname)
-    {
-        return HostBlocks.Where(b => SshWildcardMatcher.Matches(hostname.AsSpan(), b.Patterns));
-    }
+    public IEnumerable<SshHostBlock> GetMatchingHostBlocks(string hostname) { return HostBlocks.Where(b => SshWildcardMatcher.Matches(hostname.AsSpan(), b.Patterns)); }
 }

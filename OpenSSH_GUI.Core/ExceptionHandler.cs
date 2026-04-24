@@ -29,8 +29,5 @@ public class ExceptionHandler(ILogger<ExceptionHandler> logger) : IObserver<Exce
         AvaloniaScheduler.Instance.Schedule(value, HandleException);
     }
 
-    private static IDisposable HandleException(IScheduler arg1, Exception arg2)
-    {
-        throw arg2;
-    }
+    private static IDisposable HandleException(IScheduler arg1, Exception arg2) => throw arg2;
 }

@@ -16,7 +16,8 @@ public record LoggerConfiguration
         Path.ChangeExtension(AppDomain.CurrentDomain.FriendlyName, LogFileFolderAndExtension);
 
     public string LogFilePath { get; set; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName, LogFileFolderAndExtension);
 
     public string LogFileFullPath => Path.Combine(LogFilePath, LogFileName);

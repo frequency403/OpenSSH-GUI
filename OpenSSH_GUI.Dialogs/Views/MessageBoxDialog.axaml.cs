@@ -14,6 +14,7 @@ namespace OpenSSH_GUI.Dialogs.Views;
 /// </summary>
 public partial class MessageBoxDialog : Window
 {
+    private bool _isInternalClose;
     /// <summary>
     ///     Initialises a new <see cref="MessageBoxDialog" /> with the provided <see cref="MessageBoxParams" />.
     /// </summary>
@@ -102,7 +103,6 @@ public partial class MessageBoxDialog : Window
         _isInternalClose = true;
         Close(MessageBoxResult.Cancel);
     }
-    private bool _isInternalClose;
     private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
     {
         if (_isInternalClose)

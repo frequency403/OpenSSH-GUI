@@ -172,8 +172,5 @@ public static class SshConfigSerializer
     ///     Wraps <paramref name="value" /> in double quotes when it contains whitespace,
     ///     preserving unquoted values that are already safe.
     /// </summary>
-    private static string QuoteIfNeeded(string value)
-    {
-        return value.AsSpan().ContainsAny(' ', '\t') ? $"\"{value}\"" : value;
-    }
+    private static string QuoteIfNeeded(string value) => value.AsSpan().ContainsAny(' ', '\t') ? $"\"{value}\"" : value;
 }

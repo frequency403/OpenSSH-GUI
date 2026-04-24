@@ -7,8 +7,5 @@ namespace OpenSSH_GUI.Views;
 [UsedImplicitly]
 public partial class ExportWindow : WindowBase<ExportWindowViewModel, (string WindowTitle, string Export)>
 {
-    public ExportWindow()
-    {
-        InitializeComponent();
-    }
+    public ExportWindow() { InitializeComponent(); }
 }

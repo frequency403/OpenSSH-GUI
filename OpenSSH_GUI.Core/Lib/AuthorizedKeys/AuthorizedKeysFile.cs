@@ -12,6 +12,8 @@ namespace OpenSSH_GUI.Core.Lib.AuthorizedKeys;
 /// </summary>
 public class AuthorizedKeysFile : ReactiveObject
 {
+    private AuthorizedKey[] _authorizedKeys = [];
+
     /// <summary>
     ///     The contents of the authorized keys file or the path to the file.
     /// </summary>
@@ -20,9 +22,7 @@ public class AuthorizedKeysFile : ReactiveObject
     /// <summary>
     ///     Represents an authorized keys file.
     /// </summary>
-    private AuthorizedKeysFile()
-    {
-    }
+    private AuthorizedKeysFile() { }
 
     /// <summary>
     ///     Gets a value indicating whether the file is from a server.
@@ -37,9 +37,7 @@ public class AuthorizedKeysFile : ReactiveObject
         get;
         set => this.RaiseAndSetIfChanged(ref field, value);
     } = [];
-    
-    private AuthorizedKey[] _authorizedKeys = [];
-    
+
     public bool ChangesMade => !_authorizedKeys.SequenceEqual(AuthorizedKeys);
 
     public static AuthorizedKeysFile Empty { get; } = new();
@@ -94,8 +92,7 @@ public class AuthorizedKeysFile : ReactiveObject
     /// <returns>
     ///     A <see cref="ValueTask{Boolean}" /> indicating whether the key was added successfully.
     /// </returns>
-    public ValueTask<bool> AddAuthorizedKeyAsync(SshKeyFile key) 
-        => ValueTask.FromResult(AddAuthorizedKey(key));
+    public ValueTask<bool> AddAuthorizedKeyAsync(SshKeyFile key) => ValueTask.FromResult(AddAuthorizedKey(key));
 
     /// <summary>
     ///     Exports the content of the authorized keys file.

@@ -90,14 +90,15 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     {
         try
         {
-            using var si = await _messageBoxProvider.ShowSecureInputAsync(new SecureInputParams
-            {
-                Buttons = MessageBoxButtons.OkCancel,
-                Icon = MaterialIconKind.KeyOutline,
-                MinLength = 0,
-                Prompt = string.Format(StringsAndTexts.FileInfoWindowEnterNewPassword, KeyFile.FileName),
-                Title = StringsAndTexts.FileInfoWindowChangePassword
-            });
+            using var si = await _messageBoxProvider.ShowSecureInputAsync(
+                new SecureInputParams
+                {
+                    Buttons = MessageBoxButtons.OkCancel,
+                    Icon = MaterialIconKind.KeyOutline,
+                    MinLength = 0,
+                    Prompt = string.Format(StringsAndTexts.FileInfoWindowEnterNewPassword, KeyFile.FileName),
+                    Title = StringsAndTexts.FileInfoWindowChangePassword
+                });
             if (si is null)
             {
                 _logger.LogInformation("User canceled password change");
@@ -134,18 +135,19 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     [ReactiveCommand]
     private async Task ChangeFileNameAsync(SshKeyFile keyFile, CancellationToken cancellationToken = default)
     {
-        var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(new ValidatedInputParams
-        {
-            Buttons = MessageBoxButtons.OkCancel,
-            Icon = MaterialIconKind.FileEditOutline,
-            InitialValue = Path.GetFileNameWithoutExtension(keyFile.FileName) ?? string.Empty,
-            Message = StringsAndTexts.FileInfoWindowChangeMessage,
-            Prompt = StringsAndTexts.FileInfoWindowEnterNewFilename,
-            Watermark = StringsAndTexts.FileInfoWindowEnterNewFilename,
-            Validator = argument => string.IsNullOrWhiteSpace(argument)
-                ? StringsAndTexts.FileInfoWindowFilenameCannotBeEmpty
-                : null
-        });
+        var validatedInputResult = await _messageBoxProvider.ShowValidatedInputAsync(
+            new ValidatedInputParams
+            {
+                Buttons = MessageBoxButtons.OkCancel,
+                Icon = MaterialIconKind.FileEditOutline,
+                InitialValue = Path.GetFileNameWithoutExtension(keyFile.FileName) ?? string.Empty,
+                Message = StringsAndTexts.FileInfoWindowChangeMessage,
+                Prompt = StringsAndTexts.FileInfoWindowEnterNewFilename,
+                Watermark = StringsAndTexts.FileInfoWindowEnterNewFilename,
+                Validator = argument => string.IsNullOrWhiteSpace(argument)
+                    ? StringsAndTexts.FileInfoWindowFilenameCannotBeEmpty
+                    : null
+            });
         if (validatedInputResult is { IsConfirmed: true, Value: { Length: > 0 } filename })
             try
             {
@@ -154,14 +156,15 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
                 {
                     result.ThrowIfFailure();
 
-                    if (await _messageBoxProvider.ShowMessageBoxAsync(new MessageBoxParams
-                        {
-                            Title = StringsAndTexts.FileInfoWindowConfirmFileOverwrite,
-                            Message =
-                                string.Format(StringsAndTexts.FileInfoWindowFileAlreadyExists, filename),
-                            Buttons = MessageBoxButtons.YesNo,
-                            Icon = MaterialIconKind.QuestionMarkCircleOutline
-                        }) is not MessageBoxResult.Yes)
+                    if (await _messageBoxProvider.ShowMessageBoxAsync(
+                            new MessageBoxParams
+                            {
+                                Title = StringsAndTexts.FileInfoWindowConfirmFileOverwrite,
+                                Message =
+                                    string.Format(StringsAndTexts.FileInfoWindowFileAlreadyExists, filename),
+                                Buttons = MessageBoxButtons.YesNo,
+                                Icon = MaterialIconKind.QuestionMarkCircleOutline
+                            }) is not MessageBoxResult.Yes)
                         throw new OperationCanceledException("User canceled operation");
                     _logger.LogInformation("User confirmed overwrite of key file");
                     result = await _keyManager.RenameKeyAsync(keyFile, filename, true, cancellationToken);
@@ -195,7 +198,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
             catch (Exception e)
             {
                 _logger.LogError(e, "Error deleting key file");
-                await _messageBoxProvider.ShowErrorMessageBoxAsync(e,
+                await _messageBoxProvider.ShowErrorMessageBoxAsync(
+                    e,
                     string.Format(StringsAndTexts.MainWindowViewModelDeleteKeyTitleText, keyFile.FileName));
             }
         else
@@ -209,7 +213,8 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
         {
             await _clipboard.SetTextAsync(password.GetPasswordString());
             await _clipboard.FlushAsync();
-            await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.FileInfoWindowPasswordCopied,
+            await _messageBoxProvider.ShowMessageBoxAsync(
+                StringsAndTexts.FileInfoWindowPasswordCopied,
                 StringsAndTexts.FileInfoWindowPasswordCopied, MessageBoxButtons.Ok,
                 MaterialIconKind.InformationOutline);
         }

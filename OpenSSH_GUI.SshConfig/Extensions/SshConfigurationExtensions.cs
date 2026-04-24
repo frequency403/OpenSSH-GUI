@@ -21,10 +21,7 @@ public static class SshConfigurationExtensions
         /// </param>
         /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
-        public IConfigurationBuilder AddSshConfig(string path, Action<string, Exception>? loggingAction = null)
-        {
-            return builder.AddSshConfig(null, path, false, false, loggingAction);
-        }
+        public IConfigurationBuilder AddSshConfig(string path, Action<string, Exception>? loggingAction = null) => builder.AddSshConfig(null, path, false, false, loggingAction);
 
         /// <summary>
         ///     Adds the SSH configuration file at <paramref name="path" /> to the <paramref name="builder" />.
@@ -37,10 +34,7 @@ public static class SshConfigurationExtensions
         /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(string path, bool optional,
-            Action<string, Exception>? loggingAction = null)
-        {
-            return builder.AddSshConfig(null, path, optional, false, loggingAction);
-        }
+            Action<string, Exception>? loggingAction = null) => builder.AddSshConfig(null, path, optional, false, loggingAction);
 
         /// <summary>
         ///     Adds the SSH configuration file at <paramref name="path" /> to the <paramref name="builder" />.
@@ -54,10 +48,7 @@ public static class SshConfigurationExtensions
         /// <param name="loggingAction"></param>
         /// <returns>The <see cref="IConfigurationBuilder" />.</returns>
         public IConfigurationBuilder AddSshConfig(string path, bool optional,
-            bool reloadOnChange, Action<string, Exception>? loggingAction = null)
-        {
-            return builder.AddSshConfig(null, path, optional, reloadOnChange, loggingAction);
-        }
+            bool reloadOnChange, Action<string, Exception>? loggingAction = null) => builder.AddSshConfig(null, path, optional, reloadOnChange, loggingAction);
 
         /// <summary>
         ///     Adds the SSH configuration file at <paramref name="path" /> to the <paramref name="builder" />.
@@ -77,14 +68,15 @@ public static class SshConfigurationExtensions
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentException.ThrowIfNullOrEmpty(path);
 
-            return builder.AddSshConfig(s =>
-            {
-                s.FileProvider = fileProvider;
-                s.Path = path;
-                s.Optional = optional;
-                s.ReloadOnChange = reloadOnChange;
-                s.ResolveFileProvider();
-            }, loggingAction);
+            return builder.AddSshConfig(
+                s =>
+                {
+                    s.FileProvider = fileProvider;
+                    s.Path = path;
+                    s.Optional = optional;
+                    s.ReloadOnChange = reloadOnChange;
+                    s.ResolveFileProvider();
+                }, loggingAction);
         }
 
         /// <summary>

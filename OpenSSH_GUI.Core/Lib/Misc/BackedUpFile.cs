@@ -5,23 +5,11 @@ public record BackedUpFile
     public required FileInfo InitialFile { get; init; }
     public required FileInfo BackupFile { get; init; }
 
-    public void Backup()
-    {
-        InitialFile.CopyTo(BackupFile.FullName);
-    }
+    public void Backup() { InitialFile.CopyTo(BackupFile.FullName); }
 
-    public void Restore()
-    {
-        BackupFile.MoveTo(InitialFile.FullName, true);
-    }
+    public void Restore() { BackupFile.MoveTo(InitialFile.FullName, true); }
 
-    public void Delete()
-    {
-        BackupFile.Delete();
-    }
+    public void Delete() { BackupFile.Delete(); }
 
-    public override string ToString()
-    {
-        return $"{InitialFile.FullName} -> {BackupFile.FullName}";
-    }
+    public override string ToString() => $"{InitialFile.FullName} -> {BackupFile.FullName}";
 }

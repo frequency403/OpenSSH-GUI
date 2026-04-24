@@ -13,11 +13,9 @@ public static class SshHostBlockExtensions
     /// </summary>
     /// <param name="block">The block to convert.</param>
     /// <returns>A type-safe <see cref="SshHostSettings" /> representation of the block.</returns>
-    public static SshHostSettings GetSettings(this SshBlock block)
-    {
-        return GetSettingsFromEntries(block.GetEntries(),
-            block is SshHostBlock hostBlock ? hostBlock.Patterns.ToArray() : null);
-    }
+    public static SshHostSettings GetSettings(this SshBlock block) => GetSettingsFromEntries(
+        block.GetEntries(),
+        block is SshHostBlock hostBlock ? hostBlock.Patterns.ToArray() : null);
 
     /// <summary>
     ///     Extracts <see cref="SshHostSettings" /> from a collection of <see cref="SshConfigEntry" />.
@@ -159,8 +157,8 @@ public static class SshHostBlockExtensions
 
                         break;
                 }
-            else if ((item is SshConfigEntry otherEntry && settings.OtherEntries is { Length: > 0 } &&
-                      settings.OtherEntries.Contains(otherEntry)) || item is not SshConfigEntry)
+            else if (item is SshConfigEntry otherEntry && settings.OtherEntries is { Length: > 0 } &&
+                     settings.OtherEntries.Contains(otherEntry) || item is not SshConfigEntry)
                 newItems.Add(item);
 
         // Add any settings that weren't in the original block

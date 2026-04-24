@@ -41,7 +41,8 @@ public class FileSystemAnalyzer(ILogger<FileSystemAnalyzer> logger) : IHostedSer
 #pragma warning disable CA1416
             if (!Directory.Exists(rootSshPath))
                 if (unixPlatform)
-                    Directory.CreateDirectory(rootSshPath,
+                    Directory.CreateDirectory(
+                        rootSshPath,
                         UnixFileMode.UserRead |
                         UnixFileMode.UserWrite |
                         UnixFileMode.UserExecute |
@@ -52,7 +53,8 @@ public class FileSystemAnalyzer(ILogger<FileSystemAnalyzer> logger) : IHostedSer
             cancellationToken.ThrowIfCancellationRequested();
             if (!Directory.Exists(baseSshPath))
                 if (unixPlatform)
-                    Directory.CreateDirectory(baseSshPath,
+                    Directory.CreateDirectory(
+                        baseSshPath,
                         UnixFileMode.UserRead |
                         UnixFileMode.UserWrite |
                         UnixFileMode.UserExecute); // 700

@@ -55,15 +55,9 @@ public abstract class ConnectionCredentials
     /// <returns>
     ///     The <see cref="ConnectionInfo" /> object representing the SSH connection information.
     /// </returns>
-    public virtual ConnectionInfo GetConnectionInfo()
-    {
-        return AddAuthenticationMethods(new NoneAuthenticationMethod(Username));
-    }
+    public virtual ConnectionInfo GetConnectionInfo() => AddAuthenticationMethods(new NoneAuthenticationMethod(Username));
 
-    protected ConnectionInfo AddAuthenticationMethods(params AuthenticationMethod[] methods)
-    {
-        return new ConnectionInfo(Hostname, Port, Username, methods);
-    }
+    protected ConnectionInfo AddAuthenticationMethods(params AuthenticationMethod[] methods) => new(Hostname, Port, Username, methods);
 }
 
 /// <summary>
@@ -78,10 +72,7 @@ public class KeyConnectionCredentials(string hostname, string username, SshKeyFi
     /// <returns>
     ///     The <see cref="ConnectionInfo" /> object representing the SSH connection information.
     /// </returns>
-    public override ConnectionInfo GetConnectionInfo()
-    {
-        return AddAuthenticationMethods(new PrivateKeyAuthenticationMethod(Username, key?.PrivateKeyFile));
-    }
+    public override ConnectionInfo GetConnectionInfo() => AddAuthenticationMethods(new PrivateKeyAuthenticationMethod(Username, key?.PrivateKeyFile));
 }
 
 public class MultiKeyConnectionCredentials(string hostname, string username, IEnumerable<SshKeyFile>? keys)
@@ -97,8 +88,9 @@ public class MultiKeyConnectionCredentials(string hostname, string username, IEn
     {
         return keys is null
             ? base.GetConnectionInfo()
-            : AddAuthenticationMethods(keys.Select(e => new PrivateKeyAuthenticationMethod(Username, e.PrivateKeyFile)
-            ).ToArray<AuthenticationMethod>());
+            : AddAuthenticationMethods(
+                keys.Select(e => new PrivateKeyAuthenticationMethod(Username, e.PrivateKeyFile)
+                ).ToArray<AuthenticationMethod>());
     }
 }
 
@@ -112,8 +104,5 @@ public class PasswordConnectionCredentials(
     ///     Retrieves the connection information based on the provided credentials.
     /// </summary>
     /// <returns>The <see cref="ConnectionInfo" /> object representing the SSH connection information.</returns>
-    public override ConnectionInfo GetConnectionInfo()
-    {
-        return AddAuthenticationMethods(new PasswordAuthenticationMethod(Username, password));
-    }
+    public override ConnectionInfo GetConnectionInfo() => AddAuthenticationMethods(new PasswordAuthenticationMethod(Username, password));
 }

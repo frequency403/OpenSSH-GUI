@@ -57,10 +57,12 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
     [Reactive] private IBrush _statusButtonBackground =
         Application.Current?.Resources["OverlayBrush"] as IBrush ?? Brushes.Gray;
 
-    [Reactive] private string _statusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+    [Reactive] private string _statusButtonText = string.Format(
+        StringsAndTexts.ConnectToServerStatusBase,
         StringsAndTexts.ConnectToServerStatusUnknown);
 
-    [Reactive] private string _statusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+    [Reactive] private string _statusButtonToolTip = string.Format(
+        StringsAndTexts.ConnectToServerStatusBase,
         StringsAndTexts.ConnectToServerStatusUntested);
 
     [Reactive] private bool _tryingToConnect;
@@ -100,7 +102,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
             .DisposeWith(Disposables);
 
         this
-            .WhenAnyValue(viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys,
+            .WhenAnyValue(
+                viewModel => viewModel.AuthWithPublicKey, model => model.AuthWithAllKeys,
                 model => model._serverConnectionService.IsConnected)
             .Subscribe(tuple => { KeyComboBoxEnabled = tuple is { Item3: false, Item1: true, Item2: false }; })
             .DisposeWith(Disposables);
@@ -142,7 +145,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
     {
         if (ConnectionCredentials is not null)
         {
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StatusButtonText = string.Format(
+                StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusSuccess);
             StatusButtonToolTip =
                 string.Format(StringsAndTexts.ConnectToServerSshConnectionString, Username, HostName);
@@ -150,7 +154,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         }
         else
         {
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StatusButtonText = string.Format(
+                StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusFailed);
             StatusButtonBackground = Application.Current?.Resources["ErrorBrush"] as IBrush ?? Brushes.Red;
         }
@@ -164,7 +169,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         ArgumentNullException.ThrowIfNull(hostSettings);
         if (hostSettings.IdentityFiles is null)
         {
-            StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+            StatusButtonText = string.Format(
+                StringsAndTexts.ConnectToServerStatusBase,
                 StringsAndTexts.ConnectToServerStatusFailed);
             StatusButtonBackground = Application.Current?.Resources["ErrorBrush"] as IBrush ?? Brushes.Red;
             return;
@@ -213,7 +219,7 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         try
         {
             if (string.IsNullOrWhiteSpace(HostName) || string.IsNullOrWhiteSpace(Username) ||
-                (SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password)))
+                SelectedPublicKey is null && string.IsNullOrWhiteSpace(Password))
                 throw new ArgumentException(StringsAndTexts.ConnectToServerValidationError);
             TryingToConnect = true;
             ConnectionCredentials? connectionCredentials;
@@ -242,7 +248,8 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         try
         {
             if (!await _serverConnectionService.EstablishConnection(ConnectionCredentials, cancellationToken))
-                await _messageBoxProvider.ShowMessageBoxAsync(StringsAndTexts.Error,
+                await _messageBoxProvider.ShowMessageBoxAsync(
+                    StringsAndTexts.Error,
                     StringsAndTexts.ConnectToServerConnectionFailed);
         }
         catch (Exception e)
@@ -258,9 +265,11 @@ public sealed partial class ConnectToServerViewModel : ViewModelBase
         HostName = string.Empty;
         Username = string.Empty;
         Password = string.Empty;
-        StatusButtonText = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StatusButtonText = string.Format(
+            StringsAndTexts.ConnectToServerStatusBase,
             StringsAndTexts.ConnectToServerStatusUnknown);
-        StatusButtonToolTip = string.Format(StringsAndTexts.ConnectToServerStatusBase,
+        StatusButtonToolTip = string.Format(
+            StringsAndTexts.ConnectToServerStatusBase,
             StringsAndTexts.ConnectToServerStatusUntested);
         StatusButtonBackground = Application.Current?.Resources["OverlayBrush"] as IBrush ?? Brushes.Gray;
         SelectedHostSettings = null;

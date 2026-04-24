@@ -275,11 +275,14 @@
                                        VerticalAlignment="Stretch" CornerRadius="5">
                     <ToolTip.Tip>
                         <Panel>
-                            <Label IsVisible="{Binding !SshKeyManager.Processing}" Content="{Binding ItemsCountTooltip}" />
-                            <TextBlock IsVisible="{Binding SshKeyManager.Processing}" Text="{x:Static openSshGui:StringsAndTexts.MainWindowReloadingKeys}" />
+                            <Label IsVisible="{Binding !SshKeyManager.Processing}"
+                                   Content="{Binding ItemsCountTooltip}" />
+                            <TextBlock IsVisible="{Binding SshKeyManager.Processing}"
+                                       Text="{x:Static openSshGui:StringsAndTexts.MainWindowReloadingKeys}" />
                         </Panel>
                     </ToolTip.Tip>
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold"/>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
                 </controls:FlyoutButton>
 
 

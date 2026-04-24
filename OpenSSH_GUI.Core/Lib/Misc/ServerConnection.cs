@@ -78,15 +78,9 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
-    {
-        _disposables.Dispose();
-    }
+    public void Dispose() { _disposables.Dispose(); }
 
-    public static ServerConnection WithCredentials(ConnectionCredentials credentials)
-    {
-        return new ServerConnection(credentials);
-    }
+    public static ServerConnection WithCredentials(ConnectionCredentials credentials) => new(credentials);
 
     public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
     {
@@ -117,7 +111,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     {
         if (!IsConnected) throw new InvalidOperationException("No connection to get known hosts from");
 
-        var path = await ResolveRemoteEnvVariablesAsync(SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
+        var path = await ResolveRemoteEnvVariablesAsync(
+            SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
             token);
         using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
         await command.ExecuteAsync(token);
@@ -169,7 +164,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     {
         if (!IsConnected) return originalPath;
         var parts = originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries);
-        var result = "";
+        var result = string.Empty;
         foreach (var part in parts)
             if (part.Contains('\\') || part.Contains('/'))
             {

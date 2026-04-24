@@ -50,14 +50,16 @@ public static class SshConfigParser
     // ─────────────────────────────────────────────────────────────────────────
 
     private static readonly FrozenSet<string> MatchKeywords =
-        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+        FrozenSet.Create(
+            StringComparer.OrdinalIgnoreCase,
             "all", "canonical", "final",
             "exec", "host", "originalhost",
             "user", "localuser", "tagged", "localnetwork",
             "address", "group", "localaddress", "localport", "port", "rdomain");
 
     private static readonly FrozenSet<string> NoArgMatchKeywords =
-        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+        FrozenSet.Create(
+            StringComparer.OrdinalIgnoreCase,
             "all", "canonical", "final");
     // ─────────────────────────────────────────────────────────────────────────
     // Public API
@@ -101,20 +103,15 @@ public static class SshConfigParser
     /// </summary>
     /// <param name="content">Raw configuration text.</param>
     /// <param name="options">Parser options, or <see langword="null" /> to use <see cref="SshConfigParserOptions.Default" />.</param>
-    public static SshConfigDocument Parse(string content, SshConfigParserOptions? options = null)
-    {
-        return ParseDocument(content, null, options ?? SshConfigParserOptions.Default, 0);
-    }
+    public static SshConfigDocument Parse(string content, SshConfigParserOptions? options = null) => ParseDocument(content, null, options ?? SshConfigParserOptions.Default, 0);
 
     /// <summary>
     ///     Parses SSH configuration content from a <see cref="ReadOnlySpan{T}" /> of characters.
     /// </summary>
     /// <param name="content">Raw configuration characters.</param>
     /// <param name="options">Parser options, or <see langword="null" /> to use <see cref="SshConfigParserOptions.Default" />.</param>
-    public static SshConfigDocument Parse(ReadOnlySpan<char> content, SshConfigParserOptions? options = null)
-    {
-        return ParseDocument(content.ToString(), null, options ?? SshConfigParserOptions.Default, 0);
-    }
+    public static SshConfigDocument Parse(ReadOnlySpan<char> content, SshConfigParserOptions? options = null) =>
+        ParseDocument(content.ToString(), null, options ?? SshConfigParserOptions.Default, 0);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Core parse loop
@@ -324,13 +321,14 @@ public static class SshConfigParser
 
             if (NoArgMatchKeywords.Contains(keyword))
             {
-                criteria.Add(keyword.ToLowerInvariant() switch
-                {
-                    "all" => SshMatchCriterion.All,
-                    "canonical" => SshMatchCriterion.Canonical,
-                    "final" => SshMatchCriterion.Final,
-                    _ => throw new UnreachableException()
-                });
+                criteria.Add(
+                    keyword.ToLowerInvariant() switch
+                    {
+                        "all" => SshMatchCriterion.All,
+                        "canonical" => SshMatchCriterion.Canonical,
+                        "final" => SshMatchCriterion.Final,
+                        _ => throw new UnreachableException()
+                    });
                 i++;
             }
             else
@@ -499,11 +497,8 @@ public static class SshConfigParser
         public string? HeaderComment { get; init; }
         public ImmutableArray<SshLineItem>.Builder Items { get; } = ImmutableArray.CreateBuilder<SshLineItem>();
 
-        public SshBlock Build()
-        {
-            return IsHost
-                ? new SshHostBlock(HostPatterns, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment)
-                : new SshMatchBlock(MatchCriteria, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment);
-        }
+        public SshBlock Build() => IsHost
+            ? new SshHostBlock(HostPatterns, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment)
+            : new SshMatchBlock(MatchCriteria, Items.ToImmutable(), LineNumber, RawHeaderText, HeaderComment);
     }
 }

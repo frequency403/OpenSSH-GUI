@@ -101,10 +101,7 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
     ///     Notifies all reactive observers after the wipe.
     /// </summary>
     /// <exception cref="ObjectDisposedException" />
-    public void Clear()
-    {
-        _bufferWriter.Clear();
-    }
+    public void Clear() { _bufferWriter.Clear(); }
 
     /// <summary>
     ///     Decodes the stored passphrase to a managed <see cref="string" /> on the heap.
@@ -122,12 +119,9 @@ public sealed partial record SshKeyFilePassword : ReactiveRecord, IDisposable
         return result;
     }
 
-    public ISshKeyEncryption ToSshKeyEncryption(SshKeyFormat? format = null)
-    {
-        return this is { IsValid: true } keyPassword
-            ? new SshKeyEncryptionAes256(
-                keyPassword.GetPasswordString(),
-                format is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null)
-            : SshKeyGenerateInfo.DefaultSshKeyEncryption;
-    }
+    public ISshKeyEncryption ToSshKeyEncryption(SshKeyFormat? format = null) => this is { IsValid: true } keyPassword
+        ? new SshKeyEncryptionAes256(
+            keyPassword.GetPasswordString(),
+            format is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null)
+        : SshKeyGenerateInfo.DefaultSshKeyEncryption;
 }

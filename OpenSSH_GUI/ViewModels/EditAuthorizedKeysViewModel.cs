@@ -39,7 +39,8 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase
         ServerConnectionService = serverConnectionService;
         SelectedKey = SshKeyManager.SshKeys.FirstOrDefault();
 
-        _addButtonEnabledHelper = this.WhenAnyValue(vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote,
+        _addButtonEnabledHelper = this.WhenAnyValue(
+                vm => vm.SelectedKey, vm => vm.AuthorizedKeysFileRemote,
                 vm => vm.KeyAddPossible)
             .DistinctUntilChanged()
             .Select(props =>
@@ -97,8 +98,5 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private async Task AddKey(SshKeyFile key, CancellationToken cancellationToken = default)
-    {
-        await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(key);
-    }
+    private async Task AddKey(SshKeyFile key, CancellationToken cancellationToken = default) { await AuthorizedKeysFileRemote.AddAuthorizedKeyAsync(key); }
 }

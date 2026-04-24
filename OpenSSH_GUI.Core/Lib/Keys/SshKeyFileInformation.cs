@@ -12,10 +12,53 @@ public sealed record SshKeyFileInformation
 {
     private static readonly SshKeyFormat[] _availableFormats = Enum.GetValues<SshKeyFormat>();
 
-    /// <inheritdoc cref="SshKeyFileSource"/>
+    /// <summary>
+    ///     Initializes a new instance of <see cref="SshKeyFileInformation" />
+    ///     and eagerly computes all metadata from the provided <paramref name="keyFileSource" />.
+    /// </summary>
+    /// <param name="keyFileSource">The source descriptor for the SSH key file.</param>
+    public SshKeyFileInformation(SshKeyFileSource keyFileSource)
+    {
+        KeyFileSource = keyFileSource;
+        CanChangeFileName = keyFileSource is { ProvidedByConfig: false };
+
+        FileInfo = !string.IsNullOrWhiteSpace(keyFileSource.AbsolutePath)
+            ? new FileInfo(keyFileSource.AbsolutePath)
+            : new FileInfo(Assembly.GetExecutingAssembly().Location);
+
+        FileName = FileInfo.Name;
+        FullFileName = FileInfo.FullName;
+        DirectoryName = FileInfo.DirectoryName;
+        Exists = FileInfo.Exists;
+
+        CurrentFormat = FileInfo.Extension == SshKeyFormatExtension.PuttyKeyFileExtension
+            ? SshKeyFormat.PuTTYv3
+            : SshKeyFormat.OpenSSH;
+
+        IsOpenSshKey = CurrentFormat == SshKeyFormat.OpenSSH;
+
+        PublicKeyFileName = IsOpenSshKey
+            ? Path.ChangeExtension(FullFileName, SshKeyFormatExtension.OpenSshPublicKeyFileExtension)
+            : null;
+
+        AvailableFormatsForConversion = _availableFormats
+            .Where(f => f != CurrentFormat)
+            .ToArray();
+
+        DefaultConversionFormat = AvailableFormatsForConversion.Contains(SshKeyFormat.OpenSSH)
+            ? SshKeyFormat.OpenSSH
+            : AvailableFormatsForConversion.FirstOrDefault();
+
+        Files = new[] { FullFileName, PublicKeyFileName }
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => new FileInfo(p!))
+            .ToArray();
+    }
+
+    /// <inheritdoc cref="SshKeyFileSource" />
     public SshKeyFileSource KeyFileSource { get; }
 
-    /// <summary>Gets the <see cref="FileInfo"/> for the private key file.</summary>
+    /// <summary>Gets the <see cref="FileInfo" /> for the private key file.</summary>
     public FileInfo FileInfo { get; }
 
     /// <summary>Gets the file name including extension.</summary>
@@ -59,53 +102,9 @@ public sealed record SshKeyFileInformation
     /// <summary>Gets whether the file name can be changed by the user.</summary>
     public bool CanChangeFileName { get; }
 
-    /// <summary>
-    ///     Initializes a new instance of <see cref="SshKeyFileInformation"/>
-    ///     and eagerly computes all metadata from the provided <paramref name="keyFileSource"/>.
-    /// </summary>
-    /// <param name="keyFileSource">The source descriptor for the SSH key file.</param>
-    public SshKeyFileInformation(SshKeyFileSource keyFileSource)
-    {
-        KeyFileSource   = keyFileSource;
-        CanChangeFileName = keyFileSource is { ProvidedByConfig: false };
+    /// <inheritdoc />
+    public bool Equals(SshKeyFileInformation? other) => other is not null && KeyFileSource == other.KeyFileSource;
 
-        FileInfo = !string.IsNullOrWhiteSpace(keyFileSource.AbsolutePath)
-            ? new FileInfo(keyFileSource.AbsolutePath)
-            : new FileInfo(Assembly.GetExecutingAssembly().Location);
-
-        FileName      = FileInfo.Name;
-        FullFileName  = FileInfo.FullName;
-        DirectoryName = FileInfo.DirectoryName;
-        Exists        = FileInfo.Exists;
-
-        CurrentFormat = FileInfo.Extension == SshKeyFormatExtension.PuttyKeyFileExtension
-            ? SshKeyFormat.PuTTYv3
-            : SshKeyFormat.OpenSSH;
-
-        IsOpenSshKey = CurrentFormat == SshKeyFormat.OpenSSH;
-
-        PublicKeyFileName = IsOpenSshKey
-            ? Path.ChangeExtension(FullFileName, SshKeyFormatExtension.OpenSshPublicKeyFileExtension)
-            : null;
-
-        AvailableFormatsForConversion = _availableFormats
-            .Where(f => f != CurrentFormat)
-            .ToArray();
-
-        DefaultConversionFormat = AvailableFormatsForConversion.Contains(SshKeyFormat.OpenSSH)
-            ? SshKeyFormat.OpenSSH
-            : AvailableFormatsForConversion.FirstOrDefault();
-
-        Files = new[] { FullFileName, PublicKeyFileName }
-            .Where(p => !string.IsNullOrWhiteSpace(p))
-            .Select(p => new FileInfo(p!))
-            .ToArray();
-    }
-    
-    /// <inheritdoc/>
-    public bool Equals(SshKeyFileInformation? other)
-        => other is not null && KeyFileSource == other.KeyFileSource;
-
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override int GetHashCode() => KeyFileSource.GetHashCode();
 }

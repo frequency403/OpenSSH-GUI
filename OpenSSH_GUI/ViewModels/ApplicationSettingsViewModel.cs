@@ -23,13 +23,13 @@ namespace OpenSSH_GUI.ViewModels;
 public partial class ApplicationSettingsViewModel : ViewModelBase
 {
     private readonly Application _application;
+    private readonly ILauncher _launcher;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
-    private readonly ILauncher _launcher;
     private readonly IMessageBoxProvider _messageBoxProvider;
 
     [Reactive] private bool _canDeleteOldLogFiles;
-    
+
     [Reactive] private LogEventLevel _currentLogLevel;
 
     [Reactive] private ThemeVariant _currentThemeVariant;
@@ -51,8 +51,8 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         _currentLogLevel = levelSwitch.MinimumLevel;
         _application = application;
         _daysToDeleteSelected = DaysToDelete[0];
-        if (!double.TryParse(_application.Resources[App.SystemFontSize]?.ToString(), out _fontSize)) 
-            if(!double.TryParse(_application.Resources[App.BaseFontSize]?.ToString(), out _fontSize))
+        if (!double.TryParse(_application.Resources[App.SystemFontSize]?.ToString(), out _fontSize))
+            if (!double.TryParse(_application.Resources[App.BaseFontSize]?.ToString(), out _fontSize))
             {
                 _logger.LogWarning("Could not set font size by resources");
                 _fontSize = 14;
@@ -107,27 +107,28 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     public ObservableCollection<string> LogFiles { get; } = [];
 
     [ReactiveCommand]
-    private void OnNextFontSize(double obj)
-    {
-        _application.Resources[App.SystemFontSize] = obj;
-    }
+    private void OnNextFontSize(double obj) { _application.Resources[App.SystemFontSize] = obj; }
 
 
     [ReactiveCommand]
     private async Task ClearWholeCache(CancellationToken cancellationToken = default)
     {
         var loggerConfiguration = LoggerConfiguration.Default;
-        var cachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        var cachePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppDomain.CurrentDomain.FriendlyName);
-        if (await _messageBoxProvider.ShowValidatedInputAsync(StringsAndTexts.ApplicationSettingsViewModelAreYouSure,
+        if (await _messageBoxProvider.ShowValidatedInputAsync(
+                StringsAndTexts.ApplicationSettingsViewModelAreYouSure,
                 string.Format(
-                    StringsAndTexts.ApplicationSettingsViewModelConfirmMessageBoxContent.Replace("\\n",
+                    StringsAndTexts.ApplicationSettingsViewModelConfirmMessageBoxContent.Replace(
+                        "\\n",
                         Environment.NewLine), cachePath,
                     StringsAndTexts.ApplicationSettingsViewModelConfirmDialogConfirmValue),
                 inputToValidate =>
                 {
                     ArgumentException.ThrowIfNullOrWhiteSpace(inputToValidate);
-                    return string.Equals(inputToValidate,
+                    return string.Equals(
+                        inputToValidate,
                         StringsAndTexts.ApplicationSettingsViewModelConfirmDialogConfirmValue, StringComparison.Ordinal)
                         ? null
                         : StringsAndTexts.ApplicationSettingsViewModelConfirmationError;
@@ -180,8 +181,10 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 
     [ReactiveCommand]
     private Task<bool> OpenCacheFolder(CancellationToken token = default) => _launcher.LaunchDirectoryInfoAsync(
-        new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            AppDomain.CurrentDomain.FriendlyName)));
+        new DirectoryInfo(
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                AppDomain.CurrentDomain.FriendlyName)));
 
     private void OnNextTheme(ThemeVariant variant)
     {
@@ -192,7 +195,8 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             _ => Avalonia.Styling.ThemeVariant.Default
         };
         if (_application.ActualThemeVariant == themeVariant) return;
-        _logger.LogDebug("Changing Theme Variant from {OldThemeVariant} to {ThemeVariant}",
+        _logger.LogDebug(
+            "Changing Theme Variant from {OldThemeVariant} to {ThemeVariant}",
             _application.ActualThemeVariant.Key.ToString(), themeVariant.Key);
         _application.RequestedThemeVariant = themeVariant;
     }
@@ -201,11 +205,12 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     {
         var logConfiguration = LoggerConfiguration.Default;
         LogFiles.Clear();
-        foreach (var logFile in Directory.EnumerateFiles(logConfiguration.LogFilePath, "*.log",
+        foreach (var logFile in Directory.EnumerateFiles(
+                     logConfiguration.LogFilePath, "*.log",
                      SearchOption.TopDirectoryOnly))
         {
             var fileName = Path.GetFileName(logFile).Replace(AppDomain.CurrentDomain.FriendlyName, string.Empty);
-            if(fileName.Length < 8) continue;
+            if (fileName.Length < 8) continue;
             var extractedDate = fileName[..8];
             if (DateOnly.TryParseExact(extractedDate, "yyyyMMdd", out var dateTime) &&
                 DateTime.Now.Subtract(dateTime.ToDateTime(TimeOnly.MinValue)) > TimeSpan.FromDays(obj))

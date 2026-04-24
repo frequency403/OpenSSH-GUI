@@ -17,7 +17,7 @@ public class DependencyInjectionExtensionsTests
 
         // Act
         serviceCollection.RegisterViewWithViewModel<MockWindow, MockWindowViewModel>();
-        
+
         var services = serviceCollection.BuildServiceProvider();
 
         // Assert
