@@ -318,7 +318,7 @@ public partial class MainWindowViewModel : ViewModelBase
         where TWindow : WindowBase<TViewModel, TInitializer>
         where TViewModel : ViewModelBase<TInitializer>
     {
-        await _dialogHost.ShowDialog<TWindow, TViewModel>(
+        await _dialogHost.ShowDialog(
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel, TInitializer>(param, token: token)
         );
     }
@@ -327,7 +327,7 @@ public partial class MainWindowViewModel : ViewModelBase
         where TWindow : WindowBase<TViewModel>
         where TViewModel : ViewModelBase
     {
-        await _dialogHost.ShowDialog<TWindow, TViewModel>(
+        await _dialogHost.ShowDialog(
             await _serviceProvider.ResolveViewAsync<TWindow, TViewModel>(token: token));
     }
 }
