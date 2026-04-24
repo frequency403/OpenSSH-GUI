@@ -334,8 +334,7 @@ public sealed partial record SshKeyFile : ReactiveRecord, IDisposable, IAsyncDis
     {
         try
         {
-            if (passPhrase is { Length: > 0 } pass)
-                Password.Set(pass);
+            Password.Set(passPhrase);
             Load(keyFileSource);
         }
         catch (Exception e)

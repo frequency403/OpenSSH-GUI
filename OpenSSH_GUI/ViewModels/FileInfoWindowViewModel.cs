@@ -1,6 +1,8 @@
+using System.Collections.ObjectModel;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Avalonia.Input.Platform;
+using DynamicData;
 using JetBrains.Annotations;
 using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,10 +21,6 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 
-//TODO: Formatselection does not change in UI, when format was changed. The Window needs to be reloaded for the information to update.
-//TODO: Password is not shown in passwordbox when set 
-//TODO: Key is not reset when password is set to none
-//TODO: Password is not updated when changed
 [UsedImplicitly]
 public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
 {
@@ -44,6 +42,12 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     [ObservableAsProperty(ReadOnly = true)]
     private string _windowTitle = "Key info";
 
+    [ReactiveCollection]
+    private ObservableCollection<SshKeyFormat> _keyFormats = [];
+    
+    [ObservableAsProperty(ReadOnly = true)]
+    private SshKeyFormat _defaultKeyFormat;
+
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
         IServiceProvider serviceProvider, IClipboard clipboard, SshKeyManager keyManager)
     {
@@ -53,25 +57,46 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
         _clipboard = clipboard;
         _keyManager = keyManager;
         _keyFile = _serviceProvider.GetRequiredService<SshKeyFile>();
-        var keyFileChanged = this.WhenAnyValue(vm => vm.KeyFile)
-            .ObserveOn(AvaloniaScheduler.Instance);
 
-        _passwordHelper = keyFileChanged
-            .Select(e => e.Password.IsValid
-                ? e.Password.GetPasswordString()
+        _passwordHelper = this.WhenAnyValue(vm => vm.KeyFile.Password.IsValid)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Select(_ => KeyFile.Password.IsValid
+                ? KeyFile.Password.GetPasswordString()
                 : string.Empty
             ).ToProperty(this, vm => vm.Password)
             .DisposeWith(Disposables);
 
-        _windowTitleHelper = keyFileChanged
-            .Select(e => string.Join(" ", e.FileName, e.Format, e.Comment))
-            .ToProperty(this, vm => vm.WindowTitle)
-            .DisposeWith(Disposables);
+        _windowTitleHelper =
+            this.WhenAnyValue(vm => vm.KeyFile.FileName, vm => vm.KeyFile.Format, vm => vm.KeyFile.Comment)
+                .ObserveOn(AvaloniaScheduler.Instance)
+                .Select(e => string.Join(" ", e.Item1, e.Item2, e.Item3))
+                .ToProperty(this, vm => vm.WindowTitle)
+                .DisposeWith(Disposables);
 
-        _associatedFilesHeaderHelper = keyFileChanged
-            .Select(e => string.Format(StringsAndTexts.FileInfoWindowFoundAssociatedFiles, e.KeyFiles.Length))
+        _associatedFilesHeaderHelper = this.WhenAnyValue(vm => vm.KeyFile.KeyFiles)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Select(e => string.Format(StringsAndTexts.FileInfoWindowFoundAssociatedFiles, e?.Length ?? 0))
             .ToProperty(this, vm => vm.AssociatedFilesHeader)
             .DisposeWith(Disposables);
+        
+        _defaultKeyFormatHelper = this.WhenAnyValue(vm => vm.KeyFile.KeyFileInfo)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .WhereNotNull()
+            .Select(e => e.DefaultConversionFormat)
+            .ToProperty(this, vm => vm.DefaultKeyFormat)
+            .DisposeWith(Disposables);
+        
+        this.WhenAnyValue(vm => vm.KeyFile.KeyFileInfo)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .WhereNotNull()
+            .Subscribe(OnNext)
+            .DisposeWith(Disposables);
+    }
+
+    private void OnNext(SshKeyFileInformation obj)
+    {
+        KeyFormats.Clear();
+        KeyFormats.AddRange(obj.AvailableFormatsForConversion.Order().ToArray());
     }
 
     private void SetKeyOrDefault(SshKeyFileSource? source = null)

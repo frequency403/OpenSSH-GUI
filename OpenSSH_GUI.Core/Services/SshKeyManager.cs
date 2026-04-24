@@ -25,7 +25,6 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
-//TODO: When changing the format, the source key(s) is not deleted
 public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 {
     private const string BackupFileExtension = "bak";
@@ -593,6 +592,16 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             Log(
                 LogLevel.Debug, "Successfully changed format of key {key} to {format}", key.AbsoluteFilePath,
                 newFormat);
+
+            foreach (var backupFile in backupFiles)
+            {
+                if (!writtenFiles.Contains(backupFile.InitialFile.FullName, StringComparer.OrdinalIgnoreCase))
+                {
+                    backupFile.InitialFile.Delete();
+                    Log(LogLevel.Debug, "Deleted source key file {file}", backupFile.InitialFile.FullName);
+                }
+            }
+
             DeleteBackupFiles(backupFiles);
             return KeyManagerOperationResult.Success();
         }

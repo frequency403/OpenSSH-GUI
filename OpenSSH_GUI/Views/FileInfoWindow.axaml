@@ -114,7 +114,7 @@
                              MinHeight="0"
                              IsEnabled="{Binding KeyFile.FileChangesAllowed}"
                              Command="{Binding ChangeFormatOfKeyFileCommand}"
-                             CommandParameter="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat}">
+                             CommandParameter="{Binding DefaultKeyFormat}">
                     <SplitButton.Resources>
                         <!-- ReSharper disable Xaml.RedundantResource -->
                         <SolidColorBrush x:Key="SplitButtonBackground"
@@ -141,7 +141,7 @@
 
                     <SplitButton.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft"
-                                    ItemsSource="{Binding KeyFile.KeyFileInfo.AvailableFormatsForConversion}">
+                                    ItemsSource="{Binding KeyFormats}">
                             <MenuFlyout.ItemContainerTheme>
                                 <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
                                 <ControlTheme TargetType="MenuItem"
