@@ -35,7 +35,7 @@ public class DependencyInjectionExtensionsTests
         var services = new ServiceCollection();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(services.RegisterViewWithViewModel<MockWindow, InvalidVm>);
+        Assert.Throws<InvalidOperationException>(() => services.RegisterViewWithViewModel<MockWindow, InvalidVm>());
     }
 
     private class MockWindow : Window;
