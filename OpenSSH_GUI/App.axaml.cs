@@ -110,12 +110,12 @@ public class App(
                         }
 
                         var bm = new Bitmap(memoryStream);
-                        var bitmapKey = string.Join(Underline, nameof(Bitmap), width).ToLower();
+                        var bitmapKey = string.Join(Underline, nameof(Bitmap), width, variant).ToLower();
                         iconStore.AddBitmap(bitmapKey, bm);
                     }
 
                     var iconKey = string.Join(Underline, nameof(WindowIcon), 32, variant).ToLower();
-                    var bitmapRef = iconStore.GetBitmap(string.Join(Underline, nameof(Bitmap), 32).ToLower());
+                    var bitmapRef = iconStore.GetBitmap(string.Join(Underline, nameof(Bitmap), 32, variant).ToLower());
                     if (bitmapRef is not null)
                         iconStore.AddWindowIcon(iconKey, new WindowIcon(bitmapRef));
                 }
