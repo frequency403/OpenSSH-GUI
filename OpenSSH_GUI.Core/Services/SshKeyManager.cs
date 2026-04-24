@@ -25,6 +25,7 @@ namespace OpenSSH_GUI.Core.Services;
 ///     Manager for SSH keys on the local machine.
 ///     Provides functionality for searching, generating, and changing formats of SSH keys.
 /// </summary>
+//TODO: When changing the format, the source key(s) is not deleted
 public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 {
     private const string BackupFileExtension = "bak";

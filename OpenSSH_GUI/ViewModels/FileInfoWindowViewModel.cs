@@ -19,6 +19,10 @@ using SshNet.Keygen;
 
 namespace OpenSSH_GUI.ViewModels;
 
+//TODO: Formatselection does not change in UI, when format was changed. The Window needs to be reloaded for the information to update.
+//TODO: Password is not shown in passwordbox when set 
+//TODO: Key is not reset when password is set to none
+//TODO: Password is not updated when changed
 [UsedImplicitly]
 public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
 {
