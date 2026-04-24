@@ -80,7 +80,7 @@
                         Content="{x:Static openSshGui:StringsAndTexts.MainWindowOpenFileInfoWindow}" />
                 </ToolTip.Tip>
                 <StackPanel>
-                    <avalonia:MaterialIcon Kind="Settings" />
+                    <avalonia:MaterialIcon Kind="FileCogOutline" />
                 </StackPanel>
             </Button>
         </UniformGrid>

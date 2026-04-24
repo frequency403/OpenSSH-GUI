@@ -49,13 +49,8 @@
                             <TextBlock VerticalAlignment="Center" Text="{x:Static resources:StringsAndTexts.Days}" />
                             <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
                                     Background="{DynamicResource CodeForegroundBrush}" HorizontalAlignment="Center"
-                                    Command="{Binding DeleteOldLogFilesCommand}">
-                                <StackPanel Orientation="Horizontal" Spacing="5">
-                                    <avalonia:MaterialIcon Kind="DeleteOutline" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding LogFiles.Count, StringFormat=({0})}"
-                                               VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
+                                    Command="{Binding DeleteOldLogFilesCommand}" 
+                                    Content="{avalonia:MaterialIconTextExt Kind=DeleteOutline, Text={Binding LogFiles.Count, StringFormat=({0})}}"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

@@ -281,8 +281,11 @@
                                        Text="{x:Static openSshGui:StringsAndTexts.MainWindowReloadingKeys}" />
                         </Panel>
                     </ToolTip.Tip>
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
+                    <Panel>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !SshKeyManager.Processing}"
+                                   Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
+                        <materialIcons:MaterialIcon Kind="Refresh" Animation="Spin" IsVisible="{Binding SshKeyManager.Processing}" />
+                    </Panel>
                 </controls:FlyoutButton>
 
 
@@ -348,7 +351,7 @@
                             </MenuItem>
                         </MenuFlyout>
                     </controls:FlyoutButton.Flyout>
-                    <materialIcons:MaterialIcon Kind="CogOutline" />
+                    <materialIcons:MaterialIcon Kind="ApplicationCogOutline" />
                 </controls:FlyoutButton>
                 <!-- Help -->
 
@@ -390,7 +393,7 @@
                             </MenuItem>
                         </MenuFlyout>
                     </controls:FlyoutButton.Flyout>
-                    <materialIcons:MaterialIcon Kind="HelpCircleOutline" />
+                    <materialIcons:MaterialIcon Kind="InformationSlabCircleOutline" />
                 </controls:FlyoutButton>
             </UniformGrid>
         </Border>

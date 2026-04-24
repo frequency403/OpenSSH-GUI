@@ -35,7 +35,7 @@
     <Grid RowDefinitions="* * * * *" ColumnDefinitions="* * *" Margin="5">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold"
                    Text="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}" HorizontalAlignment="Center" />
-        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left"
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center"
                     VerticalAlignment="Center">
             <CheckBox IsChecked="{Binding AuthWithPublicKey}"
                       IsEnabled="{Binding !CanConnectToServer}">
@@ -101,10 +101,7 @@
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowTestConnection}" />
             </ToolTip.Tip>
-            <StackPanel Orientation="Horizontal">
-                <avalonia:MaterialIcon Kind="LanConnect" />
-                <avalonia:MaterialIcon Kind="Help" />
-            </StackPanel>
+            <avalonia:MaterialIcon Kind="LanCheck" />
         </Button>
 
         <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5"
