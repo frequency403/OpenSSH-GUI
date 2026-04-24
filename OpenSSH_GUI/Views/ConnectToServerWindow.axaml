@@ -79,7 +79,7 @@
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
 
         <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2"
-                    VerticalAlignment="Top">
+                    VerticalAlignment="Bottom">
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
                      Text="{Binding Password}"

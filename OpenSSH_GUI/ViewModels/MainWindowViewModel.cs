@@ -218,14 +218,12 @@ public partial class MainWindowViewModel : ViewModelBase
         switch (commandTypeParameter)
         {
             case 1:
-                uriBuilder.Path = "issues";
+                uriBuilder.Path += "/issues";
                 break;
             case 2:
                 uriBuilder.Query = "tab=readme-ov-file";
                 uriBuilder.Fragment = "authors";
                 break;
-            default:
-                return;
         }
 
         await _launcher.LaunchUriAsync(uriBuilder.Uri);
