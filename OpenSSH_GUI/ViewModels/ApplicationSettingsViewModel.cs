@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
@@ -26,6 +27,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     private readonly ILauncher _launcher;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
+    private readonly IWritableConfiguration<ApplicationConfiguration> _writableConfiguration;
     private readonly IMessageBoxProvider _messageBoxProvider;
 
     [Reactive] private bool _canDeleteOldLogFiles;
@@ -39,24 +41,22 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     [Reactive] private double _fontSize;
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
+        IWritableConfiguration<ApplicationConfiguration> writableConfiguration,
         ILauncher launcher,
         IMessageBoxProvider messageBoxProvider,
         Application application,
         LoggingLevelSwitch levelSwitch)
     {
         _logger = logger;
+        _writableConfiguration = writableConfiguration;
         _launcher = launcher;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         _currentLogLevel = levelSwitch.MinimumLevel;
         _application = application;
         _daysToDeleteSelected = DaysToDelete[0];
-        if (!double.TryParse(_application.Resources[App.SystemFontSize]?.ToString(), out _fontSize))
-            if (!double.TryParse(_application.Resources[App.BaseFontSize]?.ToString(), out _fontSize))
-            {
-                _logger.LogWarning("Could not set font size by resources");
-                _fontSize = 14;
-            }
+        _currentThemeVariant = _writableConfiguration.Current.PreferredTheme;
+        _fontSize = _writableConfiguration.Current.FontSize;
 
         if (Enum.TryParse<ThemeVariant>(application.ActualThemeVariant.Key.ToString(), true, out var themeVariant))
             _currentThemeVariant = themeVariant;
