@@ -178,7 +178,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         PrivateKeyFile? keyFile = key;
         return keyFile != null
-            ? ShowExportWindow(key, keyFile.ToOpenSshFormat(), null, token)
+            ? ShowExportWindow(key, keyFile.ToOpenSshPublicFormat(), null, token)
             : _messageBoxProvider.ShowMessageBoxAsync(
                 StringsAndTexts.Error,
                 StringsAndTexts.MainWindowViewModelExportKeyErrorMessage);
