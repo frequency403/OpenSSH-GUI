@@ -83,7 +83,7 @@ public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfigur
     {
         return Directory
             .EnumerateFiles(
-                SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions
+                SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions //TODO: Enable more paths to be scanned than this one in the userscope
                 {
                     IgnoreInaccessible = true,
                     RecurseSubdirectories = false
