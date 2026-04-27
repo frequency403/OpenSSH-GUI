@@ -3,24 +3,21 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.SshConfig.Models;
-using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
 /// <summary>
 ///     Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public partial class DirectoryCrawler(
-    ILogger<DirectoryCrawler> logger,
-    IConfiguration configuration) : ReactiveObject
+public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfiguration configuration) : IDirectoryCrawler
 {
     private static readonly string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
     private readonly List<SshKeyFileSource> _keyFileSources = [];
 
-    [Reactive] private bool _isSearching;
+    public bool IsSearching { get; private set; } = false;
 
     /// <summary>
     ///     Asynchronously enumerates possible SSH key file sources from both

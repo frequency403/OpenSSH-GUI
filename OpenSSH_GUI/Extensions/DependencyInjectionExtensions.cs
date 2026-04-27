@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
@@ -44,6 +45,11 @@ public static class DependencyInjectionExtensions
 
                 services.AddSingleton<ServerConnectionService>();
                 services.AddSingleton<DirectoryCrawler>();
+                services.AddSingleton<IDirectoryCrawler>(sp => sp.GetRequiredService<DirectoryCrawler>());
+                services.AddSingleton<ISshKeyFactory, SshKeyFactory>();
+                services.AddSingleton<IKeyFileBackupService, KeyFileBackupService>();
+                services.AddSingleton<ISshKeyGenerator, SshKeyGenerator>();
+                services.AddSingleton<IKeyFileWriterService, KeyFileWriterService>();
                 services.AddSingleton<SshKeyManager>();
 
                 services.AddSingleton<Window>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));

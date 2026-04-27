@@ -10,7 +10,7 @@ namespace OpenSSH_GUI.Core.Lib.Keys;
 /// </summary>
 public sealed record SshKeyFileInformation
 {
-    private static readonly SshKeyFormat[] _availableFormats = Enum.GetValues<SshKeyFormat>();
+    private static readonly SshKeyFormat[] AvailableFormats = Enum.GetValues<SshKeyFormat>();
 
     /// <summary>
     ///     Initializes a new instance of <see cref="SshKeyFileInformation" />
@@ -41,7 +41,7 @@ public sealed record SshKeyFileInformation
             ? Path.ChangeExtension(FullFileName, SshKeyFormatExtension.OpenSshPublicKeyFileExtension)
             : null;
 
-        AvailableFormatsForConversion = _availableFormats
+        AvailableFormatsForConversion = AvailableFormats
             .Where(f => f != CurrentFormat)
             .ToArray();
 

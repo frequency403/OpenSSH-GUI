@@ -7,12 +7,14 @@ namespace OpenSSH_GUI.Core;
 
 public class ExceptionHandler(ILogger<ExceptionHandler> logger) : IObserver<Exception>
 {
+    /// <inheritdoc />
     public void OnCompleted()
     {
         if (Debugger.IsAttached)
             Debugger.Break();
     }
 
+    /// <inheritdoc />
     public void OnError(Exception error)
     {
         if (Debugger.IsAttached)
@@ -21,6 +23,7 @@ public class ExceptionHandler(ILogger<ExceptionHandler> logger) : IObserver<Exce
         AvaloniaScheduler.Instance.Schedule(error, HandleException);
     }
 
+    /// <inheritdoc />
     public void OnNext(Exception value)
     {
         if (Debugger.IsAttached)

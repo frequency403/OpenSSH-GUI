@@ -9,19 +9,44 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
 /// Represents a known hosts file.
-public sealed partial record KnownHostsFile(bool IsFromServer = false) : ReactiveRecord
+public sealed partial record KnownHostsFile : ReactiveRecord
 {
     /// <summary>
     ///     Represents a known hosts file.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHost> _knownHosts = [];
 
+    private static FileStreamOptions CreateOptions()
+    {
+        var options = new FileStreamOptions
+        {
+            BufferSize = 0,
+            Access = FileAccess.ReadWrite,
+            Mode = FileMode.OpenOrCreate,
+            Share = FileShare.ReadWrite
+        };
+
+        if (!OperatingSystem.IsWindows())
+        {
+            options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+        }
+
+        return options;
+    }
+    
+    /// Represents a known hosts file.
+    public KnownHostsFile(bool IsFromServer = false)
+    {
+        this.IsFromServer = IsFromServer;
+    }
+
     public static KnownHostsFile Empty { get; } = new();
+    public bool IsFromServer { get; init; }
 
     public static ValueTask<KnownHostsFile> InitializeAsync(FileInfo fileInfo, bool fromServer = false,
         CancellationToken token = default) => fileInfo is null
         ? throw new ArgumentNullException(nameof(fileInfo))
-        : InitializeAsync(new FileStream(fileInfo.FullName, SshKeyManager.FileStreamOptions), fromServer, true, token);
+        : InitializeAsync(new FileStream(fileInfo.FullName, CreateOptions()), fromServer, true, token);
 
     public static async ValueTask<KnownHostsFile> InitializeAsync(Stream knownHostsContent, bool fromServer = false,
         bool disposeStream = true, CancellationToken token = default)
@@ -49,7 +74,7 @@ public sealed partial record KnownHostsFile(bool IsFromServer = false) : Reactiv
         if (IsFromServer) return;
         if (stream is null)
         {
-            await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), SshKeyManager.FileStreamOptions);
+            await using var file = new FileStream(SshConfigFiles.Known_Hosts.GetPathOfFile(), CreateOptions());
             using var streamReader = new StreamReader(file, leaveOpen: true);
             await SetKnownHostsAsync(file, false, token);
         }
@@ -127,4 +152,6 @@ public sealed partial record KnownHostsFile(bool IsFromServer = false) : Reactiv
         }
         return stringBuilder.ToString();
     }
+
+    public void Deconstruct(out bool IsFromServer) { IsFromServer = this.IsFromServer; }
 }
