@@ -1,10 +1,13 @@
 ﻿using System.Reflection;
+using System.Text.Json;
 using Avalonia;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
+using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Extensions;
@@ -13,7 +16,6 @@ using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.SystemConsole.Themes;
-using LoggerConfiguration = OpenSSH_GUI.Core.Configuration.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
@@ -32,22 +34,23 @@ internal sealed class Program
                                               ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
                                               ?? "0.0.0";
 
-    private static void ConfigureOpenSshGuiLogger(HostBuilderContext _, IServiceProvider serviceProvider, Serilog.LoggerConfiguration loggerConfiguration)
+    private static void ConfigureOpenSshGuiLogger(HostBuilderContext hostBuilderContext, IServiceProvider serviceProvider, Serilog.LoggerConfiguration loggerConfiguration)
     {
-        var logConfiguration = LoggerConfiguration.Default;
-        if (!Directory.Exists(logConfiguration.LogFilePath))
-            Directory.CreateDirectory(logConfiguration.LogFilePath);
+        var appConfig = hostBuilderContext.Configuration.Get<ApplicationConfiguration>() ?? throw new NullReferenceException();
+        
+        if (!Directory.Exists(appConfig.LoggerConfiguration.LogFilePath))
+            Directory.CreateDirectory(appConfig.LoggerConfiguration.LogFilePath);
 
         loggerConfiguration
             .Enrich.FromLogContext()
             .Enrich.WithCaller()
             .MinimumLevel.ControlledBy(serviceProvider.GetRequiredService<LoggingLevelSwitch>())
 #if DEBUG
-            .WriteTo.Console(outputTemplate: logConfiguration.LogOutputTemplate, theme: AnsiConsoleTheme.Code)
+            .WriteTo.Console(outputTemplate: appConfig.LoggerConfiguration.LogOutputTemplate, theme: AnsiConsoleTheme.Code)
 #endif
             .WriteTo.File(
-                logConfiguration.LogFileFullPath,
-                outputTemplate: logConfiguration.LogOutputTemplate,
+                appConfig.LoggerConfiguration.LogFileFullPath,
+                outputTemplate: appConfig.LoggerConfiguration.LogOutputTemplate,
                 rollingInterval: RollingInterval.Day);
     }
 
@@ -57,9 +60,9 @@ internal sealed class Program
     {
         using var mainCancellationTokenSource = new CancellationTokenSource();
         var host = Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .RegisterOpenSshGuiServices()
             .UseSerilog(ConfigureOpenSshGuiLogger)
-            .ConfigureAppConfiguration(ConfigureAppConfiguration)
             .Build();
 
         var appBuilder = AppBuilder.Configure(() => host.Services.GetRequiredService<App>())
@@ -85,6 +88,12 @@ internal sealed class Program
     {
         configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true, LoggingAction);
         configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true, LoggingAction);
+
+        if(!File.Exists(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath))
+            File.WriteAllText(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, JsonSerializer.Serialize(ApplicationConfiguration.Default, SourceGenerationContext.Default.ApplicationConfiguration));
+        configurationBuilder.AddJsonFile(
+            new PhysicalFileProvider(ApplicationConfiguration.ApplicationConfigurationPath), ApplicationConfiguration.ApplicationConfigurationName, false, true);
+        
         configurationBuilder.AddInMemoryCollection(
         [
             new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())

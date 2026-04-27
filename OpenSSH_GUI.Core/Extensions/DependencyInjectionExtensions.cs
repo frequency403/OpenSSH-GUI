@@ -2,7 +2,10 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenSSH_GUI.Core.Configuration;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 
@@ -153,6 +156,21 @@ public static class DependencyInjectionExtensions
 
     extension(IServiceCollection services)
     {
+        public IServiceCollection AddWritableConfiguration<T>(
+            IConfiguration config,
+            string sectionName,
+            string filePath)
+            where T : class, new()
+        {
+            services.Configure<T>(config.GetSection(sectionName));
+
+            services.AddSingleton(new JsonFileConfigurationWriter(filePath));
+
+            services.AddSingleton<IWritableConfiguration<T>, WritableConfiguration<T>>();
+
+            return services;
+        }
+        
         /// <summary>
         ///     Registers <typeparamref name="TView" /> and <typeparamref name="TViewModel" /> as a
         ///     keyed pair in the service collection, enforcing the View/ViewModel naming convention.

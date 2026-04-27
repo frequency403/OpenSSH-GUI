@@ -107,7 +107,7 @@ public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFi
                 }
                 catch (Exception e)
                 {
-                    logger.LogError("Failed to write public key file {filePath}", pubKeyFormat);
+                    logger.LogError(e, "Failed to write public key file {filePath}", pubKeyFormat);
                     throw;
                 }
 

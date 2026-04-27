@@ -5,6 +5,7 @@ using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
+using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
@@ -30,7 +31,7 @@ public static class DependencyInjectionExtensions
     {
         internal IHostBuilder RegisterOpenSshGuiServices()
         {
-            builder.ConfigureServices((_, services) =>
+            builder.ConfigureServices((hostBuilderContext, services) =>
             {
                 services.AddSingleton<App>();
                 services.AddSingleton<Application>(sp => sp.GetRequiredService<App>());
@@ -42,6 +43,9 @@ public static class DependencyInjectionExtensions
                         LogEventLevel.Verbose
 #endif
                     ));
+
+                services.AddWritableConfiguration<ApplicationConfiguration>(
+                    hostBuilderContext.Configuration, string.Empty, ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath);
 
                 services.AddSingleton<ServerConnectionService>();
                 services.AddSingleton<DirectoryCrawler>();
@@ -66,8 +70,7 @@ public static class DependencyInjectionExtensions
                 services.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
                 services.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
                 services.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
-
-
+                
                 services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
                 services.AddTransient<SshKeyFile>();
                 services.AddHostedService<FileSystemAnalyzer>();
