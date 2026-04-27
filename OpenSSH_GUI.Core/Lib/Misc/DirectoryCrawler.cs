@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
@@ -59,7 +60,7 @@ public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfigur
                     }
                 }
 
-            foreach (var keyFileSource in EnumerateDiskSources())
+            await foreach (var keyFileSource in EnumerateDiskSources(cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 logger.LogDebug("Adding keyfile {KeyFile}", keyFileSource);
@@ -79,25 +80,32 @@ public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfigur
     ///     excluding already tracked and config-reserved files.
     /// </summary>
     /// <returns>A list of <see cref="SshKeyFileSource" /> found on disk.</returns>
-    private IEnumerable<SshKeyFileSource> EnumerateDiskSources()
+    private async IAsyncEnumerable<SshKeyFileSource> EnumerateDiskSources([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        return Directory
-            .EnumerateFiles(
-                SshConfigFilesExtension.GetBaseSshPath(), "*", new EnumerationOptions //TODO: Enable more paths to be scanned than this one in the userscope
-                {
-                    IgnoreInaccessible = true,
-                    RecurseSubdirectories = false
-                })
-            .Select(e => new FileInfo(e))
-            .Where(e => !ImportantFileNames.Any(ifn =>
-                ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-            .Where(e => !_keyFileSources.Any(k =>
-                k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
-            .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
-                        e.Extension.Equals(
-                            SshKeyFormatExtension.PuttyKeyFileExtension,
-                            StringComparison.OrdinalIgnoreCase))
-            .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase)
-            .Select(e => SshKeyFileSource.FromDisk(e.FullName));
+        foreach (var directoryInfo in configuration.Get<ApplicationConfiguration>()?.LookupPaths.Select(e => new DirectoryInfo(e)) ?? [])
+        {
+            logger.LogDebug("Processing directory {Directory}", directoryInfo);
+            if(cancellationToken.IsCancellationRequested)
+                yield break;
+            foreach (var keyFile in directoryInfo.EnumerateFiles("*", new EnumerationOptions
+                     {
+                         IgnoreInaccessible = true,
+                         RecurseSubdirectories = false
+                     }).Where(e => !ImportantFileNames.Any(ifn =>
+                         ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
+                     .Where(e => !_keyFileSources.Any(k =>
+                         k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
+                     .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
+                                 e.Extension.Equals(
+                                     SshKeyFormatExtension.PuttyKeyFileExtension,
+                                     StringComparison.OrdinalIgnoreCase))
+                     .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase))
+            {
+                logger.LogDebug("Found key file {KeyFile}", keyFile);
+                yield return SshKeyFileSource.FromDisk(keyFile.FullName);
+                if(cancellationToken.IsCancellationRequested)
+                    yield break;
+            }
+        }
     }
 }
