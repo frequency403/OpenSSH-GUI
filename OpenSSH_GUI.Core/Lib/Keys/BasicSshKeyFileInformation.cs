@@ -64,7 +64,7 @@ public readonly record struct BasicSshKeyFileInformation()
 
         // PPK — comment lives in the unencrypted plaintext header regardless of encryption
         if (files.FirstOrDefault(f =>
-                f.Extension.Equals(SshKeyFormatExtension.PuttyKeyFileExtension, StringComparison.OrdinalIgnoreCase)) is
+                f.Extension.Equals(PathExtensions.PuttyKeyFileExtension, StringComparison.OrdinalIgnoreCase)) is
             { } ppkFile)
             return TryParseOrEmpty(() => ParsePpkFile(File.ReadAllText(ppkFile.FullName)));
 

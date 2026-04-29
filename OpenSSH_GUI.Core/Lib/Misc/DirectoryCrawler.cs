@@ -95,10 +95,7 @@ public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfigur
                          ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
                      .Where(e => !_keyFileSources.Any(k =>
                          k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
-                     .Where(e => string.IsNullOrWhiteSpace(e.Extension) ||
-                                 e.Extension.Equals(
-                                     SshKeyFormatExtension.PuttyKeyFileExtension,
-                                     StringComparison.OrdinalIgnoreCase))
+                     .Where(e => string.IsNullOrWhiteSpace(e.Extension) || Path.IsPuTTYKey(e.Name))
                      .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase))
             {
                 logger.LogDebug("Found key file {KeyFile}", keyFile);

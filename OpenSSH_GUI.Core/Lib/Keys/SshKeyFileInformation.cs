@@ -31,14 +31,14 @@ public sealed record SshKeyFileInformation
         DirectoryName = FileInfo.DirectoryName;
         Exists = FileInfo.Exists;
 
-        CurrentFormat = FileInfo.Extension == SshKeyFormatExtension.PuttyKeyFileExtension
+        CurrentFormat = FileInfo.Extension == PathExtensions.PuttyKeyFileExtension
             ? SshKeyFormat.PuTTYv3
             : SshKeyFormat.OpenSSH;
 
         IsOpenSshKey = CurrentFormat == SshKeyFormat.OpenSSH;
 
         PublicKeyFileName = IsOpenSshKey
-            ? Path.ChangeExtension(FullFileName, SshKeyFormatExtension.OpenSshPublicKeyFileExtension)
+            ? Path.ChangeExtension(FullFileName, PathExtensions.OpenSshPublicKeyFileExtension)
             : null;
 
         AvailableFormatsForConversion = AvailableFormats
