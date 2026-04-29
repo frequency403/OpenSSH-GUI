@@ -22,7 +22,16 @@
                 <TextBlock x:Name="KeyFileNameValidation" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                            Foreground="{DynamicResource DangerBrush}" FontSize="12" />
             </controls:HeaderedItem.SideHeader>
-            <TextBox Name="KeyFileNameTextBox" Text="{CompiledBinding KeyName}" />
+            <UniformGrid Columns="0" ColumnSpacing="10" Rows="1">
+                <ComboBox IsEditable="False"
+                          HorizontalAlignment="Stretch"
+                          FontSize="{Binding ComboBoxFontSize}"
+                          ItemsSource="{Binding ApplicationConfiguration.LookupPaths}"
+                          SelectedItem="{Binding ChosenPath}" />
+                <TextBox Name="KeyFileNameTextBox" 
+                         Text="{CompiledBinding KeyName}" 
+                         HorizontalAlignment="Stretch" />
+            </UniformGrid>
         </controls:HeaderedItem>
         <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
             <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}">

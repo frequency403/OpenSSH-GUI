@@ -1,5 +1,7 @@
 ﻿using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using Avalonia;
+using Avalonia.Controls;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -36,6 +38,9 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
     [ObservableAsProperty(ReadOnly = true)]
     private bool _canChangeKeySize;
+    
+    [ObservableAsProperty(ReadOnly = true)] 
+    private int _comboBoxFontSize;
 
     [Reactive] private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
 
@@ -48,16 +53,41 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
     [Reactive] private int _selectedKeySize;
 
     [Reactive] private SshKeyType _selectedKeyType = SshKeyGenerateInfo.DefaultSshKeyType;
-
+    
+    [Reactive] private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
+    
+    [Reactive] private string _chosenPath = string.Empty;
+    
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
         IOptionsMonitor<ApplicationConfiguration> applicationConfigurationMonitor,
+        Application application,
         IMessageBoxProvider messageBoxProvider)
     {
         _logger = logger;
         _sshKeyManager = sshKeyManager;
         _applicationConfigurationMonitor = applicationConfigurationMonitor;
         _messageBoxProvider = messageBoxProvider;
+        _comboBoxFontSize = int.Parse(application.Resources[App.SystemFontSize]?.ToString() ?? "14") - 2;
+        _applicationConfigurationMonitor.OnChange(conf =>
+        {
+            ApplicationConfiguration = conf;
+        })?.DisposeWith(Disposables);
+
+        this.WhenAnyValue(vm => vm.ApplicationConfiguration)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .StartWith(ApplicationConfiguration.Default)
+            .Subscribe(config =>
+            {
+                ChosenPath = config.LookupPaths.FirstOrDefault() ?? string.Empty;
+            }).DisposeWith(Disposables);
+
+        _comboBoxFontSizeHelper = application.GetResourceObservable(App.SystemFontSize)
+            .StartWith(application.Resources[App.SystemFontSize])
+            .WhereNotNull()
+            .OfType<int>()
+            .Select(e => e - 2)
+            .ToProperty(this, vm => vm.ComboBoxFontSize);
         
         var selectedKeyTypeChanged = this.WhenAnyValue(vm => vm.SelectedKeyType)
             .ObserveOn(AvaloniaScheduler.Instance);
@@ -123,7 +153,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
     private bool IsPropertyValid(string? arg)
     {
         if (string.IsNullOrWhiteSpace(arg)) return false;
-        return !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), arg));
+        return !File.Exists(Path.Combine(ChosenPath, arg));
     }
 
     /// <inheritdoc />
