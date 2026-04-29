@@ -5,7 +5,6 @@ using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
-using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
@@ -19,9 +18,6 @@ using OpenSSH_GUI.Dialogs.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog.Core;
-#if DEBUG
-using Serilog.Events;
-#endif
 
 namespace OpenSSH_GUI.Extensions;
 
@@ -31,22 +27,13 @@ public static class DependencyInjectionExtensions
     {
         internal IHostBuilder RegisterOpenSshGuiServices()
         {
-            builder.ConfigureServices((hostBuilderContext, services) =>
+            builder.ConfigureServices((_, services) =>
             {
                 services.AddSingleton<App>();
                 services.AddSingleton<Application>(sp => sp.GetRequiredService<App>());
                 services.AddSingleton<AppIconStore>();
+                services.AddSingleton<LoggingLevelSwitch>();
                 services.AddSingleton<ExceptionHandler>();
-                services.AddSingleton<LoggingLevelSwitch>(_ =>
-                    new LoggingLevelSwitch(
-#if DEBUG
-                        LogEventLevel.Verbose
-#endif
-                    ));
-
-                services.AddWritableConfiguration<ApplicationConfiguration>(
-                    hostBuilderContext.Configuration, string.Empty, ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath);
-
                 services.AddSingleton<ServerConnectionService>();
                 services.AddSingleton<DirectoryCrawler>();
                 services.AddSingleton<IDirectoryCrawler>(sp => sp.GetRequiredService<DirectoryCrawler>());
@@ -74,8 +61,6 @@ public static class DependencyInjectionExtensions
                 services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
                 services.AddTransient<SshKeyFile>();
                 services.AddHostedService<FileSystemAnalyzer>();
-
-                services.AddOptionsWithValidateOnStart<ApplicationConfiguration>().Bind(hostBuilderContext.Configuration);
             });
             return builder;
         }

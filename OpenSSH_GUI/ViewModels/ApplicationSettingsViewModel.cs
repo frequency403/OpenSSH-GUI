@@ -28,7 +28,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     private readonly ILauncher _launcher;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
-    private readonly IWritableConfiguration<ApplicationConfiguration> _writableConfiguration;
+    private readonly IMutableConfiguration<ApplicationConfiguration> _mutableConfiguration;
     private readonly IMessageBoxProvider _messageBoxProvider;
 
     [Reactive] private bool _canDeleteOldLogFiles;
@@ -42,23 +42,22 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     [Reactive] private double _fontSize;
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
-        IWritableConfiguration<ApplicationConfiguration> writableConfiguration,
-        IConfiguration configuration,
+        IMutableConfiguration<ApplicationConfiguration> mutableConfiguration,
         ILauncher launcher,
         IMessageBoxProvider messageBoxProvider,
         Application application,
         LoggingLevelSwitch levelSwitch)
     {
         _logger = logger;
-        _writableConfiguration = writableConfiguration;
+        _mutableConfiguration = mutableConfiguration;
         _launcher = launcher;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         _currentLogLevel = levelSwitch.MinimumLevel;
         _application = application;
         _daysToDeleteSelected = DaysToDelete[0];
-        _currentThemeVariant = _writableConfiguration.Current.PreferredTheme;
-        _fontSize = _writableConfiguration.Current.FontSize;
+        _currentThemeVariant = _mutableConfiguration.Current.PreferredTheme;
+        _fontSize = _mutableConfiguration.Current.FontSize;
 
         if (Enum.TryParse<ThemeVariant>(application.ActualThemeVariant.Key.ToString(), true, out var themeVariant))
             _currentThemeVariant = themeVariant;
@@ -188,19 +187,27 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 AppDomain.CurrentDomain.FriendlyName)));
 
-    private void OnNextTheme(ThemeVariant variant)
+    private async void OnNextTheme(ThemeVariant variant)
     {
-        var themeVariant = variant switch
+        try
         {
-            ThemeVariant.Dark => Avalonia.Styling.ThemeVariant.Dark,
-            ThemeVariant.Light => Avalonia.Styling.ThemeVariant.Light,
-            _ => Avalonia.Styling.ThemeVariant.Default
-        };
-        if (_application.ActualThemeVariant == themeVariant) return;
-        _logger.LogDebug(
-            "Changing Theme Variant from {OldThemeVariant} to {ThemeVariant}",
-            _application.ActualThemeVariant.Key.ToString(), themeVariant.Key);
-        _application.RequestedThemeVariant = themeVariant;
+            var themeVariant = variant switch
+            {
+                ThemeVariant.Dark => Avalonia.Styling.ThemeVariant.Dark,
+                ThemeVariant.Light => Avalonia.Styling.ThemeVariant.Light,
+                _ => Avalonia.Styling.ThemeVariant.Default
+            };
+            if (_application.ActualThemeVariant == themeVariant) return;
+            _logger.LogDebug(
+                "Changing Theme Variant from {OldThemeVariant} to {ThemeVariant}",
+                _application.ActualThemeVariant.Key.ToString(), themeVariant.Key);
+            _application.RequestedThemeVariant = themeVariant;
+            await _mutableConfiguration.SetPropertyValueAsync(conf => conf.PreferredTheme, variant);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while changing Theme Variant from {OldThemeVariant} to {ThemeVariant}", _application.ActualThemeVariant.Key.ToString(), variant.ToString());
+        }
     }
 
     private void OnNextDaysToDelete(int obj)

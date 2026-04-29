@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using Serilog.Events;
 
 namespace OpenSSH_GUI.Core.Configuration;
 
@@ -23,21 +24,25 @@ public class ApplicationConfiguration
     {
         LookupPaths = [SshConfigFilesExtension.GetBaseSshPath()],
         PreferredTheme = ThemeVariant.Default,
+        LogLevel = LogEventLevel.Warning,
         FontSize = 14,
         LoggerConfiguration = LoggerConfiguration.Default,
     };
 
     [Required]
-    public string[] LookupPaths { get; set; }
+    public required string[] LookupPaths { get; set; }
     
     [Required]
-    public ThemeVariant PreferredTheme { get; set; }
+    public required ThemeVariant PreferredTheme { get; set; }
+    
+    [Required]
+    public required LogEventLevel LogLevel { get; set; }
     
     [Required, Range(12, 48, ErrorMessage = "Font size must be between 12 and 48")]
-    public int FontSize { get; set; }
+    public required int FontSize { get; set; }
 
-    [ValidateObjectMembers]
-    public LoggerConfiguration LoggerConfiguration { get; set; }
+    [Required, ValidateObjectMembers]
+    public required LoggerConfiguration LoggerConfiguration { get; set; }
 }
 
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true),JsonSerializable(typeof(ApplicationConfiguration)), JsonSerializable(typeof(LoggerConfiguration))]

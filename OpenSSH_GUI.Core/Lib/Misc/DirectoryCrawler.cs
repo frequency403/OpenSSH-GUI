@@ -13,7 +13,7 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// <summary>
 ///     Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfiguration configuration) : IDirectoryCrawler
+public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfiguration configuration, IMutableConfiguration<ApplicationConfiguration> mutableConfiguration) : IDirectoryCrawler
 {
     private static readonly string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
     private readonly List<SshKeyFileSource> _keyFileSources = [];
@@ -82,7 +82,7 @@ public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfigur
     /// <returns>A list of <see cref="SshKeyFileSource" /> found on disk.</returns>
     private async IAsyncEnumerable<SshKeyFileSource> EnumerateDiskSources([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        foreach (var directoryInfo in configuration.Get<ApplicationConfiguration>()?.LookupPaths.Select(e => new DirectoryInfo(e)) ?? [])
+        foreach (var directoryInfo in mutableConfiguration.Current.LookupPaths.Select(e => new DirectoryInfo(e)) ?? [])
         {
             logger.LogDebug("Processing directory {Directory}", directoryInfo);
             if(cancellationToken.IsCancellationRequested)

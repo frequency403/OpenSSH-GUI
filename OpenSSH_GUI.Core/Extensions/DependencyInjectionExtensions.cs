@@ -1,9 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Avalonia.Controls;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.MVVM;
@@ -154,23 +158,34 @@ public static class DependencyInjectionExtensions
         }
     }
 
+    extension(IHostBuilder builder)
+    {
+        /// <summary>
+        /// Adds mutable configuration support for the specified type using the provided JSON file path and type metadata.
+        /// </summary>
+        /// <typeparam name="T">The type of the configuration object.</typeparam>
+        /// <param name="filePath">The path to the JSON file containing the configuration data.</param>
+        /// <param name="typeInfo">The JSON type information used for deserialization of the configuration data.</param>
+        /// <param name="optionalFile">The optional parameter, which indicates if the file is optional</param>
+        /// <param name="sectionName">The optional section name within the JSON file to bind to the configuration object. If not specified, the entire file is considered.</param>
+        /// <returns>The updated <see cref="IHostBuilder" /> instance with the mutable configuration added.</returns>
+        public IHostBuilder AddMutableConfiguration<T>(string filePath, JsonTypeInfo<T> typeInfo, bool optionalFile = true, string? sectionName = null) where T : class
+            => builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
+            {
+                if (!Path.IsJson(filePath))
+                    throw new ArgumentException("File must be of the json file type", nameof(filePath));
+                
+                serviceCollection.AddOptionsWithValidateOnStart<T>().Bind(sectionName is null ? hostBuilderContext.Configuration : hostBuilderContext.Configuration.GetRequiredSection(sectionName));
+                serviceCollection.AddSingleton(new JsonFileConfigurationWriter<T>(filePath, typeInfo));
+                serviceCollection.AddSingleton<IMutableConfiguration<T>, MutableConfiguration<T>>();
+            }).ConfigureAppConfiguration(configurationBuilder =>
+            {
+                configurationBuilder.AddJsonFile(filePath, optionalFile, true);
+            });
+    }
+
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddWritableConfiguration<T>(
-            IConfiguration config,
-            string sectionName,
-            string filePath)
-            where T : class, new()
-        {
-            services.Configure<T>(config.GetSection(sectionName));
-
-            services.AddSingleton(new JsonFileConfigurationWriter(filePath));
-
-            services.AddSingleton<IWritableConfiguration<T>, WritableConfiguration<T>>();
-
-            return services;
-        }
-        
         /// <summary>
         ///     Registers <typeparamref name="TView" /> and <typeparamref name="TViewModel" /> as a
         ///     keyed pair in the service collection, enforcing the View/ViewModel naming convention.

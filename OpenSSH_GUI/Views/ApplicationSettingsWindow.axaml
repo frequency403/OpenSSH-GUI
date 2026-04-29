@@ -9,15 +9,18 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
-        Width="400"
+        Width="800"
         Height="375"
         CanResize="False"
         ShowInTaskbar="True"
         ShowActivated="True"
         Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
         WindowStartupLocation="CenterOwner">
-    <UniformGrid Columns="1" Rows="0" Margin="10">
-        <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
+    <UniformGrid Columns="0" Rows="1" Margin="10">
+        
+        <!-- LEFT -->
+        <UniformGrid Columns="1" Rows="0">
+            <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
             <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLogLevel}">
                 <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
                           ItemsSource="{Binding AvailableLogLevels}"
@@ -85,5 +88,20 @@
             </controls:HeaderedItem.SideHeader>
             <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
         </controls:HeaderedItem>
+        </UniformGrid>
+        
+        <!-- RIGHT -->
+        
+        <UniformGrid Columns="1" Rows="0">
+            <controls:HeaderedItem Header="Lookup Paths">
+                <ItemsControl ItemsSource="{Binding }">
+                    <ItemsControl.ItemTemplate>
+                        
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </controls:HeaderedItem>
+            
+        </UniformGrid>
+        
     </UniformGrid>
 </Window>

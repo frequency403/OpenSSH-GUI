@@ -34,16 +34,22 @@ internal sealed class Program
                                               ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
                                               ?? "0.0.0";
 
-    private static void ConfigureOpenSshGuiLogger(HostBuilderContext hostBuilderContext, IServiceProvider serviceProvider, Serilog.LoggerConfiguration loggerConfiguration)
+    private static void ConfigureOpenSshGuiLogger(
+        ApplicationConfiguration bootstrapConfig,
+        LoggingLevelSwitch levelSwitch,
+        Serilog.LoggerConfiguration loggerConfiguration)
     {
-        var loggerConfig = hostBuilderContext.Configuration.Get<ApplicationConfiguration>()?.LoggerConfiguration ?? throw new NullReferenceException();
+        var loggerConfig = bootstrapConfig.LoggerConfiguration;
         Directory.CreateIfNotExists(loggerConfig.LogFilePath);
+
         loggerConfiguration
             .Enrich.FromLogContext()
             .Enrich.WithCaller()
-            .MinimumLevel.ControlledBy(serviceProvider.GetRequiredService<LoggingLevelSwitch>())
+            .MinimumLevel.ControlledBy(levelSwitch)
 #if DEBUG
-            .WriteTo.Console(outputTemplate: loggerConfig.LogOutputTemplate, theme: AnsiConsoleTheme.Code)
+            .WriteTo.Console(
+                outputTemplate: loggerConfig.LogOutputTemplate,
+                theme: AnsiConsoleTheme.Code)
 #endif
             .WriteTo.File(
                 loggerConfig.LogFileFullPath,
@@ -56,10 +62,20 @@ internal sealed class Program
     public static async Task Main(string[] args)
     {
         using var mainCancellationTokenSource = new CancellationTokenSource();
+        
+        File.CreateIfNotExists(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, 
+            JsonSerializer.Serialize(ApplicationConfiguration.Default, SourceGenerationContext.Default.ApplicationConfiguration));
+        
+        var bootstrapConfig = ReadBootstrapConfiguration();
+        var levelSwitch = new LoggingLevelSwitch(bootstrapConfig.LogLevel);
+        
         var host = Host.CreateDefaultBuilder(args)
+            .AddMutableConfiguration(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, SourceGenerationContext.Default.ApplicationConfiguration, false)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
+            .ConfigureServices(services => services.AddSingleton(levelSwitch))
             .RegisterOpenSshGuiServices()
-            .UseSerilog(ConfigureOpenSshGuiLogger)
+            .UseSerilog((_, _, loggerConfig) =>
+                ConfigureOpenSshGuiLogger(bootstrapConfig, levelSwitch, loggerConfig))
             .Build();
 
         var appBuilder = AppBuilder.Configure(() => host.Services.GetRequiredService<App>())
@@ -85,9 +101,7 @@ internal sealed class Program
     {
         configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true, LoggingAction);
         configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true, LoggingAction);
-
-        File.CreateIfNotExists(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, 
-            JsonSerializer.Serialize(ApplicationConfiguration.Default, SourceGenerationContext.Default.ApplicationConfiguration));
+        
         configurationBuilder.AddJsonFile(
             new PhysicalFileProvider(ApplicationConfiguration.ApplicationConfigurationPath), ApplicationConfiguration.ApplicationConfigurationName, false, true);
         
@@ -98,4 +112,26 @@ internal sealed class Program
     }
 
     private static void LoggingAction(string arg1, Exception arg2) { Log.Logger.Error(arg2, "Failed to load SSH config file: {Path}", arg1); }
+    
+    /// <summary>
+    /// Reads the application configuration directly from disk without using DI.
+    /// Used during host bootstrap to avoid circular dependency with Serilog setup.
+    /// Returns <see cref="ApplicationConfiguration.Default"/> on any failure.
+    /// </summary>
+    private static ApplicationConfiguration ReadBootstrapConfiguration()
+    {
+        try
+        {
+            var json = File.ReadAllText(
+                ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath);
+            return JsonSerializer.Deserialize(
+                       json,
+                       SourceGenerationContext.Default.ApplicationConfiguration)
+                   ?? ApplicationConfiguration.Default;
+        }
+        catch
+        {
+            return ApplicationConfiguration.Default;
+        }
+    }
 }

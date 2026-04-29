@@ -63,10 +63,10 @@ public static class PathExtensions
         /// <param name="content">The content to write to the file, defaults to <see langword="null"/></param>
         public static void CreateIfNotExists(string? path, string? content = null)
         {
+            ArgumentNullException.ThrowIfNull(path);
             if (File.Exists(path))
                 return;
-            
-            Directory.CreateIfNotExists(path);
+            Directory.CreateIfNotExists(Path.GetDirectoryName(path));
 
             using var createdFile = File.Create(path);
             if (content is null)
