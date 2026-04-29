@@ -6,6 +6,7 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:resources="clr-namespace:OpenSSH_GUI.Resources"
         xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.ApplicationSettingsWindow"
         x:DataType="viewModels:ApplicationSettingsViewModel"
@@ -16,6 +17,9 @@
         ShowActivated="True"
         Title="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowTitle}"
         WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <viewModels:PathDeletableConverter x:Key="PathDeletableConverter" />
+    </Window.Resources>
     <UniformGrid Columns="0" Rows="1" Margin="10">
         
         <!-- LEFT -->
@@ -94,9 +98,25 @@
         
         <UniformGrid Columns="1" Rows="0">
             <controls:HeaderedItem Header="Lookup Paths">
-                <ItemsControl ItemsSource="{Binding }">
+                <controls:HeaderedItem.SideHeader>
+                    <Button 
+                        Background="{DynamicResource SuccessBrush}"
+                        Command="{Binding AddLookupPathCommand}"
+                        Content="{avalonia:MaterialIconExt Kind=AddCircleOutline}" />
+                </controls:HeaderedItem.SideHeader>
+                <ItemsControl ItemsSource="{Binding ApplicationConfiguration.LookupPaths}">
                     <ItemsControl.ItemTemplate>
-                        
+                        <DataTemplate DataType="{x:Type system:String}">
+                            <Grid ColumnDefinitions="* Auto">
+                                <Label Grid.Column="0" Content="{Binding}" />
+                                <Button Grid.Column="1"
+                                        Content="{avalonia:MaterialIconExt Kind=CloseCircleOutline}"
+                                        Background="{DynamicResource WarningBrush}"
+                                        IsEnabled="{Binding Converter={StaticResource PathDeletableConverter}}"
+                                        Command="{Binding Path=$parent[Window].((viewModels:ApplicationSettingsViewModel)DataContext).DeleteLookupPathCommand}"
+                                        CommandParameter="{Binding }" />
+                            </Grid>
+                        </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </controls:HeaderedItem>

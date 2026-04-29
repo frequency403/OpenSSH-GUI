@@ -1,17 +1,24 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using Avalonia;
+using Avalonia.Data.Converters;
 using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
+using Material.Icons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
+using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.MVVM;
+using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
+using OpenSSH_GUI.Dialogs.Models;
 using OpenSSH_GUI.Resources;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
@@ -26,6 +33,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 {
     private readonly Application _application;
     private readonly ILauncher _launcher;
+    private readonly IStorageProvider _storageProvider;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
     private readonly IMutableConfiguration<ApplicationConfiguration> _mutableConfiguration;
@@ -41,9 +49,12 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 
     [Reactive] private double _fontSize;
 
+    [Reactive] private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
+
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMutableConfiguration<ApplicationConfiguration> mutableConfiguration,
         ILauncher launcher,
+        IStorageProvider storageProvider,
         IMessageBoxProvider messageBoxProvider,
         Application application,
         LoggingLevelSwitch levelSwitch)
@@ -51,6 +62,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         _logger = logger;
         _mutableConfiguration = mutableConfiguration;
         _launcher = launcher;
+        _storageProvider = storageProvider;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         _currentLogLevel = levelSwitch.MinimumLevel;
@@ -58,6 +70,14 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         _daysToDeleteSelected = DaysToDelete[0];
         _currentThemeVariant = _mutableConfiguration.Current.PreferredTheme;
         _fontSize = _mutableConfiguration.Current.FontSize;
+
+        Observable.FromEventPattern<ApplicationConfiguration>(
+                handler => mutableConfiguration.ConfigurationChanged += handler,
+                handler => mutableConfiguration.ConfigurationChanged -= handler)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Select(pattern => pattern.EventArgs)
+            .Subscribe(c => ApplicationConfiguration = c)
+            .DisposeWith(Disposables);
 
         if (Enum.TryParse<ThemeVariant>(application.ActualThemeVariant.Key.ToString(), true, out var themeVariant))
             _currentThemeVariant = themeVariant;
@@ -99,6 +119,8 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             .DistinctUntilChanged()
             .Subscribe(OnNextFontSize)
             .DisposeWith(Disposables);
+        
+        ApplicationConfiguration = mutableConfiguration.Current;
     }
 
     public static LogEventLevel[] AvailableLogLevels { get; } = Enum.GetValues<LogEventLevel>();
@@ -106,7 +128,38 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
 
     public ObservableCollection<string> LogFiles { get; } = [];
+    
 
+    [ReactiveCommand]
+    private async Task DeleteLookupPathAsync(string path, CancellationToken cancellationToken = default)
+    {
+        // TODO: Continue here
+    }
+
+    [ReactiveCommand]
+    public async Task AddLookupPathAsync(CancellationToken cancellationToken = default)
+    {
+        if ((await _storageProvider.OpenFolderPickerAsync(
+                new FolderPickerOpenOptions
+                {
+                    AllowMultiple = false,
+                })) is { Count: > 0} folders)
+        {
+            var folder = folders[0].Path.AbsolutePath;
+            if (_mutableConfiguration.Current.LookupPaths.Contains(folder))
+                await _messageBoxProvider.ShowMessageBoxAsync(
+                    new MessageBoxParams
+                    {
+                        Buttons = MessageBoxButtons.Ok,
+                        Icon = MaterialIconKind.FolderRemoveOutline,
+                        Message = "This folder is already in the lookup paths.",
+                        Title = "Folder already in lookup paths"
+                    });
+            _logger.LogDebug("Adding lookup path: {Path}", folder);
+            await _mutableConfiguration.SetPropertyValueAsync(conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Append(folder).ToArray(), cancellationToken);
+        }
+    }
+    
     [ReactiveCommand]
     private void OnNextFontSize(double obj) { _application.Resources[App.SystemFontSize] = obj; }
 
@@ -234,4 +287,17 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         _levelSwitch.MinimumLevel = obj.NewLevel;
         _logger.LogCritical("Log level changed from {OldLogLevel} to {NewLogLevel}", obj.OldLevel, obj.NewLevel);
     }
+}
+
+/// <summary>
+/// Converts a path string to a boolean indicating whether it can be deleted.
+/// Returns <see langword="false"/> if the path equals the protected default path.
+/// </summary>
+public sealed class PathDeletableConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is string path && path != SshConfigFilesExtension.GetBaseSshPath();
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
 }
