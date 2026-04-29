@@ -74,6 +74,8 @@ public static class DependencyInjectionExtensions
                 services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
                 services.AddTransient<SshKeyFile>();
                 services.AddHostedService<FileSystemAnalyzer>();
+
+                services.AddOptionsWithValidateOnStart<ApplicationConfiguration>().Bind(hostBuilderContext.Configuration);
             });
             return builder;
         }

@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.7" />
         <PackageReference Include="ReactiveUI" Version="23.2.19" />
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.0.1" />
         <PackageReference Include="ReactiveUI.SourceGenerators" Version="2.6.30">

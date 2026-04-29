@@ -36,21 +36,18 @@ internal sealed class Program
 
     private static void ConfigureOpenSshGuiLogger(HostBuilderContext hostBuilderContext, IServiceProvider serviceProvider, Serilog.LoggerConfiguration loggerConfiguration)
     {
-        var appConfig = hostBuilderContext.Configuration.Get<ApplicationConfiguration>() ?? throw new NullReferenceException();
-        
-        if (!Directory.Exists(appConfig.LoggerConfiguration.LogFilePath))
-            Directory.CreateDirectory(appConfig.LoggerConfiguration.LogFilePath);
-
+        var loggerConfig = hostBuilderContext.Configuration.Get<ApplicationConfiguration>()?.LoggerConfiguration ?? throw new NullReferenceException();
+        Directory.CreateIfNotExists(loggerConfig.LogFilePath);
         loggerConfiguration
             .Enrich.FromLogContext()
             .Enrich.WithCaller()
             .MinimumLevel.ControlledBy(serviceProvider.GetRequiredService<LoggingLevelSwitch>())
 #if DEBUG
-            .WriteTo.Console(outputTemplate: appConfig.LoggerConfiguration.LogOutputTemplate, theme: AnsiConsoleTheme.Code)
+            .WriteTo.Console(outputTemplate: loggerConfig.LogOutputTemplate, theme: AnsiConsoleTheme.Code)
 #endif
             .WriteTo.File(
-                appConfig.LoggerConfiguration.LogFileFullPath,
-                outputTemplate: appConfig.LoggerConfiguration.LogOutputTemplate,
+                loggerConfig.LogFileFullPath,
+                outputTemplate: loggerConfig.LogOutputTemplate,
                 rollingInterval: RollingInterval.Day);
     }
 
@@ -83,14 +80,14 @@ internal sealed class Program
     }
 #pragma warning restore CA1416
 
-    private static void ConfigureAppConfiguration(HostBuilderContext builderContext,
+    private static void ConfigureAppConfiguration(HostBuilderContext hostBuilderContext,
         IConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true, LoggingAction);
         configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true, LoggingAction);
 
-        if(!File.Exists(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath))
-            File.WriteAllText(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, JsonSerializer.Serialize(ApplicationConfiguration.Default, SourceGenerationContext.Default.ApplicationConfiguration));
+        File.CreateIfNotExists(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, 
+            JsonSerializer.Serialize(ApplicationConfiguration.Default, SourceGenerationContext.Default.ApplicationConfiguration));
         configurationBuilder.AddJsonFile(
             new PhysicalFileProvider(ApplicationConfiguration.ApplicationConfigurationPath), ApplicationConfiguration.ApplicationConfigurationName, false, true);
         

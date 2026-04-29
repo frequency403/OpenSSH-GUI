@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
@@ -42,6 +43,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IWritableConfiguration<ApplicationConfiguration> writableConfiguration,
+        IConfiguration configuration,
         ILauncher launcher,
         IMessageBoxProvider messageBoxProvider,
         Application application,

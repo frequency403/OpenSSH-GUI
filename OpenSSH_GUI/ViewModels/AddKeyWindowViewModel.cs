@@ -1,7 +1,10 @@
 ﻿using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
@@ -26,6 +29,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
     private readonly ILogger<AddKeyWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly SshKeyManager _sshKeyManager;
+    private readonly IOptionsMonitor<ApplicationConfiguration> _applicationConfigurationMonitor;
 
     [ObservableAsProperty(ReadOnly = true)]
     private int[] _availableKeySizes = [];
@@ -47,12 +51,14 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
+        IOptionsMonitor<ApplicationConfiguration> applicationConfigurationMonitor,
         IMessageBoxProvider messageBoxProvider)
     {
         _logger = logger;
         _sshKeyManager = sshKeyManager;
+        _applicationConfigurationMonitor = applicationConfigurationMonitor;
         _messageBoxProvider = messageBoxProvider;
-
+        
         var selectedKeyTypeChanged = this.WhenAnyValue(vm => vm.SelectedKeyType)
             .ObserveOn(AvaloniaScheduler.Instance);
 
@@ -114,7 +120,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
 
-    private static bool IsPropertyValid(string? arg)
+    private bool IsPropertyValid(string? arg)
     {
         if (string.IsNullOrWhiteSpace(arg)) return false;
         return !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), arg));
