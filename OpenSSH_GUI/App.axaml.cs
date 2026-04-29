@@ -7,6 +7,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -174,7 +175,18 @@ public class App(
         try
         {
             if (sender is Window window)
+            {
                 window.Opened -= OnMainWindowOpened;
+                window.Topmost = true;
+                logger.LogDebug("Trying to bring {WindowName} to front", sender?.GetType().Name ?? "null");
+                window.Activate();
+                
+                Dispatcher.Post(() =>
+                {
+                    logger.LogDebug("Window is not set as topmost anymore");
+                    window.Topmost = false;
+                }, DispatcherPriority.Background);
+            }
 
             try
             {
