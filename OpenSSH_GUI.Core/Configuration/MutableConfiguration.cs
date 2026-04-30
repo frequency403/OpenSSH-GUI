@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenSSH_GUI.Core.Interfaces;
+using ReactiveUI;
 
 namespace OpenSSH_GUI.Core.Configuration;
 
@@ -58,10 +59,29 @@ public sealed class MutableConfiguration<T> : IMutableConfiguration<T>
             {
                 var config = current ?? throw new InvalidOperationException("Configuration could not be read.");
 
-                if (property.Body is not MemberExpression { Member: PropertyInfo { CanWrite: true } propertyInfo })
-                    throw new InvalidOperationException($"Expression '{property}' does not refer to a writable property.");
+                // Unwrap expression (handle Convert)
+                var memberExpression = property.Body switch
+                {
+                    MemberExpression m => m,
+                    UnaryExpression { NodeType: ExpressionType.Convert, Operand: MemberExpression m } => m,
+                    _ => throw new InvalidOperationException(
+                        $"Expression '{property}' does not refer to a property.")
+                };
 
-                SetPropertyValue(propertyInfo, config, value);
+                if (memberExpression.Member is not PropertyInfo { CanWrite: true } propertyInfo)
+                    throw new InvalidOperationException(
+                        $"Expression '{property}' does not refer to a writable property.");
+
+                // Convert value if necessary
+                var targetType = propertyInfo.PropertyType;
+                object? convertedValue = value;
+
+                if (value is not null && !targetType.IsAssignableFrom(typeof(TValue)))
+                {
+                    convertedValue = ConvertValue(value, targetType);
+                }
+
+                SetPropertyValue(propertyInfo, config, convertedValue);
                 return Task.FromResult(config);
             }
             catch (Exception e)
@@ -93,7 +113,14 @@ public sealed class MutableConfiguration<T> : IMutableConfiguration<T>
     
     /// <inheritdoc/>
     public event EventHandler<T>? ConfigurationChanged;
-
+    
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _optionsMonitor?.Dispose();
+    }
+    
+    
     private void SetPropertyValue<TValue>(PropertyInfo propertyInfo, T config, TValue value)
     {
         if (!propertyInfo.CanWrite)
@@ -103,9 +130,25 @@ public sealed class MutableConfiguration<T> : IMutableConfiguration<T>
         _logger.LogDebug("Updated property {PropertyName} of configuration object '{ConfigurationType}' from {InitialValue} to {CurrentValue}", propertyInfo.Name, typeof(T).Name, initialValue, value);
     }
     
-    /// <inheritdoc/>
-    public void Dispose()
+    private static object? ConvertValue(object value, Type targetType)
     {
-        _optionsMonitor?.Dispose();
+        var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+        try
+        {
+            if (underlyingType.IsEnum)
+                return Enum.ToObject(underlyingType, value);
+
+            return Convert.ChangeType(value, underlyingType);
+        }
+        catch
+        {
+            // fallback: try direct cast
+            if (targetType.IsInstanceOfType(value))
+                return value;
+
+            throw new InvalidCastException(
+                $"Cannot convert value '{value}' to type '{targetType}'.");
+        }
     }
 }

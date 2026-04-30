@@ -1,11 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Globalization;
+using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia;
-using Avalonia.Data.Converters;
 using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
 using Material.Icons;
@@ -13,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
-using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Dialogs.Enums;
@@ -65,7 +63,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         _storageProvider = storageProvider;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
-        _currentLogLevel = levelSwitch.MinimumLevel;
+        _currentLogLevel = _mutableConfiguration.Current.LogLevel;
         _application = application;
         _daysToDeleteSelected = DaysToDelete[0];
         _currentThemeVariant = _mutableConfiguration.Current.PreferredTheme;
@@ -86,15 +84,33 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             .FromEventPattern<LoggingLevelSwitchChangedEventArgs>(
                 handler => levelSwitch.MinimumLevelChanged += handler,
                 handler => levelSwitch.MinimumLevelChanged -= handler
+            ).ObserveOn(AvaloniaScheduler.Instance)
+            .Select(pattern => Observable.FromAsync(async () =>
+            {
+                await OnNextLevel(pattern.EventArgs);
+                return Unit.Default;
+            }))
+            .Switch()
+            .Subscribe(
+                _ => { },
+                ex => logger.LogError(ex, "Error while changing loglevel")
             )
-            .Select(pattern => pattern.EventArgs)
-            .Subscribe(OnNextLevel)
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(model => model.CurrentLogLevel)
-            .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
-            .Subscribe(level => OnNextLevel(new LoggingLevelSwitchChangedEventArgs(_levelSwitch.MinimumLevel, level)))
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Select(x => Observable.FromAsync(async () =>
+            {
+                await OnNextLevel(new LoggingLevelSwitchChangedEventArgs(_levelSwitch.MinimumLevel, x));
+                return Unit.Default;
+            }))
+            .Switch()
+            .Subscribe(
+                _ => { },
+                ex => logger.LogError(ex, "Error while changing loglevel")
+            )
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(model => model.DaysToDeleteSelected)
@@ -115,9 +131,19 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.FontSize)
-            .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
-            .Subscribe(OnNextFontSize)
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Select(x => Observable.FromAsync(async () =>
+            {
+                await OnNextFontSize(x);
+                return Unit.Default;
+            }))
+            .Switch()
+            .Subscribe(
+                _ => { },
+                ex => logger.LogError(ex, "Error while changing font size")
+            )
             .DisposeWith(Disposables);
         
         ApplicationConfiguration = mutableConfiguration.Current;
@@ -131,13 +157,11 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     
 
     [ReactiveCommand]
-    private async Task DeleteLookupPathAsync(string path, CancellationToken cancellationToken = default)
-    {
-        // TODO: Continue here
-    }
+    private Task DeleteLookupPathAsync(string path, CancellationToken cancellationToken = default) => 
+        _mutableConfiguration.SetPropertyValueAsync(conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Where(p => p != path).ToArray(), cancellationToken);
 
     [ReactiveCommand]
-    public async Task AddLookupPathAsync(CancellationToken cancellationToken = default)
+    private async Task AddLookupPathAsync(CancellationToken cancellationToken = default)
     {
         if ((await _storageProvider.OpenFolderPickerAsync(
                 new FolderPickerOpenOptions
@@ -145,23 +169,48 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
                     AllowMultiple = false,
                 })) is { Count: > 0} folders)
         {
-            var folder = folders[0].Path.AbsolutePath;
-            if (_mutableConfiguration.Current.LookupPaths.Contains(folder))
-                await _messageBoxProvider.ShowMessageBoxAsync(
-                    new MessageBoxParams
-                    {
-                        Buttons = MessageBoxButtons.Ok,
-                        Icon = MaterialIconKind.FolderRemoveOutline,
-                        Message = "This folder is already in the lookup paths.",
-                        Title = "Folder already in lookup paths"
-                    });
-            _logger.LogDebug("Adding lookup path: {Path}", folder);
-            await _mutableConfiguration.SetPropertyValueAsync(conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Append(folder).ToArray(), cancellationToken);
+            foreach (var folder in folders)
+            {
+                var localPathNullable = folder.TryGetLocalPath();
+                _logger.LogDebug("Checking folder: {Path}", localPathNullable);
+                if (localPathNullable is null)
+                {
+                    _logger.LogWarning("Folder {Path} is not accessible", folder.Path);
+                    await _messageBoxProvider.ShowMessageBoxAsync(
+                        new MessageBoxParams
+                        {
+                            Buttons = MessageBoxButtons.Ok,
+                            Icon = MaterialIconKind.FolderRemoveOutline,
+                            Message = "This folder is not accessible.",
+                            Title = "Folder not accessible"
+                        });
+                    continue;
+                }
+                if (_mutableConfiguration.Current.LookupPaths.Contains(localPathNullable))
+                {
+                    _logger.LogWarning("Folder {Path} is already in the lookup paths", localPathNullable);
+                    await _messageBoxProvider.ShowMessageBoxAsync(
+                        new MessageBoxParams
+                        {
+                            Buttons = MessageBoxButtons.Ok,
+                            Icon = MaterialIconKind.FolderRemoveOutline,
+                            Message = "This folder is already in the lookup paths.",
+                            Title = "Folder already in lookup paths"
+                        });
+                    continue;
+                }
+                _logger.LogDebug("Adding lookup path: {Path}", folder);
+                await _mutableConfiguration.SetPropertyValueAsync(conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Append(localPathNullable).ToArray(), cancellationToken);
+            }
         }
     }
-    
+
     [ReactiveCommand]
-    private void OnNextFontSize(double obj) { _application.Resources[App.SystemFontSize] = obj; }
+    private async Task OnNextFontSize(double obj)
+    {
+        _application.Resources[App.SystemFontSize] = obj;
+        await _mutableConfiguration.SetPropertyValueAsync(conf => conf.FontSize, obj);
+    }
 
 
     [ReactiveCommand]
@@ -280,24 +329,11 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         }
     }
 
-    private void OnNextLevel(LoggingLevelSwitchChangedEventArgs obj)
+    private async Task OnNextLevel(LoggingLevelSwitchChangedEventArgs obj)
     {
         if (_levelSwitch.MinimumLevel == obj.NewLevel)
             return;
         _levelSwitch.MinimumLevel = obj.NewLevel;
         _logger.LogCritical("Log level changed from {OldLogLevel} to {NewLogLevel}", obj.OldLevel, obj.NewLevel);
     }
-}
-
-/// <summary>
-/// Converts a path string to a boolean indicating whether it can be deleted.
-/// Returns <see langword="false"/> if the path equals the protected default path.
-/// </summary>
-public sealed class PathDeletableConverter : IValueConverter
-{
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => value is string path && path != SshConfigFilesExtension.GetBaseSshPath();
-
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotSupportedException();
 }
