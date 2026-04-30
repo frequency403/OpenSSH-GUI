@@ -39,7 +39,7 @@ public class ApplicationConfiguration
     public required LogEventLevel LogLevel { get; set; }
     
     [Required, Range(12, 48, ErrorMessage = "Font size must be between 12 and 48")]
-    public required int FontSize { get; set; }
+    public required double FontSize { get; set; }
 
     [Required, ValidateObjectMembers]
     public required LoggerConfiguration LoggerConfiguration { get; set; }

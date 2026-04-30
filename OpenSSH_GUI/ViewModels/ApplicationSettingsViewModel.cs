@@ -37,6 +37,9 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     private readonly IMutableConfiguration<ApplicationConfiguration> _mutableConfiguration;
     private readonly IMessageBoxProvider _messageBoxProvider;
 
+    [ObservableAsProperty(ReadOnly = true)]
+    private ApplicationConfiguration _applicationConfiguration;
+
     [Reactive] private bool _canDeleteOldLogFiles;
 
     [Reactive] private LogEventLevel _currentLogLevel;
@@ -46,9 +49,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     [Reactive] private int _daysToDeleteSelected;
 
     [Reactive] private double _fontSize;
-
-    [Reactive] private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
-
+    
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMutableConfiguration<ApplicationConfiguration> mutableConfiguration,
         ILauncher launcher,
@@ -63,22 +64,20 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
         _storageProvider = storageProvider;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
-        _currentLogLevel = _mutableConfiguration.Current.LogLevel;
         _application = application;
-        _daysToDeleteSelected = DaysToDelete[0];
-        _currentThemeVariant = _mutableConfiguration.Current.PreferredTheme;
         _fontSize = _mutableConfiguration.Current.FontSize;
+        _currentLogLevel = _mutableConfiguration.Current.LogLevel;
+        _currentThemeVariant = _mutableConfiguration.Current.PreferredTheme;
+        _daysToDeleteSelected = DaysToDelete[0];
 
-        Observable.FromEventPattern<ApplicationConfiguration>(
+        _applicationConfigurationHelper = Observable.FromEventPattern<ApplicationConfiguration>(
                 handler => mutableConfiguration.ConfigurationChanged += handler,
                 handler => mutableConfiguration.ConfigurationChanged -= handler)
             .ObserveOn(AvaloniaScheduler.Instance)
             .Select(pattern => pattern.EventArgs)
-            .Subscribe(c => ApplicationConfiguration = c)
+            .StartWith(mutableConfiguration.Current)
+            .ToProperty(this, vm => vm.ApplicationConfiguration)
             .DisposeWith(Disposables);
-
-        if (Enum.TryParse<ThemeVariant>(application.ActualThemeVariant.Key.ToString(), true, out var themeVariant))
-            _currentThemeVariant = themeVariant;
 
         Observable
             .FromEventPattern<LoggingLevelSwitchChangedEventArgs>(
@@ -98,6 +97,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(model => model.CurrentLogLevel)
+            .Skip(1)
             .DistinctUntilChanged()
             .Throttle(TimeSpan.FromMilliseconds(300))
             .ObserveOn(AvaloniaScheduler.Instance)
@@ -125,12 +125,14 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.CurrentThemeVariant)
+            .Skip(1)
             .ObserveOn(AvaloniaScheduler.Instance)
             .DistinctUntilChanged()
             .Subscribe(OnNextTheme)
             .DisposeWith(Disposables);
 
         this.WhenAnyValue(vm => vm.FontSize)
+            .Skip(1)
             .DistinctUntilChanged()
             .Throttle(TimeSpan.FromMilliseconds(300))
             .ObserveOn(AvaloniaScheduler.Instance)
@@ -145,8 +147,6 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
                 ex => logger.LogError(ex, "Error while changing font size")
             )
             .DisposeWith(Disposables);
-        
-        ApplicationConfiguration = mutableConfiguration.Current;
     }
 
     public static LogEventLevel[] AvailableLogLevels { get; } = Enum.GetValues<LogEventLevel>();
@@ -335,5 +335,6 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
             return;
         _levelSwitch.MinimumLevel = obj.NewLevel;
         _logger.LogCritical("Log level changed from {OldLogLevel} to {NewLogLevel}", obj.OldLevel, obj.NewLevel);
+        await _mutableConfiguration.SetPropertyValueAsync(conf => conf.LogLevel, obj.NewLevel);
     }
 }

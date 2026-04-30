@@ -12,13 +12,16 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Resources;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Renci.SshNet;
+using Serilog.Core;
 using SkiaSharp;
 using Svg.Skia;
 
@@ -124,6 +127,7 @@ public class App(
 
             try
             {
+                ApplyConfiguration();
                 if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
                 desktop.MainWindow = await serviceProvider.ResolveViewAsync<MainWindow, MainWindowViewModel>();
 
@@ -157,6 +161,21 @@ public class App(
         {
             logger.LogError(e, "Unhandled error during application initialization");
         }
+    }
+
+    private void ApplyConfiguration()
+    {
+        var configuration = serviceProvider.GetRequiredService<IMutableConfiguration<ApplicationConfiguration>>().Current;
+        Resources[SystemFontSize] = configuration.FontSize;
+        RequestedThemeVariant = configuration.PreferredTheme switch
+        {
+            ThemeVariant.Light => Avalonia.Styling.ThemeVariant.Light,
+            ThemeVariant.Dark => Avalonia.Styling.ThemeVariant.Dark,
+            _ => Avalonia.Styling.ThemeVariant.Default
+        };
+
+        var levelSwitch = serviceProvider.GetRequiredService<LoggingLevelSwitch>();
+        levelSwitch.MinimumLevel = configuration.LogLevel;
     }
 
     private static void FontSizeChanged(double fontSize)
