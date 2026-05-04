@@ -3,11 +3,30 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             ToolTip.Tip="{Binding ToolTipContent, ElementName=Self}"
-             ToolTip.Placement="{Binding ToolTipPlacement ,ElementName=Self}"
-             ToolTip.ShowOnDisabled="True"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OpenSSH_GUI.Resources.Controls.TooltippedIcon"
              x:Name="Self">
-    <mi:MaterialIcon Kind="{Binding Icon, ElementName=Self}"/>
+    <Panel>
+        <Border x:Name="HitArea"
+                Background="Transparent"
+                PointerEntered="OnPointerEntered"
+                PointerExited="OnPointerExited"
+                PointerPressed="OnPointerPressed">
+            <mi:MaterialIcon Kind="{Binding Icon, ElementName=Self}"/>
+        </Border>
+        <Popup x:Name="Popup"
+               PlacementTarget="{Binding #HitArea}"
+               Placement="{Binding ToolTipPlacement, ElementName=Self}"
+               IsLightDismissEnabled="True"
+               Closed="OnPopupClosed">
+            <Border Background="{DynamicResource ToolTipBackground}"
+                    BorderBrush="{DynamicResource ToolTipBorderBrush}"
+                    PointerExited="OnPopupContentExited"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8 4">
+                <ContentPresenter Content="{Binding ToolTipContent, ElementName=Self}"/>
+            </Border>
+        </Popup>
+    </Panel>
 </UserControl>
