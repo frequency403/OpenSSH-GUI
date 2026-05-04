@@ -99,7 +99,7 @@
         <!-- RIGHT -->
         
         <UniformGrid Columns="1" Rows="0">
-            <controls:HeaderedItem Header="Lookup Paths">
+            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLookupPaths}">
                 <controls:HeaderedItem.SideHeader>
                     <Button 
                         Background="{DynamicResource SuccessBrush}"

@@ -403,4 +403,7 @@
     <data name="EditAuthorizedKeysServer" xml:space="preserve">
         <value>Server</value>
     </data>
+    <data name="ApplicationSettingsLookupPaths" xml:space="preserve">
+        <value>Lookup Paths</value>
+    </data>
 </root>
