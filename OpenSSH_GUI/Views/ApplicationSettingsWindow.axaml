@@ -101,10 +101,16 @@
         <UniformGrid Columns="1" Rows="0">
             <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLookupPaths}">
                 <controls:HeaderedItem.SideHeader>
-                    <Button 
-                        Background="{DynamicResource SuccessBrush}"
-                        Command="{Binding AddLookupPathCommand}"
-                        Content="{avalonia:MaterialIconExt Kind=AddCircleOutline}" />
+                    <StackPanel Orientation="Horizontal" Spacing="15">
+                        <Button 
+                            Background="{DynamicResource SuccessBrush}"
+                            Command="{Binding AddLookupPathCommand}"
+                            Content="{avalonia:MaterialIconExt Kind=AddCircleOutline}" />
+                        <controls:TooltippedIcon Icon="InfoCircleOutline" 
+                                                 ToolTipPlacement="Center"
+                                                 ToolTipContent="Hi, this is a Toolip!"/>
+                    </StackPanel>
+                    
                 </controls:HeaderedItem.SideHeader>
                 <ItemsControl Name="ItemsControl" ItemsSource="{Binding ApplicationConfiguration.LookupPaths}">
                     <ItemsControl.ItemTemplate>

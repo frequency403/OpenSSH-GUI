@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             ToolTip.Tip="{Binding ToolTipContent, ElementName=Self}"
+             ToolTip.Placement="{Binding ToolTipPlacement ,ElementName=Self}"
+             ToolTip.ShowOnDisabled="True"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OpenSSH_GUI.Resources.Controls.TooltippedIcon"
+             x:Name="Self">
+    <mi:MaterialIcon Kind="{Binding Icon, ElementName=Self}"/>
+</UserControl>
