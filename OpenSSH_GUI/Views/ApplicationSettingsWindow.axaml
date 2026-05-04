@@ -20,6 +20,7 @@
         WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <converter:PathDeletableConverter x:Key="PathDeletableConverter" />
+        <converter:CollectionIndexConverter x:Key="CollectionIndexConverter" />
     </Window.Resources>
     <UniformGrid Columns="0" Rows="1" Margin="10">
         
@@ -105,19 +106,36 @@
                         Command="{Binding AddLookupPathCommand}"
                         Content="{avalonia:MaterialIconExt Kind=AddCircleOutline}" />
                 </controls:HeaderedItem.SideHeader>
-                <ItemsControl ItemsSource="{Binding ApplicationConfiguration.LookupPaths}">
+                <ItemsControl Name="ItemsControl" ItemsSource="{Binding ApplicationConfiguration.LookupPaths}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type system:String}">
-                            <controls:HeaderedItem Header="{Binding}" Margin="50 0">
-                                <controls:HeaderedItem.SideHeader>
-                                    <Button Grid.Column="1"
-                                            Content="{avalonia:MaterialIconExt Kind=CloseCircleOutline}"
-                                            Background="{DynamicResource DangerBrush}"
-                                            IsEnabled="{Binding Converter={StaticResource PathDeletableConverter}}"
-                                            Command="{Binding Path=$parent[Window].((viewModels:ApplicationSettingsViewModel)DataContext).DeleteLookupPathCommand}"
-                                            CommandParameter="{Binding }" />
-                                </controls:HeaderedItem.SideHeader>
-                            </controls:HeaderedItem>
+                            <Grid ColumnDefinitions="Auto *" Margin="15 5">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource CollectionIndexConverter}">
+                                                    <Binding />
+                                                    <Binding Path="#ItemsControl.ItemsSource" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                        <TextBlock Text="."/>
+                                    </StackPanel>
+                                    <avalonia:MaterialIcon Kind="ArrowRight" />
+                                </StackPanel>
+                                
+                                <controls:HeaderedItem Grid.Column="1" Header="{Binding}" HorizontalAlignment="Stretch" Margin="15 0">
+                                    <controls:HeaderedItem.SideHeader>
+                                        <Button Grid.Column="1"
+                                                Content="{avalonia:MaterialIconExt Kind=CloseCircleOutline}"
+                                                Background="{DynamicResource DangerBrush}"
+                                                IsEnabled="{Binding Converter={StaticResource PathDeletableConverter}}"
+                                                Command="{Binding Path=$parent[Window].((viewModels:ApplicationSettingsViewModel)DataContext).DeleteLookupPathCommand}"
+                                                CommandParameter="{Binding }" />
+                                    </controls:HeaderedItem.SideHeader>
+                                </controls:HeaderedItem>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
