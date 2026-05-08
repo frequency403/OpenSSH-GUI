@@ -3,7 +3,7 @@
     <!-- Target framework and other specs in Directory.Build.props -->
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="12.0.1"/>
+        <PackageReference Include="Avalonia" Version="12.0.2" />
         <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1"/>
         <PackageReference Include="Material.Icons" Version="3.0.2" />
         <PackageReference Include="Material.Icons.Avalonia" Version="3.0.2" />
@@ -11,7 +11,7 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.7" />
-        <PackageReference Include="ReactiveUI" Version="23.2.19" />
+        <PackageReference Include="ReactiveUI" Version="23.2.27" />
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.0.1" />
         <PackageReference Include="ReactiveUI.SourceGenerators" Version="2.6.30">
           <PrivateAssets>all</PrivateAssets>
