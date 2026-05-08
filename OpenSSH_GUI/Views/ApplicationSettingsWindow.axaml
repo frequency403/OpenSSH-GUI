@@ -23,100 +23,103 @@
         <converter:CollectionIndexConverter x:Key="CollectionIndexConverter" />
     </Window.Resources>
     <UniformGrid Columns="0" Rows="1" Margin="10">
-        
+
         <!-- LEFT -->
         <UniformGrid Columns="1" Rows="0">
             <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
-            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLogLevel}">
-                <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
-                          ItemsSource="{Binding AvailableLogLevels}"
-                          SelectedItem="{Binding CurrentLogLevel}" />
-            </controls:HeaderedItem>
-            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsTheme}">
-                <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
-                          ItemsSource="{Binding ThemeVariants}"
-                          SelectedItem="{Binding CurrentThemeVariant}" />
-            </controls:HeaderedItem>
-        </UniformGrid>
-        <controls:HeaderedItem
-            Header="Cache Options">
-            <controls:HeaderedItem.SideHeader>
-                <Button Grid.Column="1" HorizontalAlignment="Right"
-                        Background="{DynamicResource NavigationActiveBrush}" Command="{Binding OpenCacheFolderCommand}">
-                    <avalonia:MaterialIcon Kind="FolderOpenOutline" />
-                </Button>
-            </controls:HeaderedItem.SideHeader>
-            <UniformGrid Rows="1" Columns="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <StackPanel HorizontalAlignment="Center" Spacing="1">
-                    <StackPanel Spacing="5" HorizontalAlignment="Center">
-                        <TextBlock
-                            Text="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal"
-                                    Spacing="5">
-                            <ComboBox VerticalAlignment="Center" SelectedItem="{Binding DaysToDeleteSelected}"
-                                      ItemsSource="{Binding DaysToDelete}" />
-                            <TextBlock VerticalAlignment="Center" Text="{x:Static resources:StringsAndTexts.Days}" />
-                            <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
-                                    Background="{DynamicResource CodeForegroundBrush}" HorizontalAlignment="Center"
-                                    Command="{Binding DeleteOldLogFilesCommand}" 
-                                    Content="{avalonia:MaterialIconTextExt Kind=DeleteOutline, Text={Binding LogFiles.Count, StringFormat=({0})}}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
-                <Button HorizontalAlignment="Right" Background="{DynamicResource RevokedBrush}"
-                        Command="{Binding ClearWholeCacheCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <avalonia:MaterialIcon Kind="ReportProblem" />
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Center"
-                                       Text="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}" />
-                            <Separator HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       Text="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
-                        </StackPanel>
-                    </StackPanel>
-                </Button>
+                <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLogLevel}">
+                    <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                              ItemsSource="{Binding AvailableLogLevels}"
+                              SelectedItem="{Binding CurrentLogLevel}" />
+                </controls:HeaderedItem>
+                <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsTheme}">
+                    <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10"
+                              ItemsSource="{Binding ThemeVariants}"
+                              SelectedItem="{Binding CurrentThemeVariant}" />
+                </controls:HeaderedItem>
             </UniformGrid>
+            <controls:HeaderedItem
+                Header="Cache Options">
+                <controls:HeaderedItem.SideHeader>
+                    <Button Grid.Column="1" HorizontalAlignment="Right"
+                            Background="{DynamicResource NavigationActiveBrush}"
+                            Command="{Binding OpenCacheFolderCommand}">
+                        <avalonia:MaterialIcon Kind="FolderOpenOutline" />
+                    </Button>
+                </controls:HeaderedItem.SideHeader>
+                <UniformGrid Rows="1" Columns="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <StackPanel HorizontalAlignment="Center" Spacing="1">
+                        <StackPanel Spacing="5" HorizontalAlignment="Center">
+                            <TextBlock
+                                Text="{x:Static resources:StringsAndTexts.ApplicationSettingsWindowCleanupLogsOlderThan}" />
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Orientation="Horizontal"
+                                        Spacing="5">
+                                <ComboBox VerticalAlignment="Center" SelectedItem="{Binding DaysToDeleteSelected}"
+                                          ItemsSource="{Binding DaysToDelete}" />
+                                <TextBlock VerticalAlignment="Center" Text="{x:Static resources:StringsAndTexts.Days}" />
+                                <Button IsEnabled="{Binding CanDeleteOldLogFiles}"
+                                        Background="{DynamicResource CodeForegroundBrush}" HorizontalAlignment="Center"
+                                        Command="{Binding DeleteOldLogFilesCommand}"
+                                        Content="{avalonia:MaterialIconTextExt Kind=DeleteOutline, Text={Binding LogFiles.Count, StringFormat=({0})}}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" Background="{DynamicResource RevokedBrush}"
+                            Command="{Binding ClearWholeCacheCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <avalonia:MaterialIcon Kind="ReportProblem" />
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center"
+                                           Text="{x:Static resources:StringsAndTexts.ApplicationSettingsClearWholeCache}" />
+                                <Separator HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                <TextBlock HorizontalAlignment="Center"
+                                           Text="{x:Static resources:StringsAndTexts.ApplicationSettingsProceedWithCaution}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Button>
+                </UniformGrid>
 
 
-        </controls:HeaderedItem>
-        <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}"
-                               HeaderHorizontalAlignment="Left"
-                               HeaderVerticalAlignment="Center"
-                               SideHeaderHorizontalAlignment="Right"
-                               HorizontalContentAlignment="Stretch">
-            <controls:HeaderedItem.SideHeader>
-                <Button Command="{Binding OnNextFontSizeCommand}"
-                        Background="{DynamicResource InfoBrush}"
-                        CommandParameter="{StaticResource BaseFontSize}">
-                    <avalonia:MaterialIcon Kind="Replay" />
-                </Button>
-            </controls:HeaderedItem.SideHeader>
-            <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
-        </controls:HeaderedItem>
+            </controls:HeaderedItem>
+            <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsFontSize}"
+                                   HeaderHorizontalAlignment="Left"
+                                   HeaderVerticalAlignment="Center"
+                                   SideHeaderHorizontalAlignment="Right"
+                                   HorizontalContentAlignment="Stretch">
+                <controls:HeaderedItem.SideHeader>
+                    <Button Command="{Binding OnNextFontSizeCommand}"
+                            Background="{DynamicResource InfoBrush}"
+                            CommandParameter="{StaticResource BaseFontSize}">
+                        <avalonia:MaterialIcon Kind="Replay" />
+                    </Button>
+                </controls:HeaderedItem.SideHeader>
+                <NumericUpDown Minimum="8" Maximum="48" Increment="2" Value="{Binding FontSize}" />
+            </controls:HeaderedItem>
         </UniformGrid>
-        
+
         <!-- RIGHT -->
-        
+
         <UniformGrid Columns="1" Rows="0">
             <controls:HeaderedItem Header="{x:Static resources:StringsAndTexts.ApplicationSettingsLookupPaths}">
                 <controls:HeaderedItem.SideHeader>
                     <StackPanel Orientation="Horizontal" Spacing="15">
-                        <Button 
+                        <Button
                             Background="{DynamicResource SuccessBrush}"
                             Command="{Binding AddLookupPathCommand}"
                             Content="{avalonia:MaterialIconExt Kind=AddCircleOutline}" />
-                        <controls:TooltippedIcon Icon="InfoCircleOutline" 
+                        <controls:TooltippedIcon Icon="InfoCircleOutline"
                                                  ToolTipPlacement="Center"
-                                                 ToolTipContent="Hi, this is a Toolip!"/>
+                                                 ToolTipContent="Hi, this is a Toolip!" />
                     </StackPanel>
-                    
+
                 </controls:HeaderedItem.SideHeader>
                 <ItemsControl Name="ItemsControl" ItemsSource="{Binding ApplicationConfiguration.LookupPaths}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type system:String}">
                             <Grid ColumnDefinitions="Auto *" Margin="15 5">
-                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5"
+                                            HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock>
                                             <TextBlock.Text>
@@ -126,12 +129,13 @@
                                                 </MultiBinding>
                                             </TextBlock.Text>
                                         </TextBlock>
-                                        <TextBlock Text="."/>
+                                        <TextBlock Text="." />
                                     </StackPanel>
                                     <avalonia:MaterialIcon Kind="ArrowRight" />
                                 </StackPanel>
-                                
-                                <controls:HeaderedItem Grid.Column="1" Header="{Binding}" HorizontalAlignment="Stretch" Margin="15 0">
+
+                                <controls:HeaderedItem Grid.Column="1" Header="{Binding}" HorizontalAlignment="Stretch"
+                                                       Margin="15 0">
                                     <controls:HeaderedItem.SideHeader>
                                         <Button Grid.Column="1"
                                                 Content="{avalonia:MaterialIconExt Kind=CloseCircleOutline}"
@@ -146,8 +150,8 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </controls:HeaderedItem>
-            
+
         </UniformGrid>
-        
+
     </UniformGrid>
 </Window>

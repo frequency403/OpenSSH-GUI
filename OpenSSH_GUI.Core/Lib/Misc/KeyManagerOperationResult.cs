@@ -21,20 +21,31 @@ public record KeyManagerOperationResult
     public Exception? Exception { get; protected init; }
 
     public static KeyManagerOperationResult Success() => new()
-        { Result = OperationResult.Success };
+    {
+        Result = OperationResult.Success
+    };
 
     public static KeyManagerOperationResult<T> Success<T>(T value) => KeyManagerOperationResult<T>.Success(value);
 
     public static KeyManagerOperationResult FromException(Exception exception) => exception is OperationCanceledException ? Cancelled(exception) : Failure(exception);
 
     public static KeyManagerOperationResult Failure(Exception exception) => new()
-        { Result = OperationResult.Failure, Exception = exception };
+    {
+        Result = OperationResult.Failure,
+        Exception = exception
+    };
 
     public static KeyManagerOperationResult Conflict(Exception exception) => new()
-        { Result = OperationResult.Conflict, Exception = exception };
+    {
+        Result = OperationResult.Conflict,
+        Exception = exception
+    };
 
     internal static KeyManagerOperationResult Cancelled(Exception exception) => new()
-        { Result = OperationResult.Cancelled, Exception = exception };
+    {
+        Result = OperationResult.Cancelled,
+        Exception = exception
+    };
 
     /// <summary>Throws the associated exception if the result represents a failure.</summary>
     /// <param name="throwOnCancelled">Whether to also throw if the result was cancelled.</param>
@@ -64,5 +75,8 @@ public sealed record KeyManagerOperationResult<T> : KeyManagerOperationResult
     };
 
     public static KeyManagerOperationResult<T> Success(T value) => new()
-        { Result = OperationResult.Success, ResultValue = value };
+    {
+        Result = OperationResult.Success,
+        ResultValue = value
+    };
 }

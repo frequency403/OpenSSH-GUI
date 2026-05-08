@@ -16,6 +16,7 @@ using ReactiveUI.Avalonia;
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.SystemConsole.Themes;
+using LoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
@@ -37,7 +38,7 @@ internal sealed class Program
     private static void ConfigureOpenSshGuiLogger(
         ApplicationConfiguration bootstrapConfig,
         LoggingLevelSwitch levelSwitch,
-        Serilog.LoggerConfiguration loggerConfiguration)
+        LoggerConfiguration loggerConfiguration)
     {
         var loggerConfig = bootstrapConfig.LoggerConfiguration;
         Directory.CreateIfNotExists(loggerConfig.LogFilePath);
@@ -62,13 +63,14 @@ internal sealed class Program
     public static async Task Main(string[] args)
     {
         using var mainCancellationTokenSource = new CancellationTokenSource();
-        
-        File.CreateIfNotExists(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, 
+
+        File.CreateIfNotExists(
+            ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath,
             JsonSerializer.Serialize(ApplicationConfiguration.Default, SourceGenerationContext.Default.ApplicationConfiguration));
-        
+
         var bootstrapConfig = ReadBootstrapConfiguration();
         var levelSwitch = new LoggingLevelSwitch(bootstrapConfig.LogLevel);
-        
+
         var host = Host.CreateDefaultBuilder(args)
             .AddMutableConfiguration(ApplicationConfiguration.DefaultApplicationConfigurationFileFullPath, SourceGenerationContext.Default.ApplicationConfiguration, false)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
@@ -101,10 +103,10 @@ internal sealed class Program
     {
         configurationBuilder.AddSshConfig(ConfigFile.GetPathOfFile(), true, true, LoggingAction);
         configurationBuilder.AddSshConfig(SshdConfig.GetPathOfFile(), true, true, LoggingAction);
-        
+
         configurationBuilder.AddJsonFile(
             new PhysicalFileProvider(ApplicationConfiguration.ApplicationConfigurationPath), ApplicationConfiguration.ApplicationConfigurationName, false, true);
-        
+
         configurationBuilder.AddInMemoryCollection(
         [
             new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
@@ -112,11 +114,11 @@ internal sealed class Program
     }
 
     private static void LoggingAction(string arg1, Exception arg2) { Log.Logger.Error(arg2, "Failed to load SSH config file: {Path}", arg1); }
-    
+
     /// <summary>
-    /// Reads the application configuration directly from disk without using DI.
-    /// Used during host bootstrap to avoid circular dependency with Serilog setup.
-    /// Returns <see cref="ApplicationConfiguration.Default"/> on any failure.
+    ///     Reads the application configuration directly from disk without using DI.
+    ///     Used during host bootstrap to avoid circular dependency with Serilog setup.
+    ///     Returns <see cref="ApplicationConfiguration.Default" /> on any failure.
     /// </summary>
     private static ApplicationConfiguration ReadBootstrapConfiguration()
     {

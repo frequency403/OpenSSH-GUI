@@ -6,10 +6,15 @@ public record SshKeyFileSource
     public bool ProvidedByConfig { get; init; }
 
     public static SshKeyFileSource FromDisk(string absolutePath) => new()
-        { AbsolutePath = absolutePath };
+    {
+        AbsolutePath = absolutePath
+    };
 
     public static SshKeyFileSource FromConfig(string absolutePath) => new()
-        { AbsolutePath = absolutePath, ProvidedByConfig = true };
+    {
+        AbsolutePath = absolutePath,
+        ProvidedByConfig = true
+    };
 
     public override string ToString() => $"{AbsolutePath} | Referenced by Config: {ProvidedByConfig}";
 }

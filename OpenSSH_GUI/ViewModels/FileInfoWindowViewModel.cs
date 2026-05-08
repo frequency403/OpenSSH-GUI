@@ -33,20 +33,20 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     [ObservableAsProperty(ReadOnly = true)]
     private string _associatedFilesHeader = string.Empty;
 
+    [ObservableAsProperty(ReadOnly = true)]
+    private SshKeyFormat _defaultKeyFormat;
+
     [Reactive(SetModifier = AccessModifier.Private)]
     private SshKeyFile _keyFile;
+
+    [ReactiveCollection]
+    private ObservableCollection<SshKeyFormat> _keyFormats = [];
 
     [ObservableAsProperty(ReadOnly = true)]
     private string _password = string.Empty;
 
     [ObservableAsProperty(ReadOnly = true)]
     private string _windowTitle = "Key info";
-
-    [ReactiveCollection]
-    private ObservableCollection<SshKeyFormat> _keyFormats = [];
-    
-    [ObservableAsProperty(ReadOnly = true)]
-    private SshKeyFormat _defaultKeyFormat;
 
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
         IServiceProvider serviceProvider, IClipboard clipboard, SshKeyManager keyManager)
@@ -78,14 +78,14 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
             .Select(e => string.Format(StringsAndTexts.FileInfoWindowFoundAssociatedFiles, e?.Length ?? 0))
             .ToProperty(this, vm => vm.AssociatedFilesHeader)
             .DisposeWith(Disposables);
-        
+
         _defaultKeyFormatHelper = this.WhenAnyValue(vm => vm.KeyFile.KeyFileInfo)
             .ObserveOn(AvaloniaScheduler.Instance)
             .WhereNotNull()
             .Select(e => e.DefaultConversionFormat)
             .ToProperty(this, vm => vm.DefaultKeyFormat)
             .DisposeWith(Disposables);
-        
+
         this.WhenAnyValue(vm => vm.KeyFile.KeyFileInfo)
             .ObserveOn(AvaloniaScheduler.Instance)
             .WhereNotNull()

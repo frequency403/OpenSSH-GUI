@@ -9,7 +9,7 @@ namespace OpenSSH_GUI.Core.Services;
 
 public class SshKeyGenerator(ILogger<SshKeyGenerator> logger, ISshKeyFactory keyFactory, IKeyFileWriterService keyFileWriterService) : ISshKeyGenerator
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async ValueTask<SshKeyFile> Generate(string fullFilePath, SshKeyGenerateInfo generateParamsInfo, bool overwrite = false)
     {
         GeneratedPrivateKey? createdKey;
@@ -36,7 +36,7 @@ public class SshKeyGenerator(ILogger<SshKeyGenerator> logger, ISshKeyFactory key
             keyFile.Load(keyFileSource);
         else
             keyFile.Load(keyFileSource, Encoding.UTF8.GetBytes(generateParamsInfo.Encryption.Passphrase));
-        
+
         return keyFile;
     }
 }

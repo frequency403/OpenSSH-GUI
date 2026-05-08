@@ -10,7 +10,18 @@ namespace OpenSSH_GUI.Core.Configuration;
 public class ApplicationConfiguration
 {
     [JsonIgnore]
-    public static string ApplicationConfigurationPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+    public static readonly ApplicationConfiguration Default = new()
+    {
+        LookupPaths = [SshConfigFilesExtension.GetBaseSshPath()],
+        PreferredTheme = ThemeVariant.Default,
+        LogLevel = LogEventLevel.Warning,
+        FontSize = 14,
+        LoggerConfiguration = LoggerConfiguration.Default
+    };
+
+    [JsonIgnore]
+    public static string ApplicationConfigurationPath { get; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         AppDomain.CurrentDomain.FriendlyName);
 
     [JsonIgnore]
@@ -19,25 +30,15 @@ public class ApplicationConfiguration
     [JsonIgnore]
     public static string DefaultApplicationConfigurationFileFullPath { get; } = Path.Combine(ApplicationConfigurationPath, ApplicationConfigurationName);
 
-    [JsonIgnore]
-    public static readonly ApplicationConfiguration Default = new()
-    {
-        LookupPaths = [SshConfigFilesExtension.GetBaseSshPath()],
-        PreferredTheme = ThemeVariant.Default,
-        LogLevel = LogEventLevel.Warning,
-        FontSize = 14,
-        LoggerConfiguration = LoggerConfiguration.Default,
-    };
-
     [Required]
     public required string[] LookupPaths { get; set; }
-    
+
     [Required]
     public required ThemeVariant PreferredTheme { get; set; }
-    
+
     [Required]
     public required LogEventLevel LogLevel { get; set; }
-    
+
     [Required, Range(12, 48, ErrorMessage = "Font size must be between 12 and 48")]
     public required double FontSize { get; set; }
 
@@ -45,5 +46,7 @@ public class ApplicationConfiguration
     public required LoggerConfiguration LoggerConfiguration { get; set; }
 }
 
-[JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true),JsonSerializable(typeof(ApplicationConfiguration)), JsonSerializable(typeof(LoggerConfiguration))]
-public partial class SourceGenerationContext : JsonSerializerContext { }
+[JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true), JsonSerializable(typeof(ApplicationConfiguration)), JsonSerializable(typeof(LoggerConfiguration))]
+public partial class SourceGenerationContext : JsonSerializerContext
+{
+}

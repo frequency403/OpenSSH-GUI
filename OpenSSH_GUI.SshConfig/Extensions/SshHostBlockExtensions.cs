@@ -92,7 +92,12 @@ public static class SshHostBlockExtensions
 
         var handledKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "HostName", "User", "Port", "IdentityFile", "ProxyJump", "LocalForward"
+            "HostName",
+            "User",
+            "Port",
+            "IdentityFile",
+            "ProxyJump",
+            "LocalForward"
         };
 
         var addedHostName = settings.HostName == null;
@@ -175,11 +180,19 @@ public static class SshHostBlockExtensions
 
         // Add new other entries that weren't there
         if (settings.OtherEntries is not { Length: > 0 })
-            return block with { Items = newItems.ToImmutable(), RawHeaderText = string.Empty };
+            return block with
+            {
+                Items = newItems.ToImmutable(),
+                RawHeaderText = string.Empty
+            };
         foreach (var oe in settings.OtherEntries)
             if (!newItems.Contains(oe))
                 newItems.Add(oe);
 
-        return block with { Items = newItems.ToImmutable(), RawHeaderText = string.Empty };
+        return block with
+        {
+            Items = newItems.ToImmutable(),
+            RawHeaderText = string.Empty
+        };
     }
 }

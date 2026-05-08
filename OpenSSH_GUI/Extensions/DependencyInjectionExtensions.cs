@@ -57,7 +57,7 @@ public static class DependencyInjectionExtensions
                 services.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
                 services.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
                 services.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
-                
+
                 services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
                 services.AddTransient<SshKeyFile>();
                 services.AddHostedService<FileSystemAnalyzer>();

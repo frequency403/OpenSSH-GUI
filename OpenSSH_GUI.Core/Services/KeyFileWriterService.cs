@@ -3,7 +3,6 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Interfaces;
-using OpenSSH_GUI.Core.Lib.Misc;
 using Renci.SshNet;
 using SshNet.Keygen;
 using SshNet.Keygen.Extensions;
@@ -12,7 +11,7 @@ using SshNet.Keygen.SshKeyEncryption;
 namespace OpenSSH_GUI.Core.Services;
 
 /// <summary>
-/// Provides functionality to write content or SSH key files to the filesystem.
+///     Provides functionality to write content or SSH key files to the filesystem.
 /// </summary>
 public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFileWriterService
 {
@@ -49,7 +48,7 @@ public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFi
         {
             options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
         }
-        
+
         await using var fileStream = fileInfo.Open(options);
         logger.LogDebug("Opened file {filePath}", filePath);
 
@@ -82,7 +81,7 @@ public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFi
     }
 
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(
         SshKeyFormat format,
         ISshKeyEncryption encryption,
@@ -129,8 +128,8 @@ public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFi
         writtenFiles.Add(privateFilePath);
         return writtenFiles;
     }
-    
-    
+
+
     /// <inheritdoc />
     public ValueTask<IEnumerable<string>> WriteToFileInSpecificFormat(
         SshKeyGenerateInfo generateInfo,

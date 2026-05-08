@@ -12,7 +12,7 @@
                 PointerEntered="OnPointerEntered"
                 PointerExited="OnPointerExited"
                 PointerPressed="OnPointerPressed">
-            <mi:MaterialIcon Kind="{Binding Icon, ElementName=Self}"/>
+            <mi:MaterialIcon Kind="{Binding Icon, ElementName=Self}" />
         </Border>
         <Popup x:Name="Popup"
                PlacementTarget="{Binding #HitArea}"
@@ -25,7 +25,7 @@
                     BorderThickness="1"
                     CornerRadius="4"
                     Padding="8 4">
-                <ContentPresenter Content="{Binding ToolTipContent, ElementName=Self}"/>
+                <ContentPresenter Content="{Binding ToolTipContent, ElementName=Self}" />
             </Border>
         </Popup>
     </Panel>

@@ -13,12 +13,13 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 /// <summary>
 ///     Represents a directory crawler for searching and managing SSH keys.
 /// </summary>
-public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfiguration configuration, IMutableConfiguration<ApplicationConfiguration> mutableConfiguration) : IDirectoryCrawler
+public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfiguration configuration, IMutableConfiguration<ApplicationConfiguration> mutableConfiguration)
+    : IDirectoryCrawler
 {
     private static readonly string[] ImportantFileNames = Enum.GetNames<SshConfigFiles>();
     private readonly List<SshKeyFileSource> _keyFileSources = [];
 
-    public bool IsSearching { get; private set; } = false;
+    public bool IsSearching { get; private set; }
 
     /// <summary>
     ///     Asynchronously enumerates possible SSH key file sources from both
@@ -85,22 +86,23 @@ public sealed class DirectoryCrawler(ILogger<DirectoryCrawler> logger, IConfigur
         foreach (var directoryInfo in mutableConfiguration.Current.LookupPaths.Select(e => new DirectoryInfo(e)) ?? [])
         {
             logger.LogDebug("Processing directory {Directory}", directoryInfo);
-            if(cancellationToken.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
                 yield break;
-            foreach (var keyFile in directoryInfo.EnumerateFiles("*", new EnumerationOptions
-                     {
-                         IgnoreInaccessible = true,
-                         RecurseSubdirectories = false
-                     }).Where(e => !ImportantFileNames.Any(ifn =>
-                         ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
-                     .Where(e => !_keyFileSources.Any(k =>
-                         k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
-                     .Where(e => string.IsNullOrWhiteSpace(e.Extension) || Path.IsPuTTYKey(e.Name))
-                     .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase))
+            foreach (var keyFile in directoryInfo.EnumerateFiles(
+                             "*", new EnumerationOptions
+                             {
+                                 IgnoreInaccessible = true,
+                                 RecurseSubdirectories = false
+                             }).Where(e => !ImportantFileNames.Any(ifn =>
+                             ifn.Equals(e.Name, StringComparison.OrdinalIgnoreCase)))
+                         .Where(e => !_keyFileSources.Any(k =>
+                             k.AbsolutePath.Equals(e.FullName, StringComparison.OrdinalIgnoreCase)))
+                         .Where(e => string.IsNullOrWhiteSpace(e.Extension) || Path.IsPuTTYKey(e.Name))
+                         .DistinctBy(e => e.FullName, StringComparer.OrdinalIgnoreCase))
             {
                 logger.LogDebug("Found key file {KeyFile}", keyFile);
                 yield return SshKeyFileSource.FromDisk(keyFile.FullName);
-                if(cancellationToken.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                     yield break;
             }
         }

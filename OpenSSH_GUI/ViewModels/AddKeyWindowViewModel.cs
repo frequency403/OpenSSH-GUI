@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenSSH_GUI.Core.Configuration;
@@ -28,18 +27,22 @@ namespace OpenSSH_GUI.ViewModels;
 public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 {
     private const string KeyPrefix = "id";
+    private readonly IOptionsMonitor<ApplicationConfiguration> _applicationConfigurationMonitor;
     private readonly ILogger<AddKeyWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly SshKeyManager _sshKeyManager;
-    private readonly IOptionsMonitor<ApplicationConfiguration> _applicationConfigurationMonitor;
+
+    [Reactive] private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
 
     [ObservableAsProperty(ReadOnly = true)]
     private int[] _availableKeySizes = [];
 
     [ObservableAsProperty(ReadOnly = true)]
     private bool _canChangeKeySize;
-    
-    [ObservableAsProperty(ReadOnly = true)] 
+
+    [Reactive] private string _chosenPath = string.Empty;
+
+    [ObservableAsProperty(ReadOnly = true)]
     private int _comboBoxFontSize;
 
     [Reactive] private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
@@ -53,11 +56,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
     [Reactive] private int _selectedKeySize;
 
     [Reactive] private SshKeyType _selectedKeyType = SshKeyGenerateInfo.DefaultSshKeyType;
-    
-    [Reactive] private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
-    
-    [Reactive] private string _chosenPath = string.Empty;
-    
+
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
         IOptionsMonitor<ApplicationConfiguration> applicationConfigurationMonitor,
@@ -88,7 +87,7 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableV
             .OfType<int>()
             .Select(e => e - 2)
             .ToProperty(this, vm => vm.ComboBoxFontSize);
-        
+
         var selectedKeyTypeChanged = this.WhenAnyValue(vm => vm.SelectedKeyType)
             .ObserveOn(AvaloniaScheduler.Instance);
 

@@ -2,7 +2,6 @@
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using System.Reflection;
-using Avalonia.Animation.Easings;
 using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
 using Material.Icons;
@@ -41,6 +40,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IServiceProvider _serviceProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
+    private bool _isProvidePasswordExecuting;
+
+    [ObservableAsProperty(ReadOnly = true)]
     private string _itemsCountTooltip = string.Empty;
 
     [Reactive(SetModifier = AccessModifier.Private)]
@@ -48,9 +50,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableAsProperty(ReadOnly = true)]
     private string _windowTitle = string.Empty;
-
-    [ObservableAsProperty(ReadOnly = true)]
-    private bool _isProvidePasswordExecuting;
 
     public MainWindowViewModel(
         ILogger<MainWindowViewModel> logger,

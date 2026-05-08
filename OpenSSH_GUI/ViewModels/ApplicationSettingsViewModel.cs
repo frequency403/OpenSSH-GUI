@@ -3,12 +3,10 @@ using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Platform.Storage;
 using JetBrains.Annotations;
 using Material.Icons;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Enums;
@@ -31,11 +29,11 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 {
     private readonly Application _application;
     private readonly ILauncher _launcher;
-    private readonly IStorageProvider _storageProvider;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
-    private readonly IMutableConfiguration<ApplicationConfiguration> _mutableConfiguration;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly IMutableConfiguration<ApplicationConfiguration> _mutableConfiguration;
+    private readonly IStorageProvider _storageProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
     private ApplicationConfiguration _applicationConfiguration;
@@ -49,7 +47,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     [Reactive] private int _daysToDeleteSelected;
 
     [Reactive] private double _fontSize;
-    
+
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMutableConfiguration<ApplicationConfiguration> mutableConfiguration,
         ILauncher launcher,
@@ -154,20 +152,20 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     public static int[] DaysToDelete { get; } = Enumerable.Range(1, 4).Select(i => i * 7).ToArray();
 
     public ObservableCollection<string> LogFiles { get; } = [];
-    
+
 
     [ReactiveCommand]
-    private Task DeleteLookupPathAsync(string path, CancellationToken cancellationToken = default) => 
+    private Task DeleteLookupPathAsync(string path, CancellationToken cancellationToken = default) =>
         _mutableConfiguration.SetPropertyValueAsync(conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Where(p => p != path).ToArray(), cancellationToken);
 
     [ReactiveCommand]
     private async Task AddLookupPathAsync(CancellationToken cancellationToken = default)
     {
-        if ((await _storageProvider.OpenFolderPickerAsync(
+        if (await _storageProvider.OpenFolderPickerAsync(
                 new FolderPickerOpenOptions
                 {
-                    AllowMultiple = false,
-                })) is { Count: > 0} folders)
+                    AllowMultiple = false
+                }) is { Count: > 0 } folders)
         {
             foreach (var folder in folders)
             {
@@ -200,7 +198,8 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
                     continue;
                 }
                 _logger.LogDebug("Adding lookup path: {Path}", folder);
-                await _mutableConfiguration.SetPropertyValueAsync(conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Append(localPathNullable).ToArray(), cancellationToken);
+                await _mutableConfiguration.SetPropertyValueAsync(
+                    conf => conf.LookupPaths, _mutableConfiguration.Current.LookupPaths.Append(localPathNullable).ToArray(), cancellationToken);
             }
         }
     }

@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Globalization;
-using Avalonia.Data;
 using Avalonia.Data.Converters;
 
 namespace OpenSSH_GUI.Core.Resources.Converter;
 
 /// <summary>
-/// Converts an item and its parent collection into a 1-based index string.
+///     Converts an item and its parent collection into a 1-based index string.
 /// </summary>
 public class CollectionIndexConverter : IMultiValueConverter
 {

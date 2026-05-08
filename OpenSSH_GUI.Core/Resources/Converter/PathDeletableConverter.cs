@@ -6,8 +6,8 @@ using OpenSSH_GUI.Core.Extensions;
 namespace OpenSSH_GUI.Core.Resources.Converter;
 
 /// <summary>
-/// Converts a path string to a boolean indicating whether it can be deleted.
-/// Returns <see langword="false"/> if the path equals the protected default path.
+///     Converts a path string to a boolean indicating whether it can be deleted.
+///     Returns <see langword="false" /> if the path equals the protected default path.
 /// </summary>
 public sealed class PathDeletableConverter : IValueConverter
 {

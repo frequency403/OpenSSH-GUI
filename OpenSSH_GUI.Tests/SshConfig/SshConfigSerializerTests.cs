@@ -17,7 +17,11 @@ public class SshConfigSerializerTests
             [SshHostBlock.Create(["example"], [SshConfigEntry.Create("User", "alice")])]
         );
 
-        var output = SshConfigSerializer.Serialize(doc, new SshSerializerOptions { Indent = "    " });
+        var output = SshConfigSerializer.Serialize(
+            doc, new SshSerializerOptions
+            {
+                Indent = "    "
+            });
 
         output.ShouldContain("VisualHostKey yes");
         output.ShouldContain("Host example");
@@ -38,7 +42,10 @@ public class SshConfigSerializerTests
     [Fact]
     public void Serialize_MatchBlock_ShouldProduceCorrectOutput()
     {
-        var criteria = new[] { SshMatchCriterion.ForHost("example.com"), SshMatchCriterion.ForUser("root") };
+        var criteria = new[]
+        {
+            SshMatchCriterion.ForHost("example.com"), SshMatchCriterion.ForUser("root")
+        };
         var doc = new SshConfigDocument(
             [],
             [SshMatchBlock.Create(criteria, [SshConfigEntry.Create("Port", "22")])]
@@ -81,11 +88,25 @@ public class SshConfigSerializerTests
         var entry = block.GetEntries("User").First();
 
         // Modify entry and clear RawText to force regeneration
-        var modifiedEntry = entry with { Values = ["bob"], RawText = string.Empty };
-        var modifiedBlock = block with { Items = [modifiedEntry], RawHeaderText = string.Empty };
-        var modifiedDoc = doc with { Blocks = [modifiedBlock] };
+        var modifiedEntry = entry with
+        {
+            Values = ["bob"],
+            RawText = string.Empty
+        };
+        var modifiedBlock = block with
+        {
+            Items = [modifiedEntry],
+            RawHeaderText = string.Empty
+        };
+        var modifiedDoc = doc with
+        {
+            Blocks = [modifiedBlock]
+        };
 
-        var options = new SshSerializerOptions { RoundTrip = true };
+        var options = new SshSerializerOptions
+        {
+            RoundTrip = true
+        };
 
         // Act
         var output = SshConfigSerializer.Serialize(modifiedDoc, options);

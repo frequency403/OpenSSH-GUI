@@ -22,14 +22,12 @@ public sealed class KeyFileBackupService : IKeyFileBackupService, IDisposable
     private static readonly string BackupDirectory =
         Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), AppDomain.CurrentDomain.FriendlyName);
 
-    private ILogger<KeyFileBackupService>? _operationLogger;
     private SerilogLoggerFactory? _loggerFactory;
 
+    private ILogger<KeyFileBackupService>? _operationLogger;
+
     /// <inheritdoc />
-    public void Dispose()
-    {
-        _loggerFactory?.Dispose();
-    }
+    public void Dispose() { _loggerFactory?.Dispose(); }
 
     /// <inheritdoc />
     public IEnumerable<BackedUpFile> BackupFiles(params FileInfo[] files)
@@ -38,7 +36,11 @@ public sealed class KeyFileBackupService : IKeyFileBackupService, IDisposable
         {
             var destination = Path.Combine(BackupDirectory, string.Join(".", file.Name, BackupFileExtension));
             WriteToOperationLog(LogLevel.Debug, "Backing up file {file} to {destination}", file.FullName, destination);
-            var backup = new BackedUpFile { InitialFile = file, BackupFile = new FileInfo(destination) };
+            var backup = new BackedUpFile
+            {
+                InitialFile = file,
+                BackupFile = new FileInfo(destination)
+            };
             backup.Backup();
             WriteToOperationLog(LogLevel.Debug, "Successfully backed up file {file}", file.FullName);
             yield return backup;

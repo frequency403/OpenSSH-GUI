@@ -237,7 +237,10 @@ Host key-host
         // Arrange
         var content = "Include recursive.conf";
         var options = new SshConfigParserOptions
-            { MaxIncludeDepth = 1, IncludeBasePath = Directory.GetCurrentDirectory() };
+        {
+            MaxIncludeDepth = 1,
+            IncludeBasePath = Directory.GetCurrentDirectory()
+        };
         var recursiveFile = Path.Combine(Directory.GetCurrentDirectory(), "recursive.conf");
         File.WriteAllText(recursiveFile, "Include recursive.conf");
 

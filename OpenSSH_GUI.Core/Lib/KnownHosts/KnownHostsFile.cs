@@ -2,7 +2,6 @@
 using System.Text;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Services;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
@@ -15,6 +14,12 @@ public sealed partial record KnownHostsFile : ReactiveRecord
     ///     Represents a known hosts file.
     /// </summary>
     [ReactiveCollection] private ObservableCollection<KnownHost> _knownHosts = [];
+
+    /// Represents a known hosts file.
+    public KnownHostsFile(bool IsFromServer = false) => this.IsFromServer = IsFromServer;
+
+    public static KnownHostsFile Empty { get; } = new();
+    public bool IsFromServer { get; init; }
 
     private static FileStreamOptions CreateOptions()
     {
@@ -33,15 +38,6 @@ public sealed partial record KnownHostsFile : ReactiveRecord
 
         return options;
     }
-    
-    /// Represents a known hosts file.
-    public KnownHostsFile(bool IsFromServer = false)
-    {
-        this.IsFromServer = IsFromServer;
-    }
-
-    public static KnownHostsFile Empty { get; } = new();
-    public bool IsFromServer { get; init; }
 
     public static ValueTask<KnownHostsFile> InitializeAsync(FileInfo fileInfo, bool fromServer = false,
         CancellationToken token = default) => fileInfo is null

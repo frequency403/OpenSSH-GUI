@@ -76,7 +76,10 @@ public class App(
             SshNetLoggingConfiguration.InitializeLogging(serviceProvider.GetRequiredService<ILoggerFactory>());
             try
             {
-                foreach (var variant in new[] { ThemeVariant.Light, ThemeVariant.Dark })
+                foreach (var variant in new[]
+                         {
+                             ThemeVariant.Light, ThemeVariant.Dark
+                         })
                 {
                     foreach (var (width, height) in IconSizes)
                     {
@@ -199,12 +202,13 @@ public class App(
                 window.Topmost = true;
                 logger.LogDebug("Trying to bring {WindowName} to front", sender?.GetType().Name ?? "null");
                 window.Activate();
-                
-                Dispatcher.Post(() =>
-                {
-                    logger.LogDebug("Window is not set as topmost anymore");
-                    window.Topmost = false;
-                }, DispatcherPriority.Background);
+
+                Dispatcher.Post(
+                    () =>
+                    {
+                        logger.LogDebug("Window is not set as topmost anymore");
+                        window.Topmost = false;
+                    }, DispatcherPriority.Background);
             }
 
             try

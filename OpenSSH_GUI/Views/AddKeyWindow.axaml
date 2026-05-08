@@ -28,8 +28,8 @@
                           FontSize="{Binding ComboBoxFontSize}"
                           ItemsSource="{Binding ApplicationConfiguration.LookupPaths}"
                           SelectedItem="{Binding ChosenPath}" />
-                <TextBox Name="KeyFileNameTextBox" 
-                         Text="{CompiledBinding KeyName}" 
+                <TextBox Name="KeyFileNameTextBox"
+                         Text="{CompiledBinding KeyName}"
                          HorizontalAlignment="Stretch" />
             </UniformGrid>
         </controls:HeaderedItem>

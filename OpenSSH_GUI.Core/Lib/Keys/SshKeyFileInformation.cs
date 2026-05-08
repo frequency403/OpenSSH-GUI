@@ -49,7 +49,10 @@ public sealed record SshKeyFileInformation
             ? SshKeyFormat.OpenSSH
             : AvailableFormatsForConversion.FirstOrDefault();
 
-        Files = new[] { FullFileName, PublicKeyFileName }
+        Files = new[]
+            {
+                FullFileName, PublicKeyFileName
+            }
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .Select(p => new FileInfo(p!))
             .ToArray();

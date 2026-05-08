@@ -55,5 +55,8 @@ public sealed record SshConfigParserOptions
     /// <summary>
     ///     Gets a strict options instance that throws on any unrecognised keyword.
     /// </summary>
-    public static SshConfigParserOptions Strict { get; } = new() { ThrowOnUnknownKey = true };
+    public static SshConfigParserOptions Strict { get; } = new()
+    {
+        ThrowOnUnknownKey = true
+    };
 }

@@ -282,9 +282,11 @@
                         </Panel>
                     </ToolTip.Tip>
                     <Panel>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !SshKeyManager.Processing}"
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   IsVisible="{Binding !SshKeyManager.Processing}"
                                    Text="{Binding SshKeyManager.SshKeys.Count}" FontWeight="Bold" />
-                        <materialIcons:MaterialIcon Kind="Refresh" Animation="Spin" IsVisible="{Binding SshKeyManager.Processing}" />
+                        <materialIcons:MaterialIcon Kind="Refresh" Animation="Spin"
+                                                    IsVisible="{Binding SshKeyManager.Processing}" />
                     </Panel>
                 </controls:FlyoutButton>
 

@@ -20,12 +20,12 @@ namespace OpenSSH_GUI.Core.Services;
 /// </summary>
 public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 {
-    private readonly ILogger<SshKeyManager> _logger;
+    private readonly IKeyFileBackupService _backupService;
     private readonly IDirectoryCrawler _directoryCrawler;
     private readonly ISshKeyFactory _keyFactory;
-    private readonly ISshKeyGenerator _keyGenerator;
     private readonly IKeyFileWriterService _keyFileWriterService;
-    private readonly IKeyFileBackupService _backupService;
+    private readonly ISshKeyGenerator _keyGenerator;
+    private readonly ILogger<SshKeyManager> _logger;
     private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly ObservableCollection<SshKeyFile> _sshKeysInternal = [];
 

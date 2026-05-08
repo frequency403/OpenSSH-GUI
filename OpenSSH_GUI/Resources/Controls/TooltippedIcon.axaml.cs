@@ -17,6 +17,15 @@ public partial class TooltippedIcon : UserControl
     public static readonly StyledProperty<PlacementMode> ToolTipPlacementProperty =
         AvaloniaProperty.Register<TooltippedIcon, PlacementMode>(nameof(ToolTipPlacement), PlacementMode.Bottom);
 
+    private DispatcherTimer? _hoverTimer;
+    private bool _isPinned;
+
+    public TooltippedIcon()
+    {
+        InitializeComponent();
+        InitHoverTimer();
+    }
+
     public MaterialIconKind Icon
     {
         get => GetValue(IconProperty);
@@ -35,26 +44,20 @@ public partial class TooltippedIcon : UserControl
         set => SetValue(ToolTipPlacementProperty, value);
     }
 
-    private DispatcherTimer? _hoverTimer;
-    private bool _isPinned;
-
-    public TooltippedIcon()
-    {
-        InitializeComponent();
-        InitHoverTimer();
-    }
-
     /// <summary>
-    /// Initializes the hover delay timer used to open the popup on prolonged pointer hover.
+    ///     Initializes the hover delay timer used to open the popup on prolonged pointer hover.
     /// </summary>
     private void InitHoverTimer()
     {
-        _hoverTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(600) };
+        _hoverTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(600)
+        };
         _hoverTimer.Tick += OnHoverTimerTick;
     }
 
     /// <summary>
-    /// Opens the popup transiently when the hover delay elapses, unless already pinned.
+    ///     Opens the popup transiently when the hover delay elapses, unless already pinned.
     /// </summary>
     private void OnHoverTimerTick(object? sender, EventArgs e)
     {
@@ -63,7 +66,7 @@ public partial class TooltippedIcon : UserControl
     }
 
     /// <summary>
-    /// Starts the hover timer when the pointer enters the hit area.
+    ///     Starts the hover timer when the pointer enters the hit area.
     /// </summary>
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
@@ -72,13 +75,13 @@ public partial class TooltippedIcon : UserControl
     }
 
     /// <summary>
-    /// Closes the popup on pointer exit, unless it has been pinned via click.
+    ///     Closes the popup on pointer exit, unless it has been pinned via click.
     /// </summary>
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
         _hoverTimer?.Stop();
         if (_isPinned) return;
-        
+
         var pos = e.GetPosition(Popup.Child);
         if (Popup.IsOpen && Popup.Child is not null)
         {
@@ -90,8 +93,8 @@ public partial class TooltippedIcon : UserControl
     }
 
     /// <summary>
-    /// Pins the popup open on click, or unpins and closes it if already pinned.
-    /// Light dismiss will also unpin via <see cref="OnPopupClosed"/>.
+    ///     Pins the popup open on click, or unpins and closes it if already pinned.
+    ///     Light dismiss will also unpin via <see cref="OnPopupClosed" />.
     /// </summary>
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
@@ -101,15 +104,12 @@ public partial class TooltippedIcon : UserControl
     }
 
     /// <summary>
-    /// Resets the pinned state when the popup is closed externally via light dismiss.
+    ///     Resets the pinned state when the popup is closed externally via light dismiss.
     /// </summary>
-    private void OnPopupClosed(object? sender, EventArgs e)
-    {
-        _isPinned = false;
-    }
-    
+    private void OnPopupClosed(object? sender, EventArgs e) { _isPinned = false; }
+
     /// <summary>
-    /// Closes the popup when the pointer leaves the popup content area, unless pinned.
+    ///     Closes the popup when the pointer leaves the popup content area, unless pinned.
     /// </summary>
     private void OnPopupContentExited(object? sender, PointerEventArgs e)
     {

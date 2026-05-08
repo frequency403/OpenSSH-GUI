@@ -40,7 +40,9 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     {
         ConnectionCredentials = credentials ?? ConnectionCredentials.Empty;
         ClientConnection = new SshClient(ConnectionCredentials.GetConnectionInfo())
-            { KeepAliveInterval = TimeSpan.FromSeconds(10) };
+        {
+            KeepAliveInterval = TimeSpan.FromSeconds(10)
+        };
 
         _connectionStringHelper = this.WhenAnyValue(obj => obj.IsConnected)
             .Select(c => c ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : string.Empty)

@@ -27,7 +27,7 @@ public record LoggerConfiguration
 
     [JsonIgnore]
     public string LogFileFullPath => Path.Combine(LogFilePath, LogFileName);
-    
+
     [JsonIgnore]
     public static LoggerConfiguration Default { get; } = new();
 }

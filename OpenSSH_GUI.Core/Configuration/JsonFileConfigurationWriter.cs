@@ -8,8 +8,8 @@ public sealed class JsonFileConfigurationWriter<T>(string filePath, JsonTypeInfo
     private readonly SemaphoreSlim _lock = new(1, 1);
 
     /// <summary>
-    /// Reads and deserializes the configuration file into <typeparamref name="T"/>.
-    /// Returns a default instance if the file does not exist.
+    ///     Reads and deserializes the configuration file into <typeparamref name="T" />.
+    ///     Returns a default instance if the file does not exist.
     /// </summary>
     public async Task<T?> ReadAsync(CancellationToken ct)
     {
@@ -21,7 +21,7 @@ public sealed class JsonFileConfigurationWriter<T>(string filePath, JsonTypeInfo
     }
 
     /// <summary>
-    /// Atomically writes <paramref name="value"/> to the configuration file via a temp-file swap.
+    ///     Atomically writes <paramref name="value" /> to the configuration file via a temp-file swap.
     /// </summary>
     public async Task WriteAsync(T value, CancellationToken ct)
     {
@@ -30,11 +30,11 @@ public sealed class JsonFileConfigurationWriter<T>(string filePath, JsonTypeInfo
         {
             await JsonSerializer.SerializeAsync(stream, value, typeInfo, ct);
         }
-        File.Move(tempFile, filePath, overwrite: true);
+        File.Move(tempFile, filePath, true);
     }
 
     /// <summary>
-    /// Reads the current configuration, applies <paramref name="update"/>, then writes the result back atomically.
+    ///     Reads the current configuration, applies <paramref name="update" />, then writes the result back atomically.
     /// </summary>
     public async Task UpdateAsync(Func<T?, Task<T>> update, CancellationToken ct)
     {

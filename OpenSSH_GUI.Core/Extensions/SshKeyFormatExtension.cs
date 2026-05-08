@@ -7,7 +7,6 @@ namespace OpenSSH_GUI.Core.Extensions;
 /// </summary>
 public static class SshKeyFormatExtension
 {
-
     /// <param name="format">The SSH key format.</param>
     extension(SshKeyFormat format)
     {
