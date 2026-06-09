@@ -44,7 +44,7 @@ public class App(
     private const string RessourceUri = "avares://OpenSSH_GUI/Assets/openssh-gui{0}.svg";
     private const string Underline = "_";
     internal const string SystemFontSize = "SystemFontSize";
-    internal const string BaseFontSize = "BaseFontSize";
+    private const string BaseFontSize = "BaseFontSize";
     private const string MaterialIconSize = "MaterialIconSize";
     private static readonly CompositeDisposable Disposables = new();
 
@@ -94,7 +94,7 @@ public class App(
                         {
                             if (Math.Min(
                                     width / (svg.Picture?.CullRect.Width ?? width),
-                                    height / (svg.Picture?.CullRect.Height ?? height)) is { } scale and > 0)
+                                    height / (svg.Picture?.CullRect.Height ?? height)) is var scale and > 0)
                                 canvas.Scale(scale);
                             canvas.Clear(SKColors.Transparent);
                             canvas.DrawPicture(svg.Picture);
@@ -200,7 +200,7 @@ public class App(
             {
                 window.Opened -= OnMainWindowOpened;
                 window.Topmost = true;
-                logger.LogDebug("Trying to bring {WindowName} to front", sender?.GetType().Name ?? "null");
+                logger.LogDebug("Trying to bring {WindowName} to front", sender.GetType().Name ?? "null");
                 window.Activate();
 
                 Dispatcher.Post(

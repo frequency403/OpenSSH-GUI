@@ -148,6 +148,4 @@ public sealed partial record KnownHostsFile : ReactiveRecord
         }
         return stringBuilder.ToString();
     }
-
-    public void Deconstruct(out bool IsFromServer) { IsFromServer = this.IsFromServer; }
 }

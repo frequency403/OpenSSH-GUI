@@ -36,7 +36,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     private readonly IStorageProvider _storageProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
-    private ApplicationConfiguration _applicationConfiguration;
+    private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
 
     [Reactive] private bool _canDeleteOldLogFiles;
 

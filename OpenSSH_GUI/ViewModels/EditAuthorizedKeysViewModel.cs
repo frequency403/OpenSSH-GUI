@@ -49,10 +49,7 @@ public partial class EditAuthorizedKeysViewModel : ViewModelBase
                     Item1: { } keyFile,
                     Item2:
                     {
-                        AuthorizedKeys:
-                        {
-                            Count: > 0
-                        }
+                        AuthorizedKeys.Count: > 0
                     } col,
                     Item3: true
                 } && col.CanAddKey(keyFile))

@@ -66,7 +66,7 @@ public static class DependencyInjectionExtensions
         /// <typeparam name="TViewModelInitializerParameter">The type of the initializer parameter passed to the ViewModel.</typeparam>
         /// <param name="initializerParameters">
         ///     The parameter passed to
-        ///     <see cref="WindowBase{TViewModel,TViewModelInitializerParameter}.InitializeAsync" />.
+        ///     <see cref="WindowBase{TViewModel,TViewModelInitializerParameter}.InitializeAsync(TViewModelInitializerParameter, WindowStartupLocation, CancellationToken)" />.
         /// </param>
         /// <param name="windowStartupLocation">The startup location of the window.</param>
         /// <param name="token">A <see cref="CancellationToken" /> to observe during initialization.</param>

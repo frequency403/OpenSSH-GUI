@@ -132,7 +132,7 @@ public sealed class MutableConfiguration<T> : IMutableConfiguration<T>
             value);
     }
 
-    private static object? ConvertValue(object value, Type targetType)
+    private static object ConvertValue(object value, Type targetType)
     {
         var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 

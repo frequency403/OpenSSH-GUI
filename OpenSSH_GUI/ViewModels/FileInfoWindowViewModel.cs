@@ -75,7 +75,7 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
 
         _associatedFilesHeaderHelper = this.WhenAnyValue(vm => vm.KeyFile.KeyFiles)
             .ObserveOn(AvaloniaScheduler.Instance)
-            .Select(e => string.Format(StringsAndTexts.FileInfoWindowFoundAssociatedFiles, e?.Length ?? 0))
+            .Select(e => string.Format(StringsAndTexts.FileInfoWindowFoundAssociatedFiles, e.Length))
             .ToProperty(this, vm => vm.AssociatedFilesHeader)
             .DisposeWith(Disposables);
 
