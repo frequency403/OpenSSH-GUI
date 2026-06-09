@@ -1,27 +1,39 @@
 pkgname=openssh-gui-bin
-pkgver=3.0.0
+pkgver=3.1.0
 pkgrel=1
 pkgdesc="A GUI for OpenSSH configuration and management (Binary version)"
 arch=('x86_64')
 url="https://github.com/frequency403/OpenSSH-GUI"
 license=('MIT')
+
 depends=('icu' 'openssl' 'zlib' 'krb5' 'libx11')
 options=('!strip')
+
 provides=('openssh-gui')
 conflicts=('openssh-gui' 'openssh-gui-git' 'openssh-gui-nightly')
 
+_relurl="https://github.com/frequency403/OpenSSH-GUI/releases/download/v${pkgver}"
 _rawurl="https://raw.githubusercontent.com/frequency403/OpenSSH-GUI/v${pkgver}"
-_relurl="${url}/releases/download/v${pkgver}"
 
-source=("${pkgname}-${pkgver}::${_relurl}/OpenSSH-GUI-linux-x64"
-        "${pkgname}-icon-${pkgver}.png::${_relurl}/appicon.png"
-        "${pkgname}-desktop-${pkgver}.desktop::${_relurl}/io.github.frequency403.openssh_gui.desktop"
-        "${pkgname}-license-${pkgver}::${_rawurl}/LICENSE")
+source=(
+  "${pkgname}-${pkgver}::${_relurl}/OpenSSH-GUI-linux-x64"
+  "${pkgname}-icon-${pkgver}.png::${_relurl}/appicon.png"
+  "${pkgname}-desktop-${pkgver}.desktop::${_relurl}/io.github.frequency403.openssh_gui.desktop"
+  "${pkgname}-license-${pkgver}::${_rawurl}/LICENSE"
+)
+
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
-  install -Dm755 "${pkgname}-${pkgver}"                 "${pkgdir}/usr/bin/openssh-gui"
-  install -Dm644 "${pkgname}-icon-${pkgver}.png"        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/openssh-gui.png"
-  install -Dm644 "${pkgname}-desktop-${pkgver}.desktop" "${pkgdir}/usr/share/applications/io.github.frequency403.openssh_gui.desktop"
-  install -Dm644 "${pkgname}-license-${pkgver}"         "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm755 "${srcdir}/${pkgname}-${pkgver}" \
+    "${pkgdir}/usr/bin/openssh-gui"
+
+  install -Dm644 "${srcdir}/${pkgname}-icon-${pkgver}.png" \
+    "${pkgdir}/usr/share/icons/hicolor/256x256/apps/openssh-gui.png"
+
+  install -Dm644 "${srcdir}/${pkgname}-desktop-${pkgver}.desktop" \
+    "${pkgdir}/usr/share/applications/io.github.frequency403.openssh_gui.desktop"
+
+  install -Dm644 "${srcdir}/${pkgname}-license-${pkgver}" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
