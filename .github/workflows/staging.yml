@@ -45,7 +45,7 @@ jobs:
   deploy-aur-nightly:
     name: Update AUR Nightly Package
     runs-on: ubuntu-latest
-    needs: prepare
+    needs: [prepare, build]
 
     steps:
       - name: Checkout Repository
@@ -56,12 +56,14 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./
+          path: artifacts/
 
       - name: Prepare for PKGBUILD update
         run: |
-          # Move files from subdirectories to current directory
-          find . -maxdepth 2 -mindepth 2 -type f -exec mv -t . {} +
+          rm -rf aur-assets
+          mkdir -p aur-assets
+
+          find artifacts -type f -exec cp {} aur-assets/ \;
           
           DATE=$(date +%Y%m%d)
           VERSION="${{ needs.prepare.outputs.base_version }}.${DATE}.${{ needs.prepare.outputs.git_hash }}"
