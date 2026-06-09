@@ -31,7 +31,7 @@ public sealed record SshKeyFileInformation
         DirectoryName = FileInfo.DirectoryName;
         Exists = FileInfo.Exists;
 
-        CurrentFormat = FileInfo.Extension == PathExtensions.PuttyKeyFileExtension
+        CurrentFormat = FileInfo.Extension.EndsWith(PathExtensions.PuttyKeyFileExtension)
             ? SshKeyFormat.PuTTYv3
             : SshKeyFormat.OpenSSH;
 
