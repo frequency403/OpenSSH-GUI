@@ -66,24 +66,35 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./
+          path: artifacts/
 
       - name: Prepare for PKGBUILD update
         run: |
           rm -rf aur-assets
           mkdir -p aur-assets
-          
-          find . -mindepth 2 -type f -exec cp {} aur-assets/ \;
-          
+
+          find artifacts -type f -exec cp {} aur-assets/ \;
+
+          echo "AUR asset files:"
+          ls -la aur-assets
+
+          test -f aur-assets/OpenSSH-GUI-linux-x64
+          test -f aur-assets/appicon.png
+          test -f aur-assets/io.github.frequency403.openssh_gui.desktop
+          test -f LICENSE
+
           VERSION=${GITHUB_REF_NAME#v}
           SHA_BIN=$(sha256sum aur-assets/OpenSSH-GUI-linux-x64 | cut -d' ' -f1)
           SHA_ICON=$(sha256sum aur-assets/appicon.png | cut -d' ' -f1)
           SHA_DESKTOP=$(sha256sum aur-assets/io.github.frequency403.openssh_gui.desktop | cut -d' ' -f1)
           SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
-          
+
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-bin/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
+
+          echo "Updated openssh-gui-bin PKGBUILD:"
+          grep -E '^(pkgver=|sha256sums=)' openssh-gui-bin/PKGBUILD
 
       - name: Update AUR (openssh-gui-bin)
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
