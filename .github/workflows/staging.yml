@@ -62,16 +62,16 @@ jobs:
 
       - name: Flatten and Prepare Assets
         run: |
-          # Move files from subdirectories to the root of artifacts/
-          find artifacts -mindepth 2 -type f -exec mv -t artifacts/ {} +
-          # Remove empty subdirectories
-          find artifacts -mindepth 1 -type d -delete
-          
-          # Copy LICENSE to artifacts
-          cp LICENSE artifacts/LICENSE
-          
+          rm -rf release-assets
+          mkdir -p release-assets
+
+          # Copy files from artifact subdirectories into a clean output directory.
+          find artifacts -type f -exec cp {} release-assets/ \;
+
+          cp LICENSE release-assets/LICENSE
+
           echo "Nightly Assets:"
-          ls -R artifacts
+          ls -la release-assets
 
       - name: Update nightly release
         env:
@@ -92,7 +92,7 @@ jobs:
             gh release view nightly --json assets --jq '.assets[].name' \
               | xargs -r -I{} gh release delete-asset nightly {} --yes
           
-            find artifacts -type f | xargs gh release upload nightly
+            find release-assets -type f -print0 | xargs -0 gh release upload nightly
           else
             gh release create nightly \
               --title "Nightly (${{ needs.prepare.outputs.build_date }}) — ${{ needs.prepare.outputs.version }}" \

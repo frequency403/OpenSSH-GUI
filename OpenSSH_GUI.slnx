@@ -14,6 +14,8 @@
         <File Path=".github/workflows/build.yml" />
         <File Path=".github/workflows/staging.yml" />
         <File Path=".github\workflows\auto-tag.yml" />
+        <File Path=".github\workflows\build-and-package.yml" />
+        <File Path=".github\workflows\test.yml" />
     </Folder>
     <Folder Name="/Solution Items/">
         <File Path=".gitignore" />
