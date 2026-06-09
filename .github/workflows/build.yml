@@ -35,22 +35,21 @@ jobs:
 
       - name: Flatten and Prepare Assets
         run: |
-          # Move files from subdirectories to the root of artifacts/
-          find artifacts -mindepth 2 -type f -exec mv -t artifacts/ {} +
-          # Remove empty subdirectories
-          find artifacts -mindepth 1 -type d -delete
-          
-          # Copy LICENSE to artifacts
-          cp LICENSE artifacts/LICENSE
-          
+          rm -rf release-assets
+          mkdir -p release-assets
+
+          find artifacts -type f -exec cp {} release-assets/ \;
+
+          cp LICENSE release-assets/LICENSE
+
           echo "Release Assets:"
-          ls -R artifacts
+          ls -la release-assets
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          files: "artifacts/*"
+          files: "release-assets/*"
           generate_release_notes: true
 
   deploy-aur:
@@ -71,15 +70,17 @@ jobs:
 
       - name: Prepare for PKGBUILD update
         run: |
-          # Move files from subdirectories to current directory
-          find . -maxdepth 2 -mindepth 2 -type f -exec mv -t . {} +
+          rm -rf aur-assets
+          mkdir -p aur-assets
+          
+          find . -mindepth 2 -type f -exec cp {} aur-assets/ \;
           
           VERSION=${GITHUB_REF_NAME#v}
-          SHA_BIN=$(sha256sum OpenSSH-GUI-linux-x64 | cut -d' ' -f1)
-          SHA_ICON=$(sha256sum appicon.png | cut -d' ' -f1)
-          SHA_DESKTOP=$(sha256sum io.github.frequency403.openssh_gui.desktop | cut -d' ' -f1)
+          SHA_BIN=$(sha256sum aur-assets/OpenSSH-GUI-linux-x64 | cut -d' ' -f1)
+          SHA_ICON=$(sha256sum aur-assets/appicon.png | cut -d' ' -f1)
+          SHA_DESKTOP=$(sha256sum aur-assets/io.github.frequency403.openssh_gui.desktop | cut -d' ' -f1)
           SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
-
+          
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-bin/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
