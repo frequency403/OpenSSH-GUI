@@ -52,6 +52,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dotnet-
 
+      - name: Normalize version
+        id: version
+        run: |
+          VERSION="${{ inputs.version }}"
+          VERSION="${VERSION#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Publish application
         run: |
           dotnet publish OpenSSH_GUI/OpenSSH_GUI.csproj \
@@ -61,7 +68,7 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:Version="${{ inputs.version }}" \
+            -p:Version="${{ steps.version.outputs.VERSION }}" \   # ← normalisiert
             ${{ inputs.is_nightly && '-p:IsNightly=true' || '' }}
 
       - name: Rename artifact
