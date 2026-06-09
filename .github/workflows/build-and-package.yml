@@ -68,7 +68,7 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:Version="${{ steps.version.outputs.VERSION }}" \   # ← normalisiert
+            -p:Version="${{ steps.version.outputs.VERSION }}" \ 
             ${{ inputs.is_nightly && '-p:IsNightly=true' || '' }}
 
       - name: Rename artifact
