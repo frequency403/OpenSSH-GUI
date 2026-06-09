@@ -1,3 +1,4 @@
+using Material.Icons;
 using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Models;
 
@@ -21,7 +22,7 @@ public interface IMessageBoxProvider
         string title,
         string message,
         MessageBoxButtons buttons = MessageBoxButtons.Ok,
-        MessageBoxIcon icon = MessageBoxIcon.None);
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline);
 
     /// <summary>
     ///     Shows a modal message box and returns the button the user clicked.
@@ -33,6 +34,11 @@ public interface IMessageBoxProvider
     ///     title-bar chrome.
     /// </returns>
     Task<MessageBoxResult> ShowMessageBoxAsync(MessageBoxParams @params);
+
+    public Task<MessageBoxResult> ShowErrorMessageBoxAsync(Exception? e = null, string? customMessage = null);
+
+    public Task<bool> ShowRetryMessageBoxAsync(Func<Task<bool?>> tryActionAsync, string title, string message,
+        MaterialIconKind icon = MaterialIconKind.ErrorOutline, int retries = 3, bool showTryCountInTitle = true);
 
     /// <summary>
     ///     Shows a modal secure-input (password) prompt and returns the result.
@@ -63,7 +69,8 @@ public interface IMessageBoxProvider
     /// <param name="params">The parameters for the secure-input prompt.</param>
     /// <returns>
     ///     A <see cref="SecureInputResult" /> whose <see cref="SecureInputResult.Value" />
-    ///     contains the UTF-8 encoded password, or <c>null</c> when the user cancels.
+    ///     contains the by the <see cref="SecureInputParams.Encoding" /> encoded password, or <c>null</c> when the user
+    ///     cancels.
     ///     The caller is responsible for disposing the result to zero the buffer.
     /// </returns>
     Task<SecureInputResult?> ShowSecureInputAsync(SecureInputParams @params);

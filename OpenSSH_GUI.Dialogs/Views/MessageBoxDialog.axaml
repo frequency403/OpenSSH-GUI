@@ -3,15 +3,16 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="OpenSSH_GUI.Dialogs.Views.MessageBoxDialog"
         Title="Message"
-        Width="440"
-        MinWidth="300"
-        SizeToContent="Height"
+        MinWidth="440"
+        SizeToContent="WidthAndHeight"
         CanResize="False"
+        CanMaximize="False"
+        CanMinimize="False"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaToDecorationsHint="False">
-
+        ExtendClientAreaToDecorationsHint="False"
+        Closing="Window_OnClosing">
+    <!-- ReSharper disable InconsistentNaming -->
     <Border Padding="24 20 24 16">
         <Grid RowDefinitions="*,16,Auto">
 
@@ -22,6 +23,7 @@
                         VerticalAlignment="Top">
 
                 <!-- Material Icon – visibility and kind set from code-behind -->
+
                 <avalonia:MaterialIcon x:Name="PART_MaterialIcon"
                                        Width="32"
                                        Height="32"

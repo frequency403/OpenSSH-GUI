@@ -2,7 +2,7 @@ name: Auto-Tag on Release Merge
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - master
       - main

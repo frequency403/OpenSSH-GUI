@@ -157,7 +157,8 @@ public static class SshKnownKeys
     ///     (i.e. later occurrences accumulate rather than override earlier ones).
     /// </summary>
     private static readonly FrozenSet<string> MultiOccurrenceKeys =
-        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+        FrozenSet.Create(
+            StringComparer.OrdinalIgnoreCase,
             "CertificateFile",
             "DynamicForward",
             "IdentityFile",
@@ -168,7 +169,8 @@ public static class SshKnownKeys
     ///     Keywords that accept multiple space-separated value tokens on a single directive line.
     /// </summary>
     private static readonly FrozenSet<string> MultiTokenKeys =
-        FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+        FrozenSet.Create(
+            StringComparer.OrdinalIgnoreCase,
             "SendEnv",
             "SetEnv",
             "Host",
@@ -179,35 +181,23 @@ public static class SshKnownKeys
     ///     or returns <paramref name="key" /> unchanged if it is not a recognised keyword.
     /// </summary>
     /// <param name="key">A configuration keyword in any casing.</param>
-    public static string Normalize(string key)
-    {
-        return CanonicalKeys.GetValueOrDefault(key, key);
-    }
+    public static string Normalize(string key) => CanonicalKeys.GetValueOrDefault(key, key);
 
     /// <summary>
     ///     Returns <see langword="true" /> when <paramref name="key" /> supports multiple occurrences
     ///     within the same block with additive (accumulative) semantics.
     /// </summary>
-    public static bool IsMultiOccurrenceKey(string key)
-    {
-        return MultiOccurrenceKeys.Contains(key);
-    }
+    public static bool IsMultiOccurrenceKey(string key) => MultiOccurrenceKeys.Contains(key);
 
     /// <summary>
     ///     Returns <see langword="true" /> when <paramref name="key" /> accepts multiple
     ///     space-separated value tokens on a single directive line.
     /// </summary>
-    public static bool IsMultiTokenKey(string key)
-    {
-        return MultiTokenKeys.Contains(key);
-    }
+    public static bool IsMultiTokenKey(string key) => MultiTokenKeys.Contains(key);
 
     /// <summary>
     ///     Returns <see langword="true" /> when <paramref name="key" /> is a recognised
     ///     <c>ssh_config(5)</c> client keyword.
     /// </summary>
-    public static bool IsKnownKey(string key)
-    {
-        return CanonicalKeys.ContainsKey(key);
-    }
+    public static bool IsKnownKey(string key) => CanonicalKeys.ContainsKey(key);
 }

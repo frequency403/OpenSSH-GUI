@@ -1,7 +1,7 @@
 pkgname=openssh-gui-nightly
-pkgver=1.0.0.20260316.abc1234
+pkgver=3.0.0.19700101.unknown
 pkgrel=1
-pkgdesc="A GUI for OpenSSH configuration and management (Nightly build from develop)"
+pkgdesc="A GUI for OpenSSH configuration and management (Nightly build)"
 arch=('x86_64')
 url="https://github.com/frequency403/OpenSSH-GUI"
 license=('MIT')
@@ -9,15 +9,18 @@ depends=('icu' 'openssl' 'zlib' 'krb5' 'libx11')
 options=('!strip')
 provides=('openssh-gui')
 conflicts=('openssh-gui' 'openssh-gui-bin' 'openssh-gui-git')
-source=("${pkgname}-${pkgver}::${url}/releases/download/nightly/OpenSSH-GUI-nightly-linux-x64"
-        "${pkgname}-icon-${pkgver}.png::${url}/raw/develop/OpenSSH_GUI/Assets/appicon.png"
-        "${pkgname}-desktop-${pkgver}.desktop::${url}/raw/develop/io.github.frequency403.openssh_gui.desktop"
-        "${pkgname}-license-${pkgver}::${url}/raw/develop/LICENSE")
+
+_relurl="${url}/releases/download/nightly"
+
+source=("${pkgname}-${pkgver}::${_relurl}/OpenSSH-GUI-nightly-linux-x64"
+        "${pkgname}-icon-${pkgver}.png::${_relurl}/appicon.png"
+        "${pkgname}-desktop-${pkgver}.desktop::${_relurl}/io.github.frequency403.openssh_gui.desktop"
+        "${pkgname}-license-${pkgver}::${_relurl}/LICENSE")
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
-  install -Dm755 "${pkgname}-${pkgver}" "${pkgdir}/usr/bin/openssh-gui"
-  install -Dm644 "${pkgname}-icon-${pkgver}.png" "${pkgdir}/usr/share/icons/hicolor/256x256/apps/openssh-gui.png"
-  install -Dm644 "${pkgname}-desktop-${pkgver}.desktop" "${pkgdir}/usr/share/applications/openssh-gui.desktop"
-  install -Dm644 "${pkgname}-license-${pkgver}" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm755 "${pkgname}-${pkgver}"                 "${pkgdir}/usr/bin/openssh-gui"
+  install -Dm644 "${pkgname}-icon-${pkgver}.png"        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/openssh-gui.png"
+  install -Dm644 "${pkgname}-desktop-${pkgver}.desktop" "${pkgdir}/usr/share/applications/io.github.frequency403.openssh_gui.desktop"
+  install -Dm644 "${pkgname}-license-${pkgver}"         "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

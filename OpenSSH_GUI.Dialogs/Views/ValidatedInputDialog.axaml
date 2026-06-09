@@ -3,15 +3,16 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="OpenSSH_GUI.Dialogs.Views.ValidatedInputDialog"
         Title="Input"
-        Width="420"
-        SizeToContent="Height"
+        MinWidth="420"
+        SizeToContent="WidthAndHeight"
         CanResize="False"
+        CanMaximize="False"
+        CanMinimize="False"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaToDecorationsHint="False"
-        Opened="OnOpened">
-
+        Opened="OnOpened" Closing="Window_OnClosing">
+    <!-- ReSharper disable InconsistentNaming -->
     <Border Padding="24 20 24 16">
         <StackPanel Spacing="12">
 
@@ -31,12 +32,12 @@
             <!-- Text input -->
             <TextBox x:Name="PART_Input"
                      FontSize="14"
-                     Watermark="Enter value…"
+                     PlaceholderText="Enter value…"
                      KeyDown="OnInputKeyDown" />
 
             <!-- Validation error hint -->
             <TextBlock x:Name="PART_Error"
-                       Foreground="Crimson"
+                       Foreground="{DynamicResource DangerBrush}"
                        FontSize="12"
                        IsVisible="False"
                        TextWrapping="Wrap" />

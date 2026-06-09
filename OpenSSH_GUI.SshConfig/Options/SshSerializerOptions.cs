@@ -56,5 +56,8 @@ public sealed record SshSerializerOptions
     public static SshSerializerOptions Default { get; } = new();
 
     /// <summary>Gets a round-trip options instance that preserves original formatting verbatim.</summary>
-    public static SshSerializerOptions RoundTripMode { get; } = new() { RoundTrip = true };
+    public static SshSerializerOptions RoundTripMode { get; } = new()
+    {
+        RoundTrip = true
+    };
 }

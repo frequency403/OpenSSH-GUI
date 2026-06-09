@@ -2,13 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:assets="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="350"
         Width="400"
-        Height="375"
+        Height="400"
         x:Class="OpenSSH_GUI.Views.AddKeyWindow"
         x:DataType="viewModels:AddKeyWindowViewModel"
         Title="{x:Static assets:StringsAndTexts.AddKeyWindowTitle}"
@@ -16,83 +15,58 @@
         ShowInTaskbar="True"
         ShowActivated="True"
         WindowStartupLocation="CenterOwner">
-    <Grid ColumnDefinitions="* *" RowDefinitions="* * * * * *">
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top" Margin="20 5">
-            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}"
-                   Target="KeyFileNameTextBox" />
-            <Separator />
-            <TextBox Name="KeyFileNameTextBox" Text="{Binding KeyName}" />
-            <TextBlock x:Name="KeyFileNameValidation" Foreground="Red" FontSize="12" />
-        </StackPanel>
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="* *"
-              VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="20 5">
-            <StackPanel Grid.Column="0" Margin="0 0 5 0">
-                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}"
-                       Target="KeyTypesComboBox" />
-                <Separator />
+    <UniformGrid Rows="0" Columns="1" RowSpacing="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                 Margin="10">
+        <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyFileNameTextBoxLabel}">
+            <controls:HeaderedItem.SideHeader>
+                <TextBlock x:Name="KeyFileNameValidation" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                           Foreground="{DynamicResource DangerBrush}" FontSize="12" />
+            </controls:HeaderedItem.SideHeader>
+            <UniformGrid Columns="0" ColumnSpacing="10" Rows="1">
+                <ComboBox IsEditable="False"
+                          HorizontalAlignment="Stretch"
+                          FontSize="{Binding ComboBoxFontSize}"
+                          ItemsSource="{Binding ApplicationConfiguration.LookupPaths}"
+                          SelectedItem="{Binding ChosenPath}" />
+                <TextBox Name="KeyFileNameTextBox"
+                         Text="{CompiledBinding KeyName}"
+                         HorizontalAlignment="Stretch" />
+            </UniformGrid>
+        </controls:HeaderedItem>
+        <UniformGrid Columns="2" Rows="1" ColumnSpacing="10">
+            <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyKeyTypeComboBoxLabel}">
                 <ComboBox Name="KeyTypesComboBox"
                           HorizontalAlignment="Stretch"
                           ItemsSource="{x:Static viewModels:AddKeyWindowViewModel.SshKeyTypes}"
-                          SelectedItem="{Binding SelectedKeyType}" />
-            </StackPanel>
-            <StackPanel Grid.Column="1" Margin="5 0 0 0">
-                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}"
-                       Target="KeySizeComboBox" />
-                <Separator />
-                <ComboBox Name="KeySizeComboBox" IsEnabled="{Binding CanChangeKeySize}"
+                          SelectedItem="{CompiledBinding SelectedKeyType}" />
+            </controls:HeaderedItem>
+            <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyBitSizeComboBoxLabel}">
+                <ComboBox Name="KeySizeComboBox" IsEnabled="{CompiledBinding CanChangeKeySize}"
                           HorizontalAlignment="Stretch"
-                          ItemsSource="{Binding AvaliableKeySizes}"
-                          SelectedItem="{Binding SelectedKeySize}" />
-            </StackPanel>
-        </Grid>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top"
-                    HorizontalAlignment="Stretch" Margin="20 5">
-            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}"
-                   Target="PasswordTextBox" />
-            <Separator />
-            <TextBox Name="PasswordTextBox" Text="{Binding Password}" />
-        </StackPanel>
+                          ItemsSource="{CompiledBinding AvailableKeySizes}"
+                          SelectedItem="{CompiledBinding SelectedKeySize}" />
+            </controls:HeaderedItem>
+        </UniformGrid>
 
-        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 5" HorizontalAlignment="Stretch"
-                    VerticalAlignment="Bottom">
-            <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}"
-                   Target="CommentTextBox" />
-            <Separator />
-            <TextBox Name="CommentTextBox" Text="{Binding Comment}" />
-        </StackPanel>
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="20 5" HorizontalAlignment="Stretch"
-                    VerticalAlignment="Bottom">
-            <Label Content="{x:Static assets:StringsAndTexts.KeyFormatDescription}" />
-            <Separator />
-            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding SshKeyFormats}"
-                      SelectedItem="{Binding KeyFormat}" />
-        </StackPanel>
-        <Button Grid.Row="5" Grid.Column="1" Margin="5" Background="ForestGreen" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom"
-                Command="{Binding BooleanSubmit}"
-                IsEnabled="{Binding KeyNameValidationHelper.IsValid}">
-            <Button.CommandParameter>
-                <system:Boolean>True</system:Boolean>
-            </Button.CommandParameter>
-            <ToolTip.Tip>
-                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}" />
-            </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="KeyAdd" />
-        </Button>
+        <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyPasswordTextBoxLabel}">
+            <TextBox Name="PasswordTextBox" Text="{CompiledBinding Password}" />
+        </controls:HeaderedItem>
 
-        <Button Grid.Row="5" Grid.Column="0" Margin="5" Background="Red" HorizontalAlignment="Stretch"
-                VerticalAlignment="Bottom"
-                Command="{Binding BooleanSubmit}">
-            <Button.CommandParameter>
-                <system:Boolean>False</system:Boolean>
-            </Button.CommandParameter>
-            <ToolTip.Tip>
-                <Label Content="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
-            </ToolTip.Tip>
-            <avalonia:MaterialIcon Kind="Cancel" />
-        </Button>
+        <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.AddKeyWindowKeyCommentTextBoxLabel}">
+            <TextBox Name="CommentTextBox" Text="{CompiledBinding Comment}" />
+        </controls:HeaderedItem>
 
-    </Grid>
+        <controls:HeaderedItem Header="{x:Static assets:StringsAndTexts.KeyFormatDescription}">
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{CompiledBinding SshKeyFormats}"
+                      SelectedItem="{CompiledBinding KeyFormat}" />
+        </controls:HeaderedItem>
 
+        <controls:SubmitButtons VerticalAlignment="Bottom"
+                                BooleanSubmit="{CompiledBinding BooleanSubmitCommand}"
+                                SubmitButtonEnabled="{CompiledBinding KeyNameValidationHelper.IsValid}"
+                                SubmitButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAddKeyButtonToolTipText}"
+                                SubmitButtonIconKind="KeyAdd"
+                                AbortButtonIconKind="Cancel"
+                                AbortButtonTooltip="{x:Static assets:StringsAndTexts.AddKeyWindowAbortButtonToolTipText}" />
+    </UniformGrid>
 </Window>

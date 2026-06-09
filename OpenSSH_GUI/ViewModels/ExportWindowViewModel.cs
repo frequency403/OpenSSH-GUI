@@ -7,15 +7,14 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard) : ViewModelBase<ExportWindowViewModel, ExportWindowViewModelInitializerParameters>(logger)
+public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard)
+    : ViewModelBase<(string WindowTitle, string Export)>
 {
-    [Reactive]
-    private string _windowTitle = "";
-    
-    [Reactive]
-    private string _export = "";
-    
-    public override ValueTask InitializeAsync(ExportWindowViewModelInitializerParameters parameters,
+    [Reactive] private string _export = string.Empty;
+
+    [Reactive] private string _windowTitle = string.Empty;
+
+    public override ValueTask InitializeAsync((string WindowTitle, string Export) parameters,
         CancellationToken cancellationToken = default)
     {
         WindowTitle = parameters.WindowTitle;
@@ -23,15 +22,22 @@ public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger
         return base.InitializeAsync(parameters, cancellationToken);
     }
 
-    protected override async Task OnBooleanSubmitAsync(bool inputParameter,
+    protected override async Task BooleanSubmitAsync(bool inputParameter,
         CancellationToken cancellationToken = default)
     {
-        if (inputParameter)
-            await clipboard.SetTextAsync(Export);
+        try
+        {
+            if (inputParameter)
+                await clipboard.SetTextAsync(Export);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error submitting export to clipboard");
+        }
     }
 }
 
-public record ExportWindowViewModelInitializerParameters : IInitializerParameters<ExportWindowViewModel>
+public record ExportWindowViewModelInitializerParameters
 {
     public string WindowTitle { get; init; } = string.Empty;
     public string Export { get; init; } = string.Empty;

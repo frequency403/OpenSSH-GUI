@@ -27,9 +27,4 @@ public class MessageBoxParams
     ///     Gets or sets the icon shown beside the message.
     /// </summary>
     public MaterialIconKind? Icon { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the legacy icon shown beside the message.
-    /// </summary>
-    public MessageBoxIcon LegacyIcon { get; set; } = MessageBoxIcon.None;
 }

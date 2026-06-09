@@ -1,12 +1,18 @@
-﻿using JetBrains.Annotations;
+﻿using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
+using Avalonia;
+using Avalonia.Controls;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using OpenSSH_GUI.Core.Configuration;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
-using OpenSSH_GUI.Dialogs.Enums;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Resources;
 using ReactiveUI;
+using ReactiveUI.Avalonia;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Validation.Abstractions;
 using ReactiveUI.Validation.Contexts;
@@ -18,77 +24,139 @@ using SshNet.Keygen.SshKeyEncryption;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowViewModel>, IValidatableViewModel
+public sealed partial class AddKeyWindowViewModel : ViewModelBase, IValidatableViewModel
 {
-    private readonly SshKeyManager _sshKeyManager;
+    private const string KeyPrefix = "id";
+    private readonly IOptionsMonitor<ApplicationConfiguration> _applicationConfigurationMonitor;
+    private readonly ILogger<AddKeyWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
+    private readonly SshKeyManager _sshKeyManager;
+
+    [Reactive] private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private int[] _availableKeySizes = [];
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private bool _canChangeKeySize;
+
+    [Reactive] private string _chosenPath = string.Empty;
+
+    [ObservableAsProperty(ReadOnly = true)]
+    private int _comboBoxFontSize;
+
+    [Reactive] private string _comment = SshKeyGenerateInfo.DefaultSshKeyComment;
+
+    [Reactive] private SshKeyFormat _keyFormat = SshKeyGenerateInfo.DefaultSshKeyFormat;
+
+    [Reactive] private string _keyName = string.Empty;
+
+    [Reactive] private string _password = string.Empty;
+
+    [Reactive] private int _selectedKeySize;
+
+    [Reactive] private SshKeyType _selectedKeyType = SshKeyGenerateInfo.DefaultSshKeyType;
 
     public AddKeyWindowViewModel(ILogger<AddKeyWindowViewModel> logger,
         SshKeyManager sshKeyManager,
-        IMessageBoxProvider messageBoxProvider) : base(logger)
+        IOptionsMonitor<ApplicationConfiguration> applicationConfigurationMonitor,
+        Application application,
+        IMessageBoxProvider messageBoxProvider)
     {
+        _logger = logger;
         _sshKeyManager = sshKeyManager;
+        _applicationConfigurationMonitor = applicationConfigurationMonitor;
         _messageBoxProvider = messageBoxProvider;
-        
-        _keyTypeSubscription = this.WhenAnyValue(x => x.SelectedKeyType)
-            .Subscribe(type =>
+        _comboBoxFontSize = int.Parse(application.Resources[App.SystemFontSize]?.ToString() ?? "14") - 2;
+        _applicationConfigurationMonitor.OnChange(conf =>
+        {
+            ApplicationConfiguration = conf;
+        })?.DisposeWith(Disposables);
+
+        this.WhenAnyValue(vm => vm.ApplicationConfiguration)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .StartWith(ApplicationConfiguration.Default)
+            .Subscribe(config =>
             {
-                try
-                {
-                    KeyName = $"id_{Enum.GetName(type)!.ToLower()}";
+                ChosenPath = config.LookupPaths.FirstOrDefault() ?? string.Empty;
+            }).DisposeWith(Disposables);
 
-                    var ordered = type.SupportedKeySizes.OrderDescending().ToList();
-                    AvaliableKeySizes = ordered;
-                    SelectedKeySize   = ordered.First();
-                    CanChangeKeySize = ordered.Count > 1;
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e, "Error reacting to key type change");
-                }
-            });
+        _comboBoxFontSizeHelper = application.GetResourceObservable(App.SystemFontSize)
+            .StartWith(application.Resources[App.SystemFontSize])
+            .WhereNotNull()
+            .OfType<int>()
+            .Select(e => e - 2)
+            .ToProperty(this, vm => vm.ComboBoxFontSize);
 
-        KeyNameValidationHelper = this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError);
-        SelectedKeyType = SshKeyTypes.First();
+        var selectedKeyTypeChanged = this.WhenAnyValue(vm => vm.SelectedKeyType)
+            .ObserveOn(AvaloniaScheduler.Instance);
+
+        _availableKeySizesHelper = selectedKeyTypeChanged
+            .Select(e => e.SupportedKeySizes.OrderDescending().ToArray())
+            .ToProperty(
+                this, vm => vm.AvailableKeySizes,
+                SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.OrderDescending().ToArray())
+            .DisposeWith(Disposables);
+
+        selectedKeyTypeChanged
+            .Subscribe(e =>
+            {
+                if (DefaultKeyNames.Values.Any(keyName =>
+                        string.IsNullOrWhiteSpace(KeyName) ||
+                        string.Equals(keyName, KeyName, StringComparison.OrdinalIgnoreCase)))
+                    if (DefaultKeyNames.TryGetValue(e, out var defaultKeyName))
+                        KeyName = defaultKeyName;
+
+                SelectedKeySize = e switch
+                {
+                    SshKeyType.ECDSA => SshKeyGenerateInfo.DefaultEcdsaSshKeyLength,
+                    SshKeyType.ED25519 => SshKeyGenerateInfo.DefaultEd25519SshKeyLength,
+                    SshKeyType.RSA => SshKeyGenerateInfo.DefaultRsaSshKeyLength,
+                    _ => SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Max()
+                };
+            })
+            .DisposeWith(Disposables);
+
+        _canChangeKeySizeHelper = this.WhenAnyValue(vm => vm.AvailableKeySizes)
+            .Select(e => e.Length > 1)
+            .ToProperty(
+                this, vm => vm.CanChangeKeySize,
+                initialValue: SshKeyGenerateInfo.DefaultSshKeyType.SupportedKeySizes.Any())
+            .DisposeWith(Disposables);
+
+        this.WhenAnyValue(vm => vm.KeyName)
+            .ObserveOn(AvaloniaScheduler.Instance)
+            .Subscribe(name =>
+            {
+                if (string.IsNullOrWhiteSpace(name) && DefaultKeyNames.TryGetValue(SelectedKeyType, out var value))
+                    KeyName = value;
+            }).DisposeWith(Disposables);
+
+        KeyNameValidationHelper =
+            this.ValidationRule(e => e.KeyName, IsPropertyValid, StringsAndTexts.AddKeyWindowFilenameError)
+                .DisposeWith(Disposables);
     }
 
-    private static bool IsPropertyValid(string? arg)
-    {
-        if(string.IsNullOrWhiteSpace(arg)) return false;
-        return !File.Exists(Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), arg));
-    }
+    public static IDictionary<SshKeyType, string> DefaultKeyNames { get; } = Enum.GetValues<SshKeyType>()
+        .Select(type =>
+            new KeyValuePair<SshKeyType, string>(type, string.Join("_", KeyPrefix, Enum.GetName(type)!.ToLower())))
+        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
     public static SshKeyType[] SshKeyTypes { get; } = Enum.GetValues<SshKeyType>();
     public static SshKeyFormat[] SshKeyFormats { get; } = Enum.GetValues<SshKeyFormat>();
 
-    private readonly IDisposable _keyTypeSubscription;
-
-    [Reactive]
-    private SshKeyType _selectedKeyType;
-
-    [Reactive]
-    private IEnumerable<int> _avaliableKeySizes = [];
-
-    [Reactive]
-    private int _selectedKeySize;
-
-    [Reactive]
-    private SshKeyFormat _keyFormat = SshKeyFormat.OpenSSH;
-
-    [Reactive]
-    private string _keyName = "id_rsa";
-    
-    [Reactive]
-    private bool _canChangeKeySize;
-    
-    public string Comment { get; set; } = $"{Environment.UserName}@{Environment.MachineName}";
-    public string Password { get; set; } = "";
     public ValidationHelper KeyNameValidationHelper { get; }
 
     public IValidationContext ValidationContext { get; } = new ValidationContext();
-    
+
+    private bool IsPropertyValid(string? arg)
+    {
+        if (string.IsNullOrWhiteSpace(arg)) return false;
+        return !File.Exists(Path.Combine(ChosenPath, arg));
+    }
+
     /// <inheritdoc />
-    protected override async Task OnBooleanSubmitAsync(
+    protected override async Task BooleanSubmitAsync(
         bool inputParameter,
         CancellationToken cancellationToken = default)
     {
@@ -114,22 +182,15 @@ public sealed partial class AddKeyWindowViewModel : ViewModelBase<AddKeyWindowVi
             if (!string.IsNullOrWhiteSpace(Comment))
                 genParm.Comment = Comment;
 
-            await _sshKeyManager.GenerateNewKey(fullNewFilePath, genParm);
+            var genResult = await _sshKeyManager.GenerateNewKey(fullNewFilePath, genParm, true);
+            genResult.ThrowIfFailure();
+            CloseOnBooleanSubmit = true;
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Error creating key");
-            await _messageBoxProvider.ShowMessageBoxAsync(
-                StringsAndTexts.Error,
-                e.Message,
-                MessageBoxButtons.Ok,
-                MessageBoxIcon.Error);
+            _logger.LogError(e, "Error creating key");
+            await _messageBoxProvider.ShowErrorMessageBoxAsync(e, StringsAndTexts.Error);
+            CloseOnBooleanSubmit = false;
         }
-    }
-
-    public override void Dispose()
-    {
-        _keyTypeSubscription.Dispose();
-        base.Dispose();
     }
 }

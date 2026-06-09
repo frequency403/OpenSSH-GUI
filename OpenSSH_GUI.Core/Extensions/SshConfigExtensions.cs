@@ -1,5 +1,4 @@
-using OpenSSH_GUI.Core.Interfaces.Credentials;
-using OpenSSH_GUI.Core.Lib.Credentials;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.SshConfig.Models;
 
 namespace OpenSSH_GUI.Core.Extensions;
@@ -15,10 +14,10 @@ public static class SshConfigExtensions
     ///     from which the connection credentials will be extracted.
     /// </param>
     /// <returns>
-    ///     An enumerable collection of <see cref="IConnectionCredentials" /> objects that
+    ///     An enumerable collection of <see cref="ConnectionCredentials" /> objects that
     ///     represent the normalized connection details, such as hostname, username, and authentication method.
     /// </returns>
-    public static IEnumerable<IConnectionCredentials> GetConnectionEntriesFromConfig(this SshConfigDocument document)
+    public static IEnumerable<ConnectionCredentials> GetConnectionEntriesFromConfig(this SshConfigDocument document)
     {
         var globalUser = document.GetGlobalEntries("User").FirstOrDefault()?.Value;
         var globalPort = document.GetGlobalEntries("Port").FirstOrDefault()?.Value;

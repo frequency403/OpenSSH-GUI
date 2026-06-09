@@ -93,10 +93,7 @@ public sealed record SshHostBlock : SshBlock
         int lineNumber,
         string rawHeaderText,
         string? headerComment)
-        : base(items, lineNumber, rawHeaderText, headerComment)
-    {
-        Patterns = patterns;
-    }
+        : base(items, lineNumber, rawHeaderText, headerComment) => Patterns = patterns;
 
     /// <summary>
     ///     Gets the hostname patterns declared on the <c>Host</c> header line.
@@ -114,16 +111,10 @@ public sealed record SshHostBlock : SshBlock
     /// </summary>
     /// <param name="patterns">One or more hostname patterns.</param>
     /// <param name="items">Optional initial block contents.</param>
-    public static SshHostBlock Create(IEnumerable<string> patterns, IEnumerable<SshLineItem>? items = null)
-    {
-        return new SshHostBlock([..patterns], [..items ?? []], 0, string.Empty, null);
-    }
+    public static SshHostBlock Create(IEnumerable<string> patterns, IEnumerable<SshLineItem>? items = null) => new([..patterns], [..items ?? []], 0, string.Empty, null);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"Host {string.Join(' ', Patterns)}";
-    }
+    public override string ToString() => $"Host {string.Join(' ', Patterns)}";
 }
 
 /// <summary>
@@ -142,10 +133,7 @@ public sealed record SshMatchBlock : SshBlock
         int lineNumber,
         string rawHeaderText,
         string? headerComment)
-        : base(items, lineNumber, rawHeaderText, headerComment)
-    {
-        Criteria = criteria;
-    }
+        : base(items, lineNumber, rawHeaderText, headerComment) => Criteria = criteria;
 
     /// <summary>
     ///     Gets the criteria that must all be satisfied simultaneously for this block to apply.
@@ -159,14 +147,8 @@ public sealed record SshMatchBlock : SshBlock
     /// </summary>
     /// <param name="criteria">One or more match criteria.</param>
     /// <param name="items">Optional initial block contents.</param>
-    public static SshMatchBlock Create(IEnumerable<SshMatchCriterion> criteria, IEnumerable<SshLineItem>? items = null)
-    {
-        return new SshMatchBlock([..criteria], [..items ?? []], 0, string.Empty, null);
-    }
+    public static SshMatchBlock Create(IEnumerable<SshMatchCriterion> criteria, IEnumerable<SshLineItem>? items = null) => new([..criteria], [..items ?? []], 0, string.Empty, null);
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"Match {string.Join(' ', Criteria.Select(static c => c.ToString()))}";
-    }
+    public override string ToString() { return $"Match {string.Join(' ', Criteria.Select(static c => c.ToString()))}"; }
 }

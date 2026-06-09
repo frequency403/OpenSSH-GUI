@@ -68,6 +68,7 @@ jobs:
       - name: Build AppImage
         if: matrix.target == 'linux-x64'
         run: |
+          APPSTREAM_VERSION="${GITHUB_REF_NAME#v}"
           # Download appimagetool
           wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
           chmod +x appimagetool
@@ -147,8 +148,8 @@ jobs:
 
       - name: Prepare extra assets
         run: |
-          cp OpenSSH_GUI/Assets/appicon.png artifacts/
-          cp LICENSE artifacts/
+          cp OpenSSH_GUI/Assets/appicon.png artifacts/appicon.png   # ← Name explizit
+          cp LICENSE artifacts/LICENSE
 
       # Create a single release and upload all files from the 'artifacts' directory
       - name: Create Release and Upload Assets
@@ -177,7 +178,7 @@ jobs:
         with:
           name: OpenSSH-GUI-linux-x64
           path: ./
-          
+
       - name: Download generated desktop file
         uses: actions/download-artifact@v4
         with:
@@ -191,11 +192,9 @@ jobs:
           SHA_ICON=$(sha256sum OpenSSH_GUI/Assets/appicon.png | cut -d' ' -f1)
           SHA_DESKTOP=$(sha256sum io.github.frequency403.openssh_gui.desktop | cut -d' ' -f1)
           SHA_LICENSE=$(sha256sum LICENSE | cut -d' ' -f1)
-          
+
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
-          sed -i "s/sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-bin/PKGBUILD
-          
-          # Also update openssh-gui-git pkgver for consistency
+          sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" openssh-gui-bin/PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
 
       - name: Update AUR (openssh-gui-bin)
@@ -217,3 +216,31 @@ jobs:
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ github.ref_name }}"
+  
+  winget:
+    name: Update Winget Package
+    runs-on: ubuntu-latest
+    needs: release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install Komac
+        run: |
+          curl -sL \
+            "https://github.com/russellbanks/Komac/releases/latest/download/komac-linux-amd64" \
+            -o komac
+          chmod +x komac
+
+      - name: Update Winget manifest
+        run: |
+          ./komac update "frequency403.OpenSSHGUI" \
+            --version "${{ steps.version.outputs.VERSION }}" \
+            --urls "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/OpenSSH-GUI-win-x64.exe" \
+            --submit \
+            --token "${{ secrets.WINGET_GITHUB_TOKEN }}"

@@ -104,7 +104,7 @@ public static class SshConfigSerializer
         if (opts.RoundTrip && block.RawHeaderText.Length > 0)
             sb.Append(block.RawHeaderText);
         else
-            sb.Append(BuildBlockHeader(block, opts));
+            sb.Append(BuildBlockHeader(block));
 
         sb.Append(opts.NewLine);
 
@@ -112,7 +112,7 @@ public static class SshConfigSerializer
             WriteItem(sb, item, opts.Indent, opts);
     }
 
-    private static string BuildBlockHeader(SshBlock block, SshSerializerOptions opts)
+    private static string BuildBlockHeader(SshBlock block)
     {
         var header = block switch
         {
@@ -172,8 +172,5 @@ public static class SshConfigSerializer
     ///     Wraps <paramref name="value" /> in double quotes when it contains whitespace,
     ///     preserving unquoted values that are already safe.
     /// </summary>
-    private static string QuoteIfNeeded(string value)
-    {
-        return value.AsSpan().ContainsAny(' ', '\t') ? $"\"{value}\"" : value;
-    }
+    private static string QuoteIfNeeded(string value) => value.AsSpan().ContainsAny(' ', '\t') ? $"\"{value}\"" : value;
 }

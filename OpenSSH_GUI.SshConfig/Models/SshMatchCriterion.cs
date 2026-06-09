@@ -80,22 +80,13 @@ public sealed record SshMatchCriterion(SshMatchCriterionKind Kind, string? Patte
     public static SshMatchCriterion Final { get; } = new(SshMatchCriterionKind.Final, null);
 
     /// <summary>Creates a <c>host</c> criterion with the given pattern.</summary>
-    public static SshMatchCriterion ForHost(string pattern)
-    {
-        return new SshMatchCriterion(SshMatchCriterionKind.Host, pattern);
-    }
+    public static SshMatchCriterion ForHost(string pattern) => new(SshMatchCriterionKind.Host, pattern);
 
     /// <summary>Creates a <c>user</c> criterion with the given pattern.</summary>
-    public static SshMatchCriterion ForUser(string pattern)
-    {
-        return new SshMatchCriterion(SshMatchCriterionKind.User, pattern);
-    }
+    public static SshMatchCriterion ForUser(string pattern) => new(SshMatchCriterionKind.User, pattern);
 
     /// <summary>Creates an <c>exec</c> criterion with the given shell command.</summary>
-    public static SshMatchCriterion ForExec(string command)
-    {
-        return new SshMatchCriterion(SshMatchCriterionKind.Exec, command);
-    }
+    public static SshMatchCriterion ForExec(string command) => new(SshMatchCriterionKind.Exec, command);
 
     /// <inheritdoc />
     public override string ToString()

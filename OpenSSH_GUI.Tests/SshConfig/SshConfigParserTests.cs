@@ -1,8 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
-using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
-using OpenSSH_GUI.Core.Lib.Credentials;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.SshConfig.Exceptions;
 using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
@@ -15,11 +14,8 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigParserTests
 {
-    private IFileProvider GetEmbeddedFileProvider()
-    {
-        return new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
-    }
-    
+    private IFileProvider GetEmbeddedFileProvider() => new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
+
     private string GetEmbeddedResource(string fileName)
     {
         var assembly = typeof(SshConfigParserTests).Assembly;
@@ -39,12 +35,10 @@ public class SshConfigParserTests
         var doc = SshConfigParser.Parse(content);
 
         doc.Blocks.Length.ShouldBeGreaterThan(0);
-        // "Host *" sollte vorhanden sein
         var allHosts = doc.Blocks.OfType<SshHostBlock>().ToList();
         allHosts.ShouldContain(b => b.Patterns.Contains("*"));
 
-        // Suche nach "ConnectTimeout 20" im globalen Kontext oder im Host * Block
-        var globalEntries = doc.GetGlobalEntries().ToArray();
+        _ = doc.GetGlobalEntries().ToArray();
         var hostStar = allHosts.FirstOrDefault(b => b.Patterns.Contains("*"));
         hostStar.ShouldNotBeNull();
         hostStar.GetEntries().ShouldContain(e => e.Key == "ConnectTimeout" && e.Value == "20");
@@ -60,10 +54,10 @@ public class SshConfigParserTests
 
         var ss = configurationRoot.GetSection("SshConfig").Get<SshConfiguration>();
         Assert.NotNull(ss);
-            
+
         var ifsCount = ss.Hosts.Where(host => host.IdentityFiles is not null).Sum(host => host.IdentityFiles?.Length);
         ifsCount.ShouldNotBe(null);
-        if(ifsCount is {  } count)
+        if (ifsCount is { } count)
             count.ShouldBeGreaterThan(0);
     }
 
@@ -105,7 +99,7 @@ public class SshConfigParserTests
     [Fact]
     public void Parse_EmptyContent_ShouldReturnEmptyDocument()
     {
-        var doc = SshConfigParser.Parse("");
+        var doc = SshConfigParser.Parse(string.Empty);
         doc.GlobalItems.ShouldAllBe(i => i is SshBlankLine);
         doc.Blocks.ShouldBeEmpty();
     }
@@ -243,7 +237,10 @@ Host key-host
         // Arrange
         var content = "Include recursive.conf";
         var options = new SshConfigParserOptions
-            { MaxIncludeDepth = 1, IncludeBasePath = Directory.GetCurrentDirectory() };
+        {
+            MaxIncludeDepth = 1,
+            IncludeBasePath = Directory.GetCurrentDirectory()
+        };
         var recursiveFile = Path.Combine(Directory.GetCurrentDirectory(), "recursive.conf");
         File.WriteAllText(recursiveFile, "Include recursive.conf");
 
@@ -283,6 +280,7 @@ Host key-host
         // Assert
         Assert.Null(settings.Port);
         // Note: In SshHostBlockExtensions.GetSettings, unparseable "Port" is added to otherEntries
+        Assert.NotNull(settings.OtherEntries);
         Assert.Single(settings.OtherEntries);
         Assert.Equal("Port", settings.OtherEntries[0].Key);
     }
@@ -301,6 +299,7 @@ Host key-host
         // Assert
         Assert.Equal("quoted server", block.Patterns[0]);
         Assert.Equal("alice", settings.User);
+        Assert.NotNull(settings.IdentityFiles);
         Assert.Contains("~/.ssh/id rsa", settings.IdentityFiles);
     }
 

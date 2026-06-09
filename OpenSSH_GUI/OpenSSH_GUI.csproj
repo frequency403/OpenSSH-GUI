@@ -1,68 +1,76 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-
-        <!-- Target framework and other specs in Directory.Build.props -->
-
-        <OutputType>Exe</OutputType>
-        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-        <ApplicationManifest>app.manifest</ApplicationManifest>
-        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <UseAppHost>true</UseAppHost>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <SelfContained>true</SelfContained>
-        <ApplicationIcon>Assets\appicon.ico</ApplicationIcon>
-        <IsPackable>false</IsPackable>
-        <Company>frequency403</Company>
-        <NeutralLanguage>en</NeutralLanguage>
-        <AssemblyOriginatorKeyFile>OpenSSH-GUI.snk</AssemblyOriginatorKeyFile>
-        <PublicSign>false</PublicSign>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.12"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12"/>
-        <PackageReference Include="Material.Icons" Version="3.0.0"/>
-        <PackageReference Include="Material.Icons.Avalonia" Version="3.0.0"/>
-        <PackageReference Include="ReactiveUI" Version="23.1.8"/>
-        <PackageReference Include="ReactiveUI.Validation" Version="7.0.5"/>
-        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-        <PackageReference Include="System.Reactive" Version="6.1.0"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
-        <None Include="..\openssh-gui.desktop" CopyToPublishDirectory="PreserveNewest"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Update="Resources/StringsAndTexts.resx">
-            <Generator>PublicResXFileCodeGenerator</Generator>
-            <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Update="Resources/StringsAndTexts.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>StringsAndTexts.resx</DependentUpon>
-        </Compile>
-    </ItemGroup>
-
-    <PropertyGroup> <!-- OSX Settings -->
-        <CFBundleName>OpenSSH GUI</CFBundleName> <!-- Also defines .app file name -->
-        <CFBundleDisplayName>OpenSSH GUI</CFBundleDisplayName>
-        <CFBundleIdentifier>frequency403.opensshgui</CFBundleIdentifier>
-        <CFBundleVersion>1.0.0</CFBundleVersion>
-        <CFBundlePackageType>APPL</CFBundlePackageType>
-        <CFBundleExecutable>OpenSSHGui</CFBundleExecutable>
-        <CFBundleIconFile>OpenSSHGui.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
-        <NSPrincipalClass>NSApplication</NSPrincipalClass>
-        <NSHighResolutionCapable>true</NSHighResolutionCapable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <!-- Target framework and other specs in Directory.Build.props -->
+    <OutputType>Exe</OutputType>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <UseAppHost>true</UseAppHost>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <SelfContained>true</SelfContained>
+    <ApplicationIcon>../images/openssh-gui.ico</ApplicationIcon>
+    <IsPackable>false</IsPackable>
+    <Company>frequency403</Company>
+    <NeutralLanguage>en</NeutralLanguage>
+    <AssemblyOriginatorKeyFile>OpenSSH-GUI.snk</AssemblyOriginatorKeyFile>
+    <PublicSign>false</PublicSign>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Material.Icons" />
+    <PackageReference Include="Material.Icons.Avalonia" />
+    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="ReactiveUI.Validation" />
+    <PackageReference Include="Serilog.Enrichers.Environment" />
+    <PackageReference Include="System.Interactive.Async" />
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="Xaml.Behaviors.Avalonia" />
+    <PackageReference Include="ReactiveUI.SourceGenerators">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="../images/**/*">
+      <Link>Assets/%(Filename)%(Extension)</Link>
+    </AvaloniaResource>
+    <None Include="..\openssh-gui.desktop" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources/StringsAndTexts.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>StringsAndTexts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources/StringsAndTexts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StringsAndTexts.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Controls\SubmitButtons.axaml.cs">
+      <DependentUpon>SubmitButtons.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- OSX Settings -->
+    <CFBundleName>OpenSSH GUI</CFBundleName>
+    <!-- Also defines .app file name -->
+    <CFBundleDisplayName>OpenSSH GUI</CFBundleDisplayName>
+    <CFBundleIdentifier>frequency403.opensshgui</CFBundleIdentifier>
+    <CFBundleVersion>1.0.0</CFBundleVersion>
+    <CFBundlePackageType>APPL</CFBundlePackageType>
+    <CFBundleExecutable>OpenSSHGui</CFBundleExecutable>
+    <CFBundleIconFile>OpenSSHGui.icns</CFBundleIconFile>
+    <!-- Will be copied from output directory -->
+    <NSPrincipalClass>NSApplication</NSPrincipalClass>
+    <NSHighResolutionCapable>true</NSHighResolutionCapable>
+  </PropertyGroup>
 </Project>

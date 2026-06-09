@@ -1,31 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <!-- Target framework and other specs in Directory.Build.props -->
-
-    <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.12"/>
-        <PackageReference Include="DryIoc.dll" Version="5.4.3" />
-        <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.2.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
-        <PackageReference Include="ReactiveUI" Version="23.1.8"/>
-        <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.12"/>
-        <PackageReference Include="ReactiveUI.SourceGenerators" Version="2.6.1"/>
-        <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0"/>
-        <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0"/>
-        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
-        <PackageReference Include="SSH.NET" Version="2025.1.0"/>
-        <PackageReference Include="SshNet.Keygen" Version="2024.2.0.1"/>
-        <PackageReference Include="SshNet.PuttyKeyFile" Version="2024.2.0.3"/>
-    </ItemGroup>
-
-    <ItemGroup Condition="$(Configuration) == 'Debug'">
-        <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\OpenSSH_GUI.Dialogs\OpenSSH_GUI.Dialogs.csproj"/>
-        <ProjectReference Include="..\OpenSSH_GUI.SshConfig\OpenSSH_GUI.SshConfig.csproj"/>
-    </ItemGroup>
+  <!-- Target framework and other specs in Directory.Build.props -->
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
+    <PackageReference Include="Material.Icons" />
+    <PackageReference Include="Material.Icons.Avalonia" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="ReactiveUI.Avalonia" />
+    <PackageReference Include="ReactiveUI.SourceGenerators">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="SSH.NET" />
+    <PackageReference Include="SshNet.Keygen" />
+    <PackageReference Include="SshNet.PuttyKeyFile" />
+    <PackageReference Include="System.Interactive" />
+    <PackageReference Include="System.Linq.Async" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenSSH_GUI.Dialogs\OpenSSH_GUI.Dialogs.csproj" />
+    <ProjectReference Include="..\OpenSSH_GUI.SshConfig\OpenSSH_GUI.SshConfig.csproj" />
+  </ItemGroup>
 </Project>

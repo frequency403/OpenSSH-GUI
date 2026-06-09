@@ -1,13 +1,19 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using OpenSSH_GUI.Core.Interfaces.Credentials;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Services;
 
-public class ServerConnectionService(ILogger<ServerConnectionService> logger) : ReactiveObject
+public sealed partial class ServerConnectionService : ReactiveObject, IDisposable
 {
+    private readonly CompositeDisposable _disposables = new();
+
+    private readonly ILogger<ServerConnectionService> _logger;
+
     /// <summary>
     ///     Indicates whether the current server connection is active.
     /// </summary>
@@ -16,12 +22,8 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     and is currently active. If the connection is not established or has
     ///     been terminated, it returns <c>false</c>.
     /// </remarks>
-    [MemberNotNullWhen(true, nameof(ServerConnection))]
-    public bool IsConnected
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    [ObservableAsProperty(ReadOnly = true)]
+    private bool _isConnected;
 
     /// <summary>
     ///     Gets or sets the server connection instance associated with the service.
@@ -31,14 +33,24 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     to retrieve or update the instance of the server connection. Setting this property
     ///     raises an internal change notification.
     /// </remarks>
-    public ServerConnection? ServerConnection
+    [Reactive(SetModifier = AccessModifier.Private)]
+    private ServerConnection _serverConnection = ServerConnection.Empty;
+
+    public ServerConnectionService(ILogger<ServerConnectionService> logger)
     {
-        get;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref field, value);
-            IsConnected = value != null;
-        }
+        _logger = logger;
+
+        _isConnectedHelper = this.WhenAnyValue(vm => vm.ServerConnection)
+            .Select(e => e.WhenAnyValue(sc => sc.IsConnected))
+            .Switch()
+            .ToProperty(this, obj => obj.IsConnected)
+            .DisposeWith(_disposables);
+    }
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
+        _serverConnection.Dispose();
     }
 
     /// <summary>
@@ -56,23 +68,23 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     ///     A <see cref="ValueTask{TResult}" /> representing the result of the connection attempt.
     ///     Returns <c>true</c> if the connection is successfully established; otherwise, <c>false</c>.
     /// </returns>
-    public async ValueTask<bool> EstablishConnection(IConnectionCredentials connectionCredentials,
+    public async ValueTask<bool> EstablishConnection(ConnectionCredentials connectionCredentials,
         CancellationToken token = default)
     {
         try
         {
-            ServerConnection = new ServerConnection(connectionCredentials);
+            ServerConnection = ServerConnection.WithCredentials(connectionCredentials);
             return await ServerConnection.ConnectToServerAsync(token);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error connecting to server");
+            _logger.LogError(e, "Error connecting to server");
             throw;
         }
     }
 
     /// <summary>
-    ///     Closes the current connection to the server, if a connection exists.
+    ///     Closes the current connection to the server if a connection exists.
     /// </summary>
     /// <param name="throwOnNoConnection">Indicates whether to throw an exception if no connection exists.</param>
     /// <param name="token">
@@ -86,11 +98,12 @@ public class ServerConnectionService(ILogger<ServerConnectionService> logger) : 
     /// </returns>
     public async ValueTask<bool> CloseConnection(bool throwOnNoConnection = true, CancellationToken token = default)
     {
-        if (!IsConnected) 
+        if (!IsConnected)
             return throwOnNoConnection ? throw new InvalidOperationException("No connection to disconnect from") : true;
         var disconnectResult = await ServerConnection.DisconnectFromServerAsync(token);
+        ServerConnection.Dispose();
         if (disconnectResult)
-            ServerConnection = null;
+            ServerConnection = ServerConnection.Empty;
         return disconnectResult;
     }
 }

@@ -7,16 +7,6 @@ namespace OpenSSH_GUI.Core.Extensions;
 /// </summary>
 public static class SshKeyFormatExtension
 {
-    /// <summary>
-    ///     Represents the file extension for OpenSSH Public Key format.
-    /// </summary>
-    public const string OpenSshPublicKeyFileExtension = ".pub";
-
-    /// <summary>
-    ///     Represents the file extension used for PuTTY private key files.
-    /// </summary>
-    public const string PuttyKeyFileExtension = ".ppk";
-
     /// <param name="format">The SSH key format.</param>
     extension(SshKeyFormat format)
     {
@@ -32,9 +22,9 @@ public static class SshKeyFormatExtension
         {
             return format switch
             {
-                SshKeyFormat.OpenSSH when usePublicFormat => OpenSshPublicKeyFileExtension,
+                SshKeyFormat.OpenSSH when usePublicFormat => PathExtensions.OpenSshPublicKeyFileExtension,
                 SshKeyFormat.OpenSSH => null,
-                SshKeyFormat.PuTTYv2 or SshKeyFormat.PuTTYv3 => PuttyKeyFileExtension,
+                SshKeyFormat.PuTTYv2 or SshKeyFormat.PuTTYv3 => PathExtensions.PuttyKeyFileExtension,
                 _ => null
             };
         }
@@ -45,9 +35,6 @@ public static class SshKeyFormatExtension
         /// <param name="path">The path to the file.</param>
         /// <param name="usePublicFormat">Indicates whether the key is public. Default is true.</param>
         /// <returns>The modified file path with the updated extension.</returns>
-        public string ChangeExtension(string path, bool usePublicFormat = true)
-        {
-            return Path.ChangeExtension(path, format.GetExtension(usePublicFormat));
-        }
+        public string ChangeExtension(string path, bool usePublicFormat = true) => Path.ChangeExtension(path, format.GetExtension(usePublicFormat));
     }
 }

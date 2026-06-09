@@ -201,15 +201,9 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string MainWindowFoundKeyPairsCountLabelPart1 {
+        public static string MainWindowFoundKeyPairsCountLabel {
             get {
-                return ResourceManager.GetString("MainWindowFoundKeyPairsCountLabelPart1", resourceCulture);
-            }
-        }
-        
-        public static string MainWindowFoundKeyPairsCountLabelPart2 {
-            get {
-                return ResourceManager.GetString("MainWindowFoundKeyPairsCountLabelPart2", resourceCulture);
+                return ResourceManager.GetString("MainWindowFoundKeyPairsCountLabel", resourceCulture);
             }
         }
         
@@ -573,18 +567,6 @@ namespace OpenSSH_GUI.Resources {
             }
         }
         
-        public static string ApplicationSettingsCleanup {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsCleanup", resourceCulture);
-            }
-        }
-        
-        public static string ApplicationSettingsFiles {
-            get {
-                return ResourceManager.GetString("ApplicationSettingsFiles", resourceCulture);
-            }
-        }
-        
         public static string ApplicationSettingsClearWholeCache {
             get {
                 return ResourceManager.GetString("ApplicationSettingsClearWholeCache", resourceCulture);
@@ -618,6 +600,210 @@ namespace OpenSSH_GUI.Resources {
         public static string ApplicationSettingsViewModelConfirmationError {
             get {
                 return ResourceManager.GetString("ApplicationSettingsViewModelConfirmationError", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowReloadingKeys {
+            get {
+                return ResourceManager.GetString("MainWindowReloadingKeys", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowKeyNotPasswordProtected {
+            get {
+                return ResourceManager.GetString("MainWindowKeyNotPasswordProtected", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowKeyPasswordProtectedLocked {
+            get {
+                return ResourceManager.GetString("MainWindowKeyPasswordProtectedLocked", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowKeyPasswordProtectedUnlocked {
+            get {
+                return ResourceManager.GetString("MainWindowKeyPasswordProtectedUnlocked", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowProvidePassword {
+            get {
+                return ResourceManager.GetString("MainWindowProvidePassword", resourceCulture);
+            }
+        }
+        
+        public static string MainWindowOpenFileInfoWindow {
+            get {
+                return ResourceManager.GetString("MainWindowOpenFileInfoWindow", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowFoundAssociatedFiles {
+            get {
+                return ResourceManager.GetString("FileInfoWindowFoundAssociatedFiles", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowChangePasswordTooltip {
+            get {
+                return ResourceManager.GetString("FileInfoWindowChangePasswordTooltip", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowKeyFormat {
+            get {
+                return ResourceManager.GetString("FileInfoWindowKeyFormat", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowCurrent {
+            get {
+                return ResourceManager.GetString("FileInfoWindowCurrent", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowChangeFormatTo {
+            get {
+                return ResourceManager.GetString("FileInfoWindowChangeFormatTo", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowPassword {
+            get {
+                return ResourceManager.GetString("FileInfoWindowPassword", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowChangePassword {
+            get {
+                return ResourceManager.GetString("FileInfoWindowChangePassword", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowEnterNewPassword {
+            get {
+                return ResourceManager.GetString("FileInfoWindowEnterNewPassword", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowConfirmFileOverwrite {
+            get {
+                return ResourceManager.GetString("FileInfoWindowConfirmFileOverwrite", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowFileAlreadyExists {
+            get {
+                return ResourceManager.GetString("FileInfoWindowFileAlreadyExists", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowChangeMessage {
+            get {
+                return ResourceManager.GetString("FileInfoWindowChangeMessage", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowEnterNewFilename {
+            get {
+                return ResourceManager.GetString("FileInfoWindowEnterNewFilename", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowFilenameCannotBeEmpty {
+            get {
+                return ResourceManager.GetString("FileInfoWindowFilenameCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        public static string FileInfoWindowPasswordCopied {
+            get {
+                return ResourceManager.GetString("FileInfoWindowPasswordCopied", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsLogLevel {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsLogLevel", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsTheme {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsTheme", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsFontSize {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsFontSize", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsCleanupFiles {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsCleanupFiles", resourceCulture);
+            }
+        }
+        
+        public static string ConnectToServerPreconfiguredConnections {
+            get {
+                return ResourceManager.GetString("ConnectToServerPreconfiguredConnections", resourceCulture);
+            }
+        }
+        
+        public static string ConnectToServerHostname {
+            get {
+                return ResourceManager.GetString("ConnectToServerHostname", resourceCulture);
+            }
+        }
+        
+        public static string ConnectToServerUsername {
+            get {
+                return ResourceManager.GetString("ConnectToServerUsername", resourceCulture);
+            }
+        }
+        
+        public static string ConnectToServerPassword {
+            get {
+                return ResourceManager.GetString("ConnectToServerPassword", resourceCulture);
+            }
+        }
+        
+        public static string ConnectToServerConnectionFailed {
+            get {
+                return ResourceManager.GetString("ConnectToServerConnectionFailed", resourceCulture);
+            }
+        }
+        
+        public static string EditKnownHostsLocal {
+            get {
+                return ResourceManager.GetString("EditKnownHostsLocal", resourceCulture);
+            }
+        }
+        
+        public static string EditKnownHostsRemote {
+            get {
+                return ResourceManager.GetString("EditKnownHostsRemote", resourceCulture);
+            }
+        }
+        
+        public static string EditAuthorizedKeysLocal {
+            get {
+                return ResourceManager.GetString("EditAuthorizedKeysLocal", resourceCulture);
+            }
+        }
+        
+        public static string EditAuthorizedKeysServer {
+            get {
+                return ResourceManager.GetString("EditAuthorizedKeysServer", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationSettingsLookupPaths {
+            get {
+                return ResourceManager.GetString("ApplicationSettingsLookupPaths", resourceCulture);
             }
         }
     }

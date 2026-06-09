@@ -15,9 +15,7 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
     ///     Initializes a new instance of <see cref="SshConfigurationProvider" />.
     /// </summary>
     /// <param name="source">The source settings.</param>
-    public SshConfigurationProvider(SshConfigurationSource source) : base(source)
-    {
-    }
+    public SshConfigurationProvider(SshConfigurationSource source) : base(source) { }
 
     /// <summary>
     ///     Loads the SSH configuration data from the stream.
@@ -31,8 +29,13 @@ public sealed class SshConfigurationProvider : FileConfigurationProvider
         // Use the existing parser to parse the content.
         // We use the file path from the source if available for better error messages.
         var filePath = Source.Path;
-        var document = SshConfigParser.Parse(content,
-            new SshConfigParserOptions { IncludeBasePath = filePath is null ? null : Path.GetDirectoryName(filePath), OnSkippedIncludeFile = Source is SshConfigurationSource source ? source.OnSkippedIncludeFile : null });
+        var document = SshConfigParser.Parse(
+            content,
+            new SshConfigParserOptions
+            {
+                IncludeBasePath = filePath is null ? null : Path.GetDirectoryName(filePath),
+                OnSkippedIncludeFile = Source is SshConfigurationSource source ? source.OnSkippedIncludeFile : null
+            });
 
         var data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
