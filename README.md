@@ -1,182 +1,233 @@
-OpenSSH_GUI
+# OpenSSH GUI
 
-A GUI for managing your SSH Keys - on Windows, Linux and macOS!
+A cross-platform desktop application for managing SSH keys, known hosts, and authorized keys — built with Avalonia UI, ReactiveUI, and .NET 10.
 
-The primary reason for creating this project was to give "end-users"  
-a modern looking GUI for managing their SSH Keys - and making it easier  
-to deploy them to a server of their choice.
+The goal of this project is to give users a modern, keyboard-friendly GUI for everything that usually requires `ssh-keygen` or hand-editing text files. It runs on **Windows**, **Linux**, and **macOS** and works entirely locally — no cloud, no telemetry.
 
-The program I found -> [PuSSHy](https://github.com/klimenta/pusshy) was, in my opinion  
-not as user-friendly as it could be. I also wanted to use this program on my different  
-machines, running on Linux and macOS. So I decided to create my own!
+---
 
-I hope you like it!
+## Features
 
-### Installing
+- Browse, inspect, and manage all SSH key files in your configured lookup paths
+- Generate new SSH keys (RSA, ECDSA, ED25519) with configurable bit size, comment, password, and format
+- Convert keys between **OpenSSH** and **PuTTY v2/v3** formats in one click
+- Change or clear the passphrase of any key file
+- Rename key files safely (both private and public halves move together)
+- Display SHA-256 fingerprints without ever unlocking the private key
+- Open a **FileInfo** window per key to inspect, rename, delete, convert, or copy the password
+- Edit the local `known_hosts` file; mark individual key entries or whole hosts for deletion
+- Edit the local `authorized_keys` file
+- Connect to a remote SSH server and edit its `known_hosts` and `authorized_keys` in the same UI
+- Quick-connect from pre-configured `~/.ssh/config` host blocks
+- Export public or private key content to the clipboard
+- Application settings: log level, theme (dark/light/system), font size, lookup paths, cache cleanup
+- Full dark and light theme with a VS Code–inspired teal/amber/red colour palette
 
-No Installation needed! Just run the OpenSSHA_GUI.exe or .bin
+---
 
-## Usage
+## Screenshots
 
-It is free to you, if you connect to a Server or not.  
-This program can be used on PC's (Local Machines) and Servers!
+### Main Window
 
-If you choose to connect to a server - ***beware!***  
-This program - nor the author(s) take responsibility for saved messed up files!  
-***Make a backup if you already have files!***
+![Main Window](images/MainView.png)
 
-If you need help, open an [Issue]()
+The main window lists all discovered SSH keys in a table. Each row shows:
 
-#### Main Window
+- Lock/key icon indicating whether the key is encrypted and whether the passphrase has been provided
+- Key algorithm (RSA, ECDSA, ED25519) and format (OpenSSH / PuTTY)
+- SHA-256 fingerprint; password-protected keys show a **Provide Password** button inline
+- Comment
+- Action buttons: export public key, export private key, open FileInfo window
 
-![](images/MainWindow.png)
+### Main Window — Password Entered
 
-##### V2 UI
+![Main Window with password unlocked](images/MainViewPassEntered.png)
 
-![](images/NewMainUI.png)  
-You can now convert the Key to the opposite format.  
-You can choose to delete or keep the key.  
-If the key is kept, the program will move it into a newly created sub-folder of your  
-.ssh directory.
+Once a passphrase is provided, the fingerprint column shows the actual hash and a **Forget Password** button appears.
 
-##### Key without provided password
+### Add New SSH Key
 
-![](images/FoundPasswordProtectedKey.png)
+![Add Key Window](images/AddKeyWindow.png)
 
-##### Password options, when a password was provided
+Fields:
 
-![](images/ShowForgetPws.png)
+| Field | Notes |
+|---|---|
+| Key filename | Directory dropdown (from lookup paths) + filename text box |
+| Keytype | RSA / ECDSA / ED25519 — default name updates automatically |
+| Bitsize | Populated from the cryptographic legal key sizes for the chosen type; hidden for ED25519 |
+| Password | Optional; leave blank for an unencrypted key |
+| Comment | Defaults to `user@hostname` |
+| Key Format | OpenSSH or PuTTY v2/v3 |
 
-##### Provide password prompt
+The **Add** button stays disabled until the filename passes validation (non-empty and not already on disk).
 
-![](images/ProvidePasswordPrompt.png)
+### FileInfo Window
 
-##### Application Settings
+![FileInfo Window](images/FileInfoWindow.png)
+![FileInfo Window — password visible](images/FileInfoWindowPasswordVisible.png)
 
-![](images/AppSettings.png)
-App settings can be accessed through the settings context menu.
-There is also an option, that the program converts all PPK keys in your .ssh directory  
-to the OpenSSH format. The PPK Keys are not deleted, they will be put into a folder called PPK
-![](images/SettingsContextMenu.png)
+Shows all files associated with the key (e.g. `id_ed25519` + `id_ed25519.pub`). From here you can:
 
-##### Sorting feature
+- **Change password** — prompts for the new passphrase via a secure input dialog
+- **Rename** — moves both halves, prompts for overwrite if a conflict is detected
+- **Delete** — removes all associated files from disk
+- **Convert format** — the SplitButton converts to the default target; the dropdown allows choosing any other available format
+- **Password field** — shows masked passphrase with a toggle-visibility eye button and a copy-to-clipboard button
 
-You can sort the keys, if you want to. Just click on the top description category to sort by.
-![](images/Sorted.png)
+### Application Settings
 
-#### Add SSH Key
+![Application Settings](images/ApplicationSettings.png)
 
-![](images/AddKeyWindow.png)
+| Section | Options |
+|---|---|
+| Log Level | Verbose / Debug / Information / Warning / Error / Fatal |
+| Theme | Default (system) / Dark / Light |
+| Cache Options | Delete log files older than N days; clear whole application cache |
+| Font Size | Numeric up/down; reset button restores the default |
+| Lookup Paths | Add/remove directories the key crawler searches |
 
-#### Connect to a Server
+### Connect to Server
 
-Right-Click on the Connection-status icon and click "Connect" on the showing menu.
+![Connect to Server — empty](images/ConnectToServerWindowEmpty.png)
+![Connect to Server — connected](images/ConnectToServerWindowFilled.png)
 
-![](images/ConnectToServerWindow.png)
+The connection window supports:
 
-- You can also auth with a public key from the recognized keys on your machine!   
-  ![](images/ConnectToServerWindowWithKey.png)
+- **Preconfigured connections** — populated automatically from `~/.ssh/config` host blocks that carry an `IdentityFile` directive
+- Manual entry of hostname, username, and either a password or a public key from the recognised key list
+- **Test connection** button — attempts a connection and shows a colour-coded status badge (unknown / success / failed)
+- After a successful test, the **Accept** button becomes active and establishes the session for the rest of the UI
 
-- V2 Feature: Quick Connect
-  ![](images/ConnectToServerQuickConnect.png)  
-  If you submitted a valid connection earlier, the program will save the connection,  
-  and suggest this connection here for quick access.
+### Edit known_hosts
 
+![Edit known_hosts](images/EditKnownHostsWindow.png)
 
-- You need to test the connection before you can submit it, if you do not use the new Quick-Connect feature.  
-  If you get a connection error, an error window shows up.  
-  ![](images/ConnectToServerWindowSuccess.png)
+Displays every known host in a collapsible list. Each host shows its individual key entries (algorithm + fingerprint). Toggle buttons mark individual keys or entire hosts for deletion on save. A **Remote** tab appears when a server connection is active, allowing the same edits on the server's `known_hosts`.
 
-#### Edit Authorized Keys
+---
 
-Edit your local (or remote) authorized_keys!
+## Architecture Overview
 
-![](images/EditAuthorizedKeysWindow.png)
+The project is split into four assemblies:
 
-In the remote Version you can even add a key from the recognized keys!
-The key cannot be added, when it's already present on the remote!
-![](images/EditAuthorizedKeysWindowRemote.png)
+| Assembly | Role |
+|---|---|
+| `OpenSSH_GUI` | Avalonia application shell — views, view models, DI wiring, app lifecycle |
+| `OpenSSH_GUI.Core` | Domain logic — key management, SSH config crawling, server connections, backup service |
+| `OpenSSH_GUI.SshConfig` | SSH `~/.ssh/config` parser, serialiser, and `IConfiguration` provider |
+| `OpenSSH_GUI.Dialogs` | Reusable modal dialogs (message box, secure password input, validated text input) |
 
-#### Edit Known Hosts Window
+### Key Components
 
-![](images/KnownHostsWindow.png)
+**`SshKeyManager`** is the central service. It owns the observable collection of `SshKeyFile` instances and exposes async operations for generate, rename, change-password, change-format, delete, and reload. Every destructive operation backs up the affected files first and restores them on failure.
 
-Here you have a list of all "Known Hosts" from your "known_hosts" file.
-If you want to remove one key from a Host, toggle the button of the specific Key.
-If you want to remove the whole host, just toggle the button on the top label.
+**`SshKeyFile`** is a reactive record. It uses `ReactiveUI.SourceGenerators` to expose observable properties for fingerprint, comment, key type, format, password state, and file metadata. The fingerprint is extracted without decrypting the private key by parsing the unencrypted public key blob directly (supports OpenSSH `.pub`, OpenSSH private key header, and PPK v2/v3 headers).
 
-#### Export Key Window
+**`DirectoryCrawler`** is an `IAsyncEnumerable`-based crawler that reads `~/.ssh/config` identity files first (marking them as config-provided) and then enumerates the configured lookup directories for any remaining key files.
 
-![](images/ExportKeyWindow.png)
+**`SshConfigParser`** is a zero-dependency recursive-descent parser for `ssh_config(5)` syntax. It handles `Host`, `Match`, and `Include` directives, wildcard patterns, quoted values, and inline comments, and exposes the result as an `IConfiguration` source so the rest of the app can bind directly via `IOptions<T>`.
 
-#### Tooltips
+**`ServerConnection`** wraps SSH.NET's `SshClient` and adds OS detection, remote `known_hosts`/`authorized_keys` read/write, and environment variable resolution on both Unix and Windows remote shells.
 
-***Tooltip when not connected to a server***   
-![](images/tooltip.png)
+---
 
-***Tooltip from Key***   
-![](images/tooltipKey.png)
+## Installation
 
-***Tooltip from connection***   
-![](images/tooltipServer.png)
+No installer is required. Download the self-contained binary for your platform and run it directly.
 
-## Further Information
+The application creates the following paths on first launch if they do not exist:
 
-- The program will create these at startup without prompting if they don't exist:  
-  .ssh/(**authorized_keys**, **known_hosts**)  
-  (.config/OpenSSH_GUI/ | AppData\Roaming\OpenSSH_GUI\) **OpenSSH_GUI** and a "logs" directory
+- `~/.ssh/` (mode 700 on Unix)
+- `/etc/ssh/` or `%PROGRAMDATA%\ssh\` (mode 755 on Unix)
+- `~/.ssh/known_hosts` and `~/.ssh/authorized_keys`
+- `%APPDATA%\OpenSSH_GUI\` — configuration and log files
 
-### Attention: This program will save your Passwords!
+---
 
-You can not disable this feature. The Passwords are stored when:
+## Configuration File
 
-- you enter a server connection with a password
-- provide a password for a keyfile
+Application settings are stored as JSON at:
 
-Your passwords are stored on your local machine inside the SQLite Database, protected with AES-Encryption.  
-Only the program itself can read any kind of string value inside the database.
+- **Linux / macOS:** `~/.config/OpenSSH_GUI/OpenSSH_GUI.json`
+- **Windows:** `%APPDATA%\OpenSSH_GUI\OpenSSH_GUI.json`
 
-## Plans for the future
+The file is created automatically on first run. You can also edit it by hand — changes are picked up at runtime via `IOptionsMonitor`.
 
-- [ ] Beautify UI
-- [ ] Add functionality for editing local and remote SSH (user/root) Settings
-- many more not yet known!
+```json
+{
+  "LookupPaths": [ "/home/user/.ssh" ],
+  "PreferredTheme": "Dark",
+  "LogLevel": "Warning",
+  "FontSize": 14,
+  "LoggerConfiguration": {
+    "LogFileName": "OpenSSH_GUI.log",
+    "LogFilePath": "/home/user/.config/OpenSSH_GUI/log"
+  }
+}
+```
+
+---
+
+## Building from Source
+
+Requirements: .NET 10 SDK.
+
+```bash
+git clone https://github.com/frequency403/OpenSSH-GUI
+cd OpenSSH-GUI
+dotnet build
+dotnet run --project OpenSSH_GUI
+```
+
+Tests:
+
+```bash
+dotnet test OpenSSH_GUI.Tests
+```
+
+---
+
+## Security Notes
+
+- Passphrases are handled as raw byte buffers (`SshKeyFilePassword`) backed by a `ReactiveBufferWriter<byte>`. The buffer is zeroed via `CryptographicOperations.ZeroMemory` when cleared or disposed.
+- The secure password input dialog (`SecureInputDialog`) intercepts `TextInputEvent` at tunnel phase to avoid Avalonia's default string accumulation in the `TextBox` internal buffer.
+- Private key files are never read unless the user explicitly provides a passphrase. Fingerprints and metadata are always extracted from the unencrypted public portions of the key file.
+- All destructive file operations (rename, convert, change password) create backups before modifying any file and restore them automatically on failure.
+
+---
+
+## Known Limitations
+
+- SSH config editing (local `~/.ssh/config` and remote `sshd_config`) is not yet implemented (placeholder menu items exist).
+- Remote server operations require the connecting user to have read/write access to `~/.ssh/known_hosts` and `~/.ssh/authorized_keys` on the remote machine.
+
+---
+
+## Used Libraries
+
+| Library | Purpose |
+|---|---|
+| [Avalonia UI](https://avaloniaui.net/) | Cross-platform UI framework |
+| [ReactiveUI](https://reactiveui.net/) | MVVM + reactive extensions |
+| [ReactiveUI.SourceGenerators](https://github.com/reactiveui/ReactiveUI.SourceGenerators) | Source-generated reactive properties and commands |
+| [ReactiveUI.Validation](https://github.com/reactiveui/ReactiveUI.Validation) | Inline form validation |
+| [SSH.NET](https://github.com/sshnet/SSH.NET) | SSH client |
+| [SshNet.Keygen](https://github.com/darinkes/SshNet.Keygen) | Key generation and format conversion |
+| [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile) | PuTTY key file support |
+| [Material.Icons.Avalonia](https://github.com/SKProCH/Material.Icons) | Icon set |
+| [Serilog](https://serilog.net/) | Structured logging |
+| [BouncyCastle](https://www.bouncycastle.org/) | SHA-256 fingerprint computation |
+| [Microsoft.Extensions.Hosting](https://learn.microsoft.com/dotnet/core/extensions/hosting) | DI, configuration, hosted services |
+
+---
 
 ## Authors
 
-- **Oliver Schantz** - *Idea and primary development* -
-  [GitHub](https://github.com/frequency403)
+- **Oliver Schantz** — idea and primary development — [GitHub](https://github.com/frequency403)
 
-See also the list of
-[contributors](https://github.com/frequency403/OpenSSH-GUI/contributors)
-who participated in this project.
-
-## Used Libraries / Technologies
-
-- [Avalonia UI](https://avaloniaui.net/) - Reactive UI
-
-- [ReactiveUI.Validation](https://github.com/reactiveui/ReactiveUI.Validation/)
-
-- [MessageBox.Avalonia](https://github.com/AvaloniaCommunity/MessageBox.Avalonia)
-
-- [Material.Icons](https://github.com/SKProCH/Material.Icons)
-
-- [SSH.NET](https://github.com/sshnet/SSH.NET)
-
-- [Serilog](https://serilog.net/)
-
-- [SshNet.Keygen](https://github.com/darinkes/SshNet.Keygen/)
-
-- [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile)
-
-- [EntityFrameworkCore](https://github.com/dotnet/EntityFramework.Docs)
-
-- [SshNet.PuttyKeyFile](https://github.com/darinkes/SshNet.PuttyKeyFile)
+See also the [contributors](https://github.com/frequency403/OpenSSH-GUI/contributors) list.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE)
-
-- see the [LICENSE](LICENSE) file for
-  details
-
+This project is licensed under the [MIT License](LICENSE).

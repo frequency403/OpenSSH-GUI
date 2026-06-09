@@ -5,8 +5,8 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Interfaces.KnownHosts;assembly=OpenSSH_GUI.Core"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
+        xmlns:knownHosts="clr-namespace:OpenSSH_GUI.Core.Lib.KnownHosts;assembly=OpenSSH_GUI.Core"
         mc:Ignorable="d"
         x:Class="OpenSSH_GUI.Views.EditKnownHostsWindow"
         x:DataType="viewModels:EditKnownHostsWindowViewModel"
@@ -20,7 +20,7 @@
         </Style>
         <Style Selector="ToggleButton avalonia|MaterialIcon.stay">
             <Setter Property="IsVisible" Value="True" />
-            <Setter Property="Foreground" Value="Green" />
+            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
         </Style>
         <Style Selector="ToggleButton avalonia|MaterialIcon.delete">
             <Setter Property="IsVisible" Value="False" />
@@ -30,31 +30,34 @@
         </Style>
         <Style Selector="ToggleButton:checked avalonia|MaterialIcon.delete">
             <Setter Property="IsVisible" Value="True" />
-            <Setter Property="Foreground" Value="Red" />
+            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}" />
         </Style>
     </Window.Styles>
     <Window.DataTemplates>
-        <DataTemplate DataType="knownHosts:IKnownHost">
-            <Expander HorizontalAlignment="Stretch" Margin="5">
-                <Expander.Header>
-                    <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
-                        <TextBlock Grid.Column="0" Text="{Binding Host}" HorizontalAlignment="Center"
-                                   FontWeight="Bold" />
-                        <ToggleButton Grid.Column="1" IsChecked="False" Classes="whole-host"
-                                      Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
-                            <ToolTip.Tip>
-                                <Label
-                                    Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
-                            </ToolTip.Tip>
-                            <Panel>
-                                <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
-                                <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
-                            </Panel>
-                        </ToggleButton>
-                    </Grid>
-                </Expander.Header>
-                <Grid RowDefinitions="* *" ColumnDefinitions="* * *">
-                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="DimGray"
+        <DataTemplate DataType="knownHosts:KnownHost">
+            <Expander HorizontalAlignment="Stretch" Margin="5" Background="Transparent" Header="{Binding}">
+                <Expander.HeaderTemplate>
+                    <DataTemplate DataType="{x:Type knownHosts:KnownHost}">
+                        <Grid RowDefinitions="*" ColumnDefinitions="* *" HorizontalAlignment="Stretch">
+                            <TextBlock Grid.Column="0" Text="{Binding Host}" HorizontalAlignment="Center"
+                                       FontWeight="Bold" />
+                            <ToggleButton Grid.Column="1" IsChecked="False" Classes="whole-host"
+                                          Command="{Binding KeysDeletionSwitch}" HorizontalAlignment="Right">
+                                <ToolTip.Tip>
+                                    <Label
+                                        Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowMarkForDeletionButtonToolTipText}" />
+                                </ToolTip.Tip>
+                                <Panel>
+                                    <avalonia:MaterialIcon Kind="CheckCircleOutline" Classes="stay" />
+                                    <avalonia:MaterialIcon Kind="CloseCircleOutline" Classes="delete" />
+                                </Panel>
+                            </ToggleButton>
+                        </Grid>
+                    </DataTemplate>
+                </Expander.HeaderTemplate>
+                <Grid RowDefinitions="* *" ColumnDefinitions="1* 3* 1*">
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                            BorderBrush="{DynamicResource BorderSubtleBrush}"
                             BorderThickness="0 0 0 1" Margin="0 5">
                         <Grid ColumnDefinitions="* * *">
                             <TextBlock Grid.Column="0"
@@ -71,8 +74,9 @@
                     <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Keys}"
                                   HorizontalAlignment="Stretch">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="knownHosts:IKnownHostKey">
-                                <Border BorderBrush="DimGray" BorderThickness="0 0 0 1" Padding="5">
+                            <DataTemplate DataType="knownHosts:KnownHostKey">
+                                <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0 0 0 1"
+                                        Padding="5">
                                     <Grid ColumnDefinitions="* * *">
                                         <TextBlock Grid.Column="0" Text="{Binding KeyType }"
                                                    HorizontalAlignment="Center" />
@@ -102,9 +106,9 @@
             </Expander>
         </DataTemplate>
     </Window.DataTemplates>
-    <Grid RowDefinitions="10* *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <Grid RowDefinitions="* Auto" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <TabControl Grid.Row="0" VerticalAlignment="Stretch" TabStripPlacement="Left">
-            <TabItem Header="Local" Padding="5">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditKnownHostsLocal}" Padding="5">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"
@@ -114,7 +118,8 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-            <TabItem Header="Remote" Padding="5" IsEnabled="{Binding ServerConnectionService.IsConnected}">
+            <TabItem Header="{x:Static openSshGui:StringsAndTexts.EditKnownHostsRemote}" Padding="5"
+                     IsEnabled="{Binding ServerConnectionService.IsConnected}">
                 <Grid RowDefinitions="* 6* *" ColumnDefinitions="* * *">
                     <ScrollViewer Grid.Row="0"
                                   Grid.Column="0"
@@ -125,30 +130,10 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Grid Grid.Row="1" HorizontalAlignment="Stretch" RowDefinitions="*" ColumnDefinitions="* *">
-            <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" Background="Red" Margin="5 0"
-                    Command="{Binding BooleanSubmit}">
-                <Button.CommandParameter>
-                    <system:Boolean>False</system:Boolean>
-                </Button.CommandParameter>
-                <ToolTip.Tip>
-                    <Label Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}" />
-                </ToolTip.Tip>
-                <avalonia:MaterialIcon Kind="Cancel" />
-            </Button>
-            <Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Background="Green" Margin="5 0"
-                    Command="{Binding BooleanSubmit}">
-                <Button.CommandParameter>
-                    <system:Boolean>True</system:Boolean>
-                </Button.CommandParameter>
-                <ToolTip.Tip>
-                    <Label Content="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}" />
-                </ToolTip.Tip>
-                <avalonia:MaterialIcon Kind="FloppyDisk" />
-            </Button>
-        </Grid>
-        <!-- <controls:BottomButtons Grid.Row="1" HorizontalAlignment="Stretch" Command="{Binding BooleanSubmit}" -->
-        <!--                                   SubmitButtonToolTip="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}" -->
-        <!--                                   AbortButtonToolTip="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}"/> -->
+        <controls:SubmitButtons Grid.Row="1" Margin="0 10" HorizontalAlignment="Stretch"
+                                BooleanSubmit="{Binding BooleanSubmitCommand}"
+                                AbortButtonTooltip="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowDismissButtonToolTipText}"
+                                SubmitButtonTooltip="{x:Static openSshGui:StringsAndTexts.EditKnownHostsWindowConfirmButtonToolTipText}"
+                                SubmitButtonIconKind="FloppyDisk" />
     </Grid>
 </Window>

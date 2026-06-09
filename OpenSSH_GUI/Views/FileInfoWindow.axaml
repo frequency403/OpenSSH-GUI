@@ -3,9 +3,230 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
+        xmlns:io="clr-namespace:System.IO;assembly=System.Runtime"
+        xmlns:converters="clr-namespace:OpenSSH_GUI.Converters"
+        xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:keygen="clr-namespace:SshNet.Keygen;assembly=SshNet.Keygen"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="OpenSSH_GUI.Views.FileInfoWindow"
         x:DataType="viewModels:FileInfoWindowViewModel"
-        Title="FileInfoWindow">
-    Welcome to Avalonia!
+        Width="400"
+        Height="375"
+        CanResize="False"
+        ShowActivated="True"
+        WindowStartupLocation="CenterOwner"
+        Title="{Binding WindowTitle}">
+    <Window.Styles>
+
+        <Style Selector="MenuFlyoutPresenter">
+            <Setter Property="Background" Value="{DynamicResource SplitButtonRemoteBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonRemoteDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="MinWidth" Value="120" />
+        </Style>
+
+        <Style Selector="SplitButton">
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+
+        <Style Selector="SplitButton /template/ Button#PART_PrimaryButton">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+        </Style>
+
+        <Style Selector="SplitButton /template/ Button#PART_SecondaryButton">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="2 0" />
+        </Style>
+    </Window.Styles>
+    <UniformGrid Columns="1" Rows="0" Margin="20" HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch">
+        <controls:HeaderedItem>
+            <controls:HeaderedItem.Header>
+                <TextBlock Text="{Binding AssociatedFilesHeader}" HorizontalAlignment="Left" />
+            </controls:HeaderedItem.Header>
+            <controls:HeaderedItem.SideHeader>
+                <UniformGrid Rows="1" Columns="3" ColumnSpacing="5">
+                    <Button Padding="5"
+                            Background="{DynamicResource NavigationActiveBrush}"
+                            IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
+                            Command="{Binding ChangePasswordOfKeyFileCommand}">
+                        <ToolTip.Tip>
+                            <Label Content="{x:Static openSshGui:StringsAndTexts.FileInfoWindowChangePasswordTooltip}" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="KeyAlertOutline" />
+                    </Button>
+                    <Button Padding="5"
+                            IsEnabled="{Binding KeyFile.FileChangesAllowed, FallbackValue=False}"
+                            Command="{Binding ChangeFileNameCommand}"
+                            CommandParameter="{Binding KeyFile}"
+                            Background="{DynamicResource AdminBrush}">
+                        <ToolTip.Tip>
+                            <Label Content="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilename}" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="FileEditOutline" />
+                    </Button>
+                    <Button Padding="5"
+                            Command="{Binding DeleteKeyCommand}"
+                            CommandParameter="{Binding KeyFile}"
+                            Background="{DynamicResource RevokedBrush}">
+                        <Button.Styles>
+                            <Style Selector="Button:disabled">
+                                <Setter Property="ToolTip.Tip"
+                                        Value="{x:Static openSshGui:StringsAndTexts.MainWindowViewModelChangeFilenameDisabledTooltip}" />
+                            </Style>
+                        </Button.Styles>
+                        <ToolTip.Tip>
+                            <Label
+                                Content="{x:Static openSshGui:StringsAndTexts.MainWindowDataGridControlsDeleteKeyToolTipText}" />
+                        </ToolTip.Tip>
+                        <avalonia:MaterialIcon Kind="DeleteOutline" />
+                    </Button>
+                </UniformGrid>
+            </controls:HeaderedItem.SideHeader>
+            <ItemsControl ItemsSource="{Binding KeyFile.KeyFiles}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type io:FileInfo}">
+                        <StackPanel Margin="0 5">
+                            <TextBlock Text="{Binding FullName}" />
+                            <Separator Margin="0 5 10 0 " />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </controls:HeaderedItem>
+        <controls:HeaderedItem Header="{x:Static openSshGui:StringsAndTexts.FileInfoWindowKeyFormat}">
+            <UniformGrid Rows="1" Columns="0" HorizontalAlignment="Stretch">
+                <StackPanel Spacing="10" Orientation="Horizontal"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static openSshGui:StringsAndTexts.FileInfoWindowCurrent}" />
+                    <TextBlock
+                        Text="{Binding KeyFile.Format, Converter={x:Static converters:Converter.FormatToStringConverter}}" />
+                </StackPanel>
+                <SplitButton Padding="5"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center"
+                             MinHeight="0"
+                             IsEnabled="{Binding KeyFile.FileChangesAllowed}"
+                             Command="{Binding ChangeFormatOfKeyFileCommand}"
+                             CommandParameter="{Binding DefaultKeyFormat}">
+                    <SplitButton.Resources>
+                        <!-- ReSharper disable Xaml.RedundantResource -->
+                        <SolidColorBrush x:Key="SplitButtonBackground"
+                                         Color="{DynamicResource SplitButtonRemoteBackgroundColor}" />
+                        <SolidColorBrush x:Key="SplitButtonBackgroundPointerOver"
+                                         Color="{DynamicResource SplitButtonRemotePointerOverColor}" />
+                        <SolidColorBrush x:Key="SplitButtonBackgroundPressed"
+                                         Color="{DynamicResource SplitButtonRemotePressedColor}" />
+                        <SolidColorBrush x:Key="SplitButtonBackgroundDisabled"
+                                         Color="{DynamicResource SplitButtonRemoteDisabledColor}" />
+
+                        <SolidColorBrush x:Key="SplitButtonDividerBackground"
+                                         Color="{DynamicResource SplitButtonRemoteDividerColor}" />
+
+                        <SolidColorBrush x:Key="SplitButtonForeground"
+                                         Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+                        <SolidColorBrush x:Key="SplitButtonForegroundPointerOver"
+                                         Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+
+                        <SolidColorBrush x:Key="SplitButtonForegroundPressed"
+                                         Color="{DynamicResource SplitButtonRemoteForegroundColor}" />
+                        <!-- ReSharper enable Xaml.RedundantResource -->
+                    </SplitButton.Resources>
+
+                    <SplitButton.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedLeft"
+                                    ItemsSource="{Binding KeyFormats}">
+                            <MenuFlyout.ItemContainerTheme>
+                                <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+                                <ControlTheme TargetType="MenuItem"
+                                              BasedOn="{StaticResource {x:Type MenuItem}}"
+                                              x:DataType="keygen:SshKeyFormat">
+
+                                    <Setter Property="ToolTip.Tip">
+                                        <Template>
+                                            <TextBlock
+                                                Text="{Binding Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
+                                        </Template>
+                                    </Setter>
+                                    <Setter Property="ToolTip.ShowDelay" Value="0" />
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SplitButtonRemoteBackgroundBrush}" />
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource SplitButtonRemoteForegroundBrush}" />
+                                    <Setter Property="Padding" Value="12,8" />
+                                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                    <Setter Property="Header"
+                                            Value="{Binding Converter={x:Static converters:Converter.FormatToStringConverter}}" />
+                                    <Setter Property="Command"
+                                            Value="{Binding $parent[Window].((viewModels:FileInfoWindowViewModel)DataContext).ChangeFormatOfKeyFileCommand}" />
+                                    <Setter Property="CommandParameter" Value="{Binding}" />
+
+                                    <Style Selector="^:pointerover /template/ Border#PART_LayoutRoot">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SplitButtonRemotePointerOverBrush}" />
+                                    </Style>
+                                    <Style Selector="^:pressed /template/ Border#PART_LayoutRoot">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SplitButtonRemotePressedBrush}" />
+                                    </Style>
+
+                                </ControlTheme>
+                            </MenuFlyout.ItemContainerTheme>
+                        </MenuFlyout>
+                    </SplitButton.Flyout>
+
+                    <ToolTip.Tip>
+                        <TextBlock
+                            Text="{Binding KeyFile.KeyFileInfo.DefaultConversionFormat,
+                              Converter={x:Static converters:Converter.FormatChangeTooltipConverter}}" />
+                    </ToolTip.Tip>
+
+                    <avalonia:MaterialIcon Kind="SwapVerticalCircleOutline" />
+
+                </SplitButton>
+            </UniformGrid>
+        </controls:HeaderedItem>
+        <controls:HeaderedItem Header="{x:Static openSshGui:StringsAndTexts.FileInfoWindowPassword}">
+            <Grid ColumnDefinitions="* Auto" ColumnSpacing="5">
+                <TextBox Grid.Column="0" Name="PasswordBox" LetterSpacing="2"
+                         Text="{Binding Password}"
+                         IsEnabled="{Binding KeyFile.Password.IsValid}"
+                         PasswordChar="*"
+                         IsUndoEnabled="False"
+                         IsReadOnly="True"
+                         AcceptsReturn="False"
+                         AcceptsTab="False"
+                         Focusable="False"
+                         MaxLines="1"
+                         SelectionBrush="Transparent">
+                    <TextBox.InnerRightContent>
+                        <ToggleButton IsChecked="{Binding RevealPassword, ElementName=PasswordBox}"
+                                      IsThreeState="False">
+                            <StackPanel>
+                                <avalonia:MaterialIcon Kind="EyeOutline"
+                                                       IsVisible="{Binding RevealPassword, ElementName=PasswordBox}" />
+                                <avalonia:MaterialIcon Kind="EyeOffOutline"
+                                                       IsVisible="{Binding !RevealPassword, ElementName=PasswordBox}" />
+                            </StackPanel>
+                        </ToggleButton>
+                    </TextBox.InnerRightContent>
+                </TextBox>
+                <Button Grid.Column="1" IsEnabled="{Binding RevealPassword, ElementName=PasswordBox }"
+                        Command="{Binding CopyPasswordIntoClipboardCommand}"
+                        CommandParameter="{Binding KeyFile.Password}"
+                        Height="{Binding Height, ElementName=PasswordBox}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="{DynamicResource PrimaryHoverBrush}">
+                    <avalonia:MaterialIcon Kind="ClipboardEditOutline" />
+                </Button>
+            </Grid>
+        </controls:HeaderedItem>
+    </UniformGrid>
 </Window>

@@ -1,0 +1,82 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="DarkAccentColor">#FF4EC9B0</Color>
+    <Color x:Key="DarkRegionColor">#FF0D1117</Color>
+    <Color x:Key="DarkErrorTextColor">#FFFF5F57</Color>
+
+    <!-- Alt — pure-black ramp (overlays, inverse fills on dark surfaces) -->
+    <Color x:Key="DarkAltHighColor">#FF000000</Color>
+    <Color x:Key="DarkAltMediumHighColor">#CC000000</Color>
+    <Color x:Key="DarkAltMediumColor">#99000000</Color>
+    <Color x:Key="DarkAltMediumLowColor">#66000000</Color>
+    <Color x:Key="DarkAltLowColor">#33000000</Color>
+
+    <!-- Base — text / foreground ramp -->
+    <Color x:Key="DarkBaseHighColor">#FFE6EDF3</Color>
+    <Color x:Key="DarkBaseMediumHighColor">#FFBFC9D3</Color>
+    <Color x:Key="DarkBaseMediumColor">#FF8B949E</Color>
+    <Color x:Key="DarkBaseMediumLowColor">#FF6A747E</Color>
+    <Color x:Key="DarkBaseLowColor">#FF30363D</Color>
+
+    <!-- Chrome — control chrome / surface ramp -->
+    <Color x:Key="DarkChromeAltLowColor">#FFE6EDF3</Color>
+    <Color x:Key="DarkChromeWhiteColor">#FFFFFFFF</Color>
+    <Color x:Key="DarkChromeGrayColor">#FF6E7681</Color>
+    <Color x:Key="DarkChromeHighColor">#FF30363D</Color>
+    <Color x:Key="DarkChromeMediumLowColor">#FF21262D</Color>
+    <Color x:Key="DarkChromeMediumColor">#FF1C2128</Color>
+    <Color x:Key="DarkChromeLowColor">#FF161B22</Color>
+    <Color x:Key="DarkChromeDisabledHighColor">#FF6E7681</Color>
+    <Color x:Key="DarkChromeDisabledLowColor">#FF3D444D</Color>
+
+    <!-- ChromeBlack — dark overlay/shadow ramp -->
+    <Color x:Key="DarkChromeBlackHighColor">#FF000000</Color>
+    <Color x:Key="DarkChromeBlackMediumColor">#CC000000</Color>
+    <Color x:Key="DarkChromeBlackMediumLowColor">#99000000</Color>
+    <Color x:Key="DarkChromeBlackLowColor">#33000000</Color>
+
+    <!-- List — hover/selection tints derived from Primary (teal) -->
+    <Color x:Key="DarkListLowColor">#1A4EC9B0</Color>
+    <Color x:Key="DarkListMediumColor">#334EC9B0</Color>
+
+    <Color x:Key="LightAccentColor">#FF1A8A75</Color>
+    <Color x:Key="LightRegionColor">#FFF0F4F8</Color>
+    <Color x:Key="LightErrorTextColor">#FFD93025</Color>
+
+    <!-- Alt — pure-white ramp -->
+    <Color x:Key="LightAltHighColor">#FFFFFFFF</Color>
+    <Color x:Key="LightAltMediumHighColor">#CCFFFFFF</Color>
+    <Color x:Key="LightAltMediumColor">#99FFFFFF</Color>
+    <Color x:Key="LightAltMediumLowColor">#66FFFFFF</Color>
+    <Color x:Key="LightAltLowColor">#33FFFFFF</Color>
+
+    <!-- Base — text / foreground ramp -->
+    <Color x:Key="LightBaseHighColor">#FF1A2332</Color>
+    <Color x:Key="LightBaseMediumHighColor">#FF2D3A4A</Color>
+    <Color x:Key="LightBaseMediumColor">#FF5A6A7A</Color>
+    <Color x:Key="LightBaseMediumLowColor">#FF7A8A97</Color>
+    <Color x:Key="LightBaseLowColor">#FFB8C5D0</Color>
+
+    <!-- Chrome — control chrome / surface ramp -->
+    <Color x:Key="LightChromeAltLowColor">#FF1A2332</Color>
+    <Color x:Key="LightChromeWhiteColor">#FFFFFFFF</Color>
+    <Color x:Key="LightChromeGrayColor">#FF7A8A97</Color>
+    <Color x:Key="LightChromeHighColor">#FFB8C5D0</Color>
+    <Color x:Key="LightChromeMediumLowColor">#FFF5F7FA</Color>
+    <Color x:Key="LightChromeMediumColor">#FFEAEFF4</Color>
+    <Color x:Key="LightChromeLowColor">#FFE2E8EF</Color>
+    <Color x:Key="LightChromeDisabledHighColor">#FFB8C5D0</Color>
+    <Color x:Key="LightChromeDisabledLowColor">#FFD5DCE4</Color>
+
+    <!-- ChromeBlack — dark overlay/shadow ramp (same in both themes) -->
+    <Color x:Key="LightChromeBlackHighColor">#FF000000</Color>
+    <Color x:Key="LightChromeBlackMediumColor">#CC000000</Color>
+    <Color x:Key="LightChromeBlackMediumLowColor">#99000000</Color>
+    <Color x:Key="LightChromeBlackLowColor">#33000000</Color>
+
+    <!-- List — hover/selection tints derived from Primary (deep teal) -->
+    <Color x:Key="LightListLowColor">#1A1A8A75</Color>
+    <Color x:Key="LightListMediumColor">#331A8A75</Color>
+
+</ResourceDictionary>

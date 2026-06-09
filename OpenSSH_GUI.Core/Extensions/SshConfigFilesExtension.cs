@@ -91,14 +91,15 @@ public static class SshConfigFilesExtension
     /// <returns>The file path as a <see cref="string" />.</returns>
     public static string GetPathOfFile(this SshConfigFiles files, bool resolve = true, PlatformID? platform = null)
     {
-        var path = Path.Combine(files switch
-        {
-            SshConfigFiles.Authorized_Keys or
-                SshConfigFiles.Known_Hosts or
-                SshConfigFiles.Config => GetBaseSshPath(resolve, platform),
-            SshConfigFiles.Sshd_Config => GetRootSshPath(resolve, platform),
-            _ => throw new ArgumentException("Invalid value for \"files\"")
-        }, Enum.GetName(files)!.ToLower());
+        var path = Path.Combine(
+            files switch
+            {
+                SshConfigFiles.Authorized_Keys or
+                    SshConfigFiles.Known_Hosts or
+                    SshConfigFiles.Config => GetBaseSshPath(resolve, platform),
+                SshConfigFiles.Sshd_Config => GetRootSshPath(resolve, platform),
+                _ => throw new ArgumentException("Invalid value for \"files\"")
+            }, Enum.GetName(files)!.ToLower());
         platform ??= Environment.OSVersion.Platform;
         path = platform is PlatformID.Unix ? path.Replace('\\', '/') : path.Replace('/', '\\');
         return path;

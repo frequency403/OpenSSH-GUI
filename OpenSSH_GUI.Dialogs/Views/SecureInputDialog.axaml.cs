@@ -42,14 +42,16 @@ namespace OpenSSH_GUI.Dialogs.Views;
 /// </remarks>
 public partial class SecureInputDialog : Window
 {
+    private readonly Encoding _encoding = Encoding.UTF8;
     private readonly int _maxLength;
-
     private readonly int _minLength;
 
     // Each entry represents the UTF-8 encoding of one logical character typed
     // by the user.  Kept as separate segments so Backspace can remove the last
     // character correctly even for multi-byte code points.
     private readonly List<byte[]> _segments = new();
+
+    private bool _isInternalClose;
 
     /// <summary>
     ///     Initialises a new <see cref="SecureInputDialog" />.
@@ -93,6 +95,7 @@ public partial class SecureInputDialog : Window
     {
         InitializeComponent();
 
+        _encoding = @params.Encoding;
         Title = @params.Title;
         PART_Prompt.Text = @params.Prompt;
         PART_Prompt.IsVisible = !string.IsNullOrWhiteSpace(@params.Prompt);
@@ -121,10 +124,7 @@ public partial class SecureInputDialog : Window
     /// <summary>
     ///     Moves keyboard focus to the password field once the window is shown.
     /// </summary>
-    private void OnOpened(object? sender, EventArgs e)
-    {
-        PART_Input.Focus();
-    }
+    private void OnOpened(object? sender, EventArgs e) { PART_Input.Focus(); }
 
     // -------------------------------------------------------------------------
     //  Secure input interception
@@ -144,11 +144,7 @@ public partial class SecureInputDialog : Window
 
         // Encode each character individually so Backspace can remove exactly
         // one logical character at a time.
-        foreach (var ch in e.Text)
-        {
-            var encoded = Encoding.UTF8.GetBytes(new[] { ch });
-            _segments.Add(encoded);
-        }
+        foreach (var encoded in e.Text.Select(ch => _encoding.GetBytes([ch]))) _segments.Add(encoded);
 
         SyncDisplay();
         HideError();
@@ -181,14 +177,12 @@ public partial class SecureInputDialog : Window
     //  Button handlers
     // -------------------------------------------------------------------------
 
-    private void OnOkClick(object? sender, RoutedEventArgs e)
-    {
-        TryConfirm();
-    }
+    private void OnOkClick(object? sender, RoutedEventArgs e) { TryConfirm(); }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
         ZeroSegments();
+        _isInternalClose = true;
         Close(null);
     }
 
@@ -211,7 +205,7 @@ public partial class SecureInputDialog : Window
 
         var buffer = ConsolidateBuffer();
         ZeroSegments();
-
+        _isInternalClose = true;
         Close(new SecureInputResult(buffer));
     }
 
@@ -273,5 +267,15 @@ public partial class SecureInputDialog : Window
     {
         PART_Error.IsVisible = false;
         PART_Error.Text = string.Empty;
+    }
+    private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (_isInternalClose)
+            return;
+
+        e.Cancel = true;
+        _isInternalClose = true;
+        Closing -= Window_OnClosing;
+        Close(null);
     }
 }

@@ -25,6 +25,8 @@ public partial class ValidatedInputDialog : Window
 {
     private readonly Func<string, string?> _validator;
 
+    private bool _isInternalClose;
+
     /// <summary>
     ///     Initialises a new <see cref="ValidatedInputDialog" />.
     /// </summary>
@@ -54,7 +56,7 @@ public partial class ValidatedInputDialog : Window
         Title = title;
         PART_Prompt.Text = prompt;
         PART_Prompt.IsVisible = !string.IsNullOrWhiteSpace(prompt);
-        PART_Input.Watermark = watermark;
+        PART_Input.PlaceholderText = watermark;
         PART_Input.Text = initialValue;
 
         // Subscribe to live text changes for real-time validation.
@@ -84,7 +86,7 @@ public partial class ValidatedInputDialog : Window
             PART_MaterialIcon.Kind = @params.Icon.Value;
         }
 
-        PART_Input.Watermark = @params.Watermark;
+        PART_Input.PlaceholderText = @params.Watermark;
         PART_Input.Text = @params.InitialValue;
 
         // Subscribe to live text changes for real-time validation.
@@ -108,10 +110,7 @@ public partial class ValidatedInputDialog : Window
     //  Validation
     // -------------------------------------------------------------------------
 
-    private void OnInputTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        Validate();
-    }
+    private void OnInputTextChanged(object? sender, TextChangedEventArgs e) { Validate(); }
 
     /// <summary>
     ///     Runs the external validator against the current input and updates the
@@ -155,13 +154,11 @@ public partial class ValidatedInputDialog : Window
         }
     }
 
-    private void OnOkClick(object? sender, RoutedEventArgs e)
-    {
-        TryConfirm();
-    }
+    private void OnOkClick(object? sender, RoutedEventArgs e) { TryConfirm(); }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
+        _isInternalClose = true;
         Close(new ValidatedInputResult(null));
     }
 
@@ -180,6 +177,7 @@ public partial class ValidatedInputDialog : Window
             return;
         }
 
+        _isInternalClose = true;
         Close(new ValidatedInputResult(text));
     }
 
@@ -193,5 +191,16 @@ public partial class ValidatedInputDialog : Window
     {
         PART_Error.IsVisible = false;
         PART_Error.Text = string.Empty;
+    }
+    private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (_isInternalClose)
+            return;
+
+        e.Cancel = true;
+
+        _isInternalClose = true;
+        Closing -= Window_OnClosing;
+        Close(new ValidatedInputResult(null));
     }
 }

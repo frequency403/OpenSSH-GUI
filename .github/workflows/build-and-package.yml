@@ -1,0 +1,153 @@
+name: Build and Package
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      is_nightly:
+        required: false
+        type: boolean
+        default: false
+      asset_name_prefix:
+        required: false
+        type: string
+        default: "OpenSSH-GUI"
+
+jobs:
+  build:
+    name: Build for ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: linux-x64
+            asset_extension: ''
+          - target: win-x64
+            asset_extension: '.exe'
+          - target: osx-x64
+            asset_extension: ''
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine .NET version
+        id: dotnet-version
+        run: |
+          TFM=$(grep -oPm1 '(?<=<TargetFramework>net)[0-9.]+' Directory.Build.props)
+          echo "version=${TFM}.x" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ steps.dotnet-version.outputs.version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props', '**/Directory.Build.props') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+
+      - name: Publish application
+        run: |
+          dotnet publish OpenSSH_GUI/OpenSSH_GUI.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.target }} \
+            --output "./publish" \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:Version="${{ inputs.version }}" \
+            ${{ inputs.is_nightly && '-p:IsNightly=true' || '' }}
+
+      - name: Rename artifact
+        id: rename
+        run: |
+          ASSET_NAME="${{ inputs.asset_name_prefix }}-${{ matrix.target }}${{ matrix.asset_extension }}"
+          mv ./publish/OpenSSH_GUI${{ matrix.asset_extension }} "./publish/$ASSET_NAME"
+          echo "ASSET_NAME=$ASSET_NAME" >> "$GITHUB_OUTPUT"
+
+      # --- AppImage (Linux only) ---
+      - name: Build AppImage
+        if: matrix.target == 'linux-x64'
+        id: appimage
+        run: |
+          sudo apt-get update && sudo apt-get install -y librsvg2-bin
+          
+          # Download appimagetool
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/metainfo
+
+          cp "./publish/${{ steps.rename.outputs.ASSET_NAME }}" AppDir/usr/bin/openssh-gui
+          chmod +x AppDir/usr/bin/openssh-gui
+
+          # Convert SVG to PNG for AppImage icon
+          # Use rsvg-convert to create a high-quality PNG icon
+          rsvg-convert -w 256 -h 256 images/openssh-gui.svg -o AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
+          cp images/openssh-gui.svg AppDir/usr/share/icons/hicolor/scalable/apps/openssh-gui.svg
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/openssh-gui.png
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/appicon.png
+
+          cp appimage/io.github.frequency403.openssh_gui.metainfo.xml AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml
+          
+          # Use ~ for nightly versions in appstream metadata
+          APPSTREAM_VERSION="${{ inputs.version }}"
+          if [[ "${{ inputs.is_nightly }}" == "true" ]]; then
+            APPSTREAM_VERSION="${APPSTREAM_VERSION//+/~}"
+          fi
+          
+          sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
+            AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml
+          
+          appstreamcli make-desktop-file \
+            AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml \
+            AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
+          
+          cp AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop \
+            AppDir/io.github.frequency403.openssh_gui.desktop
+
+          cp appimage/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          # Build AppImage
+          APPIMAGE_NAME="${{ inputs.asset_name_prefix }}-x86_64.AppImage"
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "$APPIMAGE_NAME"
+          echo "APPIMAGE_NAME=$APPIMAGE_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload AppImage artifact
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.appimage.outputs.APPIMAGE_NAME }}
+          path: ${{ steps.appimage.outputs.APPIMAGE_NAME }}
+
+      - name: Upload generated desktop file
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: io.github.frequency403.openssh_gui.desktop
+          path: AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
+
+      - name: Upload appicon artifact
+        if: matrix.target == 'linux-x64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: appicon
+          path: AppDir/appicon.png
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rename.outputs.ASSET_NAME }}
+          path: ./publish/${{ steps.rename.outputs.ASSET_NAME }}

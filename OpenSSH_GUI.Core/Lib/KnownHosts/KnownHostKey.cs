@@ -1,5 +1,5 @@
-﻿using OpenSSH_GUI.Core.Interfaces.KnownHosts;
-using ReactiveUI;
+﻿using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 using SshNet.Keygen;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
@@ -7,21 +7,27 @@ namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 /// <summary>
 ///     Represents a known host key in the OpenSSH GUI.
 /// </summary>
-public class KnownHostKey : ReactiveObject, IKnownHostKey
+public partial record KnownHostKey : ReactiveRecord
 {
+    private readonly string _entryWithoutHost;
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the known host key is marked for deletion.
+    /// </summary>
+    [Reactive] private bool _markedForDeletion;
+
     /// <summary>
     ///     Represents a known host key in the OpenSSH GUI.
     /// </summary>
-    public KnownHostKey(string entry)
+    public KnownHostKey(string[] keyParts)
     {
-        EntryWithoutHost = entry;
-        var splitted = EntryWithoutHost.Split(' ');
-        TypeDeclarationInFile = splitted[0];
+        _entryWithoutHost = string.Join(" ", keyParts);
+        TypeDeclarationInFile = keyParts[0];
         KeyType = Enum.Parse<SshKeyType>(
             TypeDeclarationInFile.StartsWith("ssh-")
-                ? TypeDeclarationInFile.Replace("ssh-", "")
+                ? TypeDeclarationInFile.Replace("ssh-", string.Empty)
                 : TypeDeclarationInFile.Split('-')[0], true);
-        Fingerprint = splitted[1].Replace("\n", "").Replace("\r", "");
+        Fingerprint = keyParts[1];
     }
 
     /// <summary>
@@ -39,17 +45,5 @@ public class KnownHostKey : ReactiveObject, IKnownHostKey
     /// </summary>
     public string Fingerprint { get; }
 
-    /// <summary>
-    ///     Represents a known host key without the host entry in the OpenSSH GUI.
-    /// </summary>
-    public string EntryWithoutHost { get; }
-
-    /// <summary>
-    ///     Gets or sets a value indicating whether the known host key is marked for deletion.
-    /// </summary>
-    public bool MarkedForDeletion
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
+    public override string ToString() => _entryWithoutHost;
 }

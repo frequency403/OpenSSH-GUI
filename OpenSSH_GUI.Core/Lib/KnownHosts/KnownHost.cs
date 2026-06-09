@@ -1,21 +1,23 @@
-﻿using OpenSSH_GUI.Core.Interfaces.KnownHosts;
+﻿using System.Collections.ObjectModel;
+using System.Text;
+using DynamicData;
+using OpenSSH_GUI.Core.Extensions;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace OpenSSH_GUI.Core.Lib.KnownHosts;
 
 /// <summary>
 ///     Represents a known host in the OpenSSH GUI.
 /// </summary>
-public class KnownHost : ReactiveObject, IKnownHost
+public partial record KnownHost : ReactiveRecord
 {
+    private readonly KnownHostKey[] _keysCopy;
+
     /// <summary>
-    ///     Represents a known host entry in the known_hosts file.
+    ///     Represents a known host in the OpenSSH_GUI.
     /// </summary>
-    public KnownHost(IGrouping<string, string> knownHosts)
-    {
-        Host = knownHosts.Key;
-        Keys = knownHosts.Select(e => new KnownHostKey(e.Replace($"{Host}", "").Trim()) as IKnownHostKey).ToList();
-    }
+    [ReactiveCollection] private ObservableCollection<KnownHostKey> _keys = [];
 
     /// <summary>
     ///     Gets or sets the toggled state of the switch.
@@ -25,12 +27,23 @@ public class KnownHost : ReactiveObject, IKnownHost
     ///     - If it was previously off, all known host keys are marked for deletion.
     ///     - If it was previously on, all known host keys are unmarked for deletion.
     /// </remarks>
-    private bool SwitchToggled { get; set; }
+    [Reactive] private bool _switchToggled;
+
+    public KnownHost(KeyValuePair<KnownHostHost, KnownHostKey[]> knownHosts)
+    {
+        HostUri = knownHosts.Key;
+        _keysCopy = knownHosts.Value;
+        Keys.AddRange(_keysCopy);
+    }
+
+    public KnownHostHost HostUri { get; }
+
+    public bool ChangesMade => !_keysCopy.SequenceEqual(Keys);
 
     /// <summary>
     ///     Represents a known host in the SSH known hosts file.
     /// </summary>
-    public string Host { get; }
+    public string Host => HostUri.ToString();
 
     /// <summary>
     ///     Represents a known host that can be deleted in its entirety.
@@ -38,16 +51,7 @@ public class KnownHost : ReactiveObject, IKnownHost
     public bool DeleteWholeHost => Keys.All(e => e.MarkedForDeletion);
 
     /// <summary>
-    ///     Represents a known host in the OpenSSH_GUI.
-    /// </summary>
-    public List<IKnownHostKey> Keys
-    {
-        get;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    } = [];
-
-    /// <summary>
-    ///     Toggles the marked for deletion flag of each <see cref="IKnownHostKey" /> within the <see cref="Keys" /> list.
+    ///     Toggles the marked for deletion flag of each <see cref="KnownHostKey" /> within the <see cref="Keys" /> list.
     ///     If the <see cref="SwitchToggled" /> property is true, it sets the flag to false for all keys. Otherwise, it sets
     ///     the flag to true for all keys.
     /// </summary>
@@ -74,14 +78,15 @@ public class KnownHost : ReactiveObject, IKnownHost
     ///     Returns a string containing all the entries for the known host.
     ///     If the entire host is marked for deletion, returns the line ending character.
     /// </returns>
-    public string GetAllEntries()
+    public string Export(PlatformID? platformId = null)
     {
-        return DeleteWholeHost
-            ? IKnownHostsFile.LineEnding
-            : Keys
-                .Where(e => !e.MarkedForDeletion)
-                .Aggregate("",
-                    (current, knownHostsKey) =>
-                        current + $"{Host} {knownHostsKey.EntryWithoutHost}{IKnownHostsFile.LineEnding}");
+        platformId ??= Environment.OSVersion.Platform;
+        if (DeleteWholeHost) return platformId.Value.GetLineSeparator();
+        var stringBuilder = new StringBuilder();
+        foreach (var knownHostKey in Keys.Where(e => !e.MarkedForDeletion))
+        {
+            stringBuilder.Append($"{Host} {knownHostKey}{platformId.Value.GetLineSeparator()}");
+        }
+        return stringBuilder.ToString();
     }
 }

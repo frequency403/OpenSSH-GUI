@@ -1,7 +1,4 @@
-﻿using Avalonia.Media.Imaging;
-using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using JetBrains.Annotations;
 using OpenSSH_GUI.Core.Resources.Wrapper;
 using OpenSSH_GUI.ViewModels;
 using ReactiveUI;
@@ -15,9 +12,10 @@ public partial class AddKeyWindow : WindowBase<AddKeyWindowViewModel>
     public AddKeyWindow()
     {
         InitializeComponent();
-        this.WhenActivated(d =>
+        this.WhenActivated(_ =>
         {
-            this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(ViewModel, model => model.KeyName,
+            this.BindValidation<AddKeyWindow, AddKeyWindowViewModel, string, string>(
+                ViewModel, model => model.KeyName,
                 window => window.KeyFileNameValidation.Text!);
         });
     }

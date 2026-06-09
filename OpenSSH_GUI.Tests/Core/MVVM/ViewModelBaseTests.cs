@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using Microsoft.Extensions.Logging.Abstractions;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
 
@@ -14,7 +13,7 @@ public class ViewModelBaseTests
         var vm = new TestViewModel();
 
         // Act
-        await vm.InitializeAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await vm.InitializeAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(vm.IsInitialized);
@@ -27,7 +26,7 @@ public class ViewModelBaseTests
         var vm = new TestViewModel();
 
         // Act
-        await vm.BooleanSubmit.Execute(true).FirstAsync();
+        await vm.BooleanSubmitCommand.Execute(true).FirstAsync();
 
         // Assert
         Assert.True(vm.OnBooleanSubmitCalled);
@@ -41,7 +40,7 @@ public class ViewModelBaseTests
         // Arrange
         var vm = new TestViewModel();
         var closeInvoked = false;
-        vm.Close += (s, e) => closeInvoked = true;
+        vm.Close += (_, _) => closeInvoked = true;
 
         // Act
         vm.TriggerClose();
@@ -51,21 +50,18 @@ public class ViewModelBaseTests
         Assert.False(vm.IsInitialized);
     }
 
-    private class TestViewModel() : ViewModelBase<TestViewModel>(NullLogger<TestViewModel>.Instance)
+    private class TestViewModel : ViewModelBase
     {
         public bool OnBooleanSubmitCalled { get; private set; }
         public bool InputParam { get; private set; }
 
-        protected override Task OnBooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
+        protected override Task BooleanSubmitAsync(bool inputParameter, CancellationToken cancellationToken = default)
         {
             OnBooleanSubmitCalled = true;
             InputParam = inputParameter;
             return Task.CompletedTask;
         }
 
-        public void TriggerClose()
-        {
-            RequestClose();
-        }
+        public void TriggerClose() { RequestClose(); }
     }
 }

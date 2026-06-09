@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using OpenSSH_GUI.Dialogs.Views;
 
 namespace OpenSSH_GUI.Dialogs.Models;
 
@@ -20,10 +21,7 @@ public sealed class SecureInputResult : IDisposable
     ///     Ownership of <paramref name="buffer" /> is transferred to this instance.
     /// </summary>
     /// <param name="buffer">The UTF-8 encoded password bytes. Must not be <c>null</c>.</param>
-    internal SecureInputResult(byte[] buffer)
-    {
-        _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
-    }
+    internal SecureInputResult(byte[] buffer) => _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
 
     /// <summary>
     ///     Gets the UTF-8 encoded password bytes.

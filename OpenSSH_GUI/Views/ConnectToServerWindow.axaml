@@ -5,8 +5,8 @@
         xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:viewModels="clr-namespace:OpenSSH_GUI.ViewModels"
         xmlns:openSshGui="clr-namespace:OpenSSH_GUI.Resources"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:models="clr-namespace:OpenSSH_GUI.SshConfig.Models;assembly=OpenSSH_GUI.SshConfig"
+        xmlns:controls="clr-namespace:OpenSSH_GUI.Resources.Controls"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="150"
         Width="650"
         Height="225"
@@ -35,67 +35,73 @@
     <Grid RowDefinitions="* * * * *" ColumnDefinitions="* * *" Margin="5">
         <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" FontWeight="Bold"
                    Text="{x:Static openSshGui:StringsAndTexts.ConnectToServerDescription}" HorizontalAlignment="Center" />
-        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left"
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center"
                     VerticalAlignment="Center">
             <CheckBox IsChecked="{Binding AuthWithPublicKey}"
                       IsEnabled="{Binding !CanConnectToServer}">
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUsePubKey}" />
             </CheckBox>
-            <CheckBox IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}" IsEnabled="{Binding !CanConnectToServer}">
+            <CheckBox IsChecked="{Binding AuthWithAllKeys}" IsVisible="{Binding AuthWithPublicKey}"
+                      IsEnabled="{Binding !CanConnectToServer}">
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowUseAllKeys}" />
             </CheckBox>
         </StackPanel>
-        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" RowDefinitions="* *" IsVisible="{Binding EnablePreConfiguredHosts}" Margin="10 20">
-            <Label Target="SelectConnectionFromConfig"  Grid.Row="0" Content="Preconfigured Connections" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-            <ComboBox x:Name="SelectConnectionFromConfig" Grid.Row="1" 
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                ItemsSource="{Binding SshHostSettings}" 
-                SelectedItem="{Binding SelectedHostSettings}">
+        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" RowDefinitions="* *"
+              IsVisible="{Binding EnablePreConfiguredHosts}" Margin="10 20">
+            <Label Target="SelectConnectionFromConfig" Grid.Row="0"
+                   Content="{x:Static openSshGui:StringsAndTexts.ConnectToServerPreconfiguredConnections}"
+                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <ComboBox x:Name="SelectConnectionFromConfig" Grid.Row="1"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      ItemsSource="{Binding SshHostSettings}"
+                      SelectedItem="{Binding SelectedHostSettings}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:SshHostSettings}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding User}"/>
-                            <TextBlock Text="@"/>
-                            <TextBlock Text="{Binding HostName}"/>
+                            <TextBlock Text="{Binding User}" />
+                            <TextBlock Text="@" />
+                            <TextBlock Text="{Binding HostName}" />
                         </StackPanel>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </Grid>
-        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding HostName}" Watermark="Hostname" Margin="5 10"
+        <TextBox Grid.Row="2" Grid.Column="0" Text="{Binding HostName}"
+                 PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerHostname}" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
 
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}" Watermark="Username" Margin="5 10"
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Username}"
+                 PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerUsername}" Margin="5 10"
                  Height="30"
                  VerticalContentAlignment="Center"
                  IsEnabled="{Binding !CanConnectToServer}" VerticalAlignment="Bottom" />
 
         <StackPanel Margin="5 10" Height="30" Grid.Row="2" Grid.Column="2"
-                    VerticalAlignment="Top">
+                    VerticalAlignment="Bottom">
             <TextBox Height="30"
                      VerticalContentAlignment="Center"
-                     Text="{Binding Password}" Watermark="Password" PasswordChar="*"
+                     Text="{Binding Password}"
+                     PlaceholderText="{x:Static openSshGui:StringsAndTexts.ConnectToServerPassword}" PasswordChar="*"
+                     RevealPassword="False"
                      IsEnabled="{Binding !CanConnectToServer}"
                      IsVisible="{Binding !AuthWithPublicKey}" />
             <ComboBox MaxHeight="30" HorizontalAlignment="Stretch" IsEnabled="{Binding KeyComboBoxEnabled}"
                       IsVisible="{Binding AuthWithPublicKey}"
                       ItemsSource="{Binding SshKeyManager.SshKeys}"
                       SelectedItem="{Binding SelectedPublicKey}"
+                      ItemContainerTheme="{StaticResource SshKeyItemContainerTheme}"
                       ItemTemplate="{StaticResource SshKeyComboBoxStyle}" />
         </StackPanel>
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5"
-                Command="{Binding TestConnection}"
+                Command="{Binding TestConnectionAsyncCommand}"
                 IsEnabled="{Binding !CanConnectToServer}"
                 HotKey="Enter">
             <ToolTip.Tip>
                 <Label Content="{x:Static openSshGui:StringsAndTexts.ConnectWindowTestConnection}" />
             </ToolTip.Tip>
-            <StackPanel Orientation="Horizontal">
-                <avalonia:MaterialIcon Kind="LanConnect" />
-                <avalonia:MaterialIcon Kind="Help" />
-            </StackPanel>
+            <avalonia:MaterialIcon Kind="LanCheck" />
         </Button>
 
         <TextBlock Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5"
@@ -111,7 +117,7 @@
                 <Label Content="{Binding StatusButtonToolTip}" />
             </ToolTip.Tip>
             <TextBlock Text="{Binding StatusButtonText}" VerticalAlignment="Center" />
-            <Button HorizontalAlignment="Right" Background="DarkSlateGray"
+            <Button HorizontalAlignment="Right" Background="{DynamicResource ForegroundSecondaryBrush}"
                     Command="{Binding ResetCommand}"
                     IsVisible="{Binding CanConnectToServer}">
                 <ToolTip.Tip>
@@ -120,38 +126,10 @@
                 <avalonia:MaterialIcon Kind="Replay" />
             </Button>
         </TextBlock>
-        <Grid ColumnDefinitions="* *" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
-            <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
-                    Background="Red"
-                    Command="{Binding BooleanSubmit}"
-                    HotKey="Escape">
-                <Button.CommandParameter>
-                    <system:Boolean>False</system:Boolean>
-                </Button.CommandParameter>
-                <ToolTip.Tip>
-                    <Label Content="{x:Static openSshGui:StringsAndTexts.CancelAndClose}" />
-                </ToolTip.Tip>
-                <avalonia:MaterialIcon Kind="Cancel" />
-            </Button>
-            <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
-                    Background="LimeGreen" 
-                    IsEnabled="{Binding CanConnectToServer}"
-                    Command="{Binding BooleanSubmit}"
-                    HotKey="Enter">
-                <Button.Styles>
-                    <Style Selector="Button:enabled">
-                        <Setter Property="ToolTip.Tip" Value="TEST A VALID CONNECTION FIRST B" />
-                    </Style>
-                    <Style Selector="Button:disabled">
-                        <Setter Property="ToolTip.Tip"
-                                Value="{x:Static openSshGui:StringsAndTexts.ConnectWindowAcceptConnection}" />
-                    </Style>
-                </Button.Styles>
-                <Button.CommandParameter>
-                    <system:Boolean>True</system:Boolean>
-                </Button.CommandParameter>
-                <avalonia:MaterialIcon Kind="Check" />
-            </Button>
-        </Grid>
+        <controls:SubmitButtons Margin="5" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                                BooleanSubmit="{Binding BooleanSubmitCommand}"
+                                SubmitButtonEnabled="{Binding CanConnectToServer}"
+                                SubmitButtonIconKind="CheckOutline" />
     </Grid>
 </Window>

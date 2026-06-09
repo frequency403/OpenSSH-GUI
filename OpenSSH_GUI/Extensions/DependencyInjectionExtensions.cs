@@ -1,15 +1,16 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Avalonia.Platform.Storage;
-using DryIoc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenSSH_GUI.Core;
 using OpenSSH_GUI.Core.Extensions;
+using OpenSSH_GUI.Core.Interfaces;
 using OpenSSH_GUI.Core.Interfaces.Hosts;
 using OpenSSH_GUI.Core.Lib.Keys;
 using OpenSSH_GUI.Core.Lib.Misc;
+using OpenSSH_GUI.Core.Resources;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
 using OpenSSH_GUI.Dialogs.Interfaces;
@@ -17,67 +18,51 @@ using OpenSSH_GUI.Dialogs.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog.Core;
-#if DEBUG
-using Serilog.Events;
-#endif
 
 namespace OpenSSH_GUI.Extensions;
 
 public static class DependencyInjectionExtensions
 {
-    private const string IconUri = "avares://OpenSSH_GUI/Assets/appicon.ico";
-
-    extension(IContainer container)
+    extension(IHostBuilder builder)
     {
-        internal void ConfigureServicesInternal()
+        internal IHostBuilder RegisterOpenSshGuiServices()
         {
-            container.Register<App>();
-            container.Register<ExceptionHandler>();
-            container.RegisterInstance(
-                new LoggingLevelSwitch(
-#if DEBUG
-                    LogEventLevel.Verbose
-#endif
-                ));
+            builder.ConfigureServices((_, services) =>
+            {
+                services.AddSingleton<App>();
+                services.AddSingleton<Application>(sp => sp.GetRequiredService<App>());
+                services.AddSingleton<AppIconStore>();
+                services.AddSingleton<LoggingLevelSwitch>();
+                services.AddSingleton<ExceptionHandler>();
+                services.AddSingleton<ServerConnectionService>();
+                services.AddSingleton<DirectoryCrawler>();
+                services.AddSingleton<IDirectoryCrawler>(sp => sp.GetRequiredService<DirectoryCrawler>());
+                services.AddSingleton<ISshKeyFactory, SshKeyFactory>();
+                services.AddSingleton<IKeyFileBackupService, KeyFileBackupService>();
+                services.AddSingleton<ISshKeyGenerator, SshKeyGenerator>();
+                services.AddSingleton<IKeyFileWriterService, KeyFileWriterService>();
+                services.AddSingleton<SshKeyManager>();
 
-            container.Register<ServerConnectionService>();
-            container.Register<DirectoryCrawler>();
-            container.Register<SshKeyManager>();
-            container.Register<MainWindow>(serviceKey: nameof(MainWindow), made: Made.Of(propertiesAndFields: PropertiesAndFields.Auto));
-            container.Register<MainWindowViewModel>(serviceKey: nameof(MainWindowViewModel));
+                services.AddSingleton<Window>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                services.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
+                services.AddSingleton<IClipboard>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Clipboard!);
+                services.AddSingleton<IStorageProvider>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).StorageProvider);
+                services.AddSingleton<ILauncher>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Launcher);
 
-            container.RegisterDelegate<IDialogHost>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)));
-            container.RegisterDelegate<Window>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)));
-            container.RegisterDelegate<IClipboard>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow))!.Clipboard!);
-            container.RegisterDelegate<IStorageProvider>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)).StorageProvider);
-            container.RegisterDelegate<ILauncher>(resolver =>
-                resolver.Resolve<MainWindow>(serviceKey: nameof(MainWindow)).Launcher);
-            container.RegisterDelegate(_ => new Bitmap(AssetLoader.Open(new Uri(IconUri))),
-                serviceKey: Program.IconServiceKey);
+                services.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(ServiceLifetime.Singleton);
+                services.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
+                services.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
+                services.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
+                services.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
+                services.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
+                services.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
+                services.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
 
-            container.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();
-            container.RegisterViewWithViewModel<EditKnownHostsWindow, EditKnownHostsWindowViewModel>();
-            container.RegisterViewWithViewModel<EditAuthorizedKeysWindow, EditAuthorizedKeysViewModel>();
-            container.RegisterViewWithViewModel<ConnectToServerWindow, ConnectToServerViewModel>();
-            container.RegisterViewWithViewModel<AddKeyWindow, AddKeyWindowViewModel>();
-            container.RegisterViewWithViewModel<ApplicationSettingsWindow, ApplicationSettingsViewModel>();
-            container.RegisterViewWithViewModel<FileInfoWindow, FileInfoWindowViewModel>();
-
-            container.Register<IMessageBoxProvider, MessageBoxProvider>(Reuse.Transient);
-            container.Register<SshKeyFile>(Reuse.Transient);
-        }
-    }
-
-    extension(IServiceCollection collection)
-    {
-        internal IServiceCollection RegisterOpenSshGuiServices()
-        {
-            collection.AddHostedService<FileSystemAnalyzer>();
-            return collection;
+                services.AddTransient<IMessageBoxProvider, MessageBoxProvider>();
+                services.AddTransient<SshKeyFile>();
+                services.AddHostedService<FileSystemAnalyzer>();
+            });
+            return builder;
         }
     }
 }

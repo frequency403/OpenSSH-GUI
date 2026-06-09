@@ -40,12 +40,12 @@ public sealed record SshConfigParserOptions
     ///     Defaults to <see langword="false" />.
     /// </summary>
     public bool ThrowOnUnknownKey { get; init; }
-    
+
     /// <summary>
-    /// Optional callback invoked when an included file cannot be read due to
-    /// insufficient permissions or an I/O error. Receives the file path and the
-    /// causing exception. When <see langword="null"/>, inaccessible files are
-    /// silently skipped.
+    ///     Optional callback invoked when an included file cannot be read due to
+    ///     insufficient permissions or an I/O error. Receives the file path and the
+    ///     causing exception. When <see langword="null" />, inaccessible files are
+    ///     silently skipped.
     /// </summary>
     public Action<string, Exception>? OnSkippedIncludeFile { get; init; }
 
@@ -55,5 +55,8 @@ public sealed record SshConfigParserOptions
     /// <summary>
     ///     Gets a strict options instance that throws on any unrecognised keyword.
     /// </summary>
-    public static SshConfigParserOptions Strict { get; } = new() { ThrowOnUnknownKey = true };
+    public static SshConfigParserOptions Strict { get; } = new()
+    {
+        ThrowOnUnknownKey = true
+    };
 }
