@@ -12,10 +12,9 @@ permissions:
 
 jobs:
   create-tag:
+    name: Create and Push Tag
     # Only run when a release/* branch was actually merged (not just closed)
-    if: >
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'release/')
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
     runs-on: ubuntu-latest
 
     steps:
@@ -29,18 +28,21 @@ jobs:
         id: version
         run: |
           BRANCH="${{ github.event.pull_request.head.ref }}"
+          # Strip 'release/' prefix
           VERSION="${BRANCH#release/}"
+          # Strip optional 'v' prefix
           VERSION="${VERSION#v}" 
+          
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG=v${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Detected version: $VERSION (tag: v${VERSION})"
+          echo "::notice ::Detected version: $VERSION (tag: v${VERSION})"
 
       - name: Check if tag already exists
         id: check
         run: |
           if git rev-parse "refs/tags/${{ steps.version.outputs.TAG }}" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Tag ${{ steps.version.outputs.TAG }} already exists, skipping."
+            echo "::warning ::Tag ${{ steps.version.outputs.TAG }} already exists, skipping."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
@@ -52,3 +54,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "${{ steps.version.outputs.TAG }}" -m "Release ${{ steps.version.outputs.VERSION }}"
           git push origin "${{ steps.version.outputs.TAG }}"
+          echo "::notice ::Tag ${{ steps.version.outputs.TAG }} pushed successfully."

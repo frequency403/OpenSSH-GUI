@@ -1,0 +1,44 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ main, master, development ]
+  pull_request:
+    branches: [ main, master, development ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine .NET version from project
+        id: dotnet-version
+        run: |
+          TFM=$(grep -oPm1 '(?<=<TargetFramework>net)[0-9.]+' Directory.Build.props)
+          echo "version=${TFM}.x" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ steps.dotnet-version.outputs.version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props', '**/Directory.Build.props') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+
+      - name: Restore dependencies
+        run: dotnet restore OpenSSH_GUI.slnx
+
+      - name: Build
+        run: dotnet build OpenSSH_GUI.slnx --configuration Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test OpenSSH_GUI.slnx --configuration Release --no-build --verbosity normal
