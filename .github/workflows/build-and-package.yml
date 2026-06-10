@@ -32,6 +32,9 @@ jobs:
             asset_extension: ''
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+    
       - name: Setup .NET environment
         uses: ./.github/actions/dotnet-setup
 
