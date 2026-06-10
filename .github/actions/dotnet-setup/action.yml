@@ -1,0 +1,59 @@
+name: 'Setup .NET Environment'
+description: >
+  Checks out the repository, auto-detects the TargetFramework from
+  Directory.Build.props, sets up the .NET SDK, and restores the NuGet cache.
+
+inputs:
+  fetch-depth:
+    description: 'Number of commits to fetch (0 = full history, 1 = shallow)'
+    required: false
+    default: '1'
+  token:
+    description: 'GitHub token used for checkout'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  dotnet-version:
+    description: 'Resolved .NET version string, e.g. "10.0.x"'
+    value: ${{ steps.detect-tfm.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        token: ${{ inputs.token }}
+
+    - name: Detect TargetFramework from Directory.Build.props
+      id: detect-tfm
+      shell: bash
+      run: |
+        set -euo pipefail
+        PROPS_FILE="Directory.Build.props"
+        if [[ ! -f "$PROPS_FILE" ]]; then
+          echo "::error::$PROPS_FILE not found in workspace root"
+          exit 1
+        fi
+        TFM=$(grep -oPm1 '(?<=<TargetFramework>net)[0-9.]+' "$PROPS_FILE" || true)
+        if [[ -z "$TFM" ]]; then
+          echo "::error::Could not extract <TargetFramework> from $PROPS_FILE"
+          exit 1
+        fi
+        echo "version=${TFM}.x" >> "$GITHUB_OUTPUT"
+        echo "::notice::Resolved .NET version: ${TFM}.x"
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ steps.detect-tfm.outputs.version }}
+
+    - name: Restore NuGet cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props', '**/Directory.Build.props') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
