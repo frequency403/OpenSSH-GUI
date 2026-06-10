@@ -52,12 +52,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dotnet-
 
-      - name: Normalize version
-        id: version
+      - name: Normalize version and build args
+        id: build-meta
         run: |
           VERSION="${{ inputs.version }}"
           VERSION="${VERSION#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+          EXTRA_ARGS=""
+          if [[ "${{ inputs.is_nightly }}" == "true" ]]; then
+            EXTRA_ARGS="-p:IsNightly=true"
+          fi
+          echo "EXTRA_ARGS=$EXTRA_ARGS" >> "$GITHUB_OUTPUT"
 
       - name: Publish application
         run: |
@@ -68,8 +74,8 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:Version="${{ steps.version.outputs.VERSION }}" \ 
-            ${{ inputs.is_nightly && '-p:IsNightly=true' || '' }}
+            -p:Version="${{ steps.build-meta.outputs.VERSION }}" \
+            ${{ steps.build-meta.outputs.EXTRA_ARGS }}
 
       - name: Rename artifact
         id: rename
@@ -85,11 +91,9 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y librsvg2-bin
           
-          # Download appimagetool
           wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
           chmod +x appimagetool
 
-          # Create AppDir structure
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
           mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps
@@ -99,35 +103,31 @@ jobs:
           cp "./publish/${{ steps.rename.outputs.ASSET_NAME }}" AppDir/usr/bin/openssh-gui
           chmod +x AppDir/usr/bin/openssh-gui
 
-          # Convert SVG to PNG for AppImage icon
-          # Use rsvg-convert to create a high-quality PNG icon
           rsvg-convert -w 256 -h 256 images/openssh-gui.svg -o AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
           cp images/openssh-gui.svg AppDir/usr/share/icons/hicolor/scalable/apps/openssh-gui.svg
           cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/openssh-gui.png
           cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/appicon.png
 
           cp appimage/io.github.frequency403.openssh_gui.metainfo.xml AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml
-          
-          # Use ~ for nightly versions in appstream metadata
-          APPSTREAM_VERSION="${{ inputs.version }}"
+
+          APPSTREAM_VERSION="${{ steps.build-meta.outputs.VERSION }}"
           if [[ "${{ inputs.is_nightly }}" == "true" ]]; then
             APPSTREAM_VERSION="${APPSTREAM_VERSION//+/~}"
           fi
-          
+
           sed -i "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
             AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml
-          
+
           appstreamcli make-desktop-file \
             AppDir/usr/share/metainfo/io.github.frequency403.openssh_gui.metainfo.xml \
             AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
-          
+
           cp AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop \
             AppDir/io.github.frequency403.openssh_gui.desktop
 
           cp appimage/AppRun AppDir/AppRun
           chmod +x AppDir/AppRun
 
-          # Build AppImage
           APPIMAGE_NAME="${{ inputs.asset_name_prefix }}-x86_64.AppImage"
           ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "$APPIMAGE_NAME"
           echo "APPIMAGE_NAME=$APPIMAGE_NAME" >> "$GITHUB_OUTPUT"
