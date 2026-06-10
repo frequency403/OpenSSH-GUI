@@ -1,0 +1,40 @@
+name: 'Publish .NET Application'
+description: >
+  Runs dotnet publish for a single-file, ReadyToRun, self-contained Release build.
+  Assumes the .NET SDK is already set up in the environment.
+
+inputs:
+  project-path:
+    description: 'Relative path to the .csproj file to publish'
+    required: true
+  runtime:
+    description: 'Target RID (e.g. win-x64, linux-x64, osx-x64)'
+    required: true
+  version:
+    description: 'Version string passed to MSBuild /p:Version (no v-prefix)'
+    required: true
+  output-dir:
+    description: 'Output directory relative to the workspace root'
+    required: false
+    default: './publish'
+  extra-msbuild-args:
+    description: 'Additional MSBuild property flags, e.g. "-p:IsNightly=true"'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Publish application
+      shell: bash
+      run: |
+        set -euo pipefail
+        dotnet publish "${{ inputs.project-path }}" \
+          --configuration Release \
+          --runtime "${{ inputs.runtime }}" \
+          --output "${{ inputs.output-dir }}" \
+          -p:PublishSingleFile=true \
+          -p:PublishReadyToRun=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          -p:Version="${{ inputs.version }}" \
+          ${{ inputs.extra-msbuild-args }}

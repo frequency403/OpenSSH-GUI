@@ -1,0 +1,127 @@
+name: 'Build AppImage'
+description: >
+  Packages a self-contained .NET binary into an AppImage for linux-x64.
+  Requires the repository to be checked out and the binary to exist at the given path.
+  Note: FUSE is not available on GitHub-hosted runners, so appimagetool runs via
+  --appimage-extract-and-run.
+
+inputs:
+  binary-path:
+    description: 'Path to the compiled binary to package'
+    required: true
+  version:
+    description: 'Application version (no v-prefix; may contain + for nightly builds)'
+    required: true
+  is-nightly:
+    description: 'Set to "true" to replace + with ~ in the AppStream version'
+    required: false
+    default: 'false'
+  asset-prefix:
+    description: 'Filename prefix for the output AppImage'
+    required: false
+    default: 'OpenSSH-GUI'
+  appimagetool-tag:
+    description: 'Release tag of appimagetool to download'
+    required: false
+    default: 'continuous'
+
+outputs:
+  appimage-name:
+    description: 'Filename of the produced AppImage'
+    value: ${{ steps.build.outputs.appimage-name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install AppImage build dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends librsvg2-bin appstream
+
+    - name: Download appimagetool
+      shell: bash
+      run: |
+        set -euo pipefail
+        TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/${{ inputs.appimagetool-tag }}/appimagetool-x86_64.AppImage"
+        echo "::notice::Downloading appimagetool from $TOOL_URL"
+        wget --progress=dot:giga "$TOOL_URL" -O appimagetool
+        chmod +x appimagetool
+
+    - name: Assemble and build AppImage
+      id: build
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        BINARY_PATH="${{ inputs.binary-path }}"
+        VERSION="${{ inputs.version }}"
+        IS_NIGHTLY="${{ inputs.is-nightly }}"
+        ASSET_PREFIX="${{ inputs.asset-prefix }}"
+        APP_ID="io.github.frequency403.openssh_gui"
+
+        # Validate all required source files exist before doing any work
+        for REQUIRED in \
+          "$BINARY_PATH" \
+          "images/openssh-gui.svg" \
+          "appimage/${APP_ID}.metainfo.xml" \
+          "appimage/AppRun"
+        do
+          if [[ ! -f "$REQUIRED" ]]; then
+            echo "::error::Required file not found: $REQUIRED"
+            exit 1
+          fi
+        done
+
+        # Prepare AppDir layout
+        mkdir -p "AppDir/usr/bin"
+        mkdir -p "AppDir/usr/share/icons/hicolor/256x256/apps"
+        mkdir -p "AppDir/usr/share/icons/hicolor/scalable/apps"
+        mkdir -p "AppDir/usr/share/applications"
+        mkdir -p "AppDir/usr/share/metainfo"
+
+        cp "$BINARY_PATH" AppDir/usr/bin/openssh-gui
+        chmod +x          AppDir/usr/bin/openssh-gui
+
+        # Icons
+        rsvg-convert -w 256 -h 256 images/openssh-gui.svg \
+          -o AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
+        cp images/openssh-gui.svg \
+          AppDir/usr/share/icons/hicolor/scalable/apps/openssh-gui.svg
+        cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/openssh-gui.png
+        cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/appicon.png
+
+        # Metainfo: patch placeholder version and date
+        METAINFO_DEST="AppDir/usr/share/metainfo/${APP_ID}.metainfo.xml"
+        cp "appimage/${APP_ID}.metainfo.xml" "$METAINFO_DEST"
+
+        APPSTREAM_VERSION="$VERSION"
+        if [[ "$IS_NIGHTLY" == "true" ]]; then
+          APPSTREAM_VERSION="${APPSTREAM_VERSION//+/~}"
+        fi
+        sed -i \
+          "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
+          "$METAINFO_DEST"
+
+        # Generate .desktop file from metainfo
+        appstreamcli make-desktop-file \
+          "$METAINFO_DEST" \
+          "AppDir/usr/share/applications/${APP_ID}.desktop"
+        cp "AppDir/usr/share/applications/${APP_ID}.desktop" \
+          "AppDir/${APP_ID}.desktop"
+
+        cp appimage/AppRun AppDir/AppRun
+        chmod +x AppDir/AppRun
+
+        # Assemble AppImage (--appimage-extract-and-run bypasses FUSE requirement)
+        APPIMAGE_NAME="${ASSET_PREFIX}-x86_64.AppImage"
+        ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "$APPIMAGE_NAME"
+
+        if [[ ! -f "$APPIMAGE_NAME" ]]; then
+          echo "::error::appimagetool did not produce $APPIMAGE_NAME"
+          exit 1
+        fi
+
+        echo "appimage-name=$APPIMAGE_NAME" >> "$GITHUB_OUTPUT"
+        echo "::notice::AppImage built successfully: $APPIMAGE_NAME"
