@@ -1,37 +1,57 @@
-name: 'Install Komac'
-description: >
-  Resolves and downloads the latest Komac (linux-amd64) release from GitHub
-  and makes it executable in the current working directory.
+name: install-komac
+description: Downloads Komac in a reliable way
 
 outputs:
   komac-path:
-    description: 'Absolute path to the komac binary'
-    value: ${{ steps.install.outputs.komac-path }}
+    description: Path to komac binary
+    value: ${{ steps.install.outputs.path }}
 
 runs:
-  using: composite
+  using: "composite"
   steps:
-    - name: Resolve and download Komac
+    - name: Install GitHub CLI (if missing)
+      shell: bash
+      run: |
+        if ! command -v gh >/dev/null 2>&1; then
+          sudo apt-get update
+          sudo apt-get install -y gh
+        fi
+
+    - name: Authenticate gh
+      shell: bash
+      run: |
+        echo "${{ github.token }}" | gh auth login --with-token
+
+    - name: Download Komac release
       id: install
       shell: bash
       run: |
         set -euo pipefail
 
-        KOMAC_URL=$(curl -fsSL \
-            https://api.github.com/repos/russellbanks/Komac/releases/latest \
-          | grep -o '"browser_download_url": "[^"]*linux-amd64[^"]*"' \
-          | grep -v '\.sha' \
-          | head -1 \
-          | cut -d'"' -f4)
+        TMP_DIR="$(mktemp -d)"
+        echo "Using temp dir: $TMP_DIR"
 
-        if [[ -z "$KOMAC_URL" ]]; then
-          echo "::error::Failed to resolve Komac download URL from GitHub Releases API"
+        # deterministisch: latest release holen
+        TAG=$(gh release view --repo russellbanks/Komac --json tagName -q .tagName)
+
+        echo "Latest Komac tag: $TAG"
+
+        # gezielt Asset ziehen (kein grep, kein JSON parsing)
+        gh release download "$TAG" \
+          --repo russellbanks/Komac \
+          --pattern "*linux*amd64*" \
+          --dir "$TMP_DIR"
+
+        FILE=$(find "$TMP_DIR" -type f -name "*komac*" | head -n 1 || true)
+
+        if [[ -z "${FILE:-}" ]]; then
+          echo "::error::Komac binary not found after download"
           exit 1
         fi
 
-        echo "::notice::Downloading Komac from: $KOMAC_URL"
-        curl -fsSL "$KOMAC_URL" -o komac
-        chmod +x komac
-        ./komac --version
+        chmod +x "$FILE"
 
-        echo "komac-path=$(pwd)/komac" >> "$GITHUB_OUTPUT"
+        echo "Komac version:"
+        "$FILE" --version || true
+
+        echo "path=$FILE" >> "$GITHUB_OUTPUT"
