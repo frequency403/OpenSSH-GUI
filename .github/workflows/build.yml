@@ -131,10 +131,16 @@ jobs:
 
       - name: Install Komac
         run: |
-          curl -sL \
-            "https://github.com/russellbanks/Komac/releases/latest/download/komac-linux-amd64" \
-            -o komac
+          KOMAC_URL=$(curl -fsSL https://api.github.com/repos/russellbanks/Komac/releases/latest \
+            | grep -o '"browser_download_url": "[^"]*linux-amd64[^"]*"' \
+            | grep -v '\.sha' \
+            | head -1 \
+            | cut -d'"' -f4)
+          
+          echo "Downloading Komac from: $KOMAC_URL"
+          curl -fsSL "$KOMAC_URL" -o komac
           chmod +x komac
+          ./komac --version
 
       - name: Update Winget manifest
         run: |
