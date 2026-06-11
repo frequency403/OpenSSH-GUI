@@ -41,6 +41,11 @@ jobs:
     needs: [ test, prepare ]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -52,40 +57,39 @@ jobs:
             User aur
             StrictHostKeyChecking no
           EOF
-          chmod 644 ~/.ssh/config
 
-      - name: Clone AUR repository
+      - name: Update PKGBUILD
         run: |
-          mkdir -p /tmp/aur-deploy
-          cd /tmp/aur-deploy
-          git clone ssh://aur@aur.archlinux.org/openssh-gui-git.git .
-
-      - name: Checkout OpenSSH-GUI repository
-        uses: actions/checkout@v4
-        with:
-          path: openssh-gui-repo
-          fetch-depth: 0
-
-      - name: Copy and update PKGBUILD
-        run: |
-          cd /tmp/aur-deploy
-          cp openssh-gui-repo/openssh-gui-git/PKGBUILD .
-          
+          set -euo pipefail
           DATE=$(date +%Y%m%d)
-          HASH=$(cd openssh-gui-repo && git rev-parse --short HEAD)
+          HASH=$(git rev-parse --short HEAD)
           AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
           
-          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-git/PKGBUILD
           
-          echo "Updated PKGBUILD with version: $AUR_VERSION"
-          grep -E '^(pkgver=|pkgrel=)' PKGBUILD
+          echo "Updated PKGBUILD:"
+          grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
 
-      - name: Push to AUR
+      - name: Clone and push to AUR
         run: |
-          cd /tmp/aur-deploy
+          set -euo pipefail
+          
+          # Clone AUR repository to temporary location
+          cd /tmp
+          rm -rf aur-deploy
+          mkdir aur-deploy
+          cd aur-deploy
+          git clone ssh://aur@aur.archlinux.org/openssh-gui-git.git .
+          
+          # Copy updated PKGBUILD from original repo
+          cp $GITHUB_WORKSPACE/openssh-gui-git/PKGBUILD .
+          
+          # Configure git
           git config user.name "${{ github.repository_owner }}"
           git config user.email "${{ github.repository_owner }}@users.noreply.github.com"
+          
+          # Commit and push
           git add PKGBUILD
-          git commit -m "Development update ${{ needs.prepare.outputs.tag }}" || echo "No changes to commit"
-          git push -u origin master
+          git commit -m "Development update ${{ needs.prepare.outputs.tag }}" || true
+          git push origin master
