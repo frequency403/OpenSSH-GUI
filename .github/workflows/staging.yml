@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Determine Version
         id: version
@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -61,7 +61,7 @@ jobs:
           grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
 
       - name: Publish AUR (openssh-gui-git)
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
           pkgname: openssh-gui-git
           pkgbuild: ./openssh-gui-git/PKGBUILD
