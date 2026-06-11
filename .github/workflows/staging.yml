@@ -41,32 +41,48 @@ jobs:
     needs: [ test, prepare ]
 
     steps:
-      - name: Checkout repository
+      - name: Clone AUR repository
+        run: |
+          mkdir -p /tmp/aur-deploy
+          cd /tmp/aur-deploy
+          git clone ssh://aur@aur.archlinux.org/openssh-gui-git.git .
+        env:
+          GIT_SSH_COMMAND: ssh -i /tmp/aur_key -o StrictHostKeyChecking=no
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > /tmp/aur_key
+          chmod 600 /tmp/aur_key
+
+      - name: Checkout OpenSSH-GUI repository
         uses: actions/checkout@v4
         with:
+          path: openssh-gui-repo
           fetch-depth: 0
 
-      - name: Update openssh-gui-git PKGBUILD
+      - name: Copy and update PKGBUILD
         run: |
-          set -euo pipefail
+          cd /tmp/aur-deploy
+          cp openssh-gui-repo/openssh-gui-git/PKGBUILD .
+          
           DATE=$(date +%Y%m%d)
-          HASH=$(git rev-parse --short HEAD)
-          # pkgver must only contain [a-zA-Z0-9._] — no + or -
+          HASH=$(cd openssh-gui-repo && git rev-parse --short HEAD)
           AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
+          
+          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
+          
+          echo "Updated PKGBUILD with version: $AUR_VERSION"
+          grep -E '^(pkgver=|pkgrel=)' PKGBUILD
 
-          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/"            openssh-gui-git/PKGBUILD
-
-          echo "Updated PKGBUILD:"
-          grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
-
-      - name: Publish AUR (openssh-gui-git)
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
-        with:
-          pkgname: openssh-gui-git
-          pkgbuild: ./openssh-gui-git/PKGBUILD
-          commit_username: ${{ github.repository_owner }}
-          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
-          branch: master
+      - name: Push to AUR
+        run: |
+          cd /tmp/aur-deploy
+          git config user.name "${{ github.repository_owner }}"
+          git config user.email "${{ github.repository_owner }}@users.noreply.github.com"
+          git add PKGBUILD
+          git commit -m "Development update ${{ needs.prepare.outputs.tag }}" || echo "No changes to commit"
+          git push -u origin master
+        env:
+          GIT_SSH_COMMAND: ssh -i /tmp/aur_key -o StrictHostKeyChecking=no
