@@ -11,10 +11,7 @@ inputs:
     description: The property where the dotnet msbuild command must look for the verison
     required: false
     default: 'BaseVersion'
-    
-  ref:
-    description: Where the checkout should be performed
-    required: true
+  
 
 outputs:
   version:
@@ -28,30 +25,23 @@ runs:
   using: composite
 
   steps:
-    - name: Checkout needed file
-      uses: actions/checkout@v6
-      with: 
-        fetch-depth: '1'
-        ref: ${{ inputs.ref }}
-        sparse-checkout-cone-mode: 'false'
-        sparse-checkout: |
-          ${{ inputs.file-name }}
-      
     - name: Extract BaseVersion
       id: extract
       shell: bash
       run: |
         set -euo pipefail
 
-        if [[ ! -f "${{ inputs.file-name }}" ]]; then
-          echo "::error::${{ inputs.file-name }} not found"
+        FILE="${{ inputs.file-name }}"
+
+        if [[ ! -f "$FILE" ]]; then
+          echo "::error::$FILE not found"
           exit 1
         fi
 
-        VERSION="$(dotnet msbuild "${{ inputs.file-name }}" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
+        VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
 
         if [[ -z "$VERSION" ]]; then
-          echo "::error::${{ inputs.property }} not found in ${{ inputs.file-name }}"
+          echo "::error::${{ inputs.property }} not found in $FILE"
           exit 1
         fi
 
