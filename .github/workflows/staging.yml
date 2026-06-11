@@ -49,9 +49,13 @@ jobs:
       - name: Update openssh-gui-git PKGBUILD
         run: |
           set -euo pipefail
-          VERSION="${{ needs.prepare.outputs.version }}"
-          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/"        openssh-gui-git/PKGBUILD
+          DATE=$(date +%Y%m%d)
+          HASH=$(git rev-parse --short HEAD)
+          # pkgver must only contain [a-zA-Z0-9._] — no + or -
+          AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
+
+          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/"            openssh-gui-git/PKGBUILD
 
           echo "Updated PKGBUILD:"
           grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
