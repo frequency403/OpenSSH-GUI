@@ -86,8 +86,8 @@ jobs:
           # Copy updated PKGBUILD from original repo
           cp $GITHUB_WORKSPACE/openssh-gui-git/PKGBUILD .
 
-          docker run --rm -v "$(pwd)":/pkg -w /pkg archlinux:latest \
-          bash -c "useradd -m builder && chown -R builder /pkg && su builder -c 'makepkg --printsrcinfo > .SRCINFO'"
+          docker run --rm -v "$(pwd)":/pkg archlinux:latest \
+          bash -c "useradd -m builder && cp /pkg/PKGBUILD /home/builder/ && su builder -c 'cd /home/builder && makepkg --printsrcinfo' > /pkg/.SRCINFO"
       
           git config user.name "${{ github.repository_owner }}"
           git config user.email "${{ github.repository_owner }}@users.noreply.github.com"
