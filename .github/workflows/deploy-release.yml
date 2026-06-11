@@ -2,7 +2,8 @@ name: Deploy release to consumers
 
 on:
   release:
-    types: [released]
+    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
