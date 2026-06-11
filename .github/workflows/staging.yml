@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: staging-${{ github.ref }}
-  cancel-in-progress: true  # Supersede previous run on rapid pushes
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine Version
         id: version
@@ -42,21 +42,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur_key
-          chmod 600 ~/.ssh/aur_key
-          cat >> ~/.ssh/config << 'EOF'
-          Host aur.archlinux.org
-            IdentityFile ~/.ssh/aur_key
-            User aur
-            StrictHostKeyChecking no
-          EOF
 
       - name: Update PKGBUILD
         run: |
@@ -64,34 +52,21 @@ jobs:
           DATE=$(date +%Y%m%d)
           HASH=$(git rev-parse --short HEAD)
           AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
-          
+
           sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-git/PKGBUILD
-          
+
           echo "Updated PKGBUILD:"
           grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
 
-      - name: Clone and push to AUR
-        run: |
-          set -euo pipefail
-          
-          # Clone AUR repository to temporary location
-          cd /tmp
-          rm -rf aur-deploy
-          mkdir aur-deploy
-          cd aur-deploy
-          git clone ssh://aur@aur.archlinux.org/openssh-gui-git.git .
-          git checkout -B master origin/master
-          
-          # Copy updated PKGBUILD from original repo
-          cp $GITHUB_WORKSPACE/openssh-gui-git/PKGBUILD .
-
-          docker run --rm -v "$(pwd)":/pkg archlinux:latest \
-          bash -c "useradd -m builder && cp /pkg/PKGBUILD /home/builder/ && su builder -c 'cd /home/builder && makepkg --printsrcinfo' > /pkg/.SRCINFO"
-      
-          git config user.name "${{ github.repository_owner }}"
-          git config user.email "${{ github.repository_owner }}@users.noreply.github.com"
-      
-          git add PKGBUILD .SRCINFO
-          git commit -m "Development update ${{ needs.prepare.outputs.tag }}" || true
-          git push origin master
+      - name: Deploy to AUR
+        uses: ./.github/actions/deploy-aur
+        with:
+          pkgname: openssh-gui-git
+          pkgbuild: openssh-gui-git/PKGBUILD
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_username: ${{ github.repository_owner }}
+          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
+          force_push: 'true'
+          regenerate_srcinfo: 'true'

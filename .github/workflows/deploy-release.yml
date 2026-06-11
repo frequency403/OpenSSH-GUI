@@ -52,29 +52,32 @@ jobs:
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-bin/PKGBUILD
 
-      - name: Publish AUR (bin)
-        uses: KSXGitHub/github-actions-deploy-aur@v4
+      - name: Deploy to AUR
+        uses: ./.github/actions/deploy-aur
         with:
           pkgname: openssh-gui-bin
-          pkgbuild: ./openssh-gui-bin/PKGBUILD
+          pkgbuild: openssh-gui-bin/PKGBUILD
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_username: ${{ github.repository_owner }}
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ needs.get_version.outputs.tag }}"
-          force: true
+          force_push: 'false'
+          regenerate_srcinfo: 'false'
+          updpkgsums: 'true' 
 
   winget_publish:
     name: Update Winget Package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: get_version
-
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Update Winget manifest
         uses: vedantmgoyal9/winget-releaser@main
         with:
+          max-versions-to-keep: 5
           identifier: frequency403.OpenSSHGUI
           version: ${{ needs.get_version.outputs.version }}
           release-tag: ${{ needs.get_version.outputs.tag }}
