@@ -32,7 +32,9 @@ jobs:
       - name: Extract and validate version
         id: version
         uses: ./.github/actions/determine-version
-        
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      
       - name: Create Tag Action
         id: create_tag_action
         uses: rickstaa/action-create-tag@v1

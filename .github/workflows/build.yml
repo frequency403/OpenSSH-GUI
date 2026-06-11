@@ -32,6 +32,8 @@ jobs:
       - name: Determine Version
         id: version
         uses: ./.github/actions/determine-version
+        with:
+          ref: ${{ github.ref }}
 
   build:
     needs: [ test, prepare ]

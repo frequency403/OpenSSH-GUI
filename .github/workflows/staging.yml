@@ -27,12 +27,11 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
       - name: Determine Version
         id: version
         uses: ./.github/actions/determine-version
+        with:
+          ref: ${{ github.ref }} 
 
   deploy-aur-git:
     name: Update AUR Git Package
@@ -45,6 +44,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
+          ref: ${{ github.ref }}
 
       - name: Update openssh-gui-git PKGBUILD
         run: |

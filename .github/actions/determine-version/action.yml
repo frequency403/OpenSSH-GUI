@@ -1,6 +1,21 @@
 name: Determine Version
 description: Extract and validate a semantic version from Directory.Build.props and optionally validate against a branch or tag name
 
+inputs:
+  file-name:
+    description: The filename where the dotnet msbuild command can extract the version. Provide the full path from repo root!
+    required: false
+    default: 'Directory.Build.props'
+    
+  property:
+    description: The property where the dotnet msbuild command must look for the verison
+    required: false
+    default: 'BaseVersion'
+    
+  ref:
+    description: Where the checkout should be performed
+    required: true
+
 outputs:
   version:
     description: Extracted semantic version without leading v
@@ -13,28 +28,34 @@ runs:
   using: composite
 
   steps:
+    - name: Checkout needed file
+      uses: actions/checkout@v6
+      with: 
+        fetch-depth: '1'
+        ref: ${{ inputs.ref }}
+        sparse-checkout: |
+          ${{ inputs.file-name }}
+      
     - name: Extract BaseVersion
       id: extract
       shell: bash
       run: |
         set -euo pipefail
 
-        FILE="Directory.Build.props"
-
-        if [[ ! -f "$FILE" ]]; then
-          echo "::error::$FILE not found"
+        if [[ ! -f "${{ inputs.file-name }}" ]]; then
+          echo "::error::${{ inputs.file-name }} not found"
           exit 1
         fi
 
-        VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:BaseVersion | tr -d '\r')"
+        VERSION="$(dotnet msbuild "${{ inputs.file-name }}" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
 
         if [[ -z "$VERSION" ]]; then
-          echo "::error::BaseVersion not found in $FILE"
+          echo "::error::${{ inputs.property }} not found in ${{ inputs.file-name }}"
           exit 1
         fi
 
         if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "::error::Invalid BaseVersion: $VERSION"
+          echo "::error::Invalid Property ${{ inputs.property }}: $VERSION"
           exit 1
         fi
 
