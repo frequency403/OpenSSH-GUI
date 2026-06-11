@@ -69,3 +69,5 @@ jobs:
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
+          post_process: |
+            git checkout -B master
