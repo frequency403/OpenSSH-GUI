@@ -112,18 +112,6 @@ jobs:
           echo "Updated PKGBUILD:"
           grep -E '^(pkgver=|pkgrel=|sha256sums=)' openssh-gui-nightly/PKGBUILD
 
-      - name: Publish / update nightly GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: nightly
-          name: "Nightly (${{ needs.prepare.outputs.build_date }})"
-          prerelease: true
-          files: |
-            aur-assets/OpenSSH-GUI-nightly-linux-x64
-            aur-assets/appicon.png
-            aur-assets/io.github.frequency403.openssh_gui.desktop
-            LICENSE
-
       - name: Publish AUR (openssh-gui-nightly)
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
