@@ -27,20 +27,12 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
 
     steps:
-      - name: Checkout action file
+      - name: Checkout repository
         uses: actions/checkout@v6
-        with: 
-          ref: ${{ github.ref }}
-          fetch-depth: '1'
-          sparse-checkout-cone-mode: 'true'
-          sparse-checkout: |
-            .github/actions/determine-version
-            
+
       - name: Determine Version
         id: version
         uses: ./.github/actions/determine-version
-        with:
-          ref: ${{ github.ref }} 
 
   deploy-aur-git:
     name: Update AUR Git Package
@@ -51,6 +43,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Update openssh-gui-git PKGBUILD
         run: |
