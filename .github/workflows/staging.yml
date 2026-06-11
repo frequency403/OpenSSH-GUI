@@ -81,6 +81,7 @@ jobs:
           mkdir aur-deploy
           cd aur-deploy
           git clone ssh://aur@aur.archlinux.org/openssh-gui-git.git .
+          git checkout -B master
           
           # Copy updated PKGBUILD from original repo
           cp $GITHUB_WORKSPACE/openssh-gui-git/PKGBUILD .
