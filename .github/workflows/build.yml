@@ -13,23 +13,28 @@ concurrency:
   cancel-in-progress: false  # Never cancel an in-flight release
 
 jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test.yml
+
   prepare:
     name: Prepare Metadata
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    needs: test
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Determine Version
         id: version
         uses: ./.github/actions/determine-version
 
   build:
-    needs: prepare
+    needs: [ test, prepare ]
     uses: ./.github/workflows/build-and-package.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
@@ -40,14 +45,14 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [ prepare, build ]
+    needs: [ test, prepare, build ]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Download all build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
@@ -89,7 +94,7 @@ jobs:
           ls -lah release-assets/
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           files: release-assets/*
@@ -99,16 +104,16 @@ jobs:
     name: Update AUR Packages
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [ prepare, release ]
+    needs: [ test, prepare, release ]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
@@ -178,11 +183,11 @@ jobs:
     name: Update Winget Package
     runs-on: ubuntu-slim
     timeout-minutes: 10
-    needs: [ prepare, release ]
+    needs: [ test, prepare, release ]
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Update Winget manifest
         uses: vedantmgoyal9/winget-releaser@main

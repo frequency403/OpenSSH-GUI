@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
     
       - name: Setup .NET environment
         uses: ./.github/actions/dotnet-setup
@@ -88,7 +88,7 @@ jobs:
 
       - name: Upload AppImage
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.appimage.outputs.appimage-name }}
           path: ${{ steps.appimage.outputs.appimage-name }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Upload .desktop file
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: io.github.frequency403.openssh_gui.desktop
           path: AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
@@ -104,14 +104,14 @@ jobs:
 
       - name: Upload app icon
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: appicon
           path: AppDir/appicon.png
           if-no-files-found: error
 
       - name: Upload platform binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.rename.outputs.ASSET_NAME }}
           path: ./publish/${{ steps.rename.outputs.ASSET_NAME }}

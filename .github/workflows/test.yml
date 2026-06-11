@@ -2,9 +2,9 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ main, master, development ]
   pull_request:
     branches: [ main, master, development ]
+  workflow_call:
 
 concurrency:
   group: tests-${{ github.ref }}-${{ github.event_name }}
@@ -15,11 +15,18 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Run on every push except normal (non-forced) pushes to master/main.
+    # Always run when called from another workflow (workflow_call).
+    if: >
+      github.event_name == 'workflow_call' ||
+      github.event_name == 'pull_request'  ||
+      github.event.forced == true          ||
+      (github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main')
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-        
+        uses: actions/checkout@v4
+
       - name: Setup .NET environment
         uses: ./.github/actions/dotnet-setup
 
