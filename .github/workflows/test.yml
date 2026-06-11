@@ -2,9 +2,15 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ main, master, development ]
+    branches:
+      - master
+      - main
   pull_request:
-    branches: [ main, master, development ]
+    branches:
+      - master
+      - main
+      - development
+  workflow_call:
 
 concurrency:
   group: tests-${{ github.ref }}-${{ github.event_name }}
@@ -19,7 +25,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup .NET environment
         uses: ./.github/actions/dotnet-setup
 

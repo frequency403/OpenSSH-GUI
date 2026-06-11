@@ -1,4 +1,4 @@
-name: Staging / Nightly Build
+name: Staging / Development Build
 
 on:
   push:
@@ -9,19 +9,22 @@ permissions:
   contents: write
 
 concurrency:
-  group: nightly-${{ github.ref }}
-  cancel-in-progress: true  # Supersede previous nightly on rapid pushes
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true  # Supersede previous run on rapid pushes
 
 jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test.yml
+
   prepare:
     name: Prepare Metadata
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    needs: test
     outputs:
-      version: ${{ steps.meta.outputs.version }}
-      base_version: ${{ steps.meta.outputs.base_version }}
-      git_hash: ${{ steps.meta.outputs.git_hash }}
-      build_date: ${{ steps.meta.outputs.build_date }}
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
 
     steps:
       - name: Checkout repository
@@ -31,92 +34,38 @@ jobs:
         id: version
         uses: ./.github/actions/determine-version
 
-      - name: Resolve build metadata
-        id: meta
-        run: |
-          set -euo pipefail
-          HASH=$(git rev-parse --short HEAD)
-          DATE=$(date +%Y-%m-%d)
-          BASE_VERSION="${{ steps.version.outputs.version }}"
-
-          VERSION="${BASE_VERSION}+${HASH}"
-          echo "version=$VERSION"           >> "$GITHUB_OUTPUT"
-          echo "base_version=$BASE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "git_hash=$HASH"             >> "$GITHUB_OUTPUT"
-          echo "build_date=$DATE"           >> "$GITHUB_OUTPUT"
-          echo "::notice::Nightly version: $VERSION"
-
-  build:
-    needs: prepare
-    uses: ./.github/workflows/build-and-package.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      is_nightly: true
-      asset_name_prefix: OpenSSH-GUI-nightly
-
-  deploy-aur-nightly:
-    name: Update AUR Nightly Package
+  deploy-aur-git:
+    name: Update AUR Git Package
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [ prepare, build ]
+    needs: [ test, prepare ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
-      - name: Prepare and update nightly PKGBUILD
+      - name: Update openssh-gui-git PKGBUILD
         run: |
           set -euo pipefail
-          rm -rf aur-assets
-          mkdir -p aur-assets
-
-          find artifacts -type f | while read -r FILE; do
-            DEST="aur-assets/$(basename "$FILE")"
-            if [[ -f "$DEST" ]]; then
-              echo "::error::AUR artifact name collision: $(basename "$FILE")"
-              exit 1
-            fi
-            cp "$FILE" "$DEST"
-          done
-
-          test -f aur-assets/OpenSSH-GUI-nightly-linux-x64 \
-            || { echo "::error::Missing nightly linux binary"; exit 1; }
-          test -f aur-assets/appicon.png \
-            || { echo "::error::Missing appicon.png"; exit 1; }
-          test -f "aur-assets/io.github.frequency403.openssh_gui.desktop" \
-            || { echo "::error::Missing .desktop file"; exit 1; }
-          test -f LICENSE \
-            || { echo "::error::Missing LICENSE"; exit 1; }
-
           DATE=$(date +%Y%m%d)
-          AUR_VERSION="${{ needs.prepare.outputs.base_version }}.${DATE}.${{ needs.prepare.outputs.git_hash }}"
-          echo "AUR_VERSION=$AUR_VERSION" >> "$GITHUB_ENV"
+          HASH=$(git rev-parse --short HEAD)
+          # pkgver must only contain [a-zA-Z0-9._] — no + or -
+          AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
 
-          SHA_BIN=$(sha256sum     aur-assets/OpenSSH-GUI-nightly-linux-x64 | cut -d' ' -f1)
-          SHA_ICON=$(sha256sum    aur-assets/appicon.png                     | cut -d' ' -f1)
-          SHA_DESKTOP=$(sha256sum "aur-assets/io.github.frequency403.openssh_gui.desktop" | cut -d' ' -f1)
-          SHA_LICENSE=$(sha256sum LICENSE                                    | cut -d' ' -f1)
-
-          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-nightly/PKGBUILD
-          sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" \
-            openssh-gui-nightly/PKGBUILD
+          sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/"            openssh-gui-git/PKGBUILD
 
           echo "Updated PKGBUILD:"
-          grep -E '^(pkgver=|sha256sums=)' openssh-gui-nightly/PKGBUILD
+          grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
 
-      - name: Publish AUR (openssh-gui-nightly)
+      - name: Publish AUR (openssh-gui-git)
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
-          pkgname: openssh-gui-nightly
-          pkgbuild: ./openssh-gui-nightly/PKGBUILD
+          pkgname: openssh-gui-git
+          pkgbuild: ./openssh-gui-git/PKGBUILD
           commit_username: ${{ github.repository_owner }}
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Nightly update ${{ env.AUR_VERSION }}"
+          commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
