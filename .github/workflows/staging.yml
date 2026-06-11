@@ -44,7 +44,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Update openssh-gui-git PKGBUILD
         run: |
@@ -65,7 +65,8 @@ jobs:
         with:
           pkgname: openssh-gui-git
           pkgbuild: ./openssh-gui-git/PKGBUILD
-          commit_username: ${{ github.repository_owner }}
-          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          author_name: ${{ github.repository_owner }}
+          author_email: ${{ github.repository_owner }}@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
+          force: true
