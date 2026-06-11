@@ -27,7 +27,7 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine Version
         id: version
@@ -49,10 +49,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts/
 
@@ -94,106 +94,8 @@ jobs:
           ls -lah release-assets/
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           files: release-assets/*
           generate_release_notes: true
-
-  deploy-aur:
-    name: Update AUR Packages
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [ test, prepare, release ]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
-      - name: Prepare AUR assets and update PKGBUILDs
-        run: |
-          set -euo pipefail
-          rm -rf aur-assets
-          mkdir -p aur-assets
-
-          find artifacts -type f | while read -r FILE; do
-            DEST="aur-assets/$(basename "$FILE")"
-            if [[ -f "$DEST" ]]; then
-              echo "::error::AUR artifact name collision: $(basename "$FILE")"
-              exit 1
-            fi
-            cp "$FILE" "$DEST"
-          done
-
-          # Assert all required AUR files are present
-          test -f aur-assets/OpenSSH-GUI-linux-x64 \
-            || { echo "::error::Missing linux binary"; exit 1; }
-          test -f aur-assets/appicon.png \
-            || { echo "::error::Missing appicon.png"; exit 1; }
-          test -f "aur-assets/io.github.frequency403.openssh_gui.desktop" \
-            || { echo "::error::Missing .desktop file"; exit 1; }
-          test -f LICENSE \
-            || { echo "::error::Missing LICENSE"; exit 1; }
-
-          VERSION="${{ needs.prepare.outputs.version }}"
-          SHA_BIN=$(sha256sum     aur-assets/OpenSSH-GUI-linux-x64 | cut -d' ' -f1)
-          SHA_ICON=$(sha256sum    aur-assets/appicon.png            | cut -d' ' -f1)
-          SHA_DESKTOP=$(sha256sum "aur-assets/io.github.frequency403.openssh_gui.desktop" | cut -d' ' -f1)
-          SHA_LICENSE=$(sha256sum LICENSE                           | cut -d' ' -f1)
-
-          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/"        openssh-gui-bin/PKGBUILD
-          sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" \
-            openssh-gui-bin/PKGBUILD
-
-          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/"        openssh-gui-git/PKGBUILD
-
-          echo "Updated PKGBUILDs:"
-          grep -E '^(pkgver=|pkgrel=|sha256sums=)' openssh-gui-bin/PKGBUILD
-
-      - name: Publish AUR (openssh-gui-bin)
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
-        with:
-          pkgname: openssh-gui-bin
-          pkgbuild: ./openssh-gui-bin/PKGBUILD
-          commit_username: ${{ github.repository_owner }}
-          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Update to ${{ needs.prepare.outputs.tag }}"
-
-      - name: Publish AUR (openssh-gui-git)
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
-        with:
-          pkgname: openssh-gui-git
-          pkgbuild: ./openssh-gui-git/PKGBUILD
-          commit_username: ${{ github.repository_owner }}
-          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Update to ${{ needs.prepare.outputs.tag }}"
-
-  winget:
-    name: Update Winget Package
-    runs-on: ubuntu-slim
-    timeout-minutes: 10
-    needs: [ test, prepare, release ]
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Update Winget manifest
-        uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: frequency403.OpenSSHGUI
-          version: ${{ needs.prepare.outputs.version }}
-          release-tag: ${{ needs.prepare.outputs.tag }}
-          installers-regex: 'win-x64\.exe$'
-          token: ${{ secrets.WINGET_GITHUB_TOKEN }}
