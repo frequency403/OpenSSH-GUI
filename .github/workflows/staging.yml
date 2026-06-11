@@ -85,12 +85,13 @@ jobs:
           
           # Copy updated PKGBUILD from original repo
           cp $GITHUB_WORKSPACE/openssh-gui-git/PKGBUILD .
-          
-          # Configure git
+
+          docker run --rm -v "$(pwd)":/pkg -w /pkg archlinux:latest \
+          bash -c "pacman -Sy --noconfirm --needed pacman && makepkg --printsrcinfo > .SRCINFO"
+      
           git config user.name "${{ github.repository_owner }}"
           git config user.email "${{ github.repository_owner }}@users.noreply.github.com"
-          
-          # Commit and push
-          git add PKGBUILD
+      
+          git add PKGBUILD .SRCINFO
           git commit -m "Development update ${{ needs.prepare.outputs.tag }}" || true
           git push origin master
