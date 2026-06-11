@@ -86,6 +86,7 @@ jobs:
         with:
           max-versions-to-keep: 5
           identifier: frequency403.OpenSSHGUI
+          fork-user: ${{ github.repository_owner }}
           version: ${{ needs.get_version.outputs.version }}
           release-tag: ${{ needs.get_version.outputs.tag }}
           installers-regex: 'win-x64\.exe$'
