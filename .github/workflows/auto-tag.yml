@@ -24,12 +24,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Extract and validate version from branch name
+      - name: Extract and validate version
         id: version
         uses: ./.github/actions/determine-version
 
@@ -37,9 +37,9 @@ jobs:
         id: check
         run: |
           set -euo pipefail
-          if git rev-parse "refs/tags/${{ steps.version.outputs.TAG }}" >/dev/null 2>&1; then
+          if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
             echo "exists=true"  >> "$GITHUB_OUTPUT"
-            echo "::warning::Tag ${{ steps.version.outputs.TAG }} already exists, skipping."
+            echo "::warning::Tag ${{ steps.version.outputs.tag }} already exists, skipping."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
@@ -50,7 +50,7 @@ jobs:
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.version.outputs.TAG }}" \
-            -m "Release ${{ steps.version.outputs.VERSION }}"
-          git push origin "${{ steps.version.outputs.TAG }}"
-          echo "::notice::Tag ${{ steps.version.outputs.TAG }} pushed successfully."
+          git tag -a "${{ steps.version.outputs.tag }}" \
+            -m "Release ${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+          echo "::notice::Tag ${{ steps.version.outputs.tag }} pushed successfully."

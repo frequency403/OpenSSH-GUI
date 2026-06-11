@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine Version
         id: version
@@ -62,12 +62,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts/
 
@@ -105,11 +105,24 @@ jobs:
           SHA_LICENSE=$(sha256sum LICENSE                                    | cut -d' ' -f1)
 
           sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-nightly/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/"            openssh-gui-nightly/PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" \
             openssh-gui-nightly/PKGBUILD
 
           echo "Updated PKGBUILD:"
-          grep -E '^(pkgver=|sha256sums=)' openssh-gui-nightly/PKGBUILD
+          grep -E '^(pkgver=|pkgrel=|sha256sums=)' openssh-gui-nightly/PKGBUILD
+
+      - name: Publish / update nightly GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: nightly
+          name: "Nightly (${{ needs.prepare.outputs.build_date }})"
+          prerelease: true
+          files: |
+            aur-assets/OpenSSH-GUI-nightly-linux-x64
+            aur-assets/appicon.png
+            aur-assets/io.github.frequency403.openssh_gui.desktop
+            LICENSE
 
       - name: Publish AUR (openssh-gui-nightly)
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1

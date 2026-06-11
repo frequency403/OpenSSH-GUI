@@ -1,4 +1,4 @@
-﻿name: Build and Release
+name: Build and Release
 
 on:
   push:
@@ -16,12 +16,13 @@ jobs:
   prepare:
     name: Prepare Metadata
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine Version
         id: version
@@ -43,10 +44,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts/
 
@@ -68,12 +69,15 @@ jobs:
 
           cp LICENSE release-assets/LICENSE
 
-          # Assert all expected files are present before creating the release
+          # Assert all expected files are present before creating the release.
+          # appicon.png and .desktop are required by openssh-gui-bin PKGBUILD source URLs.
           for EXPECTED in \
             "OpenSSH-GUI-linux-x64" \
             "OpenSSH-GUI-win-x64.exe" \
             "OpenSSH-GUI-osx-x64" \
-            "OpenSSH-GUI-x86_64.AppImage"
+            "OpenSSH-GUI-x86_64.AppImage" \
+            "appicon.png" \
+            "io.github.frequency403.openssh_gui.desktop"
           do
             if [[ ! -f "release-assets/$EXPECTED" ]]; then
               echo "::error::Expected release asset missing: $EXPECTED"
@@ -85,7 +89,7 @@ jobs:
           ls -lah release-assets/
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
           files: release-assets/*
@@ -99,12 +103,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts/
 
@@ -140,12 +144,15 @@ jobs:
           SHA_LICENSE=$(sha256sum LICENSE                           | cut -d' ' -f1)
 
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/"        openssh-gui-bin/PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('$SHA_BIN' '$SHA_ICON' '$SHA_DESKTOP' '$SHA_LICENSE')/" \
             openssh-gui-bin/PKGBUILD
+
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-git/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/"        openssh-gui-git/PKGBUILD
 
           echo "Updated PKGBUILDs:"
-          grep -E '^(pkgver=|sha256sums=)' openssh-gui-bin/PKGBUILD
+          grep -E '^(pkgver=|pkgrel=|sha256sums=)' openssh-gui-bin/PKGBUILD
 
       - name: Publish AUR (openssh-gui-bin)
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
@@ -169,23 +176,19 @@ jobs:
 
   winget:
     name: Update Winget Package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     needs: [ prepare, release ]
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        
-      - name: Install Komac
-        id: komac
-        uses: ./.github/actions/install-komac
+        uses: actions/checkout@v6
 
       - name: Update Winget manifest
-        run: |
-          set -euo pipefail
-          "${{ steps.komac.outputs.komac-path }}" update "frequency403.OpenSSHGUI" \
-            --version "${{ needs.prepare.outputs.version }}" \
-            --urls "https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare.outputs.tag }}/OpenSSH-GUI-win-x64.exe" \
-            --submit \
-            --token "${{ secrets.WINGET_GITHUB_TOKEN }}"
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: frequency403.OpenSSHGUI
+          version: ${{ needs.prepare.outputs.version }}
+          release-tag: ${{ needs.prepare.outputs.tag }}
+          installers-regex: 'win-x64\.exe$'
+          token: ${{ secrets.WINGET_GITHUB_TOKEN }}
