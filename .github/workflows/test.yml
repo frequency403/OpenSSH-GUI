@@ -2,8 +2,14 @@ name: Unit Tests
 
 on:
   push:
+    branches:
+      - master
+      - main
   pull_request:
-    branches: [ main, master, development ]
+    branches:
+      - master
+      - main
+      - development
   workflow_call:
 
 concurrency:
@@ -15,13 +21,16 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Run on every push except normal (non-forced) pushes to master/main.
-    # Always run when called from another workflow (workflow_call).
+    # Run on:
+    #   - workflow_call (gate for staging + build)
+    #   - pull_request targeting development, master, or main
+    #   - force push to master/main
+    # NOT on normal (non-forced) pushes to master/main — those are handled
+    # by auto-tag.yml or build.yml which call this via workflow_call.
     if: >
       github.event_name == 'workflow_call' ||
       github.event_name == 'pull_request'  ||
-      github.event.forced == true          ||
-      (github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main')
+      (github.event_name == 'push' && github.event.forced == true)
 
     steps:
       - name: Checkout repository

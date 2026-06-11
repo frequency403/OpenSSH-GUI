@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: auto-tag-${{ github.ref }}
@@ -16,11 +17,10 @@ concurrency:
 
 jobs:
   create-tag:
-    name: Create and Push Tag
-    # Only run when a release/* branch was actually merged (not just closed)
+    name: Create Tag and Sync Development
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -54,3 +54,39 @@ jobs:
             -m "Release ${{ steps.version.outputs.version }}"
           git push origin "${{ steps.version.outputs.tag }}"
           echo "::notice::Tag ${{ steps.version.outputs.tag }} pushed successfully."
+
+      - name: Cherry-pick release commit into development
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          RELEASE_SHA="${{ github.event.pull_request.head.sha }}"
+          VERSION="${{ steps.version.outputs.version }}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin development
+          git checkout -B development origin/development
+
+          if git cherry-pick "$RELEASE_SHA"; then
+            git push origin development
+            echo "::notice::Cherry-pick of $RELEASE_SHA into development succeeded."
+          else
+            git cherry-pick --abort
+
+            SYNC_BRANCH="chore/sync-release-${VERSION}-to-development"
+            git checkout -B "$SYNC_BRANCH" origin/development
+            git push origin "$SYNC_BRANCH"
+
+            gh pr create \
+              --base development \
+              --head "$SYNC_BRANCH" \
+              --title "chore: sync release ${VERSION} into development" \
+              --body "$(printf 'Automatic cherry-pick of release \`%s\` (commit \`%s\`) into \`development\` failed due to conflicts.\n\nPlease apply and resolve manually:\n\n```\ngit fetch origin\ngit checkout %s\ngit cherry-pick %s\n# resolve conflicts\ngit push origin %s\n```' \
+                "$VERSION" "$RELEASE_SHA" "$SYNC_BRANCH" "$RELEASE_SHA" "$SYNC_BRANCH")"
+
+            echo "::warning::Cherry-pick conflict. PR created: $SYNC_BRANCH → development."
+          fi
