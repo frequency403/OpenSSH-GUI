@@ -57,8 +57,8 @@ jobs:
         with:
           pkgname: openssh-gui-bin
           pkgbuild: ./openssh-gui-bin/PKGBUILD
-          commit_username: ${{ github.repository_owner }}
-          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          author_name: ${{ github.repository_owner }}
+          author_email: ${{ github.repository_owner }}@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ needs.get_version.outputs.tag }}"
 
