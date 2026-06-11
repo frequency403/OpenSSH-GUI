@@ -1,0 +1,85 @@
+name: Deploy release to consumers
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+
+jobs:
+  get_version:
+    name: Extract Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse.outputs.version }}
+      tag: ${{ steps.parse.outputs.tag }}
+
+    steps:
+      - name: Parse release metadata
+        id: parse
+        run: |
+          set -euo pipefail
+
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+  aur_publish:
+    name: Publish AUR packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: get_version
+
+    steps:
+      - name: Checkout PKGBUILD only
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            openssh-gui-bin/PKGBUILD
+
+      - name: Update PKGBUILD version
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ needs.get_version.outputs.version }}"
+
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-bin/PKGBUILD
+
+      - name: Deploy to AUR
+        uses: ./.github/actions/deploy-aur
+        with:
+          pkgname: openssh-gui-bin
+          pkgbuild: openssh-gui-bin/PKGBUILD
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_username: ${{ github.repository_owner }}
+          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          commit_message: "Update to ${{ needs.get_version.outputs.tag }}"
+          force_push: 'false'
+          regenerate_srcinfo: 'false'
+          updpkgsums: 'true' 
+
+  winget_publish:
+    name: Update Winget Package
+    runs-on: ubuntu-slim
+    needs: get_version
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Update Winget manifest
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          max-versions-to-keep: 5
+          identifier: frequency403.OpenSSHGUI
+          version: ${{ needs.get_version.outputs.version }}
+          release-tag: ${{ needs.get_version.outputs.tag }}
+          installers-regex: 'win-x64\.exe$'
+          token: ${{ secrets.WINGET_GITHUB_TOKEN }}

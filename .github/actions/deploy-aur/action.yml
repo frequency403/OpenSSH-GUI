@@ -1,0 +1,118 @@
+name: 'Deploy AUR Package'
+description: >
+  Publishes a PKGBUILD to AUR. Tries KSXGitHub/github-actions-deploy-aur first,
+  falls back to a manual clone-and-push with .SRCINFO regeneration via Docker.
+
+inputs:
+  pkgname:
+    description: 'AUR package name'
+    required: true
+  pkgbuild:
+    description: 'Path to the PKGBUILD file'
+    required: true
+  ssh_private_key:
+    description: 'SSH private key with AUR access'
+    required: true
+  commit_username:
+    description: 'Git commit username'
+    required: true
+  commit_email:
+    description: 'Git commit email'
+    required: true
+  commit_message:
+    description: 'Git commit message'
+    required: true
+  force_push:
+    description: 'Force push to AUR'
+    required: false
+    default: 'false'
+  regenerate_srcinfo:
+    description: 'Regenerate .SRCINFO via Docker in the manual fallback (needed for -git packages)'
+    required: false
+    default: 'false'
+  updpkgsums:
+    description: 'Run updpkgsums after copying PKGBUILD (requires pacman-contrib in the Action environment)'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Deploy via AUR Action (primary)
+      id: aur_action
+      continue-on-error: true
+      uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
+      with:
+        pkgname: ${{ inputs.pkgname }}
+        pkgbuild: ${{ inputs.pkgbuild }}
+        commit_username: ${{ inputs.commit_username }}
+        commit_email: ${{ inputs.commit_email }}
+        ssh_private_key: ${{ inputs.ssh_private_key }}
+        commit_message: ${{ inputs.commit_message }}
+        force_push: ${{ inputs.force_push }}
+        ssh_keyscan_types: rsa,ecdsa,ed25519
+        updpkgsums: ${{ inputs.updpkgsums }}
+
+    - name: Setup SSH key for fallback
+      if: steps.aur_action.outcome == 'failure'
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/aur_key
+        chmod 600 ~/.ssh/aur_key
+        cat >> ~/.ssh/config << 'EOF'
+        Host aur.archlinux.org
+          IdentityFile ~/.ssh/aur_key
+          User aur
+          StrictHostKeyChecking no
+        EOF
+
+    - name: Deploy via manual push (fallback)
+      id: aur_manual
+      continue-on-error: true
+      if: steps.aur_action.outcome == 'failure'
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "::warning::AUR Action failed, falling back to manual push"
+
+        PKGBUILD_DIR="$(dirname "${{ inputs.pkgbuild }}")"
+
+        cd /tmp
+        rm -rf aur-deploy
+        mkdir aur-deploy
+        cd aur-deploy
+        git clone ssh://aur@aur.archlinux.org/${{ inputs.pkgname }}.git .
+        git checkout -B master origin/master
+
+        cp "$GITHUB_WORKSPACE/${{ inputs.pkgbuild }}" ./PKGBUILD
+
+        if [[ "${{ inputs.regenerate_srcinfo }}" == "true" ]]; then
+          docker run --rm -v "$(pwd)":/pkg archlinux:latest \
+            bash -c "useradd -m builder \
+              && cp /pkg/PKGBUILD /home/builder/ \
+              && su builder -c 'cd /home/builder && makepkg --printsrcinfo >> /pkg/.SRCINFO'"
+        fi
+
+        git config user.name "${{ inputs.commit_username }}"
+        git config user.email "${{ inputs.commit_email }}"
+
+        git add PKGBUILD
+        if [[ "${{ inputs.regenerate_srcinfo }}" == "true" ]]; then
+          git add .SRCINFO
+        fi
+
+        git commit -m "${{ inputs.commit_message }}" || true
+
+        if [[ "${{ inputs.force_push }}" == "true" ]]; then
+          git push origin master --force
+        else
+          git push origin master
+        fi
+
+    - name: Verify deployment succeeded
+      if: steps.aur_action.outcome == 'failure' && steps.aur_manual.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "::error::Both deployment paths failed for ${{ inputs.pkgname }}"
+        exit 1

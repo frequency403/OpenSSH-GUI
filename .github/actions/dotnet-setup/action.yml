@@ -3,16 +3,6 @@ description: >
   Checks out the repository, auto-detects the TargetFramework from
   Directory.Build.props, sets up the .NET SDK, and restores the NuGet cache.
 
-inputs:
-  fetch-depth:
-    description: 'Number of commits to fetch (0 = full history, 1 = shallow)'
-    required: false
-    default: '1'
-  token:
-    description: 'GitHub token used for checkout'
-    required: false
-    default: ${{ github.token }}
-
 outputs:
   dotnet-version:
     description: 'Resolved .NET version string, e.g. "10.0.x"'
@@ -21,12 +11,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: ${{ inputs.fetch-depth }}
-        token: ${{ inputs.token }}
-
     - name: Detect TargetFramework from Directory.Build.props
       id: detect-tfm
       shell: bash
@@ -46,12 +30,12 @@ runs:
         echo "::notice::Resolved .NET version: ${TFM}.x"
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ steps.detect-tfm.outputs.version }}
 
     - name: Restore NuGet cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props', '**/Directory.Build.props') }}

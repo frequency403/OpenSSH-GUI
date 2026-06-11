@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: staging-${{ github.ref }}
-  cancel-in-progress: true  # Supersede previous run on rapid pushes
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Determine Version
         id: version
@@ -42,30 +42,31 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Update openssh-gui-git PKGBUILD
+      - name: Update PKGBUILD
         run: |
           set -euo pipefail
           DATE=$(date +%Y%m%d)
           HASH=$(git rev-parse --short HEAD)
-          # pkgver must only contain [a-zA-Z0-9._] — no + or -
           AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
 
           sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
-          sed -i "s/^pkgrel=.*/pkgrel=1/"            openssh-gui-git/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-git/PKGBUILD
 
           echo "Updated PKGBUILD:"
           grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
 
-      - name: Publish AUR (openssh-gui-git)
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+      - name: Deploy to AUR
+        uses: ./.github/actions/deploy-aur
         with:
           pkgname: openssh-gui-git
-          pkgbuild: ./openssh-gui-git/PKGBUILD
+          pkgbuild: openssh-gui-git/PKGBUILD
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_username: ${{ github.repository_owner }}
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
+          force_push: 'true'
+          regenerate_srcinfo: 'true'

@@ -2,17 +2,16 @@ name: Auto-Tag on Release Merge
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [closed]
     branches:
       - master
-      - main
 
 permissions:
   contents: write
   pull-requests: write
 
 concurrency:
-  group: auto-tag-${{ github.ref }}
+  group: auto-tag-${{ github.event.pull_request.base.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -23,34 +22,21 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout merge commit
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Extract and validate version
         id: version
         uses: ./.github/actions/determine-version
-
-      - name: Check if tag already exists
-        id: check
-        run: |
-          set -euo pipefail
-          if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
-            echo "exists=true"  >> "$GITHUB_OUTPUT"
-            echo "::warning::Tag ${{ steps.version.outputs.tag }} already exists, skipping."
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create and push tag
-        if: steps.check.outputs.exists == 'false'
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.version.outputs.tag }}" \
-            -m "Release ${{ steps.version.outputs.version }}"
-          git push origin "${{ steps.version.outputs.tag }}"
-          echo "::notice::Tag ${{ steps.version.outputs.tag }} pushed successfully."
+      
+      - name: Create Tag Action
+        id: create_tag_action
+        uses: rickstaa/action-create-tag@v1
+        with: 
+          commit_sha: ${{ github.event.pull_request.merge_commit_sha }}
+          github_token: ${{ secrets.PAT_TOKEN }}
+          tag: ${{ steps.version.outputs.tag }}

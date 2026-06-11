@@ -1,6 +1,18 @@
 name: Determine Version
 description: Extract and validate a semantic version from Directory.Build.props and optionally validate against a branch or tag name
 
+inputs:
+  file-name:
+    description: The filename where the dotnet msbuild command can extract the version. Provide the full path from repo root!
+    required: false
+    default: 'Directory.Build.props'
+    
+  property:
+    description: The property where the dotnet msbuild command must look for the verison
+    required: false
+    default: 'BaseVersion'
+  
+
 outputs:
   version:
     description: Extracted semantic version without leading v
@@ -19,22 +31,22 @@ runs:
       run: |
         set -euo pipefail
 
-        FILE="Directory.Build.props"
+        FILE="${{ inputs.file-name }}"
 
         if [[ ! -f "$FILE" ]]; then
           echo "::error::$FILE not found"
           exit 1
         fi
 
-        VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:BaseVersion | tr -d '\r')"
+        VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
 
         if [[ -z "$VERSION" ]]; then
-          echo "::error::BaseVersion not found in $FILE"
+          echo "::error::${{ inputs.property }} not found in $FILE"
           exit 1
         fi
 
         if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "::error::Invalid BaseVersion: $VERSION"
+          echo "::error::Invalid Property ${{ inputs.property }}: $VERSION"
           exit 1
         fi
 
