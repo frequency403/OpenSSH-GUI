@@ -33,6 +33,7 @@ runs:
       with: 
         fetch-depth: '1'
         ref: ${{ inputs.ref }}
+        sparse-checkout-cone-mode: 'false'
         sparse-checkout: |
           ${{ inputs.file-name }}
       
