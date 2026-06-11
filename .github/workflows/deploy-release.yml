@@ -89,4 +89,4 @@ jobs:
           version: ${{ needs.get_version.outputs.version }}
           release-tag: ${{ needs.get_version.outputs.tag }}
           installers-regex: 'win-x64\.exe$'
-          token: ${{ secrets.WINGET_GITHUB_TOKEN }}
+          token: ${{ secrets.WINGET_PUBLISH_TOKEN }}
