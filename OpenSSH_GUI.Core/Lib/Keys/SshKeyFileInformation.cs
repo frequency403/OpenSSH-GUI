@@ -24,7 +24,7 @@ public sealed record SshKeyFileInformation
 
         FileInfo = !string.IsNullOrWhiteSpace(keyFileSource.AbsolutePath)
             ? new FileInfo(keyFileSource.AbsolutePath)
-            : new FileInfo(Assembly.GetExecutingAssembly().Location);
+            : new FileInfo(AppContext.BaseDirectory);
 
         FileName = FileInfo.Name;
         FullFileName = FileInfo.FullName;
