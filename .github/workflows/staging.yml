@@ -41,19 +41,24 @@ jobs:
     needs: [ test, prepare ]
 
     steps:
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur_key
+          chmod 600 ~/.ssh/aur_key
+          cat >> ~/.ssh/config << 'EOF'
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur_key
+            User aur
+            StrictHostKeyChecking no
+          EOF
+          chmod 644 ~/.ssh/config
+
       - name: Clone AUR repository
         run: |
           mkdir -p /tmp/aur-deploy
           cd /tmp/aur-deploy
           git clone ssh://aur@aur.archlinux.org/openssh-gui-git.git .
-        env:
-          GIT_SSH_COMMAND: ssh -i /tmp/aur_key -o StrictHostKeyChecking=no
-
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > /tmp/aur_key
-          chmod 600 /tmp/aur_key
 
       - name: Checkout OpenSSH-GUI repository
         uses: actions/checkout@v4
@@ -84,5 +89,3 @@ jobs:
           git add PKGBUILD
           git commit -m "Development update ${{ needs.prepare.outputs.tag }}" || echo "No changes to commit"
           git push -u origin master
-        env:
-          GIT_SSH_COMMAND: ssh -i /tmp/aur_key -o StrictHostKeyChecking=no
