@@ -27,7 +27,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup .NET environment
-        uses: ./.github/actions/dotnet-setup
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/Directory.Packages.props
+            **/Directory.Build.props
 
       - name: Restore dependencies
         run: dotnet restore OpenSSH_GUI.slnx

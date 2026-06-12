@@ -41,7 +41,6 @@ jobs:
     uses: ./.github/workflows/build-and-package.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
-      is_nightly: false
       asset_name_prefix: OpenSSH-GUI
 
   release:
