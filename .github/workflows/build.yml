@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with: 
+        with:
           fetch-depth: '1'
           ref: ${{ github.ref }}
 
@@ -37,17 +37,72 @@ jobs:
         uses: ./.github/actions/determine-version
 
   build:
-    needs: [ test, prepare ]
+    needs: [test, prepare]
     uses: ./.github/workflows/build-and-package.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
       asset_name_prefix: OpenSSH-GUI
 
+  create_installer:
+    name: Create Windows Installer
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [test, prepare, build]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Download Windows binary
+        uses: actions/download-artifact@v8
+        with:
+          name: OpenSSH-GUI-win-x64.exe
+          path: ./publish
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            nsis \
+            librsvg2-bin \
+            imagemagick
+
+      - name: Convert SVG to multi-resolution ICO
+        run: |
+          set -euo pipefail
+          for SIZE in 16 32 48 64 128 256; do
+            rsvg-convert -w "$SIZE" -h "$SIZE" \
+              images/openssh-gui.svg -o "/tmp/icon-${SIZE}.png"
+          done
+          convert \
+            /tmp/icon-16.png  /tmp/icon-32.png  /tmp/icon-48.png \
+            /tmp/icon-64.png  /tmp/icon-128.png /tmp/icon-256.png \
+            installer-icon.ico
+
+      - name: Substitute installer variables
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          sed \
+            -e "s|@@VERSION@@|${VERSION}|g" \
+            -e "s|@@SOURCE_EXE@@|publish\\OpenSSH-GUI-win-x64.exe|g" \
+            installer/OpenSSH-GUI.nsi > installer.nsi
+
+      - name: Build installer
+        run: makensis installer.nsi
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: OpenSSH-GUI-${{ needs.prepare.outputs.version }}-Setup
+          path: OpenSSH-GUI-${{ needs.prepare.outputs.version }}-Setup.exe
+          if-no-files-found: error
+
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [ test, prepare, build ]
+    needs: [test, prepare, build, create_installer]
 
     steps:
       - name: Checkout repository
@@ -59,6 +114,8 @@ jobs:
           path: artifacts/
 
       - name: Prepare and validate release assets
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           set -euo pipefail
           rm -rf release-assets
@@ -74,13 +131,17 @@ jobs:
             cp "$FILE" "$DEST"
           done
 
+          # Raw win-x64 binary is an intermediate artifact only —
+          # the installer replaces it as the Windows distribution unit
+          rm -f "release-assets/OpenSSH-GUI-win-x64.exe"
+
           cp LICENSE release-assets/LICENSE
 
           # Assert all expected files are present before creating the release.
           # appicon.png and .desktop are required by openssh-gui-bin PKGBUILD source URLs.
           for EXPECTED in \
             "OpenSSH-GUI-linux-x64" \
-            "OpenSSH-GUI-win-x64.exe" \
+            "OpenSSH-GUI-${VERSION}-Setup.exe" \
             "OpenSSH-GUI-osx-x64" \
             "OpenSSH-GUI-x86_64.AppImage" \
             "appicon.png" \

@@ -50,12 +50,6 @@ jobs:
           VERSION="${VERSION#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
-          EXTRA_ARGS=""
-          if [[ "${{ inputs.is_nightly }}" == "true" ]]; then
-            EXTRA_ARGS="-p:IsNightly=true"
-          fi
-          echo "EXTRA_ARGS=$EXTRA_ARGS" >> "$GITHUB_OUTPUT"
-
       - name: Install/Restore dependencies
         shell: bash
         run: dotnet restore
