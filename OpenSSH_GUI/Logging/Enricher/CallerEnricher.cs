@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -12,7 +13,8 @@ namespace OpenSSH_GUI.Logging.Enricher;
 public sealed class CallerEnricher : ILogEventEnricher
 {
     private const string LineNumberProperty = "LineNumber";
-    private const string FileNameProperty = "FileName";
+    private const string ClassNameProperty = "ClassName";
+    private const string ClassNameDefaultValue = "<unknown>";
 
     // Serilog-internal namespaces to skip when walking the stack
     private static readonly string[] SerilogNamespaces =
@@ -29,12 +31,33 @@ public sealed class CallerEnricher : ILogEventEnricher
     {
         var frame = FindCallerFrame();
         var lineNumber = frame?.GetFileLineNumber() ?? 0;
-        var fileName = Path.GetFileName(frame?.GetFileName()) ?? "<unknown>";
+        var frameMethod = frame?.GetMethod();
+        var className = GetDeclaringClassName(frameMethod);
 
         logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(LineNumberProperty, lineNumber));
-        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(FileNameProperty, fileName));
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(ClassNameProperty, className));
     }
 
+    private static string GetDeclaringClassName(MethodBase? methodBase)
+    {
+        if(methodBase == null) return ClassNameDefaultValue;
+        var declaringType = methodBase.DeclaringType;
+        var declaringTypeName = declaringType?.Name;
+        if(declaringTypeName is null) return ClassNameDefaultValue;
+        while (declaringTypeName.Contains('<'))
+        {
+            if (declaringType?.DeclaringType is not null)
+            {
+                declaringTypeName = declaringType.DeclaringType.Name;
+            }
+            else
+            {
+                break;
+            }
+        }
+        return declaringTypeName;
+    }
+    
     /// <summary>
     ///     Walks the stack to find the first frame outside of Serilog, system namespaces,
     ///     and the enricher itself.

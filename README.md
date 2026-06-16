@@ -1,5 +1,13 @@
 # OpenSSH GUI
 
+[![Development Build](https://github.com/frequency403/OpenSSH-GUI/actions/workflows/staging.yml/badge.svg?branch=development)](https://github.com/frequency403/OpenSSH-GUI/actions/workflows/staging.yml)  
+[![Release](https://github.com/frequency403/OpenSSH-GUI/actions/workflows/build.yml/badge.svg)](https://github.com/frequency403/OpenSSH-GUI/actions/workflows/build.yml)  
+![GitHub Release](https://img.shields.io/github/v/release/frequency403/OpenSSH-GUI?sort=semver&display_name=tag&logo=keeweb&link=https%3A%2F%2Fgithub.com%2Ffrequency403%2FOpenSSH-GUI%2Freleases%2Flatest)  
+![AUR Version](https://img.shields.io/aur/version/openssh-gui-bin?style=plastic&logo=archlinux&label=openssh-gui-bin&link=https%3A%2F%2Faur.archlinux.org%2Fpackages%2Fopenssh-gui-bin)  
+![AUR Version](https://img.shields.io/aur/version/openssh-gui-git?style=plastic&logo=archlinux&label=openssh-gui-git&link=https%3A%2F%2Faur.archlinux.org%2Fpackages%2Fopenssh-gui-git)  
+![WinGet Package Version](https://img.shields.io/winget/v/frequency403.OpenSSHGUI?style=plastic&logo=gitforwindows)
+
+
 A cross-platform desktop application for managing SSH keys, known hosts, and authorized keys — built with Avalonia UI, ReactiveUI, and .NET 10.
 
 The goal of this project is to give users a modern, keyboard-friendly GUI for everything that usually requires `ssh-keygen` or hand-editing text files. It runs on **Windows**, **Linux**, and **macOS** and works entirely locally — no cloud, no telemetry.

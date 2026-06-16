@@ -8,7 +8,7 @@ public record LoggerConfiguration
 {
 #if DEBUG
     private const string LogTemplate =
-        "[{Timestamp:yyyy/MM/dd HH:mm:ss}] [{Level:u3}] ({FileName}:{LineNumber}): {Message:lj}{NewLine}{Exception}";
+        "[{Timestamp:yyyy/MM/dd HH:mm:ss}] [{Level:u3}] ({ClassName}:{LineNumber}): {Message:lj}{NewLine}{Exception}";
 #else
     private const string LogTemplate =
         "[{Timestamp:yyyy/MM/dd HH:mm:ss}] [{Level:u3}] {Message:lj}{NewLine}{Exception}";
