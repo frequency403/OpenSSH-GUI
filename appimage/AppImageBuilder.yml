@@ -1,0 +1,20 @@
+version: 1
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: io.github.frequency403.openssh_gui
+    name: OpenSSH GUI
+    icon: openssh-gui
+    version: ${APPSTREAM_VERSION}
+    exec: usr/bin/openssh-gui
+    exec_args: "$@"
+
+  runtime:
+    env:
+      APPDIR_LIBRARY_PATH: "$APPDIR/usr/lib"
+
+AppImage:
+  arch: x86_64
+  update-information: guess

@@ -15,4 +15,9 @@
             <_Parameter2>$(PackageProjectUrl)</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
+    
+    <PropertyGroup>
+<!--        This "warning" is intended - because we use dependencyinjection-->
+        <NoWarn>AVLN3001</NoWarn>
+    </PropertyGroup>
 </Project>

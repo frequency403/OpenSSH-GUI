@@ -1,10 +1,14 @@
 [Desktop Entry]
-Version=1.0
+Version=1.5
 Type=Application
 Name=OpenSSH GUI
-Comment=A GUI for OpenSSH configuration and management
+GenericName=SSH Configuration Manager
+Comment=GUI for OpenSSH key and configuration management
+Keywords=SSH;OpenSSH;Security;Network;RemoteAccess;Key;
+TryExec=openssh-gui
 Exec=openssh-gui
 Icon=openssh-gui
-Categories=Network;RemoteAccess;
+Categories=Network;RemoteAccess;Security;System;
 Terminal=false
+StartupNotify=true
 StartupWMClass=OpenSSH_GUI

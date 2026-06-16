@@ -6,10 +6,6 @@ on:
       version:
         required: true
         type: string
-      is_nightly:
-        required: false
-        type: boolean
-        default: false
       asset_name_prefix:
         required: false
         type: string
@@ -34,9 +30,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
-    
+
       - name: Setup .NET environment
-        uses: ./.github/actions/dotnet-setup
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/Directory.Packages.props
+            **/Directory.Build.props
 
       - name: Normalize version and build flags
         id: meta
@@ -47,20 +50,32 @@ jobs:
           VERSION="${VERSION#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
-          EXTRA_ARGS=""
-          if [[ "${{ inputs.is_nightly }}" == "true" ]]; then
-            EXTRA_ARGS="-p:IsNightly=true"
-          fi
-          echo "EXTRA_ARGS=$EXTRA_ARGS" >> "$GITHUB_OUTPUT"
+      - name: Install/Restore dependencies
+        shell: bash
+        run: dotnet restore
+        
+      - name: Build application
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet build OpenSSH_GUI/OpenSSH_GUI.csproj \
+            --configuration Release \
+            --no-restore \
+            --runtime "${{ matrix.target }}" \
+            -p:Version="${{ steps.meta.outputs.VERSION }}"
 
       - name: Publish application
-        uses: ./.github/actions/dotnet-publish
-        with:
-          project-path: OpenSSH_GUI/OpenSSH_GUI.csproj
-          runtime: ${{ matrix.target }}
-          version: ${{ steps.meta.outputs.VERSION }}
-          output-dir: ./publish
-          extra-msbuild-args: ${{ steps.meta.outputs.EXTRA_ARGS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet publish OpenSSH_GUI/OpenSSH_GUI.csproj \
+            --configuration Release \
+            --runtime "${{ matrix.target }}" \
+            --output ./publish \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:Version="${{ steps.meta.outputs.VERSION }}"
 
       - name: Rename artifact for distribution
         id: rename
@@ -76,22 +91,81 @@ jobs:
           mv "$SOURCE" "./publish/$ASSET_NAME"
           echo "ASSET_NAME=$ASSET_NAME" >> "$GITHUB_OUTPUT"
 
+      - name: Prepare AppImage inputs
+        if: matrix.target == 'linux-x64'
+        id: appimage-meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends librsvg2-bin appstream
+          
+          APP_ID="io.github.frequency403.openssh_gui"
+          APPIMAGE_NAME="${{ inputs.asset_name_prefix }}-x86_64.AppImage"
+          APPSTREAM_VERSION="${{ steps.meta.outputs.VERSION }}"
+          
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/metainfo
+          
+          cp "./publish/${{ steps.rename.outputs.ASSET_NAME }}" AppDir/usr/bin/openssh-gui
+          chmod +x AppDir/usr/bin/openssh-gui
+          
+          rsvg-convert -w 256 -h 256 images/openssh-gui.svg \
+            -o AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
+          cp images/openssh-gui.svg \
+            AppDir/usr/share/icons/hicolor/scalable/apps/openssh-gui.svg
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/openssh-gui.png
+          cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/appicon.png
+          
+          METAINFO_DEST="AppDir/usr/share/metainfo/${APP_ID}.metainfo.xml"
+          cp "appimage/${APP_ID}.metainfo.xml" "$METAINFO_DEST"
+          sed -i \
+            "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
+            "$METAINFO_DEST"
+          
+          appstreamcli make-desktop-file \
+            "$METAINFO_DEST" \
+            "AppDir/usr/share/applications/${APP_ID}.desktop"
+          cp "AppDir/usr/share/applications/${APP_ID}.desktop" \
+            "AppDir/${APP_ID}.desktop"
+          
+          cp appimage/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+          
+          echo "APPIMAGE_NAME=$APPIMAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "LINUX_ASSET_NAME=${{ steps.rename.outputs.ASSET_NAME }}" >> "$GITHUB_ENV"
+          echo "APPSTREAM_VERSION=$APPSTREAM_VERSION" >> "$GITHUB_ENV"
+
       - name: Build AppImage
         if: matrix.target == 'linux-x64'
-        id: appimage
-        uses: ./.github/actions/build-appimage
+        uses: AppImageCrafters/build-appimage-action@master
         with:
-          binary-path: ./publish/${{ steps.rename.outputs.ASSET_NAME }}
-          version: ${{ steps.meta.outputs.VERSION }}
-          is-nightly: ${{ inputs.is_nightly }}
-          asset-prefix: ${{ inputs.asset_name_prefix }}
+          recipe: appimage/AppImageBuilder.yml
+
+      - name: Rename AppImage
+        if: matrix.target == 'linux-x64'
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUILT_APPIMAGE="$(find . -maxdepth 1 -type f -name '*.AppImage' | head -n 1)"
+          
+          if [[ -z "$BUILT_APPIMAGE" ]]; then
+            echo "::error::No AppImage was produced"
+            exit 1
+          fi
+          
+          mv "$BUILT_APPIMAGE" "${{ steps.appimage-meta.outputs.APPIMAGE_NAME }}"
 
       - name: Upload AppImage
         if: matrix.target == 'linux-x64'
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.appimage.outputs.appimage-name }}
-          path: ${{ steps.appimage.outputs.appimage-name }}
+          name: ${{ steps.appimage-meta.outputs.APPIMAGE_NAME }}
+          path: ${{ steps.appimage-meta.outputs.APPIMAGE_NAME }}
           if-no-files-found: error
 
       - name: Upload .desktop file

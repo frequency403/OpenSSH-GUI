@@ -55,8 +55,7 @@ public static class SshConfigurationExtensions
         /// </summary>
         /// <param name="fileProvider">The <see cref="IFileProvider" /> to use to access the file.</param>
         /// <param name="path">
-        ///     Path relative to the base path stored in <see cref="IConfigurationBuilder.Properties" /> of
-        ///     <paramref name="builder" />.
+        ///     Path relative to the base path stored in <see cref="IConfigurationBuilder.Properties" />
         /// </param>
         /// <param name="optional">Whether the file is optional.</param>
         /// <param name="reloadOnChange">Whether the configuration should be reloaded if the file changes.</param>

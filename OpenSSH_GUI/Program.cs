@@ -20,7 +20,6 @@ using LoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace OpenSSH_GUI;
 
-// REFACTOR: Change Readme.MD accordingly to new Project functionality;
 [UsedImplicitly]
 internal sealed class Program
 {

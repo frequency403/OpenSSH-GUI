@@ -48,7 +48,7 @@ jobs:
       - name: Checkout PKGBUILD only
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
 
       - name: Update PKGBUILD version
         run: |
@@ -70,17 +70,14 @@ jobs:
           commit_message: "Update to ${{ needs.get_version.outputs.tag }}"
           force_push: 'false'
           regenerate_srcinfo: 'false'
-          updpkgsums: 'true' 
+          updpkgsums: 'true'
 
   winget_publish:
     name: Update Winget Package
     runs-on: ubuntu-slim
-    needs: get_version
+    needs: aur_publish
     timeout-minutes: 10
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
       - name: Update Winget manifest
         uses: vedantmgoyal9/winget-releaser@main
         with:
@@ -89,5 +86,5 @@ jobs:
           fork-user: ${{ github.repository_owner }}
           version: ${{ needs.get_version.outputs.version }}
           release-tag: ${{ needs.get_version.outputs.tag }}
-          installers-regex: 'win-x64\.exe$'
+          installers-regex: 'Setup\.exe$'
           token: ${{ secrets.WINGET_PUBLISH_TOKEN }}

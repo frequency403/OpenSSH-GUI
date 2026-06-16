@@ -20,3 +20,10 @@ source=(
 )
 
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/openssh-gui" "${pkgdir}/usr/bin/openssh-gui"
+  install -Dm644 "${srcdir}/openssh-gui-icon" "${pkgdir}/usr/share/pixmaps/openssh-gui.png"
+  install -Dm644 "${srcdir}/openssh-gui-desktop" "${pkgdir}/usr/share/applications/io.github.frequency403.openssh_gui.desktop"
+  install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
