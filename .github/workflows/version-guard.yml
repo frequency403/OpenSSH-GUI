@@ -1,0 +1,60 @@
+name: Version Guard (release -> master)
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+jobs:
+  validate-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target (master)
+        uses: actions/checkout@v6
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Extract master version
+        id: master_version
+        uses: ./.github/actions/determine-version
+        
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Extract release version
+        id: release_version
+        uses: ./.github/actions/determine-version
+
+      - name: Compare versions
+        shell: bash
+        run: |
+          MASTER="${{ steps.master_version.outputs.version }}"
+          RELEASE="${{ steps.release_version.outputs.version }}"
+
+          echo "Master:  $MASTER"
+          echo "Release: $RELEASE"
+
+          python3 - << 'EOF'
+          import sys
+          from packaging.version import Version
+
+          master = Version("${{ steps.master_version.outputs.version }}")
+          release = Version("${{ steps.release_version.outputs.version }}")
+
+          if release <= master:
+              print(f"Release version {release} must be greater than master {master}")
+              sys.exit(1)
+
+          print("Version check passed")
+          EOF
