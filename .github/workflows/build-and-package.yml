@@ -52,7 +52,7 @@ jobs:
 
       - name: Install/Restore dependencies
         shell: bash
-        run: dotnet restore
+        run: dotnet restore --runtime "${{ matrix.target }}"
         
       - name: Build application
         shell: bash
