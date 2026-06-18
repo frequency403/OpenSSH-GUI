@@ -75,7 +75,7 @@ jobs:
   winget_publish:
     name: Update Winget Package
     runs-on: ubuntu-slim
-    needs: aur_publish
+    needs: [aur_publish, get_version]
     timeout-minutes: 10
     steps:
       - name: Update Winget manifest
