@@ -87,7 +87,7 @@ jobs:
         run: |
           sed \
             -e "s|@@VERSION@@|${VERSION}|g" \
-            -e "s|@@SOURCE_EXE@@|publish\\OpenSSH-GUI-win-x64.exe|g" \
+            -e "s|@@SOURCE_EXE@@|publish/OpenSSH-GUI-win-x64.exe|g" \
             installer/OpenSSH-GUI.nsi > installer.nsi
 
       - name: Build installer
