@@ -91,81 +91,21 @@ jobs:
           mv "$SOURCE" "./publish/$ASSET_NAME"
           echo "ASSET_NAME=$ASSET_NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Prepare AppImage inputs
-        if: matrix.target == 'linux-x64'
-        id: appimage-meta
-        shell: bash
-        run: |
-          set -euo pipefail
-          
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends librsvg2-bin appstream
-          
-          APP_ID="io.github.frequency403.openssh_gui"
-          APPIMAGE_NAME="${{ inputs.asset_name_prefix }}-x86_64.AppImage"
-          APPSTREAM_VERSION="${{ steps.meta.outputs.VERSION }}"
-          
-          mkdir -p AppDir/usr/bin
-          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-          mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps
-          mkdir -p AppDir/usr/share/applications
-          mkdir -p AppDir/usr/share/metainfo
-          
-          cp "./publish/${{ steps.rename.outputs.ASSET_NAME }}" AppDir/usr/bin/openssh-gui
-          chmod +x AppDir/usr/bin/openssh-gui
-          
-          rsvg-convert -w 256 -h 256 images/openssh-gui.svg \
-            -o AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png
-          cp images/openssh-gui.svg \
-            AppDir/usr/share/icons/hicolor/scalable/apps/openssh-gui.svg
-          cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/openssh-gui.png
-          cp AppDir/usr/share/icons/hicolor/256x256/apps/openssh-gui.png AppDir/appicon.png
-          
-          METAINFO_DEST="AppDir/usr/share/metainfo/${APP_ID}.metainfo.xml"
-          cp "appimage/${APP_ID}.metainfo.xml" "$METAINFO_DEST"
-          sed -i \
-            "s|<release version=\"0.0.0\" date=\"1970-01-01\"/>|<release version=\"${APPSTREAM_VERSION}\" date=\"$(date +%Y-%m-%d)\"/>|" \
-            "$METAINFO_DEST"
-          
-          appstreamcli make-desktop-file \
-            "$METAINFO_DEST" \
-            "AppDir/usr/share/applications/${APP_ID}.desktop"
-          cp "AppDir/usr/share/applications/${APP_ID}.desktop" \
-            "AppDir/${APP_ID}.desktop"
-          
-          cp appimage/AppRun AppDir/AppRun
-          chmod +x AppDir/AppRun
-          
-          echo "APPIMAGE_NAME=$APPIMAGE_NAME" >> "$GITHUB_OUTPUT"
-          echo "LINUX_ASSET_NAME=${{ steps.rename.outputs.ASSET_NAME }}" >> "$GITHUB_ENV"
-          echo "APPSTREAM_VERSION=$APPSTREAM_VERSION" >> "$GITHUB_ENV"
-
       - name: Build AppImage
         if: matrix.target == 'linux-x64'
-        uses: AppImageCrafters/build-appimage-action@master
+        id: appimage
+        uses: ./.github/actions/build-appimage
         with:
-          recipe: appimage/AppImageBuilder.yml
-
-      - name: Rename AppImage
-        if: matrix.target == 'linux-x64'
-        shell: bash
-        run: |
-          set -euo pipefail
-          BUILT_APPIMAGE="$(find . -maxdepth 1 -type f -name '*.AppImage' | head -n 1)"
-          
-          if [[ -z "$BUILT_APPIMAGE" ]]; then
-            echo "::error::No AppImage was produced"
-            exit 1
-          fi
-          
-          mv "$BUILT_APPIMAGE" "${{ steps.appimage-meta.outputs.APPIMAGE_NAME }}"
+          binary-path: ./publish/${{ steps.rename.outputs.ASSET_NAME }}
+          version: ${{ steps.meta.outputs.VERSION }}
+          asset-prefix: ${{ inputs.asset_name_prefix }}
 
       - name: Upload AppImage
         if: matrix.target == 'linux-x64'
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ steps.appimage-meta.outputs.APPIMAGE_NAME }}
-          path: ${{ steps.appimage-meta.outputs.APPIMAGE_NAME }}
+          name: ${{ steps.appimage.outputs.appimage-name }}
+          path: ${{ steps.appimage.outputs.appimage-name }}
           if-no-files-found: error
 
       - name: Upload .desktop file

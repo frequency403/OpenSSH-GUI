@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v[0-9]*.[0-9]*.[0-9]*'
+  workflow_dispatch: 
+    
 
 permissions:
   contents: write
@@ -85,7 +87,7 @@ jobs:
         run: |
           sed \
             -e "s|@@VERSION@@|${VERSION}|g" \
-            -e "s|@@SOURCE_EXE@@|publish\\OpenSSH-GUI-win-x64.exe|g" \
+            -e "s|@@SOURCE_EXE@@|publish/OpenSSH-GUI-win-x64.exe|g" \
             installer/OpenSSH-GUI.nsi > installer.nsi
 
       - name: Build installer
@@ -162,3 +164,4 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           files: release-assets/*
           generate_release_notes: true
+          token: ${{ secrets.PAT_TOKEN }}
