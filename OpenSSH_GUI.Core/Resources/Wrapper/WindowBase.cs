@@ -1,6 +1,7 @@
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
     public required ILogger<WindowBase<TViewModel>> Logger { get; set; }
     public required IServiceProvider Services { get; set; }
     public required AppIconStore AppIconStore { get; set; }
-
+    
     public void Dispose() { Disposables.Dispose(); }
 
     protected void WindowInitialize(WindowStartupLocation startupLocation = WindowStartupLocation.CenterScreen)
@@ -45,6 +46,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
         try
         {
             ViewModel = Services.GetRequiredKeyedService<TViewModel>(typeof(TViewModel).Name);
+            ViewModel.OwnerTopLevel = GetTopLevel(this);
         }
         catch (Exception e)
         {

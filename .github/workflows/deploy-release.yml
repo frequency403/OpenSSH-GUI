@@ -1,8 +1,8 @@
 name: Deploy release to consumers
 
 on:
-  release:
-    types: [published]
+  repository_dispatch: 
+    types: [deploy]
   workflow_dispatch:
     inputs:
       tag:
@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          TAG="${{ github.event.release.tag_name || inputs.tag }}"
+          TAG="${{ github.event.client_payload.tag || inputs.tag }}"
 
           if [[ -z "$TAG" ]]; then
             echo "::error::No tag available — triggered via workflow_dispatch without tag input"

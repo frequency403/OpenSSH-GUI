@@ -7,7 +7,7 @@ using ReactiveUI.SourceGenerators;
 namespace OpenSSH_GUI.ViewModels;
 
 [UsedImplicitly]
-public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger, IClipboard clipboard)
+public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger)
     : ViewModelBase<(string WindowTitle, string Export)>
 {
     [Reactive] private string _export = string.Empty;
@@ -27,18 +27,15 @@ public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger
     {
         try
         {
-            if (inputParameter)
+            if (inputParameter && OwnerTopLevel is { Clipboard: { } clipboard })
+            {
                 await clipboard.SetTextAsync(Export);
+                await clipboard.FlushAsync();
+            }
         }
         catch (Exception e)
         {
             logger.LogError(e, "Error submitting export to clipboard");
         }
     }
-}
-
-public record ExportWindowViewModelInitializerParameters
-{
-    public string WindowTitle { get; init; } = string.Empty;
-    public string Export { get; init; } = string.Empty;
 }
