@@ -34,7 +34,6 @@ public partial class MainWindowViewModel : ViewModelBase
         .FirstOrDefault(a => a.Key == "ProjectUrl")?.Value;
 
     private readonly IDialogHost _dialogHost;
-    private readonly ILauncher _launcher;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IServiceProvider _serviceProvider;
@@ -58,7 +57,6 @@ public partial class MainWindowViewModel : ViewModelBase
         IServiceProvider serviceProvider,
         IConfiguration configuration,
         IMessageBoxProvider messageBoxProvider,
-        ILauncher launcher,
         IDialogHost dialogHost)
     {
         SshKeyManager = sshKeyManager;
@@ -66,7 +64,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _logger = logger;
         _serviceProvider = serviceProvider;
         _messageBoxProvider = messageBoxProvider;
-        _launcher = launcher;
         _dialogHost = dialogHost;
         Version = configuration[Program.VersionEnvVar] ?? "VERSION ERROR";
 
@@ -232,7 +229,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 break;
         }
 
-        await _launcher.LaunchUriAsync(uriBuilder.Uri);
+        if(OwnerTopLevel is { Launcher: { } launcher})
+            await launcher.LaunchUriAsync(uriBuilder.Uri);
     }
 
     [ReactiveCommand]

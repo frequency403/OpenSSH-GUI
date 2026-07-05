@@ -34,6 +34,13 @@ public abstract class ViewModelBase<TParameters> : ViewModelBase, IInitializable
 public abstract partial class ViewModelBase : ReactiveObject, IDisposable, IAsyncDisposable, IActivatableViewModel,
     IInitializableViewModel
 {
+    /// <summary>
+    ///     The TopLevel this view is hosted in. Set by the view once attached to the visual tree,
+    ///     since clipboard access must go through the actual hosting window on Windows (OLE clipboard
+    ///     is bound to the calling HWND, not a globally cached one).
+    /// </summary>
+    public TopLevel? OwnerTopLevel { get; set; }
+    
     protected readonly CompositeDisposable Disposables;
 
     /// <summary>

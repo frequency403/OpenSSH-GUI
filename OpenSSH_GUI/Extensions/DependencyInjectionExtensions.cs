@@ -44,10 +44,7 @@ public static class DependencyInjectionExtensions
                 services.AddSingleton<SshKeyManager>();
 
                 services.AddSingleton<Window>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
-                services.AddSingleton<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
-                services.AddSingleton<IClipboard>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Clipboard!);
-                services.AddSingleton<IStorageProvider>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).StorageProvider);
-                services.AddSingleton<ILauncher>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)).Launcher);
+                services.AddTransient<IDialogHost>(sp => sp.GetRequiredKeyedService<MainWindow>(nameof(MainWindow)));
 
                 services.RegisterViewWithViewModel<MainWindow, MainWindowViewModel>(ServiceLifetime.Singleton);
                 services.RegisterViewWithViewModel<ExportWindow, ExportWindowViewModel>();

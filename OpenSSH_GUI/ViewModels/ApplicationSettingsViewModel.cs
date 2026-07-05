@@ -28,12 +28,10 @@ namespace OpenSSH_GUI.ViewModels;
 public partial class ApplicationSettingsViewModel : ViewModelBase
 {
     private readonly Application _application;
-    private readonly ILauncher _launcher;
     private readonly LoggingLevelSwitch _levelSwitch;
     private readonly ILogger<ApplicationSettingsViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
     private readonly IMutableConfiguration<ApplicationConfiguration> _mutableConfiguration;
-    private readonly IStorageProvider _storageProvider;
 
     [ObservableAsProperty(ReadOnly = true)]
     private ApplicationConfiguration _applicationConfiguration = ApplicationConfiguration.Default;
@@ -50,16 +48,12 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
 
     public ApplicationSettingsViewModel(ILogger<ApplicationSettingsViewModel> logger,
         IMutableConfiguration<ApplicationConfiguration> mutableConfiguration,
-        ILauncher launcher,
-        IStorageProvider storageProvider,
         IMessageBoxProvider messageBoxProvider,
         Application application,
         LoggingLevelSwitch levelSwitch)
     {
         _logger = logger;
         _mutableConfiguration = mutableConfiguration;
-        _launcher = launcher;
-        _storageProvider = storageProvider;
         _messageBoxProvider = messageBoxProvider;
         _levelSwitch = levelSwitch;
         _application = application;
@@ -161,7 +155,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task AddLookupPathAsync(CancellationToken cancellationToken = default)
     {
-        if (await _storageProvider.OpenFolderPickerAsync(
+        if (OwnerTopLevel is { StorageProvider: { } storageProvider} && await storageProvider.OpenFolderPickerAsync(
                 new FolderPickerOpenOptions
                 {
                     AllowMultiple = false
@@ -282,11 +276,12 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private Task<bool> OpenCacheFolder(CancellationToken token = default) => _launcher.LaunchDirectoryInfoAsync(
-        new DirectoryInfo(
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                AppDomain.CurrentDomain.FriendlyName)));
+    private async Task<bool> OpenCacheFolder(CancellationToken token = default) => OwnerTopLevel is { Launcher: { } launcher }
+        && await launcher.LaunchDirectoryInfoAsync(
+            new DirectoryInfo(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    AppDomain.CurrentDomain.FriendlyName)));
 
     private async void OnNextTheme(ThemeVariant variant)
     {

@@ -24,7 +24,6 @@ namespace OpenSSH_GUI.ViewModels;
 [UsedImplicitly]
 public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
 {
-    private readonly IClipboard _clipboard;
     private readonly SshKeyManager _keyManager;
     private readonly ILogger<FileInfoWindowViewModel> _logger;
     private readonly IMessageBoxProvider _messageBoxProvider;
@@ -49,12 +48,11 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     private string _windowTitle = "Key info";
 
     public FileInfoWindowViewModel(ILogger<FileInfoWindowViewModel> logger, IMessageBoxProvider messageBoxProvider,
-        IServiceProvider serviceProvider, IClipboard clipboard, SshKeyManager keyManager)
+        IServiceProvider serviceProvider, SshKeyManager keyManager)
     {
         _logger = logger;
         _messageBoxProvider = messageBoxProvider;
         _serviceProvider = serviceProvider;
-        _clipboard = clipboard;
         _keyManager = keyManager;
         _keyFile = _serviceProvider.GetRequiredService<SshKeyFile>();
 
@@ -240,8 +238,12 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     {
         try
         {
-            await _clipboard.SetTextAsync(password.GetPasswordString());
-            await _clipboard.FlushAsync();
+            if (OwnerTopLevel is { Clipboard: { } clipboard })
+            {
+                await clipboard.SetTextAsync(password.GetPasswordString());
+                await clipboard.FlushAsync();
+            }
+            
             await _messageBoxProvider.ShowMessageBoxAsync(
                 StringsAndTexts.FileInfoWindowPasswordCopied,
                 StringsAndTexts.FileInfoWindowPasswordCopied, MessageBoxButtons.Ok,
