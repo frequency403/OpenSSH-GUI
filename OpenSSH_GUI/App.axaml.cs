@@ -127,6 +127,7 @@ public class App(
                 logger.LogError(e, "Error creating app icons");
                 throw;
             }
+            iconStore.Freeze();
 
             try
             {

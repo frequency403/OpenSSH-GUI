@@ -229,7 +229,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 break;
         }
 
-        if(OwnerTopLevel is { Launcher: { } launcher})
+        if(GetTopLevel() is { Launcher: { } launcher})
             await launcher.LaunchUriAsync(uriBuilder.Uri);
     }
 

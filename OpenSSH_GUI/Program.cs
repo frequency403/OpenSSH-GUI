@@ -59,7 +59,7 @@ internal sealed class Program
 
 #pragma warning disable CA1416
     [STAThread]
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         using var mainCancellationTokenSource = new CancellationTokenSource();
 
@@ -91,9 +91,9 @@ internal sealed class Program
                     .WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
             });
 
-        await host.StartAsync(mainCancellationTokenSource.Token);
+        host.Start();
         appBuilder.StartWithClassicDesktopLifetime(args);
-        await host.StopAsync(mainCancellationTokenSource.Token);
+        host.StopAsync(mainCancellationTokenSource.Token).GetAwaiter().GetResult();
     }
 #pragma warning restore CA1416
 

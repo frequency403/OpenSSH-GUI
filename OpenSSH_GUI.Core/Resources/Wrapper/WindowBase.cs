@@ -46,7 +46,7 @@ public abstract class WindowBase<TViewModel> : ReactiveWindow<TViewModel>, IDisp
         try
         {
             ViewModel = Services.GetRequiredKeyedService<TViewModel>(typeof(TViewModel).Name);
-            ViewModel.OwnerTopLevel = GetTopLevel(this);
+            ViewModel.GetTopLevel = () => GetTopLevel(this);
         }
         catch (Exception e)
         {

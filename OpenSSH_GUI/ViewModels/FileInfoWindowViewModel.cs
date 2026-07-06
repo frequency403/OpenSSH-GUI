@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
 using DynamicData;
 using JetBrains.Annotations;
@@ -8,6 +9,7 @@ using Material.Icons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenSSH_GUI.Core.Lib.Keys;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Dialogs.Enums;
@@ -238,9 +240,9 @@ public partial class FileInfoWindowViewModel : ViewModelBase<SshKeyFileSource>
     {
         try
         {
-            if (OwnerTopLevel is { Clipboard: { } clipboard })
+            if (GetTopLevel() is { Clipboard: { } clipboard })
             {
-                await clipboard.SetTextAsync(password.GetPasswordString());
+                await clipboard.SetValueAsync(DataFormat.Text, Password);
                 await clipboard.FlushAsync();
             }
             
