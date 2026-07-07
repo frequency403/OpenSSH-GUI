@@ -15,11 +15,11 @@ jobs:
     timeout-minutes: 10
     steps:
     
-    - name: Checkout
-      uses: actions/checkout@v7
-      with: 
-        ref: ${{ github.ref }}
-        fetch-depth: '1'
+#    - name: Checkout
+#      uses: actions/checkout@v7
+#      with: 
+#        ref: ${{ github.ref }}
+#        fetch-depth: '1'
         
     - name: Deploy to AUR
       uses: ./.github/actions/deploy-aur
