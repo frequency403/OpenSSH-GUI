@@ -20,7 +20,7 @@ jobs:
         fetch-depth: '1'
         sparse-checkout: |
           openssh-gui-git/PKGBUILD
-        ref: $ {{ github.ref }}
+        ref: ${{ github.ref }}
     - name: Deploy
       uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
       with:
