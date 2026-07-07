@@ -4,8 +4,8 @@ on:
   push:
     tags:
       - 'v[0-9]*.[0-9]*.[0-9]*'
-  workflow_dispatch: 
-    
+    branches:
+      - master
 
 permissions:
   contents: write
@@ -29,7 +29,7 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: '1'
           ref: ${{ github.ref }}
@@ -53,8 +53,11 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
-
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: '1'
+          ref: ${{ github.ref }}
+      
       - name: Download Windows binary
         uses: actions/download-artifact@v8
         with:
@@ -108,7 +111,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v8
@@ -171,4 +174,4 @@ jobs:
         with:
           event-type: deploy
           token: ${{ secrets.PAT_TOKEN }}
-          client_payload: '{"tag": "${{ needs.prepare.outputs.tag }}"}'
+          client-payload: '{"tag": "${{ needs.prepare.outputs.tag }}", "version": "${{ needs.prepare.outputs.version }}"}'

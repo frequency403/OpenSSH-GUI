@@ -28,11 +28,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Determine Version
         id: version
         uses: ./.github/actions/determine-version
+        with:
+          suffix: ${{ github.sha }}
 
   deploy-aur-git:
     name: Update AUR Git Package
@@ -42,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

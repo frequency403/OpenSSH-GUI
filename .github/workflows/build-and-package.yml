@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup .NET environment
         uses: actions/setup-dotnet@v5
@@ -41,28 +41,9 @@ jobs:
             **/Directory.Packages.props
             **/Directory.Build.props
 
-      - name: Normalize version and build flags
-        id: meta
-        shell: bash
-        run: |
-          set -euo pipefail
-          VERSION="${{ inputs.version }}"
-          VERSION="${VERSION#v}"
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Install/Restore dependencies
         shell: bash
         run: dotnet restore --runtime "${{ matrix.target }}"
-        
-      - name: Build application
-        shell: bash
-        run: |
-          set -euo pipefail
-          dotnet build OpenSSH_GUI/OpenSSH_GUI.csproj \
-            --configuration Release \
-            --no-restore \
-            --runtime "${{ matrix.target }}" \
-            -p:Version="${{ steps.meta.outputs.VERSION }}"
 
       - name: Publish application
         shell: bash
@@ -75,7 +56,7 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:Version="${{ steps.meta.outputs.VERSION }}"
+            -p:Version="${{ inputs.version }}"
 
       - name: Rename artifact for distribution
         id: rename
@@ -97,7 +78,7 @@ jobs:
         uses: ./.github/actions/build-appimage
         with:
           binary-path: ./publish/${{ steps.rename.outputs.ASSET_NAME }}
-          version: ${{ steps.meta.outputs.VERSION }}
+          version: ${{ inputs.version }}
           asset-prefix: ${{ inputs.asset_name_prefix }}
 
       - name: Upload AppImage

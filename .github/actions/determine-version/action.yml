@@ -1,17 +1,21 @@
 name: Determine Version
-description: Extract and validate a semantic version from Directory.Build.props and optionally validate against a branch or tag name
+description: Extract and validate a semantic version from project
 
 inputs:
   file-name:
     description: The filename where the dotnet msbuild command can extract the version. Provide the full path from repo root!
     required: false
-    default: 'Directory.Build.props'
+    default: '.\OpenSSH_GUI\OpenSSH_GUI.csproj'
     
   property:
     description: The property where the dotnet msbuild command must look for the verison
     required: false
-    default: 'BaseVersion'
-  
+    default: 'Version'
+    
+  suffix:
+    description: The Suffix to use, when any
+    required: false
+    default: ''
 
 outputs:
   version:
@@ -25,7 +29,7 @@ runs:
   using: composite
 
   steps:
-    - name: Extract BaseVersion
+    - name: Extract Version
       id: extract
       shell: bash
       run: |
@@ -38,6 +42,12 @@ runs:
           exit 1
         fi
 
+        if [[ ! -f "${{ inputs.suffix }}" ]]; then
+          BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r') -p:VersionSuffix=${{ inputs.suffix }}"
+        else
+          BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
+        fi
+        
         VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
 
         if [[ -z "$VERSION" ]]; then
@@ -50,6 +60,6 @@ runs:
           exit 1
         fi
 
-        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
         echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
         echo "::notice::Detected version: $VERSION (tag: v$VERSION)"

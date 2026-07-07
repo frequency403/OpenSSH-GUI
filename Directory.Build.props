@@ -5,10 +5,11 @@
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
         <PackageProjectUrl>https://github.com/frequency403/OpenSSH-GUI</PackageProjectUrl>
-        <BaseVersion>3.2.3</BaseVersion>
+        <VersionPrefix>3.2.3</VersionPrefix>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     </PropertyGroup>
-
+    
     <ItemGroup>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>ProjectUrl</_Parameter1>

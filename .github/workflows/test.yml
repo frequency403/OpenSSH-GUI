@@ -1,16 +1,17 @@
 name: Unit Tests
-
 on:
+  workflow_call: 
+    
   push:
-    branches:
+    branches-ignore:
       - master
-      - main
-  pull_request:
-    branches:
-      - master
-      - main
       - development
-  workflow_call:
+      - 'release/**'
+  pull_request: 
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 concurrency:
   group: tests-${{ github.ref }}-${{ github.event_name }}
@@ -18,13 +19,18 @@ concurrency:
 
 jobs:
   test:
-    name: Run Tests
-    runs-on: ubuntu-latest
+    name: ${{matrix.os}}-tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
     timeout-minutes: 20
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
 
       - name: Setup .NET environment
         uses: actions/setup-dotnet@v5
