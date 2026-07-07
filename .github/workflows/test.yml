@@ -1,13 +1,8 @@
 name: Unit Tests
 on:
-  workflow_call: 
-    
-  push:
-    branches-ignore:
-      - master
-      - development
-      - 'release/**'
-  pull_request: 
+  workflow_call:
+
+  pull_request:
     types:
       - opened
       - reopened

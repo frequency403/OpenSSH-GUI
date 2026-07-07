@@ -5,7 +5,6 @@
         <Platform Name="x86" />
     </Configurations>
     <Folder Name="/AppImageAssets/">
-        <File Path="appimage/AppImageBuilder.yml" />
         <File Path="appimage/AppRun" />
         <File Path="appimage/io.github.frequency403.openssh_gui.metainfo.xml" />
     </Folder>

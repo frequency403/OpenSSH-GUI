@@ -13,6 +13,9 @@ on:
 jobs:
   validate-version:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.head.ref, 'release/')
+    outputs:
+      version: ${{ steps.release_version.outputs.version }}
 
     steps:
       - name: Checkout target (master)
@@ -24,12 +27,13 @@ jobs:
       - name: Extract master version
         id: master_version
         uses: ./.github/actions/determine-version
-        
+
 
       - name: Checkout PR branch
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Extract release version
@@ -45,7 +49,7 @@ jobs:
           echo "Master:  $MASTER"
           echo "Release: $RELEASE"
 
-          python3 - << 'EOF'
+          python3 - << 'PYEOF'
           import sys
           from packaging.version import Version
 
@@ -57,4 +61,12 @@ jobs:
               sys.exit(1)
 
           print("Version check passed")
-          EOF
+          PYEOF
+
+  build:
+    name: Build release branch artifacts
+    needs: validate-version
+    uses: ./.github/workflows/build-and-package.yml
+    with:
+      version: ${{ needs.validate-version.outputs.version }}
+      asset_name_prefix: OpenSSH-GUI

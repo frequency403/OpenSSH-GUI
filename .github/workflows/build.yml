@@ -50,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [test, prepare, build]
+    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Checkout Repository
@@ -108,6 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [test, prepare, build, create_installer]
+    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Checkout repository

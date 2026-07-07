@@ -87,11 +87,19 @@ runs:
 
         cp "$GITHUB_WORKSPACE/${{ inputs.pkgbuild }}" ./PKGBUILD
 
+        if [[ "${{ inputs.updpkgsums }}" == "true" ]]; then
+          if command -v updpkgsums >/dev/null 2>&1; then
+            updpkgsums PKGBUILD
+          else
+            echo "::warning::updpkgsums requested but pacman-contrib is not installed in the fallback environment; sha256sums left unchanged"
+          fi
+        fi
+
         if [[ "${{ inputs.regenerate_srcinfo }}" == "true" ]]; then
           docker run --rm -v "$(pwd)":/pkg archlinux:latest \
             bash -c "useradd -m builder \
               && cp /pkg/PKGBUILD /home/builder/ \
-              && su builder -c 'cd /home/builder && makepkg --printsrcinfo >> /pkg/.SRCINFO'"
+              && su builder -c 'cd /home/builder && makepkg --printsrcinfo > /pkg/.SRCINFO'"
         fi
 
         git config user.name "${{ inputs.commit_username }}"

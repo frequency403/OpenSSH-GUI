@@ -49,17 +49,21 @@ jobs:
           fetch-depth: 0
 
       - name: Update PKGBUILD
+        id: update
         run: |
           set -euo pipefail
           DATE=$(date +%Y%m%d)
-          HASH=$(git rev-parse --short HEAD)
-          AUR_VERSION="${{ needs.prepare.outputs.version }}.${DATE}.${HASH}"
+          VERSION="${{ needs.prepare.outputs.version }}"
+          VERSION="${VERSION//-/.}"
+          AUR_VERSION="${VERSION}.${DATE}"
 
           sed -i "s/^pkgver=.*/pkgver=$AUR_VERSION/" openssh-gui-git/PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-git/PKGBUILD
 
           echo "Updated PKGBUILD:"
           grep -E '^(pkgver=|pkgrel=)' openssh-gui-git/PKGBUILD
+          
+          echo "version=$AUR_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to AUR
         uses: ./.github/actions/deploy-aur
@@ -69,6 +73,6 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_username: ${{ github.repository_owner }}
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          commit_message: "Development update ${{ needs.prepare.outputs.tag }}"
+          commit_message: "Development update ${{ steps.update.outputs.version }}"
           force_push: 'true'
           regenerate_srcinfo: 'true'
