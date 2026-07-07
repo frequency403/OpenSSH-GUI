@@ -20,7 +20,6 @@
         <File Path=".github/FUNDING.yml" />
         <File Path=".github/workflows/build.yml" />
         <File Path=".github/workflows/deploy-release.yml" />
-        <File Path=".github/workflows/staging.yml" />
         <File Path=".github/workflows/version-guard.yml" />
         <File Path=".github/workflows/auto-tag.yml" />
         <File Path=".github/workflows/build-and-package.yml" />
