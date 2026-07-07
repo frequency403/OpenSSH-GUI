@@ -42,8 +42,9 @@ runs:
           exit 1
         fi
 
+        BUILD_VERSION=""
         if [[ ! -f "${{ inputs.suffix }}" ]]; then
-          BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r') -p:VersionSuffix=${{ inputs.suffix }}"
+          BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -p:VersionSuffix=${{ inputs.suffix }} -getProperty:${{ inputs.property }} | tr -d '\r')"
         else
           BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
         fi
