@@ -13,14 +13,7 @@ jobs:
     name: Update GIT AUR package
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    steps:
-    
-#    - name: Checkout
-#      uses: actions/checkout@v7
-#      with: 
-#        ref: ${{ github.ref }}
-#        fetch-depth: '1'
-        
+    steps:       
     - name: Deploy to AUR
       uses: ./.github/actions/deploy-aur
       with:
