@@ -43,10 +43,10 @@ runs:
         fi
 
         BUILD_VERSION=""
-        if [[ ! -f "${{ inputs.suffix }}" ]]; then
-          BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -p:VersionSuffix=${{ inputs.suffix }} -getProperty:${{ inputs.property }} | tr -d '\r')"
+        if [[ ! "${{ inputs.suffix }}" ]]; then
+          BUILD_VERSION="$(dotnet msbuild "$FILE" -nologo -p:VersionSuffix=${{ inputs.suffix }} -getProperty:${{ inputs.property }} | tr -d '\r')"
         else
-          BUILD_VERSION = "$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
+          BUILD_VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
         fi
         
         VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
