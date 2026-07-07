@@ -4,7 +4,7 @@ on:
     branches:
       - 'development'
     paths:
-      - 'PKGBUILD'
+      - 'openssh-gui-git/PKGBUILD'
 concurrency:
   group: staging-${{ github.ref }}
   cancel-in-progress: true
