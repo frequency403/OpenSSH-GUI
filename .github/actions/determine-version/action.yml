@@ -5,7 +5,7 @@ inputs:
   file-name:
     description: The filename where the dotnet msbuild command can extract the version. Provide the full path from repo root!
     required: false
-    default: '.\OpenSSH_GUI\OpenSSH_GUI.csproj'
+    default: 'OpenSSH_GUI/OpenSSH_GUI.csproj'
     
   property:
     description: The property where the dotnet msbuild command must look for the verison
