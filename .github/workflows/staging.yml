@@ -1,0 +1,23 @@
+name: staging.yml
+on:
+  push:
+    branches:
+      - 'development'
+    paths:
+      - 'PKGBUILD'
+concurrency:
+  group: staging-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  deploy-aur:
+    - name: Deploy to AUR
+        uses: ./.github/actions/deploy-aur
+        with:
+          pkgname: openssh-gui-git
+          pkgbuild: openssh-gui-git/PKGBUILD
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_username: ${{ github.repository_owner }}
+          commit_email: ${{ github.repository_owner }}@users.noreply.github.com
+          commit_message: "Updated PKGBUILD"
+          force_push: 'true'
+          regenerate_srcinfo: 'true'

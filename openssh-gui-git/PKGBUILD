@@ -17,6 +17,11 @@ conflicts=('openssh-gui' 'openssh-gui-bin' 'openssh-gui-nightly')
 source=("git+${url}.git#branch=development")
 sha256sums=('SKIP')
 
+prepare() {
+  cd "${srcdir}/${_pkgname}"
+  dotnet restore OpenSSH_GUI/OpenSSH_GUI.csproj
+}
+
 pkgver() {
     cd "${srcdir}/${_pkgname}"
 
