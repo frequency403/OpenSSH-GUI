@@ -9,7 +9,10 @@ concurrency:
   group: staging-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  deploy-aur:
+  aur_publish:
+    name: Update GIT AUR package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
     - name: Deploy to AUR
         uses: ./.github/actions/deploy-aur
