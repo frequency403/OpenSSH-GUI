@@ -29,8 +29,8 @@ internal sealed class Program
     public const string VersionEnvVar = "RUNNING_VERSION";
 
     private static string GetHostVersion() => Assembly.GetEntryAssembly()
-                                                  ?.GetCustomAttribute<AssemblyVersionAttribute>()
-                                                  ?.Version
+                                                  ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                                  ?.InformationalVersion
                                               ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
                                               ?? "0.0.0";
 
