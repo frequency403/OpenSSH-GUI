@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using OpenSSH_GUI.SshConfig.Parsers;
 using Shouldly;
 using Xunit;
@@ -6,13 +7,13 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshWildcardMatcherTests
 {
-    [Theory, InlineData("example.com", "example.com", true), InlineData("example.com", "*.com", true), InlineData("example.com", "example.*", true),
+    [AvaloniaTheory, InlineData("example.com", "example.com", true), InlineData("example.com", "*.com", true), InlineData("example.com", "example.*", true),
      InlineData("example.com", "*example*", true), InlineData("example.com", "ex?mple.com", true), InlineData("example.com", "other.com", false), InlineData("abc", "a?c", true),
      InlineData("abc", "a*", true), InlineData("abc", "*c", true), InlineData("abc", "*", true), InlineData("abc", "abcd", false), InlineData("abc", "ab", false),
      InlineData("", "*", true), InlineData("a", "", false), InlineData("", "", true), InlineData("abc", "***", true), InlineData("abc", "*b*", true), InlineData("abc", "a**c", true)]
     public void MatchesGlob_Tests(string input, string pattern, bool expected) { SshWildcardMatcher.MatchesGlob(input.AsSpan(), pattern.AsSpan()).ShouldBe(expected); }
 
-    [Theory, InlineData(
+    [AvaloniaTheory, InlineData(
          "host1", new[]
          {
              "host1", "host2"

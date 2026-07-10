@@ -155,7 +155,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     [ReactiveCommand]
     private async Task AddLookupPathAsync(CancellationToken cancellationToken = default)
     {
-        if (OwnerTopLevel is { StorageProvider: { } storageProvider} && await storageProvider.OpenFolderPickerAsync(
+        if (GetTopLevel() is { StorageProvider: { } storageProvider} && await storageProvider.OpenFolderPickerAsync(
                 new FolderPickerOpenOptions
                 {
                     AllowMultiple = false
@@ -276,7 +276,7 @@ public partial class ApplicationSettingsViewModel : ViewModelBase
     }
 
     [ReactiveCommand]
-    private async Task<bool> OpenCacheFolder(CancellationToken token = default) => OwnerTopLevel is { Launcher: { } launcher }
+    private async Task<bool> OpenCacheFolder(CancellationToken token = default) => GetTopLevel() is { Launcher: { } launcher }
         && await launcher.LaunchDirectoryInfoAsync(
             new DirectoryInfo(
                 Path.Combine(

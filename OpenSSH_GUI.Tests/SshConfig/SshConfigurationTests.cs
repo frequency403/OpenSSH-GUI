@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using Microsoft.Extensions.Configuration;
 using OpenSSH_GUI.SshConfig.Extensions;
 using Shouldly;
@@ -7,7 +8,7 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigurationTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void AddSshConfig_ShouldLoadGlobalEntries()
     {
         // Arrange
@@ -33,7 +34,7 @@ public class SshConfigurationTests
         }
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void AddSshConfig_ShouldLoadHostBlocks()
     {
         // Arrange
@@ -62,7 +63,7 @@ public class SshConfigurationTests
         }
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void AddSshConfig_Optional_ShouldNotThrowIfFileMissing()
     {
         // Arrange

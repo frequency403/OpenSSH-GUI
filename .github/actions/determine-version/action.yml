@@ -1,17 +1,21 @@
 name: Determine Version
-description: Extract and validate a semantic version from Directory.Build.props and optionally validate against a branch or tag name
+description: Extract and validate a semantic version from project
 
 inputs:
   file-name:
     description: The filename where the dotnet msbuild command can extract the version. Provide the full path from repo root!
     required: false
-    default: 'Directory.Build.props'
+    default: 'OpenSSH_GUI/OpenSSH_GUI.csproj'
     
   property:
     description: The property where the dotnet msbuild command must look for the verison
     required: false
-    default: 'BaseVersion'
-  
+    default: 'Version'
+    
+  suffix:
+    description: The Suffix to use, when any
+    required: false
+    default: ''
 
 outputs:
   version:
@@ -25,31 +29,34 @@ runs:
   using: composite
 
   steps:
-    - name: Extract BaseVersion
+    - name: Extract Version
       id: extract
       shell: bash
       run: |
         set -euo pipefail
 
         FILE="${{ inputs.file-name }}"
+        SUFFIX="${{ inputs.suffix }}"
 
         if [[ ! -f "$FILE" ]]; then
           echo "::error::$FILE not found"
           exit 1
         fi
 
-        VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} | tr -d '\r')"
+        BUILD_VERSION="$(dotnet msbuild "$FILE" -nologo -getProperty:${{ inputs.property }} -p:VersionSuffix="$SUFFIX" | tr -d '\r')"
 
-        if [[ -z "$VERSION" ]]; then
+        if [[ -z "$BUILD_VERSION" ]]; then
           echo "::error::${{ inputs.property }} not found in $FILE"
           exit 1
         fi
+
+        VERSION="${BUILD_VERSION%%-*}"
 
         if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           echo "::error::Invalid Property ${{ inputs.property }}: $VERSION"
           exit 1
         fi
 
-        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "version=$BUILD_VERSION" >> "$GITHUB_OUTPUT"
         echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
-        echo "::notice::Detected version: $VERSION (tag: v$VERSION)"
+        echo "::notice::Detected version: $BUILD_VERSION (tag: v$VERSION)"

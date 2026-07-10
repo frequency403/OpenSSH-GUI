@@ -4,33 +4,42 @@
         <Platform Name="x64" />
         <Platform Name="x86" />
     </Configurations>
+    <Folder Name="/AppImageAssets/">
+        <File Path="appimage/AppRun" />
+        <File Path="appimage/io.github.frequency403.openssh_gui.metainfo.xml" />
+    </Folder>
     <Folder Name="/AUR Files/">
         <File Path="openssh-gui-bin/PKGBUILD" />
         <File Path="openssh-gui-git/PKGBUILD" />
         <File Path="openssh-gui.desktop" />
     </Folder>
     <Folder Name="/CI/">
+        <File Path=".github/actions/build-appimage/action.yml" />
+        <File Path=".github/actions/deploy-aur/action.yml" />
+        <File Path=".github/actions/determine-version/action.yml" />
         <File Path=".github/FUNDING.yml" />
         <File Path=".github/workflows/build.yml" />
+        <File Path=".github/workflows/deploy-release.yml" />
+        <File Path=".github/workflows/version-guard.yml" />
+        <File Path=".github/workflows/auto-tag.yml" />
+        <File Path=".github/workflows/build-and-package.yml" />
+        <File Path=".github/workflows/test.yml" />
         <File Path=".github/workflows/staging.yml" />
-        <File Path=".github\workflows\auto-tag.yml" />
-        <File Path=".github\workflows\build-and-package.yml" />
-        <File Path=".github\workflows\test.yml" />
     </Folder>
     <Folder Name="/Solution Items/">
         <File Path=".gitignore" />
         <File Path="Directory.Packages.props" />
         <File Path="global.json" />
         <File Path="Directory.Build.props" />
-        <File Path="Directory.Build.targets" />
         <File Path="LICENSE" />
         <File Path="README.md" />
+    </Folder>
+    <Folder Name="/WingetInstaller/">
+        <File Path="installer/OpenSSH-GUI.nsi" />
     </Folder>
     <Project Path="OpenSSH_GUI.Core/OpenSSH_GUI.Core.csproj" />
     <Project Path="OpenSSH_GUI.Dialogs/OpenSSH_GUI.Dialogs.csproj" />
     <Project Path="OpenSSH_GUI.SshConfig/OpenSSH_GUI.SshConfig.csproj" />
     <Project Path="OpenSSH_GUI.Tests/OpenSSH_GUI.Tests.csproj" />
-    <Project Path="OpenSSH_GUI/OpenSSH_GUI.csproj">
-        <Deploy Solution="Debug|Any CPU" />
-    </Project>
+    <Project Path="OpenSSH_GUI/OpenSSH_GUI.csproj" />
 </Solution>

@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using OpenSSH_GUI.SshConfig.Models;
 using OpenSSH_GUI.SshConfig.Options;
 using OpenSSH_GUI.SshConfig.Parsers;
@@ -9,7 +10,7 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshConfigSerializerTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void Serialize_SimpleDocument_ShouldProduceCorrectOutput()
     {
         var doc = new SshConfigDocument(
@@ -28,7 +29,7 @@ public class SshConfigSerializerTests
         output.ShouldContain("    User alice");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Serialize_RoundTrip_ShouldPreserveFormatting()
     {
         var input =
@@ -39,7 +40,7 @@ public class SshConfigSerializerTests
         output.Replace("\r\n", "\n").Trim().ShouldBe(input.Replace("\r\n", "\n").Trim());
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Serialize_MatchBlock_ShouldProduceCorrectOutput()
     {
         var criteria = new[]
@@ -55,7 +56,7 @@ public class SshConfigSerializerTests
         output.ShouldContain("Match host example.com user root");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Serialize_CleanMode_WithOptions_ShouldFormatCorrectly()
     {
         // Arrange
@@ -78,7 +79,7 @@ public class SshConfigSerializerTests
         Assert.Equal("Host example\n\tUser=alice\n", output);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Serialize_RoundTrip_WithModifications_ShouldRegenerate()
     {
         // Arrange
@@ -117,7 +118,7 @@ public class SshConfigSerializerTests
         Assert.DoesNotContain("User alice", output);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void QuoteIfNeeded_ShouldQuoteWhitespace()
     {
         // Arrange

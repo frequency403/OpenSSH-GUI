@@ -1,6 +1,9 @@
-﻿using Avalonia.Input.Platform;
+﻿using Avalonia.Input;
+using Avalonia.Input.Platform;
+using Avalonia.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Lib.Misc;
 using OpenSSH_GUI.Core.MVVM;
 using ReactiveUI.SourceGenerators;
 
@@ -27,9 +30,9 @@ public partial class ExportWindowViewModel(ILogger<ExportWindowViewModel> logger
     {
         try
         {
-            if (inputParameter && OwnerTopLevel is { Clipboard: { } clipboard })
+            if (inputParameter && GetTopLevel() is { Clipboard: { } clipboard })
             {
-                await clipboard.SetTextAsync(Export);
+                await clipboard.SetValueAsync(DataFormat.Text, Export);
                 await clipboard.FlushAsync();
             }
         }

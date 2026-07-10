@@ -28,11 +28,10 @@ internal sealed class Program
     public const string AppName = "OpenSSH GUI";
     public const string VersionEnvVar = "RUNNING_VERSION";
 
-    private static string GetHostVersion() => Assembly.GetEntryAssembly()
-                                                  ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                                  ?.InformationalVersion
-                                              ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
-                                              ?? "0.0.0";
+    private static string GetHostVersion(Assembly? assembly) => assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                                                    ?.InformationalVersion
+                                                                ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
+                                                                ?? "0.0.0";
 
     private static void ConfigureOpenSshGuiLogger(
         ApplicationConfiguration bootstrapConfig,
@@ -59,7 +58,7 @@ internal sealed class Program
 
 #pragma warning disable CA1416
     [STAThread]
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         using var mainCancellationTokenSource = new CancellationTokenSource();
 
@@ -91,9 +90,9 @@ internal sealed class Program
                     .WithExceptionHandler(host.Services.GetRequiredService<ExceptionHandler>());
             });
 
-        await host.StartAsync(mainCancellationTokenSource.Token);
+        host.Start();
         appBuilder.StartWithClassicDesktopLifetime(args);
-        await host.StopAsync(mainCancellationTokenSource.Token);
+        host.StopAsync(mainCancellationTokenSource.Token).GetAwaiter().GetResult();
     }
 #pragma warning restore CA1416
 
@@ -108,7 +107,7 @@ internal sealed class Program
 
         configurationBuilder.AddInMemoryCollection(
         [
-            new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
+            new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion(Assembly.GetEntryAssembly()))
         ]);
     }
 

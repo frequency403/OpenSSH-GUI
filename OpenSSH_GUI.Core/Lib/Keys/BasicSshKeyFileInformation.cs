@@ -46,8 +46,9 @@ public readonly record struct BasicSshKeyFileInformation()
     /// <summary>
     ///     Extracts metadata from any supported SSH key file without requiring a passphrase.
     ///     Supports OpenSSH public keys (.pub), OpenSSH private keys, and PuTTY keys (PPK v1/v2/v3).
-    ///     The comment will be empty for passphrase-protected OpenSSH private keys
-    ///     when no corresponding .pub file is present.
+    ///     The comment will be empty when no corresponding .pub file is present,
+    ///     because the OpenSSH private key format does not expose the key comment
+    ///     without decrypting the private section.
     /// </summary>
     /// <param name="keyFileInformation">Descriptor of the key file(s) on disk.</param>
     /// <returns>Parsed metadata, or an empty instance if the key cannot be read.</returns>
@@ -64,7 +65,7 @@ public readonly record struct BasicSshKeyFileInformation()
 
         // PPK — comment lives in the unencrypted plaintext header regardless of encryption
         if (files.FirstOrDefault(f =>
-                f.Extension.Equals(PathExtensions.PuttyKeyFileExtension, StringComparison.OrdinalIgnoreCase)) is
+                f.Extension.Replace(".", string.Empty).Equals(PathExtensions.PuttyKeyFileExtension, StringComparison.OrdinalIgnoreCase)) is
             { } ppkFile)
             return TryParseOrEmpty(() => ParsePpkFile(File.ReadAllText(ppkFile.FullName)));
 
@@ -341,12 +342,12 @@ public readonly record struct BasicSshKeyFileInformation()
     }
 
     public string ToString(SshKeyHashAlgorithmName hashAlgorithmName, string outputFormat = OutputFormat) => IsEmpty
-        ? hashAlgorithmName == HashAlgorithmName
+        ? string.Empty
+        : hashAlgorithmName == HashAlgorithmName
             ? string.Format(outputFormat, BitLength, HashAlgorithmName, FingerPrint, Comment, KeyType)
             : string.Format(
                 outputFormat, BitLength, hashAlgorithmName, ComputeFingerprint([], hashAlgorithmName),
-                Comment, KeyType)
-        : string.Empty;
+                Comment, KeyType);
 
     /// <summary>
     ///     Returns a human-readable string matching the output format of <c>ssh-keygen -lf</c>:

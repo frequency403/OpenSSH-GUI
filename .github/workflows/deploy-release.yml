@@ -3,58 +3,27 @@ name: Deploy release to consumers
 on:
   repository_dispatch: 
     types: [deploy]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag (e.g. v1.2.3)'
-        required: true
-        type: string
 
 permissions:
   contents: read
 
 jobs:
-  get_version:
-    name: Extract Version
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.parse.outputs.version }}
-      tag: ${{ steps.parse.outputs.tag }}
-
-    steps:
-      - name: Parse release metadata
-        id: parse
-        run: |
-          set -euo pipefail
-
-          TAG="${{ github.event.client_payload.tag || inputs.tag }}"
-
-          if [[ -z "$TAG" ]]; then
-            echo "::error::No tag available — triggered via workflow_dispatch without tag input"
-            exit 1
-          fi
-
-          VERSION="${TAG#v}"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
   aur_publish:
     name: Publish AUR packages
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: get_version
 
     steps:
       - name: Checkout PKGBUILD only
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ github.event.client_payload.tag }}
 
       - name: Update PKGBUILD version
         run: |
           set -euo pipefail
 
-          VERSION="${{ needs.get_version.outputs.version }}"
+          VERSION="${{ github.event.client_payload.version }}"
 
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-bin/PKGBUILD
@@ -67,7 +36,7 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_username: ${{ github.repository_owner }}
           commit_email: ${{ github.repository_owner }}@users.noreply.github.com
-          commit_message: "Update to ${{ needs.get_version.outputs.tag }}"
+          commit_message: "Update to ${{ github.event.client_payload.tag }}"
           force_push: 'false'
           regenerate_srcinfo: 'false'
           updpkgsums: 'true'
@@ -75,7 +44,7 @@ jobs:
   winget_publish:
     name: Update Winget Package
     runs-on: ubuntu-slim
-    needs: [aur_publish, get_version]
+    needs: aur_publish
     timeout-minutes: 10
     steps:
       - name: Update Winget manifest
@@ -84,7 +53,7 @@ jobs:
           max-versions-to-keep: 5
           identifier: frequency403.OpenSSHGUI
           fork-user: ${{ github.repository_owner }}
-          version: ${{ needs.get_version.outputs.version }}
-          release-tag: ${{ needs.get_version.outputs.tag }}
+          version: ${{ github.event.client_payload.version }}
+          release-tag: ${{ github.event.client_payload.tag }}
           installers-regex: 'Setup\.exe$'
           token: ${{ secrets.WINGET_PUBLISH_TOKEN }}
