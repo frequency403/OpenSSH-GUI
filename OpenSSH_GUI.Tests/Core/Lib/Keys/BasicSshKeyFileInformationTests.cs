@@ -257,14 +257,6 @@ public class BasicSshKeyFileInformationTests
     [AvaloniaFact]
     public void FromKeyFileInfo_OpenSshPrivateKeyWithoutPubFile_ReturnsEmpty_DueToUnconditionalPubFileLookup()
     {
-        // BUG: SshKeyFileInformation.PublicKeyFileName is computed unconditionally for any
-        // non-.ppk extension regardless of whether the .pub file physically exists on disk.
-        // FromKeyFileInfo only checks "PublicKeyFileName is not null" (not File.Exists), so it
-        // always attempts to read the (now missing) .pub file first and swallows the resulting
-        // FileNotFoundException as "Empty" instead of falling back to parsing the OpenSSH private
-        // key directly. This contradicts the method's own XML doc comment which promises the
-        // comment "will be empty ... when no corresponding .pub file is present" (implying the
-        // fingerprint/key type would still be parsed) - in reality the whole result is Empty.
         var dir = Directory.CreateTempSubdirectory();
         try
         {
@@ -285,13 +277,8 @@ public class BasicSshKeyFileInformationTests
     }
 
     [AvaloniaFact]
-    public void ToString_ForSuccessfullyParsedKey_ReturnsEmptyString_DueToInvertedTernary()
+    public void ToString_ForSuccessfullyParsedKey_ReturnsPopulatedString()
     {
-        // BUG: BasicSshKeyFileInformation.ToString(SshKeyHashAlgorithmName, string) has an
-        // inverted ternary: "IsEmpty ? <formatted string> : string.Empty". This means a
-        // *successfully* parsed key (IsEmpty == false) always renders as an empty string, while
-        // the *empty/unparseable* placeholder instance renders the formatted placeholder text.
-        // This is the exact opposite of the documented "ssh-keygen -lf"-style behaviour.
         var dir = Directory.CreateTempSubdirectory();
         try
         {
@@ -299,8 +286,8 @@ public class BasicSshKeyFileInformationTests
             var info = new SshKeyFileInformation(SshKeyFileSource.FromDisk(privatePath));
             var result = BasicSshKeyFileInformation.FromKeyFileInfo(info);
 
-            result.FingerPrint.ShouldNotBeNullOrEmpty(); // sanity: key was actually parsed
-            result.ToString().ShouldBe(string.Empty);
+            result.FingerPrint.ShouldNotBeNullOrEmpty(); 
+            result.ToString().ShouldNotBe(string.Empty);
         }
         finally
         {
@@ -309,16 +296,8 @@ public class BasicSshKeyFileInformationTests
     }
 
     [AvaloniaFact]
-    public void ToString_ForEmptyInstance_ReturnsFormattedPlaceholder_DueToInvertedTernary()
-    {
-        var empty = new BasicSshKeyFileInformation();
-
-        var text = empty.ToString();
-
-        text.ShouldNotBeNullOrEmpty();
-        text.ShouldContain("0");
-        text.ShouldContain("SHA256");
-    }
+    public void ToString_ForEmptyInstance_ReturnsEmptyString() 
+        => new BasicSshKeyFileInformation().ToString().ShouldBeNullOrWhiteSpace();
 
     [AvaloniaFact]
     public void Equals_TwoDefaultInstances_AreEqual()
