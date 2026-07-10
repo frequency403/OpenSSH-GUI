@@ -3,9 +3,12 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType>Exe</OutputType>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">linux-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="Avalonia.Headless.XUnit" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3" />
@@ -24,6 +27,8 @@
   <ItemGroup>
     <ProjectReference Include="..\OpenSSH_GUI.Core\OpenSSH_GUI.Core.csproj" />
     <ProjectReference Include="..\OpenSSH_GUI.SshConfig\OpenSSH_GUI.SshConfig.csproj" />
+    <ProjectReference Include="..\OpenSSH_GUI\OpenSSH_GUI.csproj" />
+    <ProjectReference Include="..\OpenSSH_GUI.Dialogs\OpenSSH_GUI.Dialogs.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets/Testfiles/*" />

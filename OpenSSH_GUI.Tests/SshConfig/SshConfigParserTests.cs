@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.Core.Extensions;
@@ -28,7 +29,7 @@ public class SshConfigParserTests
         return reader.ReadToEnd();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_GlobalConfig_ShouldParseEmbeddedFile()
     {
         var content = GetEmbeddedResource("ssh_config_global");
@@ -44,7 +45,7 @@ public class SshConfigParserTests
         hostStar.GetEntries().ShouldContain(e => e.Key == "ConnectTimeout" && e.Value == "20");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_PersonalConfig_Into_Config_DependencyInjection()
     {
         var sc = new ConfigurationBuilder();
@@ -61,7 +62,7 @@ public class SshConfigParserTests
             count.ShouldBeGreaterThan(0);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_PersonalConfig_ShouldParseEmbeddedFile()
     {
         var content = GetEmbeddedResource("ssh_config_personal");
@@ -76,7 +77,7 @@ public class SshConfigParserTests
         prodWeb01.GetEntries().ShouldContain(e => e.Key == "HostName" && e.Value == "10.10.1.11");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_SshdServerConfig_ShouldParseEmbeddedFile()
     {
         var content = GetEmbeddedResource("sshd_config_server");
@@ -96,7 +97,7 @@ public class SshConfigParserTests
         userDeploy.GetEntries().ShouldContain(e => e.Key == "AllowTcpForwarding" && e.Value == "no");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_EmptyContent_ShouldReturnEmptyDocument()
     {
         var doc = SshConfigParser.Parse(string.Empty);
@@ -104,7 +105,7 @@ public class SshConfigParserTests
         doc.Blocks.ShouldBeEmpty();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_SimpleHostBlock_ShouldParseCorrectly()
     {
         var content = @"
@@ -125,7 +126,7 @@ Host example
         entries[1].Value.ShouldBe("alice");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_GlobalItems_ShouldParseCorrectly()
     {
         var content = @"
@@ -143,7 +144,7 @@ Host example
         doc.Blocks.Length.ShouldBe(1);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_Comments_ShouldBePreserved()
     {
         var content = @"# Global comment
@@ -163,7 +164,7 @@ Host example # host comment
         hostBlock.HeaderComment.ShouldBe("# host comment");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_MultipleHosts_ShouldParseCorrectly()
     {
         var content = "Host host1 host2\n  User bob";
@@ -174,7 +175,7 @@ Host example # host comment
         hostBlock.Patterns.ShouldContain("host2");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_MatchBlock_ShouldParseCorrectly()
     {
         var content = "Match host example.com user root\n  Port 22";
@@ -188,7 +189,7 @@ Host example # host comment
         matchBlock.Criteria[1].Pattern.ShouldBe("root");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void GetConnectionEntriesFromConfig_ShouldReturnCredentials()
     {
         var content = @"
@@ -215,7 +216,7 @@ Host key-host
         keyHost.GetType().ShouldBe(typeof(KeyConnectionCredentials));
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void GetConnectionEntriesFromConfig_WithPersonalConfig_ShouldReturnCredentials()
     {
         var content = GetEmbeddedResource("ssh_config_personal");
@@ -231,7 +232,7 @@ Host key-host
         keyHost.ShouldNotBeNull();
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_IncludeRecursion_ShouldThrow()
     {
         // Arrange
@@ -255,7 +256,7 @@ Host key-host
         }
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_UnknownKey_WithStrictOptions_ShouldThrow()
     {
         // Arrange
@@ -266,7 +267,7 @@ Host key-host
         Assert.Throws<SshConfigParseException>(() => SshConfigParser.Parse(content, options));
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_InvalidPort_ShouldBeHandledInSettings()
     {
         // Arrange
@@ -285,7 +286,7 @@ Host key-host
         Assert.Equal("Port", settings.OtherEntries[0].Key);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_QuotedValues_ShouldStripDoubleQuotes()
     {
         // Arrange
@@ -303,7 +304,7 @@ Host key-host
         Assert.Contains("~/.ssh/id rsa", settings.IdentityFiles);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_EmptyLinesAndComments_ShouldPreserve()
     {
         // Arrange
@@ -326,7 +327,7 @@ Host key-host
         Assert.IsType<SshBlankLine>(block.Items[3]);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_MatchCriteria_AllSupported()
     {
         // Arrange
@@ -345,7 +346,7 @@ Host key-host
         Assert.Contains(block.Criteria, c => c.Kind == SshMatchCriterionKind.Address);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Parse_MatchCriteria_Invalid_ShouldThrow()
     {
         // Arrange

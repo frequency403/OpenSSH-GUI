@@ -1,4 +1,5 @@
 using System.Reactive.Linq;
+using Avalonia.Headless.XUnit;
 using OpenSSH_GUI.Core.MVVM;
 using Xunit;
 
@@ -6,7 +7,7 @@ namespace OpenSSH_GUI.Tests.Core.MVVM;
 
 public class ViewModelBaseTests
 {
-    [Fact]
+    [AvaloniaFact]
     public async Task InitializeAsync_ShouldSetIsInitialized()
     {
         // Arrange
@@ -19,7 +20,7 @@ public class ViewModelBaseTests
         Assert.True(vm.IsInitialized);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public async Task BooleanSubmit_ShouldCallOnBooleanSubmitAsync()
     {
         // Arrange
@@ -34,7 +35,7 @@ public class ViewModelBaseTests
         Assert.False(vm.IsInitialized);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void RequestClose_ShouldInvokeCloseEvent()
     {
         // Arrange
