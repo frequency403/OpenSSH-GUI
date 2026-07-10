@@ -1,0 +1,59 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature!
+        
+        **Before submitting:**
+        - Search [existing issues](https://github.com/frequency403/OpenSSH-GUI/issues)
+        - Consider if this belongs in [Discussions](https://github.com/frequency403/OpenSSH-GUI/discussions) first
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / Use Case
+      description: What problem does this solve? Why is it needed?
+      placeholder: "I frequently need to... Currently I have to... This would help because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: How should this feature work? (Even rough ideas help!)
+      placeholder: "A button here that... When I click X, Y happens..."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this for your workflow?
+      options:
+        - 🔴 Critical - blocks my work
+        - 🟡 High - significantly improves workflow
+        - 🟢 Medium - nice to have
+        - 🔵 Low - cosmetic/minor improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives_considered
+    attributes:
+      label: Alternatives Considered
+      description: Have you worked around this? Are there other tools that do this?
+      placeholder: "Currently I use command line / PuTTY / ..."
+
+  - type: checkboxes
+    id: willingness_to_help
+      attributes:
+      label: Willingness to Contribute
+      description: Would you be willing to help implement or test this?
+      options:
+        - label: "Yes! I can submit a PR or help with testing."
+        - label: "Maybe - depends on complexity"
+        - label: "No - I'd appreciate if someone else tackles this"

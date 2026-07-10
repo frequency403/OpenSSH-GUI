@@ -1,0 +1,108 @@
+name: Bug Report
+description: Report a bug to help improve OpenSSH-GUI
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        
+        **Before submitting:**
+        - Search [existing issues](https://github.com/frequency403/OpenSSH-GUI/issues)
+        - Update to the latest release
+        - Check if the issue is reproducible
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version are you running? (e.g., `v3.2.3` or commit hash)
+      placeholder: "v3.2.3"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating System
+      description: Where does this occur?
+      options:
+        - Windows 10/11
+        - macOS
+        - Linux (Ubuntu, Fedora, etc.)
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: os_version
+    attributes:
+      label: OS Version Details
+      description: Specific version (e.g., Windows 11 22H2, Ubuntu 24.04)
+      placeholder: "Windows 11 22H2"
+
+  - type: dropdown
+    id: installation_method
+    attributes:
+      label: Installation Method
+      description: How did you install?
+      options:
+        - GitHub Release (.zip)
+        - Winget
+        - AUR (Arch Linux)
+        - Homebrew (macOS)
+        - Built from source
+        - Other package manager (Snap, Flatpak, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the issue clearly. What were you trying to do?
+      placeholder: "I tried to add an SSH key and..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What should have happened instead?
+      placeholder: "The key should have been added without error..."
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps for others to replicate the bug
+      placeholder: |
+        1. Launch OpenSSH-GUI
+        2. Click "Add Key"
+        3. Select file: ~/.ssh/id_ed25519
+        4. Enter passphrase
+        5. See error: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Screenshots
+      description: |
+        - Screenshot of the issue (if UI-related)
+        - Any console output or crash logs
+        - Location: `%APPDATA%\OpenSSH-GUI\logs\` (Windows) or `~/.local/share/OpenSSH-GUI/logs/` (Linux/macOS)
+      render: bash
+
+  - type: checkboxes
+    id: additional_context
+    attributes:
+      label: Additional Information
+      options:
+        - label: "This issue occurs consistently"
+        - label: "I tested on a different SSH key"
+        - label: "I verified OpenSSH itself works (via command line)"
+        - label: "I searched existing issues and found none matching this"
