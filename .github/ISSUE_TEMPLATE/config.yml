@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 General Question or Discussion
+    url: https://github.com/frequency403/OpenSSH-GUI/discussions
+    about: For questions, ideas, or community chat, please use Discussions instead.
+
+  - name: 📖 Documentation
+    url: https://github.com/frequency403/OpenSSH-GUI#readme
+    about: Check the README first for installation and usage info.
