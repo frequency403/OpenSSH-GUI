@@ -28,11 +28,10 @@ internal sealed class Program
     public const string AppName = "OpenSSH GUI";
     public const string VersionEnvVar = "RUNNING_VERSION";
 
-    private static string GetHostVersion() => Assembly.GetEntryAssembly()
-                                                  ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                                  ?.InformationalVersion
-                                              ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
-                                              ?? "0.0.0";
+    private static string GetHostVersion(Assembly? assembly) => assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                                                    ?.InformationalVersion
+                                                                ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString()
+                                                                ?? "0.0.0";
 
     private static void ConfigureOpenSshGuiLogger(
         ApplicationConfiguration bootstrapConfig,
@@ -108,7 +107,7 @@ internal sealed class Program
 
         configurationBuilder.AddInMemoryCollection(
         [
-            new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion())
+            new KeyValuePair<string, string?>(VersionEnvVar, GetHostVersion(Assembly.GetEntryAssembly()))
         ]);
     }
 
