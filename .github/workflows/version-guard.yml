@@ -62,11 +62,3 @@ jobs:
 
           print("Version check passed")
           PYEOF
-
-  build:
-    name: Build release branch artifacts
-    needs: validate-version
-    uses: ./.github/workflows/build-and-package.yml
-    with:
-      version: ${{ needs.validate-version.outputs.version }}
-      asset_name_prefix: OpenSSH-GUI
