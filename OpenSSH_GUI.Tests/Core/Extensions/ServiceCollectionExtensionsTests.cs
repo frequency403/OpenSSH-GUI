@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using OpenSSH_GUI.Core.Extensions;
@@ -9,7 +10,7 @@ namespace OpenSSH_GUI.Tests.Core.Extensions;
 
 public class DependencyInjectionExtensionsTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void RegisterViewWithViewModel_ValidNaming_ShouldRegister()
     {
         // Arrange
@@ -28,7 +29,7 @@ public class DependencyInjectionExtensionsTests
         });
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void RegisterViewWithViewModel_InvalidNaming_ShouldThrow()
     {
         // Arrange

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Avalonia.Headless.XUnit;
 using OpenSSH_GUI.SshConfig.Extensions;
 using OpenSSH_GUI.SshConfig.Models;
 using Xunit;
@@ -7,7 +8,7 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshHostSettingsTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void GetSettings_ShouldMapCommonEntries()
     {
         // Arrange
@@ -40,7 +41,7 @@ public class SshHostSettingsTests
         Assert.Equal("Compression", settings.OtherEntries?[0].Key);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void WithSettings_ShouldUpdateBlock()
     {
         // Arrange
@@ -70,7 +71,7 @@ public class SshHostSettingsTests
         Assert.Equal("9000 localhost:90", reserializedSettings.LocalForwards[0]);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void EmptySettings_ShouldBeCorrect()
     {
         // Arrange & Act

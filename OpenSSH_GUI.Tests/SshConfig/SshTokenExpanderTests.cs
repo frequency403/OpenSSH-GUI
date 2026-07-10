@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using OpenSSH_GUI.SshConfig.Parsers;
 using Shouldly;
 using Xunit;
@@ -6,7 +7,7 @@ namespace OpenSSH_GUI.Tests.SshConfig;
 
 public class SshTokenExpanderTests
 {
-    [Fact]
+    [AvaloniaFact]
     public void Expand_NoTokens_ShouldReturnOriginalString()
     {
         var context = new SshTokenContext();
@@ -14,7 +15,7 @@ public class SshTokenExpanderTests
         result.ShouldBe("nothing to see here");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Expand_PercentPercent_ShouldReturnSinglePercent()
     {
         var context = new SshTokenContext();
@@ -22,7 +23,7 @@ public class SshTokenExpanderTests
         result.ShouldBe("100% sure");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Expand_CommonTokens_ShouldSubstituteCorrectly()
     {
         var context = new SshTokenContext(
@@ -36,7 +37,7 @@ public class SshTokenExpanderTests
         SshTokenExpander.Expand("user is %u", context).ShouldBe("user is bob");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Expand_UnrecognizedToken_ShouldKeepUnchanged()
     {
         var context = new SshTokenContext();
@@ -44,7 +45,7 @@ public class SshTokenExpanderTests
         result.ShouldBe("token %z is unknown");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Expand_TrailingPercent_ShouldKeepUnchanged()
     {
         var context = new SshTokenContext();
@@ -52,7 +53,7 @@ public class SshTokenExpanderTests
         result.ShouldBe("ends with %");
     }
 
-    [Fact]
+    [AvaloniaFact]
     public void Expand_AllTokens_ShouldSubstituteCorrectly()
     {
         var context = new SshTokenContext(

@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using OpenSSH_GUI.SshConfig.Extensions;
@@ -11,7 +12,7 @@ public class SshConfigurationBindingTests
 {
     private static IFileProvider GetEmbeddedFileProvider() => new EmbeddedFileProvider(typeof(SshConfigParserTests).Assembly, "OpenSSH_GUI.Tests.Assets.Testfiles");
 
-    [Fact]
+    [AvaloniaFact]
     public void AddSshConfig_ShouldBeBindableToObjects()
     {
         // Arrange
