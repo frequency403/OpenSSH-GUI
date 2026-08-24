@@ -24,11 +24,18 @@ inputs:
     description: 'Release tag of appimagetool to download'
     required: false
     default: 'continuous'
+  update-information:
+    description: 'zsync update information string (empty disables delta-update embedding)'
+    required: false
+    default: 'gh-releases-zsync|frequency403|OpenSSH-GUI|latest|OpenSSH-GUI-x86_64.AppImage.zsync'
 
 outputs:
   appimage-name:
     description: 'Filename of the produced AppImage'
     value: ${{ steps.build.outputs.appimage-name }}
+  appimage-zsync-name:
+    description: 'Filename of the produced .zsync file (empty if update-information was not set)'
+    value: ${{ steps.build.outputs.appimage-zsync-name }}
 
 runs:
   using: composite
@@ -38,7 +45,7 @@ runs:
       run: |
         set -euo pipefail
         sudo apt-get update -qq
-        sudo apt-get install -y --no-install-recommends librsvg2-bin appstream
+        sudo apt-get install -y --no-install-recommends librsvg2-bin appstream zsync
 
     - name: Download appimagetool
       shell: bash
@@ -116,7 +123,15 @@ runs:
 
         # Assemble AppImage (--appimage-extract-and-run bypasses FUSE requirement)
         APPIMAGE_NAME="${ASSET_PREFIX}-x86_64.AppImage"
-        ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "$APPIMAGE_NAME"
+        UPDATE_INFO="${{ inputs.update-information }}"
+
+        if [[ -n "$UPDATE_INFO" ]]; then
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run \
+            -u "$UPDATE_INFO" \
+            AppDir "$APPIMAGE_NAME"
+        else
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir "$APPIMAGE_NAME"
+        fi
 
         if [[ ! -f "$APPIMAGE_NAME" ]]; then
           echo "::error::appimagetool did not produce $APPIMAGE_NAME"
@@ -124,4 +139,14 @@ runs:
         fi
 
         echo "appimage-name=$APPIMAGE_NAME" >> "$GITHUB_OUTPUT"
+
+        ZSYNC_NAME="${APPIMAGE_NAME}.zsync"
+        if [[ -n "$UPDATE_INFO" ]]; then
+          if [[ ! -f "$ZSYNC_NAME" ]]; then
+            echo "::error::update-information was set but $ZSYNC_NAME was not produced (zsyncmake missing on PATH?)"
+            exit 1
+          fi
+          echo "appimage-zsync-name=$ZSYNC_NAME" >> "$GITHUB_OUTPUT"
+        fi
+
         echo "::notice::AppImage built successfully: $APPIMAGE_NAME"

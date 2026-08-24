@@ -149,6 +149,7 @@ jobs:
             "OpenSSH-GUI-${VERSION}-Setup.exe" \
             "OpenSSH-GUI-osx-x64" \
             "OpenSSH-GUI-x86_64.AppImage" \
+            "OpenSSH-GUI-x86_64.AppImage.zsync" \
             "appicon.png" \
             "io.github.frequency403.openssh_gui.desktop"
           do
