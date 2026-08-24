@@ -88,6 +88,14 @@ jobs:
           name: ${{ steps.appimage.outputs.appimage-name }}
           path: ${{ steps.appimage.outputs.appimage-name }}
           if-no-files-found: error
+          
+      - name: Upload AppImage zsync file
+        if: matrix.target == 'linux-x64' && steps.appimage.outputs.appimage-zsync-name != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.appimage.outputs.appimage-zsync-name }}
+          path: ${{ steps.appimage.outputs.appimage-zsync-name }}
+          if-no-files-found: error
 
       - name: Upload .desktop file
         if: matrix.target == 'linux-x64'
