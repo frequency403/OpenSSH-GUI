@@ -21,9 +21,13 @@ inputs:
     required: false
     default: 'OpenSSH-GUI'
   appimagetool-tag:
-    description: 'Release tag of appimagetool to download'
+    description: 'Release tag of appimagetool to download (must match appimagetool-sha256)'
     required: false
-    default: 'continuous'
+    default: '1.9.1'
+  appimagetool-sha256:
+    description: 'Expected SHA-256 of appimagetool-x86_64.AppImage for the given tag'
+    required: false
+    default: 'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0'
   update-information:
     description: 'zsync update information string (empty disables delta-update embedding)'
     required: false
@@ -49,23 +53,30 @@ runs:
 
     - name: Download appimagetool
       shell: bash
+      env:
+        TOOL_TAG: ${{ inputs.appimagetool-tag }}
+        TOOL_SHA256: ${{ inputs.appimagetool-sha256 }}
       run: |
         set -euo pipefail
-        TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/${{ inputs.appimagetool-tag }}/appimagetool-x86_64.AppImage"
+        TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/${TOOL_TAG}/appimagetool-x86_64.AppImage"
         echo "::notice::Downloading appimagetool from $TOOL_URL"
         wget --progress=dot:giga "$TOOL_URL" -O appimagetool
+        # The tool is executed with access to the build output - verify it before running it.
+        echo "${TOOL_SHA256}  appimagetool" | sha256sum --check --strict
         chmod +x appimagetool
 
     - name: Assemble and build AppImage
       id: build
       shell: bash
+      env:
+        BINARY_PATH: ${{ inputs.binary-path }}
+        VERSION: ${{ inputs.version }}
+        IS_NIGHTLY: ${{ inputs.is-nightly }}
+        ASSET_PREFIX: ${{ inputs.asset-prefix }}
+        UPDATE_INFO: ${{ inputs.update-information }}
       run: |
         set -euo pipefail
 
-        BINARY_PATH="${{ inputs.binary-path }}"
-        VERSION="${{ inputs.version }}"
-        IS_NIGHTLY="${{ inputs.is-nightly }}"
-        ASSET_PREFIX="${{ inputs.asset-prefix }}"
         APP_ID="io.github.frequency403.openssh_gui"
 
         # Validate all required source files exist before doing any work
@@ -123,7 +134,6 @@ runs:
 
         # Assemble AppImage (--appimage-extract-and-run bypasses FUSE requirement)
         APPIMAGE_NAME="${ASSET_PREFIX}-x86_64.AppImage"
-        UPDATE_INFO="${{ inputs.update-information }}"
 
         if [[ -n "$UPDATE_INFO" ]]; then
           ARCH=x86_64 ./appimagetool --appimage-extract-and-run \

@@ -11,6 +11,9 @@ on:
         type: string
         default: 'OpenSSH-GUI'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build for ${{ matrix.target }}
@@ -29,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup .NET environment
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           global-json-file: global.json
           cache: true
@@ -47,6 +50,8 @@ jobs:
 
       - name: Publish application
         shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           dotnet publish OpenSSH_GUI/OpenSSH_GUI.csproj \
@@ -56,14 +61,16 @@ jobs:
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:Version="${{ inputs.version }}"
+            -p:Version="$VERSION"
 
       - name: Rename artifact for distribution
         id: rename
         shell: bash
+        env:
+          ASSET_NAME_PREFIX: ${{ inputs.asset_name_prefix }}
         run: |
           set -euo pipefail
-          ASSET_NAME="${{ inputs.asset_name_prefix }}-${{ matrix.target }}${{ matrix.asset_extension }}"
+          ASSET_NAME="${ASSET_NAME_PREFIX}-${{ matrix.target }}${{ matrix.asset_extension }}"
           SOURCE="./publish/OpenSSH_GUI${{ matrix.asset_extension }}"
           if [[ ! -f "$SOURCE" ]]; then
             echo "::error::Expected build output not found: $SOURCE"
@@ -83,7 +90,7 @@ jobs:
 
       - name: Upload AppImage
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.appimage.outputs.appimage-name }}
           path: ${{ steps.appimage.outputs.appimage-name }}
@@ -91,7 +98,7 @@ jobs:
           
       - name: Upload AppImage zsync file
         if: matrix.target == 'linux-x64' && steps.appimage.outputs.appimage-zsync-name != ''
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.appimage.outputs.appimage-zsync-name }}
           path: ${{ steps.appimage.outputs.appimage-zsync-name }}
@@ -99,7 +106,7 @@ jobs:
 
       - name: Upload .desktop file
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: io.github.frequency403.openssh_gui.desktop
           path: AppDir/usr/share/applications/io.github.frequency403.openssh_gui.desktop
@@ -107,14 +114,14 @@ jobs:
 
       - name: Upload app icon
         if: matrix.target == 'linux-x64'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: appicon
           path: AppDir/appicon.png
           if-no-files-found: error
 
       - name: Upload platform binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ steps.rename.outputs.ASSET_NAME }}
           path: ./publish/${{ steps.rename.outputs.ASSET_NAME }}
