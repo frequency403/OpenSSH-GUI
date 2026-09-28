@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
+using System.Text;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
@@ -13,6 +14,13 @@ namespace OpenSSH_GUI.Core.Lib.Misc;
 
 public sealed partial class ServerConnection : ReactiveObject, IDisposable
 {
+    private const string RemoteSshDirectory = ".ssh";
+
+    // SftpClient.ChangePermissions expects the octal digits written as a decimal number (e.g. 700 => rwx------).
+    private const short RemoteSshDirectoryMode = 700;
+
+    private const short RemoteSshFileMode = 600;
+
     private readonly CompositeDisposable _disposables = new();
 
     [ObservableAsProperty(ReadOnly = true)]
@@ -21,17 +29,11 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     [Reactive(SetModifier = AccessModifier.Private)]
     private DateTime _connectionTime = DateTime.Now;
 
-    [ObservableAsProperty(ReadOnly = true)]
-    private string _createEmptyFileCommand = string.Empty;
-
     [Reactive(SetModifier = AccessModifier.Private)]
     private bool _isConnected;
 
     [ObservableAsProperty(ReadOnly = true)]
     private string _lineSeparator = string.Empty;
-
-    [ObservableAsProperty(ReadOnly = true)]
-    private string _readContentsCommand = string.Empty;
 
     [Reactive(SetModifier = AccessModifier.Private)]
     private PlatformID _serverOs = PlatformID.Other;
@@ -39,24 +41,16 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     private ServerConnection(ConnectionCredentials? credentials = null)
     {
         ConnectionCredentials = credentials ?? ConnectionCredentials.Empty;
-        ClientConnection = new SshClient(ConnectionCredentials.GetConnectionInfo())
+        var connectionInfo = ConnectionCredentials.GetConnectionInfo();
+        ClientConnection = new SshClient(connectionInfo)
         {
             KeepAliveInterval = TimeSpan.FromSeconds(10)
         };
+        FileTransferConnection = new SftpClient(connectionInfo);
 
         _connectionStringHelper = this.WhenAnyValue(obj => obj.IsConnected)
             .Select(c => c ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : string.Empty)
             .ToProperty(this, obj => obj.ConnectionString)
-            .DisposeWith(_disposables);
-
-        _readContentsCommandHelper = this.WhenAnyValue(obj => obj.ServerOs)
-            .Select(c => c == PlatformID.Win32NT ? "type" : "cat")
-            .ToProperty(this, obj => obj.ReadContentsCommand)
-            .DisposeWith(_disposables);
-
-        _createEmptyFileCommandHelper = this.WhenAnyValue(obj => obj.ServerOs)
-            .Select(c => c == PlatformID.Win32NT ? "echo. >" : "touch")
-            .ToProperty(this, obj => obj.CreateEmptyFileCommand)
             .DisposeWith(_disposables);
 
         _lineSeparatorHelper = this.WhenAnyValue(obj => obj.ServerOs)
@@ -79,18 +73,34 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
         init => this.RaiseAndSetIfChanged(ref field, value);
     }
 
+    /// <summary>
+    ///     SFTP channel used for all remote file access. Transferring file contents over SFTP avoids
+    ///     building shell command lines from file paths or file contents.
+    /// </summary>
+    private SftpClient FileTransferConnection
+    {
+        get;
+        init => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
     /// <inheritdoc />
-    public void Dispose() { _disposables.Dispose(); }
+    public void Dispose()
+    {
+        _disposables.Dispose();
+        FileTransferConnection.Dispose();
+        ClientConnection.Dispose();
+    }
 
     public static ServerConnection WithCredentials(ConnectionCredentials credentials) => new(credentials);
 
     public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
     {
         await ClientConnection.ConnectAsync(token);
-        IsConnected = ClientConnection.IsConnected;
+        if (ClientConnection.IsConnected)
+            await FileTransferConnection.ConnectAsync(token);
+        IsConnected = ClientConnection.IsConnected && FileTransferConnection.IsConnected;
         if (!IsConnected) return ServerOs != PlatformID.Other && IsConnected;
         ServerOs = await GetServerOsAsync(token);
-        await CheckForFilesAndCreateThemIfTheyNotExistAsync(token);
         ConnectionTime = DateTime.Now;
         return ServerOs != PlatformID.Other && IsConnected;
     }
@@ -99,6 +109,7 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     {
         try
         {
+            FileTransferConnection.Disconnect();
             ClientConnection.Disconnect();
             IsConnected = ClientConnection.IsConnected;
             return ValueTask.FromResult(true);
@@ -113,12 +124,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     {
         if (!IsConnected) throw new InvalidOperationException("No connection to get known hosts from");
 
-        var path = await ResolveRemoteEnvVariablesAsync(
-            SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs),
-            token);
-        using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
-        await command.ExecuteAsync(token);
-        return await KnownHostsFile.InitializeAsync(command.OutputStream, true, false, token);
+        var content = await ReadRemoteFileAsync(SshConfigFiles.Known_Hosts, token);
+        return await KnownHostsFile.InitializeAsync(content, true, true, token);
     }
 
     public async ValueTask<bool> WriteKnownHostsToServerAsync(KnownHostsFile knownHostsFile,
@@ -127,12 +134,9 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
         if (!knownHostsFile.KnownHosts.Any(e => e.ChangesMade)) return false;
         if (!IsConnected) return false;
 
-        var path = await ResolveRemoteEnvVariablesAsync(
-            SshConfigFiles.Known_Hosts.GetPathOfFile(false, ServerOs), token);
         var content = await knownHostsFile.GetUpdatedContentsAsync(ServerOs);
-        using var command = ClientConnection.CreateCommand(BuildRemoteWriteCommand(ServerOs, content, path));
-        await command.ExecuteAsync(token);
-        return command.ExitStatus == 0;
+        await WriteRemoteFileAsync(SshConfigFiles.Known_Hosts, content, token);
+        return true;
     }
 
     public async ValueTask<AuthorizedKeysFile> GetAuthorizedKeysFromServerAsync(CancellationToken token = default)
@@ -140,11 +144,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
         if (!IsConnected)
             throw new InvalidOperationException("No connection to get authorized keys from");
 
-        var path = await ResolveRemoteEnvVariablesAsync(
-            SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
-        using var command = ClientConnection.CreateCommand($"{ReadContentsCommand} {path}");
-        await command.ExecuteAsync(token);
-        return await AuthorizedKeysFile.ParseAsync(command.OutputStream, token);
+        await using var content = await ReadRemoteFileAsync(SshConfigFiles.Authorized_Keys, token);
+        return await AuthorizedKeysFile.ParseAsync(content, token);
     }
 
     public async ValueTask<bool> WriteAuthorizedKeysChangesToServerAsync(AuthorizedKeysFile authorizedKeysFile,
@@ -153,62 +154,57 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
         if (!authorizedKeysFile.ChangesMade) return false;
         if (!IsConnected) return false;
 
-        var path = await ResolveRemoteEnvVariablesAsync(
-            SshConfigFiles.Authorized_Keys.GetPathOfFile(false, ServerOs), token);
         var content = authorizedKeysFile.ExportFileContent(ServerOs);
-        using var command = ClientConnection.CreateCommand(BuildRemoteWriteCommand(ServerOs, content, path));
-        await command.ExecuteAsync(token);
-        return command.ExitStatus == 0;
+        await WriteRemoteFileAsync(SshConfigFiles.Authorized_Keys, content, token);
+        return true;
     }
 
-    private async ValueTask<string> ResolveRemoteEnvVariablesAsync(string originalPath,
-        CancellationToken token = default)
-    {
-        if (!IsConnected) return originalPath;
-        var parts = originalPath.Split('%', StringSplitOptions.RemoveEmptyEntries);
-        var result = string.Empty;
-        foreach (var part in parts)
-            if (part.Contains('\\') || part.Contains('/'))
-            {
-                result += part.Trim();
-            }
-            else
-            {
-                var cmdText = ServerOs is PlatformID.Unix or PlatformID.MacOSX
-                    ? $"echo ${part}"
-                    : $"echo %{part}%";
-                using var command = ClientConnection.CreateCommand(cmdText);
-                await command.ExecuteAsync(token);
-                result += command.Result.Trim();
-            }
+    /// <summary>
+    ///     Returns the SFTP path of the given file inside the remote user's SSH directory.
+    ///     The path is relative to the SFTP working directory, which is the user's home directory
+    ///     on both OpenSSH for Unix and OpenSSH for Windows.
+    /// </summary>
+    private static string GetRemotePath(SshConfigFiles file) =>
+        $"{RemoteSshDirectory}/{Enum.GetName(file)!.ToLowerInvariant()}";
 
-        return result;
+    /// <summary>
+    ///     Reads the given remote file via SFTP. A missing file yields an empty stream.
+    /// </summary>
+    private async ValueTask<Stream> ReadRemoteFileAsync(SshConfigFiles file, CancellationToken token)
+    {
+        var path = GetRemotePath(file);
+        var content = new MemoryStream();
+        if (await FileTransferConnection.ExistsAsync(path, token))
+            await FileTransferConnection.DownloadFileAsync(path, content, token);
+        content.Seek(0, SeekOrigin.Begin);
+        return content;
     }
 
-    private async ValueTask CheckForFilesAndCreateThemIfTheyNotExistAsync(CancellationToken token = default)
+    /// <summary>
+    ///     Replaces the contents of the given remote file via SFTP. Missing files and the
+    ///     SSH directory are created with owner-only permissions on Unix hosts.
+    /// </summary>
+    private async ValueTask WriteRemoteFileAsync(SshConfigFiles file, string content, CancellationToken token)
     {
-        if (!ClientConnection.IsConnected) return;
+        var path = GetRemotePath(file);
+        var isUnix = ServerOs is PlatformID.Unix or PlatformID.MacOSX;
 
-        var authKeyPath = SshConfigFiles.Authorized_Keys.GetPathOfFile(false);
-        var knownHostPath = SshConfigFiles.Known_Hosts.GetPathOfFile(false);
-
-        using var authorizedKeysFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {authKeyPath}");
-        await authorizedKeysFileCheck.ExecuteAsync(token);
-
-        using var knownHostsFileCheck = ClientConnection.CreateCommand($"{ReadContentsCommand} {knownHostPath}");
-        await knownHostsFileCheck.ExecuteAsync(token);
-
-        if (authorizedKeysFileCheck.ExitStatus != 0)
+        if (!await FileTransferConnection.ExistsAsync(RemoteSshDirectory, token))
         {
-            using var createAuthCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {authKeyPath}");
-            await createAuthCmd.ExecuteAsync(token);
+            await FileTransferConnection.CreateDirectoryAsync(RemoteSshDirectory, token);
+            if (isUnix) FileTransferConnection.ChangePermissions(RemoteSshDirectory, RemoteSshDirectoryMode);
         }
 
-        if (knownHostsFileCheck.ExitStatus != 0)
+        var isNewFile = !await FileTransferConnection.ExistsAsync(path, token);
+
+        await using (var remoteFile =
+                     await FileTransferConnection.OpenAsync(path, FileMode.Create, FileAccess.Write, token))
         {
-            using var createKnownCmd = ClientConnection.CreateCommand($"{CreateEmptyFileCommand} {knownHostPath}");
-            await createKnownCmd.ExecuteAsync(token);
+            var bytes = new UTF8Encoding(false).GetBytes(content);
+            await remoteFile.WriteAsync(bytes, token);
         }
+
+        if (isNewFile && isUnix) FileTransferConnection.ChangePermissions(path, RemoteSshFileMode);
     }
 
     private async ValueTask<PlatformID> GetServerOsAsync(CancellationToken token = default)
@@ -227,54 +223,5 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
             return PlatformID.Win32NT;
 
         return PlatformID.Other;
-    }
-
-    /// <summary>
-    ///     Builds a platform-appropriate shell command to write the given content to a file on the remote host.
-    /// </summary>
-    /// <param name="platformId">The <see cref="PlatformID" /> of the remote host.</param>
-    /// <param name="content">The content to write into the file.</param>
-    /// <param name="filePath">The full remote path of the target file.</param>
-    /// <param name="append">If <c>true</c>, appends to the file instead of overwriting it.</param>
-    /// <returns>A shell command string ready to be executed on the remote host.</returns>
-    /// <exception cref="PlatformNotSupportedException">
-    ///     Thrown when no write command can be constructed for the given <paramref name="platformId" />.
-    /// </exception>
-    private static string BuildRemoteWriteCommand(PlatformID platformId, string content, string filePath,
-        bool append = false)
-    {
-        var redirectOperator = append ? ">>" : ">";
-
-        return platformId is PlatformID.Unix or PlatformID.MacOSX
-            ? BuildUnixCommand(content, filePath, redirectOperator)
-            : BuildWindowsCommand(content, filePath, redirectOperator);
-    }
-
-    /// <summary>
-    ///     Builds a Unix shell write command using <c>printf</c> for reliable, escape-safe output.
-    /// </summary>
-    /// <param name="content">The content to write.</param>
-    /// <param name="filePath">The target file path on the remote host.</param>
-    /// <param name="redirectOperator">Shell redirect operator (<c>&gt;</c> or <c>&gt;&gt;</c>).</param>
-    /// <returns>A Unix shell command string.</returns>
-    private static string BuildUnixCommand(string content, string filePath, string redirectOperator)
-    {
-        var escaped = content.Replace("'", "'\\''");
-        return $"printf '%s' '{escaped}' {redirectOperator} '{filePath}'";
-    }
-
-    /// <summary>
-    ///     Builds a Windows shell write command using PowerShell's <c>Set-Content</c> or <c>Add-Content</c>
-    ///     for reliable Unicode-safe file writing.
-    /// </summary>
-    /// <param name="content">The content to write.</param>
-    /// <param name="filePath">The target file path on the remote host.</param>
-    /// <param name="redirectOperator">Shell redirect operator (<c>&gt;</c> or <c>&gt;&gt;</c>), used to determine append mode.</param>
-    /// <returns>A PowerShell command string.</returns>
-    private static string BuildWindowsCommand(string content, string filePath, string redirectOperator)
-    {
-        var escaped = content.Replace("'", "''");
-        var cmdlet = redirectOperator == ">>" ? "Add-Content" : "Set-Content";
-        return $"powershell -Command \"{cmdlet} -Path '{filePath}' -Value '{escaped}' -NoNewline -Encoding UTF8\"";
     }
 }
