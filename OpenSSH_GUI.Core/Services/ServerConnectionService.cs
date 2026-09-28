@@ -2,6 +2,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
+using OpenSSH_GUI.Core.Interfaces;
+using OpenSSH_GUI.Core.Lib.HostKeys;
 using OpenSSH_GUI.Core.Lib.Misc;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -11,6 +13,10 @@ namespace OpenSSH_GUI.Core.Services;
 public sealed partial class ServerConnectionService : ReactiveObject, IDisposable
 {
     private readonly CompositeDisposable _disposables = new();
+
+    private readonly IHostKeyTrustPrompt _hostKeyTrustPrompt;
+
+    private readonly IKnownHostKeyStore _knownHostKeyStore;
 
     private readonly ILogger<ServerConnectionService> _logger;
 
@@ -36,9 +42,12 @@ public sealed partial class ServerConnectionService : ReactiveObject, IDisposabl
     [Reactive(SetModifier = AccessModifier.Private)]
     private ServerConnection _serverConnection = ServerConnection.Empty;
 
-    public ServerConnectionService(ILogger<ServerConnectionService> logger)
+    public ServerConnectionService(ILogger<ServerConnectionService> logger, IKnownHostKeyStore knownHostKeyStore,
+        IHostKeyTrustPrompt hostKeyTrustPrompt)
     {
         _logger = logger;
+        _knownHostKeyStore = knownHostKeyStore;
+        _hostKeyTrustPrompt = hostKeyTrustPrompt;
 
         _isConnectedHelper = this.WhenAnyValue(vm => vm.ServerConnection)
             .Select(e => e.WhenAnyValue(sc => sc.IsConnected))
@@ -73,8 +82,21 @@ public sealed partial class ServerConnectionService : ReactiveObject, IDisposabl
     {
         try
         {
-            ServerConnection = ServerConnection.WithCredentials(connectionCredentials);
-            return await ServerConnection.ConnectToServerAsync(token);
+            var (connected, rejectedKey) = await TryConnectAsync(connectionCredentials, token);
+            if (rejectedKey is null) return connected;
+
+            if (rejectedKey.Status is not HostKeyVerificationStatus.Unknown)
+                throw new HostKeyVerificationException(rejectedKey.HostKey, rejectedKey.Status);
+
+            // Trust on first use: the user has to confirm the fingerprint before the key is stored.
+            if (!await _hostKeyTrustPrompt.ConfirmUnknownHostKeyAsync(rejectedKey.HostKey))
+                throw new HostKeyVerificationException(rejectedKey.HostKey, rejectedKey.Status);
+
+            _knownHostKeyStore.Add(rejectedKey.HostKey);
+            (connected, rejectedKey) = await TryConnectAsync(connectionCredentials, token);
+            return rejectedKey is null
+                ? connected
+                : throw new HostKeyVerificationException(rejectedKey.HostKey, rejectedKey.Status);
         }
         catch (Exception e)
         {
@@ -82,6 +104,50 @@ public sealed partial class ServerConnectionService : ReactiveObject, IDisposabl
             throw;
         }
     }
+
+    /// <summary>
+    ///     Connects with host key verification against <c>known_hosts</c>.
+    /// </summary>
+    /// <returns>
+    ///     The connection result, or the rejected host key if the connection was aborted
+    ///     because the host key could not be verified.
+    /// </returns>
+    private async ValueTask<(bool Connected, RejectedHostKey? RejectedKey)> TryConnectAsync(
+        ConnectionCredentials connectionCredentials, CancellationToken token)
+    {
+        RejectedHostKey? rejectedKey = null;
+        DisposeCurrentConnection();
+        ServerConnection = ServerConnection.WithCredentials(
+            connectionCredentials, hostKey =>
+            {
+                var status = _knownHostKeyStore.Verify(hostKey);
+                if (status is HostKeyVerificationStatus.Trusted) return true;
+                rejectedKey ??= new RejectedHostKey(hostKey, status);
+                return false;
+            });
+
+        try
+        {
+            return (await ServerConnection.ConnectToServerAsync(token), null);
+        }
+        catch (Exception e) when (rejectedKey is not null)
+        {
+            _logger.LogWarning(
+                e, "Host key {fingerprint} of {host} rejected: {status}", rejectedKey.HostKey.FingerprintSha256,
+                rejectedKey.HostKey.KnownHostsName, rejectedKey.Status);
+            DisposeCurrentConnection();
+            ServerConnection = ServerConnection.Empty;
+            return (false, rejectedKey);
+        }
+    }
+
+    private void DisposeCurrentConnection()
+    {
+        if (!ReferenceEquals(ServerConnection, ServerConnection.Empty))
+            ServerConnection.Dispose();
+    }
+
+    private sealed record RejectedHostKey(HostKeyInfo HostKey, HostKeyVerificationStatus Status);
 
     /// <summary>
     ///     Closes the current connection to the server if a connection exists.
