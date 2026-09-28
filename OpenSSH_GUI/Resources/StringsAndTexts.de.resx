@@ -393,4 +393,15 @@
     <data name="ApplicationSettingsLookupPaths" xml:space="preserve">
         <value>Suchpfade</value>
     </data>
+    <data name="HostKeyUnknownTitle" xml:space="preserve">
+        <value>Unbekannter Host-Schlüssel</value>
+    </data>
+    <data name="HostKeyUnknownText" xml:space="preserve">
+        <value>Die Echtheit des Hosts '{0}' kann nicht bestätigt werden.
+
+{1}-Fingerprint:
+{2}
+
+Fahren Sie nur fort, wenn Sie diesen Fingerprint überprüft haben. Diesem Host vertrauen und den Schlüssel in known_hosts aufnehmen?</value>
+    </data>
 </root>

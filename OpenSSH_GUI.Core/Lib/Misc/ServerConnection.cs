@@ -5,10 +5,12 @@ using System.Text;
 using OpenSSH_GUI.Core.Enums;
 using OpenSSH_GUI.Core.Extensions;
 using OpenSSH_GUI.Core.Lib.AuthorizedKeys;
+using OpenSSH_GUI.Core.Lib.HostKeys;
 using OpenSSH_GUI.Core.Lib.KnownHosts;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
+using Renci.SshNet.Common;
 
 namespace OpenSSH_GUI.Core.Lib.Misc;
 
@@ -38,7 +40,8 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
     [Reactive(SetModifier = AccessModifier.Private)]
     private PlatformID _serverOs = PlatformID.Other;
 
-    private ServerConnection(ConnectionCredentials? credentials = null)
+    private ServerConnection(ConnectionCredentials? credentials = null,
+        Func<HostKeyInfo, bool>? hostKeyValidator = null)
     {
         ConnectionCredentials = credentials ?? ConnectionCredentials.Empty;
         var connectionInfo = ConnectionCredentials.GetConnectionInfo();
@@ -47,6 +50,14 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
             KeepAliveInterval = TimeSpan.FromSeconds(10)
         };
         FileTransferConnection = new SftpClient(connectionInfo);
+
+        // Without a validator every host key would be accepted - reject unless explicitly verified.
+        hostKeyValidator ??= _ => false;
+        EventHandler<HostKeyEventArgs> onHostKeyReceived = (_, args) =>
+            args.CanTrust = hostKeyValidator(
+                new HostKeyInfo(ConnectionCredentials.Hostname, ConnectionCredentials.Port, args.HostKey));
+        ClientConnection.HostKeyReceived += onHostKeyReceived;
+        FileTransferConnection.HostKeyReceived += onHostKeyReceived;
 
         _connectionStringHelper = this.WhenAnyValue(obj => obj.IsConnected)
             .Select(c => c ? $"{ConnectionCredentials.Username}@{ConnectionCredentials.Hostname}" : string.Empty)
@@ -91,7 +102,16 @@ public sealed partial class ServerConnection : ReactiveObject, IDisposable
         ClientConnection.Dispose();
     }
 
-    public static ServerConnection WithCredentials(ConnectionCredentials credentials) => new(credentials);
+    /// <summary>
+    ///     Creates a connection for the given credentials.
+    /// </summary>
+    /// <param name="credentials">The credentials used to authenticate.</param>
+    /// <param name="hostKeyValidator">
+    ///     Decides whether the host key presented by the server is trusted. The connection is aborted
+    ///     during the key exchange when it returns <c>false</c>.
+    /// </param>
+    public static ServerConnection WithCredentials(ConnectionCredentials credentials,
+        Func<HostKeyInfo, bool> hostKeyValidator) => new(credentials, hostKeyValidator);
 
     public async ValueTask<bool> ConnectToServerAsync(CancellationToken token = default)
     {

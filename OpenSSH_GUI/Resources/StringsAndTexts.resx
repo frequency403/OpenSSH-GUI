@@ -406,4 +406,15 @@
     <data name="ApplicationSettingsLookupPaths" xml:space="preserve">
         <value>Lookup Paths</value>
     </data>
+    <data name="HostKeyUnknownTitle" xml:space="preserve">
+        <value>Unknown host key</value>
+    </data>
+    <data name="HostKeyUnknownText" xml:space="preserve">
+        <value>The authenticity of host '{0}' can't be established.
+
+{1} key fingerprint:
+{2}
+
+Only continue if you have verified this fingerprint. Trust this host and add the key to known_hosts?</value>
+    </data>
 </root>
