@@ -19,6 +19,9 @@ public sealed class KeyFileBackupService : IKeyFileBackupService, IDisposable
 {
     private const string BackupFileExtension = "bak";
 
+    private const UnixFileMode OwnerOnlyDirectoryMode =
+        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
+
     private static readonly string BackupDirectory =
         Path.Combine(SshConfigFilesExtension.GetBaseSshPath(), AppDomain.CurrentDomain.FriendlyName);
 
@@ -76,8 +79,16 @@ public sealed class KeyFileBackupService : IKeyFileBackupService, IDisposable
     {
         if (_operationLogger is not null) return;
 
-        if (!Directory.Exists(BackupDirectory))
+        // The directory holds copies of private keys - restrict it to the owner.
+        if (OperatingSystem.IsWindows())
+        {
             Directory.CreateDirectory(BackupDirectory);
+        }
+        else
+        {
+            Directory.CreateDirectory(BackupDirectory, OwnerOnlyDirectoryMode);
+            File.SetUnixFileMode(BackupDirectory, OwnerOnlyDirectoryMode);
+        }
 
         var operationLogFile = Path.Combine(BackupDirectory, Path.ChangeExtension("operation_log", "log"));
         _loggerFactory = new SerilogLoggerFactory(
