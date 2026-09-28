@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Text;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,8 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using Renci.SshNet;
 using SshNet.Keygen;
+using SshNet.Keygen.Extensions;
+using SshNet.Keygen.SshKeyEncryption;
 
 namespace OpenSSH_GUI.Core.Services;
 
@@ -73,8 +74,8 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
 
     /// <summary>
     ///     Changes the password of an SSH key file, handling both OpenSSH and PuTTY formats transparently.
-    ///     If the key is in PuTTY format, it will be temporarily converted to OpenSSH, the password changed,
-    ///     and then converted back to the original format.
+    ///     The already decrypted key is re-encrypted in-process and written back in its original format.
+    ///     An empty <paramref name="newPassword" /> removes the encryption.
     /// </summary>
     /// <param name="key">The SSH key file whose password should be changed.</param>
     /// <param name="newPassword">The new password to set, encoded using <paramref name="encoding" />.</param>
@@ -87,7 +88,7 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
     /// <exception cref="ArgumentException">Thrown if the resolved key file path is null or whitespace.</exception>
     /// <exception cref="TimeoutException">Thrown if the internal semaphore could not be acquired within 5 seconds.</exception>
     /// <exception cref="Exception">
-    ///     Thrown if <c>ssh-keygen</c> exits with a non-zero code, or if intermediate key file operations fail.
+    ///     Thrown if writing or reloading the re-encrypted key file fails.
     ///     On failure, all modified files are restored from backup.
     /// </exception>
     public async ValueTask<KeyManagerOperationResult> ChangePasswordOfKeyAsync(SshKeyFile key,
@@ -99,7 +100,6 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
         var semaphoreAcquired = false;
         var errorsOccured = false;
         BackedUpFile[] backupFiles = [];
-        string[] additionalDeleteFiles = [];
         var keyFilePath = string.Empty;
         try
         {
@@ -117,60 +117,17 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             semaphoreAcquired = true;
             backupFiles = _backupService.BackupFiles(key.KeyFiles).ToArray();
 
-            if (key.Format is { } and not SshKeyFormat.OpenSSH)
-            {
-                Log(LogLevel.Debug, "Detected PuTTY key {key} - need to change format first", keyFilePath);
-                additionalDeleteFiles = (await _keyFileWriterService.WriteToFileInSpecificFormat(
-                    SshKeyFormat.OpenSSH,
-                    key.Password.ToSshKeyEncryption(), privateKeyFile, keyFilePath, true)).ToArray();
+            // Re-encrypt in-process: the decrypted key is already loaded, so no passphrase has to be
+            // handed to an external process (command lines are readable by other local users).
+            var format = key.Format ?? SshKeyFormat.OpenSSH;
+            var newEncryption = CreateEncryption(newPassword.Span, encoding, format);
+            var privateKeyContent = format is SshKeyFormat.OpenSSH
+                ? privateKeyFile.ToOpenSshFormat(newEncryption)
+                : privateKeyFile.ToPuttyFormat(newEncryption, format);
 
-                keyFilePath = additionalDeleteFiles.First(e => string.IsNullOrWhiteSpace(Path.GetExtension(e)));
-                Log(LogLevel.Debug, "New file path: {newFilePath}", keyFilePath);
-            }
-
-            using var process = new Process();
-            process.StartInfo = new ProcessStartInfo
-            {
-                FileName = "ssh-keygen",
-                Arguments =
-                    $"-p -f {keyFilePath} -P \"{key.Password.GetPasswordString()}\" -N \"{encoding.GetString(newPassword.Span)}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            if (process.Start())
-            {
-                await process.WaitForExitAsync(token);
-                if (process.ExitCode != 0)
-                {
-                    var message = await process.StandardError.ReadToEndAsync(token);
-                    Log(
-                        LogLevel.Error, "ssh-keygen exited with code {exitCode} and message: {message}",
-                        process.ExitCode, message);
-                    throw new Exception($"ssh-keygen exited with code {process.ExitCode}");
-                }
-
-                var output = await process.StandardOutput.ReadToEndAsync(token);
-                Log(LogLevel.Debug, "ssh-keygen exited without errors and output: {message}", output);
-            }
-
-            if (key.Format is { } format and not SshKeyFormat.OpenSSH)
-            {
-                var keyFile = _keyFactory.Create();
-                keyFile.Load(SshKeyFileSource.FromDisk(keyFilePath), newPassword.Span);
-                Log(
-                    LogLevel.Debug,
-                    "Changes to the password were made in OpenSSH Format - need to change format to Putty again");
-                keyFilePath = (await _keyFileWriterService.WriteToFileInSpecificFormat(
-                    format, keyFile.Password.ToSshKeyEncryption(),
-                    keyFile.PrivateKeyFile ?? throw new Exception("Private key file not found"), keyFilePath,
-                    true)).First();
-
-                Log(LogLevel.Debug, "New file path: {newFilePath}", keyFilePath);
-                foreach (var deleteFile in additionalDeleteFiles) File.Delete(deleteFile);
-            }
+            // The public key does not change with the passphrase, only the private key file is rewritten.
+            await _keyFileWriterService.WriteToFile(keyFilePath, privateKeyContent, true);
+            Log(LogLevel.Debug, "Re-encrypted private key {key}", keyFilePath);
 
             key.Load(SshKeyFileSource.FromDisk(keyFilePath), newPassword.Span);
             Log(LogLevel.Debug, "Successfully changed password of key {key}", keyFilePath);
@@ -191,6 +148,16 @@ public sealed partial class SshKeyManager : ReactiveObject, IDisposable
             _backupService.EndOperationLog(errorsOccured);
             Processing = false;
         }
+    }
+
+    private static ISshKeyEncryption CreateEncryption(ReadOnlySpan<byte> password, Encoding encoding,
+        SshKeyFormat format)
+    {
+        return password.IsEmpty
+            ? new SshKeyEncryptionNone()
+            : new SshKeyEncryptionAes256(
+                encoding.GetString(password),
+                format is SshKeyFormat.PuTTYv3 ? new PuttyV3Encryption() : null);
     }
 
     /// <summary>
