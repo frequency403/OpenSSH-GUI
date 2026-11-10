@@ -35,7 +35,16 @@ public static class SshConfigFilesExtension
         try
         {
             if (!Directory.Exists(GetRootSshPath())) Directory.CreateDirectory(GetRootSshPath());
-            if (!Directory.Exists(GetBaseSshPath())) Directory.CreateDirectory(GetBaseSshPath());
+            if (!Directory.Exists(GetBaseSshPath()))
+            {
+                // OpenSSH expects the user's .ssh directory to be accessible by the owner only.
+                if (OperatingSystem.IsWindows())
+                    Directory.CreateDirectory(GetBaseSshPath());
+                else
+                    Directory.CreateDirectory(
+                        GetBaseSshPath(),
+                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
         }
         catch (Exception e)
         {

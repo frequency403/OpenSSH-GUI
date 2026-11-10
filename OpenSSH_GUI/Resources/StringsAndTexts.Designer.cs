@@ -806,5 +806,17 @@ namespace OpenSSH_GUI.Resources {
                 return ResourceManager.GetString("ApplicationSettingsLookupPaths", resourceCulture);
             }
         }
+        
+        public static string HostKeyUnknownTitle {
+            get {
+                return ResourceManager.GetString("HostKeyUnknownTitle", resourceCulture);
+            }
+        }
+        
+        public static string HostKeyUnknownText {
+            get {
+                return ResourceManager.GetString("HostKeyUnknownText", resourceCulture);
+            }
+        }
     }
 }

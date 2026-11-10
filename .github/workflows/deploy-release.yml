@@ -15,15 +15,20 @@ jobs:
 
     steps:
       - name: Checkout PKGBUILD only
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.client_payload.tag }}
 
       - name: Update PKGBUILD version
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
         run: |
           set -euo pipefail
 
-          VERSION="${{ github.event.client_payload.version }}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version in dispatch payload: $VERSION"
+            exit 1
+          fi
 
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" openssh-gui-bin/PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" openssh-gui-bin/PKGBUILD
@@ -48,7 +53,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Update Winget manifest
-        uses: vedantmgoyal9/winget-releaser@main
+        uses: vedantmgoyal9/winget-releaser@a8fff44b123f115ce4c21543edf8b677376fc7e0 # main
         with:
           max-versions-to-keep: 5
           identifier: frequency403.OpenSSHGUI

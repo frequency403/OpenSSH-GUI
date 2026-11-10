@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout merge commit
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.merge_commit_sha }}
@@ -35,7 +35,7 @@ jobs:
       
       - name: Create Tag Action
         id: create_tag_action
-        uses: rickstaa/action-create-tag@v1
+        uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1
         with: 
           commit_sha: ${{ github.event.pull_request.merge_commit_sha }}
           github_token: ${{ secrets.PAT_TOKEN }}

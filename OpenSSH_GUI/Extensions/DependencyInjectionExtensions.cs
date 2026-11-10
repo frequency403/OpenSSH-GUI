@@ -15,6 +15,7 @@ using OpenSSH_GUI.Core.Services;
 using OpenSSH_GUI.Core.Services.Hosted;
 using OpenSSH_GUI.Dialogs.Interfaces;
 using OpenSSH_GUI.Dialogs.Services;
+using OpenSSH_GUI.Services;
 using OpenSSH_GUI.ViewModels;
 using OpenSSH_GUI.Views;
 using Serilog.Core;
@@ -34,6 +35,8 @@ public static class DependencyInjectionExtensions
                 services.AddSingleton<AppIconStore>();
                 services.AddSingleton<LoggingLevelSwitch>();
                 services.AddSingleton<ExceptionHandler>();
+                services.AddSingleton<IKnownHostKeyStore, KnownHostKeyStore>();
+                services.AddSingleton<IHostKeyTrustPrompt, HostKeyTrustPrompt>();
                 services.AddSingleton<ServerConnectionService>();
                 services.AddSingleton<DirectoryCrawler>();
                 services.AddSingleton<IDirectoryCrawler>(sp => sp.GetRequiredService<DirectoryCrawler>());

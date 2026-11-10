@@ -15,6 +15,8 @@ namespace OpenSSH_GUI.Core.Services;
 /// </summary>
 public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFileWriterService
 {
+    private const UnixFileMode OwnerOnlyFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+
     /// <inheritdoc />
     public async ValueTask WriteToFile(string filePath, string content,
         bool overwrite = false, Encoding? encoding = null)
@@ -36,21 +38,28 @@ public class KeyFileWriterService(ILogger<KeyFileWriterService> logger) : IKeyFi
             throw new IOException("File already exists");
         }
 
+        // Create truncates an existing file, CreateNew closes the race between the existence check and the open.
         var options = new FileStreamOptions
         {
             BufferSize = 0,
-            Access = FileAccess.ReadWrite,
-            Mode = FileMode.OpenOrCreate,
-            Share = FileShare.ReadWrite
+            Access = FileAccess.Write,
+            Mode = overwrite ? FileMode.Create : FileMode.CreateNew,
+            Share = FileShare.None
         };
 
         if (!OperatingSystem.IsWindows())
         {
-            options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            options.UnixCreateMode = OwnerOnlyFileMode;
         }
 
         await using var fileStream = fileInfo.Open(options);
         logger.LogDebug("Opened file {filePath}", filePath);
+
+        if (!OperatingSystem.IsWindows())
+        {
+            // UnixCreateMode only applies to newly created files - enforce 0600 on overwritten files as well.
+            File.SetUnixFileMode(fileStream.SafeFileHandle, OwnerOnlyFileMode);
+        }
 
         byte[]? rented = null;
         var maxByteCount = encoding.GetMaxByteCount(content.Length);

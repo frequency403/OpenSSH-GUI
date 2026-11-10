@@ -41,7 +41,7 @@ runs:
     - name: Deploy via AUR Action (primary)
       id: aur_action
       continue-on-error: true
-      uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
+      uses: KSXGitHub/github-actions-deploy-aur@da03e160361ce01bf087e790b6ffd196d7dccff7 # v4.1.3
       with:
         pkgname: ${{ inputs.pkgname }}
         pkgbuild: ${{ inputs.pkgbuild }}
@@ -56,15 +56,19 @@ runs:
     - name: Setup SSH key for fallback
       if: steps.aur_action.outcome == 'failure'
       shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.ssh_private_key }}
       run: |
+        set -euo pipefail
         mkdir -p ~/.ssh
-        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/aur_key
-        chmod 600 ~/.ssh/aur_key
+        chmod 700 ~/.ssh
+        # Passed via env: inline expression expansion would place the key into the generated script file.
+        (umask 077 && printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/aur_key)
         cat >> ~/.ssh/config << 'EOF'
         Host aur.archlinux.org
           IdentityFile ~/.ssh/aur_key
           User aur
-          StrictHostKeyChecking no
+          StrictHostKeyChecking accept-new
         EOF
 
     - name: Deploy via manual push (fallback)
@@ -72,22 +76,31 @@ runs:
       continue-on-error: true
       if: steps.aur_action.outcome == 'failure'
       shell: bash
+      # Inputs are passed via env instead of inline expression expansion to prevent script injection
+      # (e.g. through commit messages).
+      env:
+        PKGNAME: ${{ inputs.pkgname }}
+        PKGBUILD_PATH: ${{ inputs.pkgbuild }}
+        COMMIT_USERNAME: ${{ inputs.commit_username }}
+        COMMIT_EMAIL: ${{ inputs.commit_email }}
+        COMMIT_MESSAGE: ${{ inputs.commit_message }}
+        FORCE_PUSH: ${{ inputs.force_push }}
+        REGENERATE_SRCINFO: ${{ inputs.regenerate_srcinfo }}
+        UPDPKGSUMS: ${{ inputs.updpkgsums }}
       run: |
         set -euo pipefail
         echo "::warning::AUR Action failed, falling back to manual push"
-
-        PKGBUILD_DIR="$(dirname "${{ inputs.pkgbuild }}")"
 
         cd /tmp
         rm -rf aur-deploy
         mkdir aur-deploy
         cd aur-deploy
-        git clone ssh://aur@aur.archlinux.org/${{ inputs.pkgname }}.git .
+        git clone "ssh://aur@aur.archlinux.org/${PKGNAME}.git" .
         git checkout -B master origin/master
 
-        cp "$GITHUB_WORKSPACE/${{ inputs.pkgbuild }}" ./PKGBUILD
+        cp "$GITHUB_WORKSPACE/$PKGBUILD_PATH" ./PKGBUILD
 
-        if [[ "${{ inputs.updpkgsums }}" == "true" ]]; then
+        if [[ "$UPDPKGSUMS" == "true" ]]; then
           if command -v updpkgsums >/dev/null 2>&1; then
             updpkgsums PKGBUILD
           else
@@ -95,24 +108,24 @@ runs:
           fi
         fi
 
-        if [[ "${{ inputs.regenerate_srcinfo }}" == "true" ]]; then
+        if [[ "$REGENERATE_SRCINFO" == "true" ]]; then
           docker run --rm -v "$(pwd)":/pkg archlinux:latest \
             bash -c "useradd -m builder \
               && cp /pkg/PKGBUILD /home/builder/ \
               && su builder -c 'cd /home/builder && makepkg --printsrcinfo > /pkg/.SRCINFO'"
         fi
 
-        git config user.name "${{ inputs.commit_username }}"
-        git config user.email "${{ inputs.commit_email }}"
+        git config user.name "$COMMIT_USERNAME"
+        git config user.email "$COMMIT_EMAIL"
 
         git add PKGBUILD
-        if [[ "${{ inputs.regenerate_srcinfo }}" == "true" ]]; then
+        if [[ "$REGENERATE_SRCINFO" == "true" ]]; then
           git add .SRCINFO
         fi
 
-        git commit -m "${{ inputs.commit_message }}" || true
+        git commit -m "$COMMIT_MESSAGE" || true
 
-        if [[ "${{ inputs.force_push }}" == "true" ]]; then
+        if [[ "$FORCE_PUSH" == "true" ]]; then
           git push origin master --force
         else
           git push origin master
@@ -121,6 +134,8 @@ runs:
     - name: Verify deployment succeeded
       if: steps.aur_action.outcome == 'failure' && steps.aur_manual.outcome == 'failure'
       shell: bash
+      env:
+        PKGNAME: ${{ inputs.pkgname }}
       run: |
-        echo "::error::Both deployment paths failed for ${{ inputs.pkgname }}"
+        echo "::error::Both deployment paths failed for $PKGNAME"
         exit 1
